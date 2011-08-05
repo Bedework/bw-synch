@@ -1,0 +1,241 @@
+/* ********************************************************************
+    Licensed to Jasig under one or more contributor license
+    agreements. See the NOTICE file distributed with this work
+    for additional information regarding copyright ownership.
+    Jasig licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a
+    copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+*/
+package org.bedework.exchgsynch.responses;
+
+import org.bedework.exchgsynch.CalendarItem;
+import org.bedework.exchgsynch.intf.SynchException;
+
+import net.fortuna.ical4j.model.component.CalendarComponent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
+import com.microsoft.schemas.exchange.services._2006.types.FindItemParentType;
+import com.microsoft.schemas.exchange.services._2006.types.FolderIdType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemType;
+
+/** Response from Exchange after FindItem request.
+ *
+ */
+public class FinditemsResponse extends ExchangeResponse {
+  private Boolean includesLastItemInRange;
+
+  /* If we're fetching all the info */
+  private List<CalendarComponent> comps;
+
+  /* If we're only fetching enough to synch */
+  /**
+   * @author douglm
+   *
+   */
+  public static class SynchInfo {
+    /** */
+    public ItemIdType itemId;
+
+    /** */
+    public FolderIdType parentFolderId;
+
+//    public String itemClass;
+
+    /** */
+    public String uid;
+
+    /** */
+    public String lastMod;
+
+    /* Fields set during the actual synch process */
+
+    /** Exchange item needs to be added to remote */
+    public boolean addToRemote;
+
+    /** Exchange item needs to update remote */
+    public boolean updateRemote;
+
+    /** Constructor
+     *
+     * @param itemId
+     * @param parentFolderId
+     * @param uid
+     * @param lastMod
+     */
+    public SynchInfo(final ItemIdType itemId,
+                     final FolderIdType parentFolderId,
+//                     final String itemClass,
+                     final String uid,
+                     final String lastMod) {
+      this.itemId = itemId;
+      this.parentFolderId = parentFolderId;
+//      this.itemClass = itemClass;
+      this.uid = uid;
+      this.lastMod = lastMod;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("SynchInfo{");
+
+      folderIdToString(sb, "itemId", itemId);
+
+      sb.append(",\n      ");
+      folderIdToString(sb, "parentFolderId", parentFolderId);
+
+ //     sb.append(",\n   itemClass=");
+   //   sb.append(itemClass);
+
+      sb.append(",\n      uid=");
+      sb.append(uid);
+
+      sb.append(",\n      lastMod=");
+      sb.append(lastMod);
+
+      sb.append("}");
+
+      return sb.toString();
+    }
+
+    private void folderIdToString(final StringBuilder sb,
+                                  final String name,
+                                  final Object id) {
+      sb.append(name);
+      sb.append("={id=");
+
+      String iid;
+      String ckey;
+
+      if (id instanceof FolderIdType) {
+        FolderIdType fid = (FolderIdType)id;
+        iid = fid.getId();
+        ckey = fid.getChangeKey();
+      } else if (id instanceof ItemIdType) {
+        ItemIdType fid = (ItemIdType)id;
+        iid = fid.getId();
+        ckey = fid.getChangeKey();
+      } else {
+        iid = "Unhandled class: " + id.getClass();
+        ckey = iid;
+      }
+
+      sb.append(iid);
+
+      sb.append(",\n        changeKey=");
+      sb.append(ckey);
+      sb.append("}");
+    }
+  }
+
+  private List<SynchInfo> synchInfo;
+
+  /**
+   * @param firm
+   * @param synchInfoOnly
+   * @throws SynchException
+   */
+  public FinditemsResponse(final FindItemResponseMessageType firm,
+                           final boolean synchInfoOnly) throws SynchException {
+    super(firm);
+
+    FindItemParentType rf = firm.getRootFolder();
+
+    includesLastItemInRange = rf.isIncludesLastItemInRange();
+
+    for (ItemType item: rf.getItems().getItemOrMessageOrCalendarItem()) {
+      if (!(item instanceof CalendarItemType)) {
+        continue;
+      }
+
+      CalendarItemType ci = (CalendarItemType)item;
+
+      if (!synchInfoOnly) {
+        CalendarItem c = new CalendarItem(ci);
+        CalendarComponent comp = c.toComp();
+
+        if (comps == null) {
+          comps = new ArrayList<CalendarComponent>();
+        }
+
+        comps.add(comp);
+        continue;
+      }
+
+      // Synchinfo
+
+      SynchInfo si = new SynchInfo(ci.getItemId(),
+                                   ci.getParentFolderId(),
+//                                   ci.getItemClass(),
+                                   ci.getUID(),
+                                   ci.getLastModifiedTime().toXMLFormat());
+
+      if (synchInfo == null) {
+        synchInfo = new ArrayList<SynchInfo>();
+      }
+
+      synchInfo.add(si);
+    }
+  }
+
+  /** Gets the value of the includesLastItemInRange property.
+   *
+   * @return Boolean
+   */
+  public Boolean getIncludesLastItemInRange() {
+    return includesLastItemInRange;
+  }
+
+  /**
+   * @return components or null
+   */
+  public List<CalendarComponent> getComps() {
+    return comps;
+  }
+
+  /**
+   * @return synchinfo or null
+   */
+  public List<SynchInfo> getSynchInfo() {
+    return synchInfo;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("FinditemsResponse{");
+
+    super.toStringSegment(sb);
+
+    sb.append(",\n   includesLastItemInRange=");
+    sb.append(getIncludesLastItemInRange());
+
+    if (comps != null) {
+      for (CalendarComponent c: comps) {
+        sb.append(",\n     ");
+        sb.append(c.toString());
+      }
+    }
+
+    if (synchInfo != null) {
+      for (SynchInfo si: synchInfo) {
+        sb.append(",\n     ");
+        sb.append(si.toString());
+      }
+    }
+    return sb.toString();
+  }
+}

@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+
+<!-- This is the main build file for the exchange synch processor.
+
+     Authors: Mike Douglass   douglm  rpi.edu
+-->
+
+<project name="exsynch" default="deploy">
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+	
+  <property environment="env"/>
+  <dirname property="project.home" file="${ant.file}"/>
+  
+  <property name="org.bedework.project.exsynch"
+            location="${project.home}" />
+
+  <property file="${project.home}/build.properties" />
+
+  <property name="bedework.home"
+            location="${project.home}/../bedework" />
+
+  <property name="build.dir" location="${bedework.home}/build"/>
+
+  <import file="${build.dir}/buildTools/deftasks.xml"/>
+
+  <deftasks/>
+
+  <projectDefs name="${org.bedework.package.name}"
+               version="${org.bedework.exsynch.version}" 
+               deployment-name="exsynch"
+  />
+
+  <import file="${build.dir}/loadDeployConfig.xml"/>
+  <import file="${build.dir}/buildTools/wsimport.xml"/>
+
+  <import file="${project.home}/appjars.xml" />
+  
+  <property name="org.bedework.sou.hibernate.properties"
+            location="${project.home}/resources/hibernate" />
+
+  <property name="org.bedework.jboss.datasource.jndiname"
+            value="${org.bedework.global.jboss.exsynch.datasource.jndiname}" />
+  
+  <property name="ear.meta.dir" location="${project.home}/ear.meta"/>
+
+  <!-- =================================================================
+       init:
+       ================================================================= -->
+
+  <target name="init">
+    <projectInit/>
+    
+    <property name="org.bedework.project.bedework"
+              location="${project.home}/../bedework" />
+
+    <loadDeployConfig/>
+
+    <property name="org.bedework.temp.wars.home"
+              location="${dist.home}/temp/wars" />
+    
+    <if>
+      <not>
+        <isset property="org.bedework.global.context.roots" />
+      </not>
+      <then>
+        <tempfile property="org.bedework.global.context.roots"
+                  destdir="${org.bedework.temp.dir}"
+                  prefix="context-roots" suffix=".properties" />
+      </then>
+    </if>
+
+    <property name="org.bedework.exsynch.gensrc.base"
+              location="${project.home}/gensrc" />
+
+    <property name="org.bedework.exsynch.genwssrc.base"
+              location="${project.home}/genwssrc" />
+
+    <property name="org.bedework.module.common.base"
+              location="${project.home}/common" />
+
+    <property name="org.bedework.module.server.base" 
+              location="${project.home}/server" />
+
+    <property name="org.bedework.module.service.base"
+              location="${project.home}/service" />
+  	
+  	<property name="org.bedework.exsynch.wsdl.dir" 
+  	          location="${bedework.home}/resources/exsynchwsdefs" />
+
+    <property name="common.jar"
+              location="${dist.home}/${org.bedework.module.common.jar}-${project.version}.jar" />
+
+    <property name="server.jar"
+              location="${dist.home}/${org.bedework.module.server.jar}-${project.version}.jar" />
+
+    <property name="service.jar"
+              location="${dist.home}/${org.bedework.module.service.jar}-${project.version}.jar" />
+  </target>
+  
+  <target name="build-init" depends="init">
+    <!-- Make sure bwxml is built -->
+    <ant antfile="${project.home}/../bwxml/build.xml" inheritall="false" />
+    
+    <property name="org.bedework.getjar.property.prefix"
+              value="org.bedework.appjar" />
+    
+    <getJar name="log4j" version="1.2.8" />
+    <getJar name="servletapi" version="2.4" />
+    <getJar name="ical4j" version="1.0-rc3-SNAPSHOT" />
+    
+    <getJar name="ejb3-persistence" version="3.4.0.GA" />
+    <getJar name="hibernate" version="3.3.1.ga" />
+    <getJar name="hibernate-annotations" version="3.4.0.GA" />
+
+    <getJar name="bw-exchangewsschema" version="${org.bedework.bwxml.version}"
+            project="bwxml"
+            projecthome="${project.home}/../bwxml" />
+
+    <getJar name="bw-exsynchwsschema" version="${org.bedework.bwxml.version}"
+            project="bwxml"
+            projecthome="${project.home}/../bwxml" />
+    
+    <getJar name="rpiutil" version="${org.bedework.rpiutil.version}" 
+            project="rpiutil"
+            projecthome="${project.home}/../bedework/projects/rpiutil" />
+
+    <getJar name="rpiaccess" version="${org.bedework.access.version}" 
+            project="access"
+            projecthome="${project.home}/../bedework/projects/access" />
+  </target>
+  
+  <target name="deploy-init" depends="init">
+    <deployInit ear-name="bw-${ant.project.name}" />
+  </target>
+
+  <!-- ===================== build-source Target ===============================
+     This target builds jar files ready for the deploy target.
+     =================================================================== -->
+
+  <target name="build-source" depends="build-init" >
+    <!--
+    <build-jar module-base="${org.bedework.exsynch.gensrc.base}" 
+               jar-file="${gensrc.jar}" />
+    <wsimport wsdl="${org.bedework.exsynch.wsdl.dir}/wssvc.wsdl"
+              module-base="${org.bedework.exsynch.genwssrc.base}"
+              jar-file="${genwssrc.jar}"
+              bindingsdir="${org.bedework.exsynch.wsdl.dir}/wsdlbindings"
+    />
+-->
+
+    <build-jar module-base="${org.bedework.module.common.base}" 
+               jar-file="${common.jar}" />
+               
+    <build-jar module-base="${org.bedework.module.server.base}" 
+               jar-file="${server.jar}" />
+
+    <build-jar module-base="${org.bedework.module.service.base}" 
+               jar-file="${service.jar}" />
+    
+    <build-jar-stats />
+  </target>
+
+  <!-- ===================== deploy Target ===============================
+     Deploy if an application server is defined.
+     =================================================================== -->
+
+  <target name="deploy" depends="deploy-init,build"
+               description="Deploy generated files">
+    <getExtraJars/>
+
+    <!-- ===============================================================
+         Build the callback web service war
+         =============================================================== -->
+    
+    <forApp name="exsynchwcb"
+            prefix="org.bedework.deploy"
+            appPrefix="org.bedework.app"
+            projectPrefix="org.bedework.project">
+      <sequential>
+        <property name="app.sou.dir"
+                  location="${org.bedework.deploy.app.sou}" />
+        
+        <propertyset id="deploy-user-app-properties">
+          <propertyref prefix="org.bedework.app.${org.bedework.deploy.name}"/>
+          <globmapper from="org.bedework.app.${org.bedework.deploy.name}.*" 
+                      to="propval.app.*"/>
+        </propertyset>
+      
+        <ant antfile="${buildwar}" inheritRefs="true" target="build" >
+          <propertyset refid="deploy-user-app-properties" />
+        </ant>
+      </sequential>
+    </forApp>
+      
+    <deployTerm />
+  </target>
+
+<!-- ==================== Javadoc Target ===============================
+     The "javadoc" target creates Javadoc API documentation for the Java
+     classes included in your application.  Normally, this is only required
+     when preparing a distribution release, but is available as a separate
+     target in case the developer wants to create Javadocs independently.
+     =================================================================== -->
+
+  <target name="javadoc" depends="init"
+          description="Create Javadoc API documentation">
+    <property name="destdir" location="${dist.home}/docs/api"/>
+    <mkdir dir="${destdir}"/>
+
+    <javadoc sourcepath="${org.bedework.module.common.base}/src:${org.bedework.module.service.base}/src:${org.bedework.module.server.base}/src:"
+           classpathref="compile.classpath"
+                destdir="${destdir}"
+           packagenames="org.bedework.*,
+                         edu.rpi.*"
+                 access="public"
+                 author="true"
+                version="true"
+          breakiterator="yes"
+            windowtitle="${project.name} ${project.version} API Documentation">
+      <doctitle><![CDATA[${project.name} ${project.version}<br/>API Documentation]]></doctitle>
+      <header><![CDATA[${project.name} ${project.version}<br/>API Documentation]]></header>
+      <link href="../../access/api" />
+      <link href="../../calendarapi/api" />
+      <link href="../../davutil/api" />
+      <link href="../../rpiutil/api" />
+      <link href="../../webdav/api" />
+      <link href="${env.JAVA_HOME}/docs/api" />
+    </javadoc>
+  </target>
+</project>
