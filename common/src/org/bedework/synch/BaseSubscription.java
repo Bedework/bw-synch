@@ -42,8 +42,6 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
 
   private int seq;
 
-  private String principalHref;
-
   private String subscriptionId;
 
   private String localConnectorId;
@@ -74,14 +72,12 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
    * @param subscribe
    */
   public BaseSubscription(final String subscriptionId,
-                          final String principalHref,
                           final boolean subscribe) {
     if (subscriptionId == null) {
       this.subscriptionId = UUID.randomUUID().toString();
     } else {
       this.subscriptionId = subscriptionId;
     }
-    this.principalHref = principalHref;
     this.subscribe = subscribe;
   }
 
@@ -120,22 +116,6 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
    */
   public Integer getSeq() {
     return seq;
-  }
-
-  /** Principal requesting synch service
-   *
-   * @param val    String
-   */
-  public void setprincipalHref(final String val) {
-    principalHref = val;
-  }
-
-  /** Principal requesting synch service
-   *
-   * @return String
-   */
-  public String getprincipalHref() {
-    return principalHref;
   }
 
   /** Our generated subscriptionId.
@@ -258,10 +238,6 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
       return true;
     }
 
-    if (!getprincipalHref().equals(that.getprincipalHref())) {
-      return true;
-    }
-
     if (!getLocalConnectorId().equals(that.getLocalConnectorId())) {
       return true;
     }
@@ -325,11 +301,6 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
     sb.append(getId());
     sb.append(", seq = ");
     sb.append(getSeq());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("principalHref = ");
-    sb.append(getprincipalHref());
 
     sb.append(",\n");
     sb.append(indent);

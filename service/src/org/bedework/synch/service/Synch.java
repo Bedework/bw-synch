@@ -18,8 +18,9 @@
 */
 package org.bedework.synch.service;
 
-import org.apache.log4j.Logger;
 import org.bedework.synch.SynchEngine;
+
+import org.apache.log4j.Logger;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
@@ -61,11 +62,6 @@ public class Synch implements SynchMBean {
 
             conf = syncher.getConfig();
           }
-
-          if(pinger == null) {
-            pinger = new PingThread(getName());
-            pinger.start();
-          }
         } catch (Throwable t) {
           if (!showedTrace) {
             error(t);
@@ -90,62 +86,7 @@ public class Synch implements SynchMBean {
     }
   }
 
-  /** This process will send keep-alive notifications to the remote system.
-   * During startup the first notification is sent so this process starts with
-   * a wait
-   *
-   */
-  private class PingThread extends Thread {
-    boolean showedTrace;
-
-    /**
-     * @param name - for the thread
-     */
-    public PingThread(final String name) {
-      super(name);
-    }
-
-    @Override
-    public void run() {
-      while (running) {
-        // Wait a bit before pinging
-        long waitTime;
-
-        if (conf == null) {
-          waitTime = 10 * 1000;
-        } else {
-          waitTime = conf.getRemoteKeepAliveInterval() * 1000;
-        }
-        try {
-          Object o = new Object();
-          synchronized (o) {
-            o.wait (waitTime);
-          }
-        } catch (Throwable t) {
-          error(t.getMessage());
-        }
-
-        try {
-          if (syncher != null) {
-            // Time to ping
-
-            syncher.ping();
-          }
-        } catch (Throwable t) {
-          if (!showedTrace) {
-            error(t);
-            showedTrace = true;
-          } else {
-            error(t.getMessage());
-          }
-        }
-      }
-    }
-  }
-
   private ProcessorThread processor;
-
-  private PingThread pinger;
 
   /* ========================================================================
    * Dump/restore
@@ -183,6 +124,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.dumprestore.BwDumpRestoreMBean#getName()
    */
+  @Override
   public String getName() {
     /* This apparently must be the same as the name attribute in the
      * jboss service definition
@@ -190,10 +132,12 @@ public class Synch implements SynchMBean {
     return "org.bedework:service=ExchgSynch";
   }
 
+  @Override
   public void setAppname(final String val) {
 	  SynchEngine.setAppname(val);
   }
 
+  @Override
   public String getAppname() {
     return SynchEngine.getAppname();
   }
@@ -202,34 +146,42 @@ public class Synch implements SynchMBean {
    * Dump/restore
    * ======================================================================== */
 
+  @Override
   public void setCreate(final boolean val) {
     create = val;
   }
 
+  @Override
   public boolean getCreate() {
     return create;
   }
 
+  @Override
   public void setDelimiter(final String val) {
     delimiter = val;
   }
 
+  @Override
   public String getDelimiter() {
     return delimiter;
   }
 
+  @Override
   public void setDrop(final boolean val) {
     drop = val;
   }
 
+  @Override
   public boolean getDrop() {
     return drop;
   }
 
+  @Override
   public void setExport(final boolean val) {
     export = val;
   }
 
+  @Override
   public boolean getExport() {
     return export;
   }
@@ -238,58 +190,72 @@ public class Synch implements SynchMBean {
    *
    * @param val
    */
+  @Override
   public void setFormat(final boolean val) {
     format = val;
   }
 
+  @Override
   public boolean getFormat() {
     return format;
   }
 
+  @Override
   public void setHaltOnError(final boolean val) {
     haltOnError = val;
   }
 
+  @Override
   public boolean getHaltOnError() {
     return haltOnError;
   }
 
+  @Override
   public void setSchemaOutFile(final String val) {
     schemaOutFile = val;
   }
 
+  @Override
   public String getSchemaOutFile() {
     return schemaOutFile;
   }
 
+  @Override
   public void setSqlIn(final String val) {
     sqlIn = val;
   }
 
+  @Override
   public String getSqlIn() {
     return sqlIn;
   }
 
+  @Override
   public void setDataIn(final String val) {
     dataIn = val;
   }
 
+  @Override
   public String getDataIn() {
     return dataIn;
   }
 
+  @Override
   public void setDataOut(final String val) {
     dataOut = val;
   }
 
+  @Override
   public String getDataOut() {
     return dataOut;
   }
 
+  @Override
   public void setDataOutPrefix(final String val) {
     dataOutPrefix = val;
   }
 
+  @Override
   public String getDataOutPrefix() {
     return dataOutPrefix;
   }
@@ -298,6 +264,7 @@ public class Synch implements SynchMBean {
    * Operations
    * ======================================================================== */
 
+  @Override
   public boolean testSchemaValid() {
     return true;
   }
@@ -305,6 +272,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.dumprestore.BwDumpRestoreMBean#schema()
    */
+  @Override
   public String schema() {
     String result = "Export complete: check logs";
 
@@ -336,6 +304,7 @@ public class Synch implements SynchMBean {
     return result;
   }
 
+  @Override
   public synchronized List<String> restoreData() {
     List<String> infoLines = new ArrayList<String>();
 
@@ -401,6 +370,7 @@ public class Synch implements SynchMBean {
     return infoLines;
   }
 
+  @Override
   public List<String> dumpData() {
     List<String> infoLines = new ArrayList<String>();
 
@@ -456,10 +426,12 @@ public class Synch implements SynchMBean {
     return infoLines;
   }
 
+  @Override
   public String dropTables() {
     return "Not implemented";
   }
 
+  @Override
   public List<Stat> getStats() {
     List<Stat> stats = new ArrayList<Stat>();
 
@@ -487,6 +459,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.dumprestore.BwDumpRestoreMBean#create()
    */
+  @Override
   public void create() {
     // An opportunity to initialise
   }
@@ -494,6 +467,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.indexer.BwIndexerMBean#start()
    */
+  @Override
   public void start() {
     if (processor != null) {
       error("Already started");
@@ -509,6 +483,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.indexer.BwIndexerMBean#stop()
    */
+  @Override
   public void stop() {
     if (processor == null) {
       error("Already stopped");
@@ -544,6 +519,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.indexer.BwIndexerMBean#isStarted()
    */
+  @Override
   public boolean isStarted() {
     return (processor != null) && processor.isAlive();
   }
@@ -551,6 +527,7 @@ public class Synch implements SynchMBean {
   /* (non-Javadoc)
    * @see org.bedework.dumprestore.BwDumpRestoreMBean#destroy()
    */
+  @Override
   public void destroy() {
   }
 

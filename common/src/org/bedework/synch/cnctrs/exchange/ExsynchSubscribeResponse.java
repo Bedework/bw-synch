@@ -16,9 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.responses;
+package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.exchgsynch.intf.SynchException;
+import org.bedework.synch.SynchException;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseMessageType;
 
@@ -26,8 +26,8 @@ import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseM
  *
  */
 public class ExsynchSubscribeResponse extends ExchangeResponse {
-  private String subscriptionId;
-  private String watermark;
+  private final String subscriptionId;
+  private final String watermark;
 
   /**
    * @param srm

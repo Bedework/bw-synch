@@ -32,30 +32,6 @@ import java.util.List;
  * @author Mike Douglass
  */
 public interface ConnectorInstance<S extends BaseSubscription> {
-  /** Called to initialize the connector for a subscription.
-   * A response of null means no synch available.
-   *
-   * <p>The return value is a random uid which is used to validate incoming
-   * callback requests from the remote server.
-   *
-   * <p>The callback url is unique to the connector. It will be used as a path
-   * prefix to allow the callback service to locate the handler for incoming
-   * callback requests.
-   *
-   * <p>For example, if the callback context is /synchcb/ and the connector id
-   * is "bedework" then the callback uri might be /synchcb/bedework/. The
-   * connector might append a uid to that path to allow it to locate the
-   * active subscription for which the callback is intended.
-   *
-   * @param callbackUri
-   * @param token - null for new connection - current token for ping
-   * @return null for no synch else a random uid.
-   * @throws SynchException
-   */
-  String init(S sub,
-              String callbackUri,
-              String token) throws SynchException;
-
   /** Information used to synch remote with Exchange
    * This information is only valid in the context of a given subscription.
    */

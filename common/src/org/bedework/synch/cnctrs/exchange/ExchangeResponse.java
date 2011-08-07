@@ -16,9 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.responses;
+package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.exchgsynch.intf.SynchException;
+import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
 

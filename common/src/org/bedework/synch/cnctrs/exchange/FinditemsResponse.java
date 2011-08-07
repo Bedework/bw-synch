@@ -16,10 +16,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.responses;
+package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.exchgsynch.CalendarItem;
-import org.bedework.exchgsynch.intf.SynchException;
+import org.bedework.synch.CalendarItem;
+import org.bedework.synch.SynchException;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
@@ -37,7 +37,7 @@ import com.microsoft.schemas.exchange.services._2006.types.ItemType;
  *
  */
 public class FinditemsResponse extends ExchangeResponse {
-  private Boolean includesLastItemInRange;
+  private final Boolean includesLastItemInRange;
 
   /* If we're fetching all the info */
   private List<CalendarComponent> comps;

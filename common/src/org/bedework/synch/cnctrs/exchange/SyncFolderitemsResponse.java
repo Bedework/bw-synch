@@ -16,74 +16,93 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.responses;
+package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.exchgsynch.CalendarItem;
 import org.bedework.exchgsynch.intf.SynchException;
 
-import java.util.ArrayList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.SyncFolderItemsResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseObjectChangedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ModifiedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.MovedCopiedEventType;
-import com.microsoft.schemas.exchange.services._2006.types.NotificationType;
+import com.microsoft.schemas.exchange.services._2006.types.SyncFolderItemsChangesType;
+import com.microsoft.schemas.exchange.services._2006.types.SyncFolderItemsCreateOrUpdateType;
 
 /** Notification from Exchange.
  *
  */
-public class Notification extends ExchangeResponse {
-  private String subscriptionId;
-  private String previousWatermark;
-
-  private List<NotificationItem> notifications = new ArrayList<NotificationItem>();
+public class SyncFolderitemsResponse extends ExchangeResponse {
+  private String syncState;
+  private Boolean includesLastItemInRange;
+  private SyncFolderItemsChangesType changes;
 
   /**
-   * @param snrm
+   * @param sfirm
    * @throws SynchException
    */
-  public Notification(final SendNotificationResponseMessageType snrm) throws SynchException {
-    super(snrm);
+  public SyncFolderitemsResponse(final SyncFolderItemsResponseMessageType sfirm) throws SynchException {
+    super(sfirm);
 
-    NotificationType nt = snrm.getNotification();
-    subscriptionId = nt.getSubscriptionId();
-    previousWatermark = nt.getPreviousWatermark();
+    syncState = sfirm.getSyncState();
+    includesLastItemInRange = sfirm.isIncludesLastItemInRange();
 
-    List<JAXBElement<? extends BaseNotificationEventType>> bnes =
-      nt.getCopiedEventOrCreatedEventOrDeletedEvent();
+    List<JAXBElement<?>> syncitems = sfirm.getChanges().getCreateOrUpdateOrDelete();
 
-    for (JAXBElement<? extends BaseNotificationEventType> el1: bnes) {
-      notifications.add(new NotificationItem(el1.getName().getLocalPart(),
-                                             el1.getValue()));
+    for (JAXBElement<?> el1: syncitems) {
+      String chgType = el1.getName().getLocalPart();
+
+      SyncFolderItemsCreateOrUpdateType s = (SyncFolderItemsCreateOrUpdateType)el1.getValue();
+
+      if (debug) {
+        debugMsg("chgType =" + chgType);
+      }
+
+      if (s.getCalendarItem() == null) {
+        continue;
+      }
+
+      CalendarItem c = new CalendarItem(s.getCalendarItem());
+      CalendarComponent comp = c.toComp();
+
+      if (debug) {
+        debugMsg(comp.toString());
+      }
     }
   }
 
-  /**
+  /** Gets the syncState property.
+   *
    * @return String
    */
-  public String getSubscriptionId() {
-    return subscriptionId;
+  public String getSyncState() {
+    return syncState;
   }
 
-  /**
-   * @return String
+  /** Gets the value of the includesLastItemInRange property.
+   *
+   * @return Boolean
    */
-  public String getPreviousWatermark() {
-    return previousWatermark;
+  public Boolean getIncludesLastItemInRange() {
+    return includesLastItemInRange;
   }
 
-  /**
-   * @return notifications
+  /** Gets the value of the changes property.
+   *
+   * @return SyncFolderItemsChangesType }
+   *
    */
-  public List<NotificationItem> getNotifications() {
-    return notifications;
+  public SyncFolderItemsChangesType getChanges() {
+    return changes;
   }
-
 
   /**
    * @author douglm
@@ -291,12 +310,13 @@ public class Notification extends ExchangeResponse {
 
     super.toStringSegment(sb);
 
-    sb.append(",\n   subscriptionId=");
-    sb.append(getSubscriptionId());
+    sb.append(",\n   syncState=");
+    sb.append(getSyncState());
 
-    sb.append(",\n   previousWatermark=");
-    sb.append(getPreviousWatermark());
+    sb.append(",\n   includesLastItemInRange=");
+    sb.append(getIncludesLastItemInRange());
 
+    /*
     String delim = ",\n   notification items{\n      ";
     for (NotificationItem ni: getNotifications()) {
       sb.append(delim);
@@ -310,6 +330,7 @@ public class Notification extends ExchangeResponse {
     }
 
     sb.append("}");
+    */
 
     return sb.toString();
   }

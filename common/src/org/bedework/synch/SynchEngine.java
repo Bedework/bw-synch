@@ -19,12 +19,12 @@
 package org.bedework.synch;
 
 import org.bedework.synch.ConnectorInstance.ItemInfo;
+import org.bedework.synch.cnctrs.exchange.ExsynchSubscribeResponse;
+import org.bedework.synch.cnctrs.exchange.FinditemsResponse;
+import org.bedework.synch.cnctrs.exchange.Notification;
+import org.bedework.synch.cnctrs.exchange.FinditemsResponse.SynchInfo;
+import org.bedework.synch.cnctrs.exchange.Notification.NotificationItem;
 import org.bedework.synch.messages.FindItemsRequest;
-import org.bedework.synch.messages.GetItemsRequest;
-import org.bedework.synch.messages.SubscribeRequest;
-import org.bedework.synch.responses.ExsynchSubscribeResponse;
-import org.bedework.synch.responses.FinditemsResponse;
-import org.bedework.synch.responses.FinditemsResponse.SynchInfo;
 import org.bedework.synch.wsimpl.BwSynchIntfImpl;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
@@ -33,7 +33,6 @@ import edu.rpi.sss.util.OptionsI;
 import edu.rpi.sss.util.xml.NsContext;
 
 import net.fortuna.ical4j.model.TimeZone;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
@@ -43,36 +42,20 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeWebService;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.GetItemResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseItemIdType;
-import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
-import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
-import com.microsoft.schemas.exchange.services._2006.types.ItemType;
-import com.microsoft.schemas.exchange.services._2006.types.MailboxCultureType;
-import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
-import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 
 /** Synch processor.
  * <p>The synch processor manages subscriptions made by a subscriber to a target.
@@ -151,9 +134,6 @@ public class SynchEngine {
     new HashMap<String, BaseSubscription>();
 
   private final ConnectorInstance exintf;
-
-  /* If non-null this is the token we currently have for the remote service */
-  private String remoteToken;
 
   private boolean starting;
 
@@ -287,13 +267,6 @@ public class SynchEngine {
         starting = true;
       }
 
-      remoteToken = exintf.initExchangeSynch(config, null);
-      if (remoteToken == null) {
-        warn("System interface returned null from init. Stopping");
-        starting = false;
-        return;
-      }
-
       info("**************************************************");
       info("Starting synch");
       info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
@@ -376,20 +349,6 @@ public class SynchEngine {
     return running;
   }
 
-  /**
-   * @throws SynchException
-   */
-  public void ping() throws SynchException {
-    String token = exintf.initExchangeSynch(config,
-                                            remoteToken);
-    if (token == null) {
-      warn("System interface returned null from init. Stopping");
-      starting = false;
-      running = false;
-      stop();
-    }
-  }
-
   /** Stop synch process.
    *
    * @throws SynchException
@@ -426,8 +385,6 @@ public class SynchEngine {
         maxWait = 0; // Force exit
       }
     }
-
-    remoteToken = null;
 
     info("**************************************************");
     info("Exchange synch shutdown complete");
@@ -747,61 +704,6 @@ public class SynchEngine {
     return StatusType.OK;
   }
 
-  private ExsynchSubscribeResponse doSubscription(final BaseSubscription sub) throws SynchException {
-    try {
-      /* Send a request for a new subscription to exchange */
-      SubscribeRequest s = new SubscribeRequest(sub,
-                                                config);
-
-      s.setFolderId(sub.getExchangeCalendar());
-
-      Holder<SubscribeResponseType> subscribeResult = new Holder<SubscribeResponseType>();
-
-      getPort(sub).subscribe(s.getRequest(),
-                             // null, // impersonation,
-                             getMailboxCulture(),
-                             getRequestServerVersion(),
-                             subscribeResult,
-                             getServerVersionInfoHolder());
-
-      if (debug) {
-        trace(subscribeResult.toString());
-      }
-
-      List<JAXBElement<? extends ResponseMessageType>> rms =
-        subscribeResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-
-      if (rms.size() != 1) {
-        //
-        return null;
-      }
-
-      SubscribeResponseMessageType srm = (SubscribeResponseMessageType)rms.iterator().next().getValue();
-      ExsynchSubscribeResponse esr = new ExsynchSubscribeResponse(srm);
-
-      if (debug) {
-        trace(esr.toString());
-      }
-
-      return esr;
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  private ExchangeServicePortType getPort(final BaseSubscription sub) throws SynchException {
-    try {
-      return getExchangeServicePort(sub.getExchangeId(),
-                                    sub.getExchangePw().toCharArray()); // XXX need to en/decrypt
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
   private StatusType getItems(final BaseSubscription sub) throws SynchException {
     try {
       /* Trying to use the synch approach
@@ -988,72 +890,6 @@ public class SynchEngine {
     }
   }
 
-  private CalendarItem fetchItem(final BaseSubscription sub,
-                                 final BaseItemIdType id) throws SynchException {
-    List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
-
-    toFetch.add(id);
-
-    List<CalendarItem> items = fetchItems(sub, toFetch);
-
-    if (items.size() != 1) {
-      return null;
-    }
-
-    return items.get(0);
-  }
-
-  private List<CalendarItem> fetchItems(final BaseSubscription sub,
-                                        final List<BaseItemIdType> toFetch) throws SynchException {
-    GetItemsRequest gir = new GetItemsRequest(toFetch);
-
-    Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();
-
-    getPort(sub).getItem(gir.getRequest(),
-                         // null, // impersonation,
-                         getMailboxCulture(),
-                         getRequestServerVersion(),
-                         // null, // timeZoneContext
-                         giResult,
-                         getServerVersionInfoHolder());
-
-    List<JAXBElement<? extends ResponseMessageType>> girms =
-      giResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-
-    List<CalendarItem> items = new ArrayList<CalendarItem>();
-
-    for (JAXBElement<? extends ResponseMessageType> jaxbgirm: girms) {
-      Object o = jaxbgirm.getValue();
-
-      if (!(o instanceof ItemInfoResponseMessageType)) {
-        continue;
-      }
-
-      ItemInfoResponseMessageType iirm = (ItemInfoResponseMessageType)o;
-
-      if (iirm.getItems() == null) {
-        continue;
-      }
-
-      for (ItemType item: iirm.getItems().getItemOrMessageOrCalendarItem()) {
-        if (!(item instanceof CalendarItemType)) {
-          continue;
-        }
-
-        CalendarItem ci = new CalendarItem((CalendarItemType)item);
-        if (debug) {
-          CalendarComponent comp = ci.toComp();
-
-          trace(comp.toString());
-        }
-
-        items.add(ci);
-      }
-    }
-
-    return items;
-  }
-
   private int cmpLastMods(final String calLmod, final String exLmod) {
     int exi = 0;
     if (calLmod == null) {
@@ -1087,72 +923,6 @@ public class SynchEngine {
   private boolean checkAccess(final BaseSubscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
-  }
-
-  private MailboxCultureType getMailboxCulture() {
-    MailboxCultureType mbc = new MailboxCultureType();
-
-    mbc.setValue("en-US"); // XXX This probably needs to come from the locale
-
-    return mbc;
-  }
-
-  private Holder<ServerVersionInfo> getServerVersionInfoHolder() {
-    ServerVersionInfo serverVersionInfo = new ServerVersionInfo();
-    Holder<ServerVersionInfo> serverVersion = new Holder<ServerVersionInfo>(serverVersionInfo);
-
-    return serverVersion;
-  }
-
-  private RequestServerVersion getRequestServerVersion() {
-    RequestServerVersion requestVersion = new RequestServerVersion();
-
-    requestVersion.setVersion(ExchangeVersionType.EXCHANGE_2010);
-
-    return requestVersion;
-  }
-
-  private ExchangeServicePortType getExchangeServicePort(final String user,
-                                                         final char[] pw) throws SynchException {
-    try {
-      URL wsdlURL = new URL(config.getExchangeWSDLURI());
-
-      Authenticator.setDefault(new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(
-                user,
-                pw);
-        }
-    });
-
-      ExchangeWebService ews =
-        new ExchangeWebService(wsdlURL,
-                               new QName("http://schemas.microsoft.com/exchange/services/2006/messages",
-                                         "ExchangeWebService"));
-      ExchangeServicePortType port = ews.getExchangeWebPort();
-
-//      Map<String, Object> context = ((BindingProvider)port).getRequestContext();
-
-  //    context.put(BindingProvider.USERNAME_PROPERTY, user);
-    //  context.put(BindingProvider.PASSWORD_PROPERTY, new String(pw));
-
-      /*
-        $client->__setSoapHeaders(
-        new SOAPHeader('http://schemas.microsoft.com/exchange/services/2006/types',
-        'RequestServerVersion',
-        array("Version"=>"Exchange2007_SP1"))
-        );
-
-        $client is the SoapClient Instance.
-
-      */
-
-
-      return port;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
   }
 
   private Logger getLogger() {

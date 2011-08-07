@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="lib/servletapi-2.4.jar"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-calws-soapschema-3.7.jar" sourcepath="/bwxml/calws-soap/gensrc"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-exchangewsschema-3.7.jar" sourcepath="/bwxml/exchangews/gensrc/src"/>
+	<classpathentry kind="lib" path="/bwxml/dist/bw-synchwsschema-3.7.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

@@ -116,7 +116,7 @@
             project="bwxml"
             projecthome="${project.home}/../bwxml" />
 
-    <getJar name="bw-exsynchwsschema" version="${org.bedework.bwxml.version}"
+    <getJar name="bw-synchwsschema" version="${org.bedework.bwxml.version}"
             project="bwxml"
             projecthome="${project.home}/../bwxml" />
     
