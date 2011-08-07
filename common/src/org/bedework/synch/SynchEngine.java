@@ -18,10 +18,12 @@
 */
 package org.bedework.synch;
 
-import org.bedework.exsynch.wsmessages.AddItemResponseType;
-import org.bedework.exsynch.wsmessages.FetchItemResponseType;
-import org.bedework.exsynch.wsmessages.StatusType;
-import org.bedework.exsynch.wsmessages.UpdateItemResponseType;
+import org.bedework.synch.messages.FindItemsRequest;
+import org.bedework.synch.messages.GetItemsRequest;
+import org.bedework.synch.messages.SubscribeRequest;
+import org.bedework.synch.responses.ExsynchSubscribeResponse;
+import org.bedework.synch.responses.FinditemsResponse;
+import org.bedework.synch.responses.FinditemsResponse.SynchInfo;
 import org.bedework.synch.wsimpl.BwSynchIntfImpl;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
@@ -33,6 +35,9 @@ import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import org.apache.log4j.Logger;
+import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
@@ -70,38 +75,38 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 
 /** Synch processor.
  * <p>The synch processor manages subscriptions made by a subscriber to a target.
- * Such a subscription might be one way or two way. 
- * 
+ * Such a subscription might be one way or two way.
+ *
  * <p>There are two ends to a subscription handled by connectors. The connectors
- * implement a standard interface which provides sufficient information for the 
- * synch process. 
- * 
- * <p>Synchronization is triggered either when a change takes place - through 
+ * implement a standard interface which provides sufficient information for the
+ * synch process.
+ *
+ * <p>Synchronization is triggered either when a change takes place - through
  * some sort of push-notification or periodically.
- * 
- * <p>For example, we might have a one way subscription from bedework to 
+ *
+ * <p>For example, we might have a one way subscription from bedework to
  * exchange. Exchange will post notifications to the synch engine which will
  * then resymch the modified entity.
- * 
- * <p>Alternatively we might have a subscription to a file which we refresh each 
+ *
+ * <p>Alternatively we might have a subscription to a file which we refresh each
  * day at 4am.
- * 
+ *
  * <p>A subscription may be in the following states:<ul>
  * <li>dormant - that is there is no current activity, for
  * example a file subscription with a periodic update,</li>
  * <li>active - there is some active connection associated with it, for example,
  * an Exchange push subscription waiting for a notification</li>
- * <li>processing - for example, an Exchange push subscription which is 
+ * <li>processing - for example, an Exchange push subscription which is
  * processing a notification</li>
  * <li>unsubscribing - the user has asked to unsubscribe but there is some
  * activity we are waiting for<li>
  * </ul>
- * 
+ *
  * <p>Interactions with the calendars is carried out through an interface which
  * assumes the CalWs-SOAP protocol. Messages and responses are of that form
  * though the actual implementation may not use the protocol if the target does
  * not support it. For example we convert CalWs-SOAP interactions into ExchangeWS.
- * 
+ *
  * --------------------- ignore below ----------------------------------------
  *
  * <p>This process manages the setting up of push-subscriptions with the exchange
@@ -132,25 +137,19 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  * @author Mike Douglass
  */
 public class SynchEngine {
-  private boolean debug;
+  private final boolean debug;
 
   private static String appname = "Exsynch";
 
   protected transient Logger log;
 
   /* Map of currently active subscriptions - that is - we have traffic between
-   * us and Exchange
+   * local and remote systems.
    */
-  private Map<String, BaseSubscription> subs =
+  private final Map<String, BaseSubscription> subs =
     new HashMap<String, BaseSubscription>();
 
-  ///* Line up subscriptions for processing */
-  //private Queue<ExchangeSubscription> subscribeQueue =
-  //  new ConcurrentLinkedQueue<ExchangeSubscription>();
-
-  //private ExchangeSynchIntf intf;
-
-  private ConnectorIntf exintf;
+  private final ConnectorIntf exintf;
 
   /* If non-null this is the token we currently have for the remote service */
   private String remoteToken;
@@ -164,7 +163,7 @@ public class SynchEngine {
   private ExsynchConfig config;
 
   /* Max number of items we fetch at a time */
-  private int getItemsBatchSize = 20;
+  private final int getItemsBatchSize = 20;
 
   private static Object getSyncherLock = new Object();
 
@@ -175,7 +174,7 @@ public class SynchEngine {
   /* Where we keep subscriptions that come in while we are starting */
   private List<BaseSubscription> subsList;
 
-  private ExsynchDb db;
+  private SynchDb db;
 
   /* Calls back from the remote system have resource uris tha are prefixed with
    * this.

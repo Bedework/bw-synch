@@ -18,34 +18,42 @@
 */
 package org.bedework.synch;
 
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
-
-import java.util.List;
-
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
+
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+
+import java.util.List;
 
 /** The interface implemented by connectors.
  *
  * @author Mike Douglass
  */
 public interface ConnectorIntf<S extends BaseSubscription> {
-  /** Called to initialize the exchange synch process. A response of null means
-   * no exchange synch. Note that users can synchronize with exchange systems in
-   * other domains, so even if your site doesn't run exchange you may want to to
-   * run the synch process,
+  /** Called to initialize the connector. A response of null means no synch
+   * available.
    *
-   * The return value is a random uid which is used to validate incoming
-   * requests from the remote server.
+   * <p>The return value is a random uid which is used to validate incoming
+   * callback requests from the remote server.
+   *
+   * <p>The callback url is unique to the connector. It will be used as a path
+   * prefix to allow the callback service to locate the handler for incoming
+   * callback requests.
+   *
+   * <p>For example, if the callback context is /synchcb/ and the connector id
+   * is "bedework" then the callback uri might be /synchcb/bedework/. The
+   * connector might append a uid to that path to allow it to locate the
+   * active subscription for which the callback is intended.
    *
    * @param conf
    * @param token - null for new connection - current token for ping
    * @return null for no synch else a random uid.
    * @throws SynchException
    */
-  String initExchangeSynch(ExsynchConfig conf,
-                           String token) throws SynchException;
+  String init(String callbackUri,
+              String token) throws SynchException;
 
   /** Information used to synch remote with Exchange
    * This information is only valid in the context of a given subscription.
@@ -93,7 +101,7 @@ public interface ConnectorIntf<S extends BaseSubscription> {
    * @return List of items - never null, maybe empty.
    * @throws SynchException
    */
-  List<ItemInfo> getItemsInfo(ExchangeSubscription sub) throws SynchException;
+  List<ItemInfo> getItemsInfo(S sub) throws SynchException;
 
   /** Add a calendar component
    *
@@ -103,7 +111,7 @@ public interface ConnectorIntf<S extends BaseSubscription> {
    * @return response
    * @throws SynchException
    */
-  AddItemResponseType addItem(ExchangeSubscription sub,
+  AddItemResponseType addItem(S sub,
                           String uid,
                           IcalendarType val) throws SynchException;
 
@@ -114,7 +122,7 @@ public interface ConnectorIntf<S extends BaseSubscription> {
    * @return response
    * @throws SynchException
    */
-  FetchItemResponseType fetchItem(ExchangeSubscription sub,
+  FetchItemResponseType fetchItem(S sub,
                                   String uid) throws SynchException;
 
   /** Update a calendar component
@@ -126,8 +134,8 @@ public interface ConnectorIntf<S extends BaseSubscription> {
    * @return response
    * @throws SynchException
    */
-  UpdateItemResponseType updateItem(ExchangeSubscription sub,
+  UpdateItemResponseType updateItem(S sub,
                                 String uid,
-                                List<XpathUpdate> updates,
+                                UpdateItemType updates,
                                 edu.rpi.sss.util.xml.NsContext nsc) throws SynchException;
 }

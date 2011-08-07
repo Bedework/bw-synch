@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.intf;
+package org.bedework.synch.cnctrs.exchange;
 
 import java.util.UUID;
 

@@ -21,22 +21,23 @@ package org.bedework.synch;
 import java.util.UUID;
 
 /** Represents a subscription for the synch engine.
- * 
+ *
  * <p>A subscription has 2 connectors for each end of the subscription. We will
  * refer to these as the local and remote ends even though the subscription can
  * be symmetric and either end can be nominated the 'master' calendar.
- * 
+ *
  * <p>Each connector has a kind which is a name used to retrieve a connector
  * from the connector manager. The retrieved connector implements the SynchIntf
  * interface and provides a serializable object to store connection specific
  * properties such as id and password.
- * 
- * <p>These properties are obtained by presenting the user with a list of 
+ *
+ * <p>These properties are obtained by presenting the user with a list of
  * required properties and then encrypting and storing the response.
  *
  * @author Mike Douglass
  */
-public class BaseSubscription implements Comparable<BaseSubscription> {
+@SuppressWarnings("rawtypes")
+public class BaseSubscription<S extends BaseSubscription> implements Comparable<S> {
   private long id;
 
   private int seq;
@@ -57,7 +58,7 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
   private boolean subscribe;
 
   /* Process outstanding after this */
-  private BaseSubscription outstandingSubscription;
+  private S outstandingSubscription;
 
   /** null constructor for hibernate
    *
@@ -138,7 +139,7 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
 	  localConnectorId = val;
   }
 
-  /** 
+  /**
    * @return String
    */
   public String getLocalConnectorId() {
@@ -169,7 +170,7 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
 	  remoteConnectorId = val;
   }
 
-  /** 
+  /**
    * @return String
    */
   public String getRemoteConnectorId() {
@@ -210,17 +211,17 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
 
   /** An outstanding request that requires an unsubscribe to complete first
    *
-   * @param val    ExchangeSubscription
+   * @param val    S
    */
-  public void setOutstandingSubscription(final BaseSubscription val) {
+  public void setOutstandingSubscription(final S val) {
     outstandingSubscription = val;
   }
 
   /** An outstanding request that requires an unsubscribe to complete first
    *
-   * @return ExchangeSubscription
+   * @return S
    */
-  public BaseSubscription getOutstandingSubscription() {
+  public S getOutstandingSubscription() {
     return outstandingSubscription;
   }
 
@@ -229,7 +230,7 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
    * @param that
    * @return true if anything changed
    */
-  public boolean changed(final BaseSubscription that) {
+  public boolean changed(final S that) {
     if (!equals(that)) {
       return true;
     }
@@ -283,28 +284,16 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
     return sb.toString();
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
-  public int compareTo(final BaseSubscription that) {
-    if (this == that) {
-      return 0;
-    }
-
-    return getSubscriptionId().compareTo(that.getSubscriptionId());
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    return compareTo((BaseSubscription)o) == 0;
-  }
-
   /* ====================================================================
-   *                        Private methods
+   *                   Convenience methods
    * ==================================================================== */
 
-  private void toStringSegment(final StringBuilder sb,
-                              final String indent) {
+  /** Add our stuff to the StringBuilder
+   *
+   * @param sb    StringBuilder for result
+   */
+  protected void toStringSegment(final StringBuilder sb,
+                                 final String indent) {
     sb.append("id = ");
     sb.append(getId());
     sb.append(", seq = ");
@@ -340,5 +329,31 @@ public class BaseSubscription implements Comparable<BaseSubscription> {
     sb.append(indent);
     sb.append("subscribe = ");
     sb.append(getSubscribe());
+  }
+
+  /* ====================================================================
+   *                   Object methods
+   * The following are required for a db object.
+   * ==================================================================== */
+
+  /* (non-Javadoc)
+   * @see java.lang.Comparable#compareTo(java.lang.Object)
+   */
+  @Override
+  public int compareTo(final S that) {
+    throw new RuntimeException("compareTo must be implemented for a subscription");
+    /*
+    if (this == that) {
+      return 0;
+    }
+
+    return getSubscriptionId().compareTo(that.getSubscriptionId());
+    */
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean equals(final Object o) {
+    return compareTo((S)o) == 0;
   }
 }

@@ -16,13 +16,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.intf;
+package org.bedework.synch.cnctrs.exchange;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
 import org.bedework.synch.SynchException;
+import org.bedework.synch.intf.Defs;
+
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
