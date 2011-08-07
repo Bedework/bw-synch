@@ -16,10 +16,12 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.intf;
+package org.bedework.synch.intf;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
+
+import org.bedework.synch.SynchException;
 
 /** Forbidden exception thrown by synch classes
  *

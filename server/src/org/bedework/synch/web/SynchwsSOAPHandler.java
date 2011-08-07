@@ -1,40 +1,31 @@
-/* **********************************************************************
-    Copyright 2010 Rensselaer Polytechnic Institute. All worldwide rights reserved.
+/* ********************************************************************
+    Licensed to Jasig under one or more contributor license
+    agreements. See the NOTICE file distributed with this work
+    for additional information regarding copyright ownership.
+    Jasig licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a
+    copy of the License at:
 
-    Redistribution and use of this distribution in source and binary forms,
-    with or without modification, are permitted provided that:
-       The above copyright notice and this permission notice appear in all
-        copies and supporting documentation;
+    http://www.apache.org/licenses/LICENSE-2.0
 
-        The name, identifiers, and trademarks of Rensselaer Polytechnic
-        Institute are not used in advertising or publicity without the
-        express prior written permission of Rensselaer Polytechnic Institute;
-
-    DISCLAIMER: The software is distributed" AS IS" without any express or
-    implied warranty, including but not limited to, any implied warranties
-    of merchantability or fitness for a particular purpose or any warrant)'
-    of non-infringement of any current or pending patent rights. The authors
-    of the software make no representations about the suitability of this
-    software for any particular purpose. The entire risk as to the quality
-    and performance of the software is with the user. Should the software
-    prove defective, the user assumes the cost of all necessary servicing,
-    repair or correction. In particular, neither Rensselaer Polytechnic
-    Institute, nor the authors of the software are liable for any indirect,
-    special, consequential, or incidental damages related to the software,
-    to the maximum extent the law permits.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
+package org.bedework.synch.web;
 
-package org.bedework.exchgsynch.web;
-
-import org.bedework.exchgsynch.ExchangeSynch;
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
-import org.bedework.exchgsynch.intf.SynchException;
 import org.bedework.exsynch.wsmessages.ObjectFactory;
 import org.bedework.exsynch.wsmessages.StatusType;
 import org.bedework.exsynch.wsmessages.SubscribeRequestType;
 import org.bedework.exsynch.wsmessages.SubscribeResponseType;
 import org.bedework.exsynch.wsmessages.UnsubscribeRequestType;
 import org.bedework.exsynch.wsmessages.UnsubscribeResponseType;
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchException;
 
 import java.util.List;
 
@@ -45,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SynchwsSOAPHandler extends SOAPHandler {
   @Override
-  public void init(final ExchangeSynch syncher) throws SynchException {
+  public void init(final SynchEngine syncher) throws SynchException {
     super.init(syncher);
     setContextPath("org.bedework.exsynch.wsmessages:" +
                    "ietf.params.xml.ns.icalendar_2");
@@ -104,7 +95,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
 
     /* Look for a subscription that matches the 2 end points */
 
-    List<ExchangeSubscription> ess = getSyncher().find(sr.getCalendarHref(),
+    List<BaseSubscription> ess = getSyncher().find(sr.getCalendarHref(),
                                                        sr.getExchangeFolderId(),
                                                        sr.getExchangeUser());
     ObjectFactory of = new ObjectFactory();
@@ -114,7 +105,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
     if (!ess.isEmpty()) {
       sresp.setSubscribeStatus(StatusType.ALREADY_SUBSCRIBED);
     } else {
-      ExchangeSubscription sub = new ExchangeSubscription(null,
+      BaseSubscription sub = new BaseSubscription(null,
                                                           sr.getCalendarHref(),
                                                           sr.getPrincipalHref(),
                                                           sr.getExchangeFolderId(),
@@ -139,7 +130,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
       trace("Handle unsubscribe " +  u.getSubscriptionId());
     }
 
-    ExchangeSubscription sub;
+    BaseSubscription sub;
 
     sub = getSyncher().getSubscription(u.getSubscriptionId());
 

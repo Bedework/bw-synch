@@ -24,25 +24,13 @@
     to the maximum extent the law permits.
 */
 
-package org.bedework.exchgsynch.web;
-
-import org.bedework.exchgsynch.ExchangeSynch;
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
-import org.bedework.exchgsynch.intf.SynchException;
-import org.bedework.exchgsynch.responses.Notification;
+package org.bedework.synch.web;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
-
-import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
-import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 
 /** Handle SOAP interactions with Exchange for exchange synch servlet.
  */
@@ -55,7 +43,7 @@ public class EwsSOAPHandler extends SOAPHandler {
   }
 
   @Override
-  public void doRequest(final HttpServletRequest req,
+  public void doRequest(final HttpServletRequest req, 
                         final HttpServletResponse resp,
                         final String resourceUri) throws SynchException {
     try {
@@ -72,7 +60,7 @@ public class EwsSOAPHandler extends SOAPHandler {
         return;
       }
 
-      ExchangeSubscription sub = getSyncher().getSubscription(id);
+      BaseSubscription sub = getSyncher().getSubscription(id);
 
       if (sub == null) {
         if (debug) {

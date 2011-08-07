@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch;
+package org.bedework.synch;
 
 import java.io.Serializable;
 

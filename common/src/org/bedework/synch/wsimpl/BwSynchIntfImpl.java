@@ -16,12 +16,8 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.wsimpl;
+package org.bedework.synch.wsimpl;
 
-import org.bedework.exchgsynch.ExsynchConfig;
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
-import org.bedework.exchgsynch.intf.ExchangeSynchIntf;
-import org.bedework.exchgsynch.intf.SynchException;
 import org.bedework.exsynch.wsmessages.AddItemResponseType;
 import org.bedework.exsynch.wsmessages.AddItemType;
 import org.bedework.exsynch.wsmessages.AddType;
@@ -49,8 +45,6 @@ import org.bedework.exsynch.wsmessages.SynchInfoType;
 import org.bedework.exsynch.wsmessages.UpdateItemResponseType;
 import org.bedework.exsynch.wsmessages.UpdateItemType;
 
-import edu.rpi.cmt.calendar.diff.XmlIcalCompare.XpathUpdate;
-
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 
@@ -71,7 +65,7 @@ import javax.xml.namespace.QName;
  *
  *   @author Mike Douglass   douglm@rpi.edu
  */
-public class BwSynchIntfImpl implements ExchangeSynchIntf {
+public class BwSynchIntfImpl implements ConnectorIntf {
   protected boolean debug;
 
   private Logger log;
@@ -142,7 +136,7 @@ public class BwSynchIntfImpl implements ExchangeSynchIntf {
   }
 
   @Override
-  public List<ItemInfo> getItemsInfo(final ExchangeSubscription sub) throws SynchException {
+  public List<ItemInfo> getItemsInfo(final BaseSubscription sub) throws SynchException {
     List<ItemInfo> items = new ArrayList<ItemInfo>();
 
     GetSynchInfoType gsi = new GetSynchInfoType();
@@ -173,7 +167,7 @@ public class BwSynchIntfImpl implements ExchangeSynchIntf {
   }
 
   @Override
-  public AddItemResponseType addItem(final ExchangeSubscription sub,
+  public AddItemResponseType addItem(final BaseSubscription sub,
                                  final String uid,
                                  final IcalendarType val) throws SynchException {
     AddItemType ai = new AddItemType();
@@ -187,7 +181,7 @@ public class BwSynchIntfImpl implements ExchangeSynchIntf {
     return getPort().addItem(ai);
   }
 
-  public FetchItemResponseType fetchItem(final ExchangeSubscription sub,
+  public FetchItemResponseType fetchItem(final BaseSubscription sub,
                                      final String uid) throws SynchException {
     FetchItemType fi = new FetchItemType();
 
@@ -200,7 +194,7 @@ public class BwSynchIntfImpl implements ExchangeSynchIntf {
   }
 
   @SuppressWarnings("unchecked")
-  public UpdateItemResponseType updateItem(final ExchangeSubscription sub,
+  public UpdateItemResponseType updateItem(final BaseSubscription sub,
                                        final String uid,
                                        final List<XpathUpdate> updates,
                                        final edu.rpi.sss.util.xml.NsContext nsc) throws SynchException {

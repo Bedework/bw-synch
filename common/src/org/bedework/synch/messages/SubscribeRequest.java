@@ -41,7 +41,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
    * @param sub
    * @param config
    */
-  public SubscribeRequest(final ExchangeSubscription sub,
+  public SubscribeRequest(final BaseSubscription sub,
                           final ExsynchConfig config) {
     super();
 

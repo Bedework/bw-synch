@@ -23,14 +23,12 @@
     special, consequential, or incidental damages related to the software,
     to the maximum extent the law permits.
 */
-package org.bedework.exchgsynch;
-
-import org.bedework.exchgsynch.CalendarItem.ItemType;
-import org.bedework.exchgsynch.CalendarItem.TzStuff;
-import org.bedework.exchgsynch.intf.Defs;
-import org.bedework.exchgsynch.intf.SynchException;
+package org.bedework.synch;
 
 import org.apache.log4j.Logger;
+import org.bedework.synch.CalendarItem.ItemType;
+import org.bedework.synch.CalendarItem.TzStuff;
+import org.bedework.synch.intf.Defs;
 
 import ietf.params.xml.ns.icalendar_2.ActionPropType;
 import ietf.params.xml.ns.icalendar_2.ArrayOfEventTodoContainedComponents;

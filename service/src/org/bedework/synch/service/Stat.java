@@ -23,7 +23,7 @@
     special, consequential, or incidental damages related to the software,
     to the maximum extent the law permits.
 */
-package org.bedework.exchgsynch.service;
+package org.bedework.synch.service;
 
 import java.io.Serializable;
 

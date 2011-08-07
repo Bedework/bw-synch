@@ -23,7 +23,7 @@
     special, consequential, or incidental damages related to the software,
     to the maximum extent the law permits.
 */
-package org.bedework.exchgsynch.service;
+package org.bedework.synch.service;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author douglm
  */
-public interface ExchgSynchMBean {
+public interface SynchMBean {
   /* ========================================================================
    * Attributes
    * ======================================================================== */

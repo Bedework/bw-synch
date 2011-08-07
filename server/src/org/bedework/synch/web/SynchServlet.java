@@ -1,40 +1,30 @@
-/* **********************************************************************
-    Copyright 2010 Rensselaer Polytechnic Institute. All worldwide rights reserved.
+/* ********************************************************************
+    Licensed to Jasig under one or more contributor license
+    agreements. See the NOTICE file distributed with this work
+    for additional information regarding copyright ownership.
+    Jasig licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a
+    copy of the License at:
 
-    Redistribution and use of this distribution in source and binary forms,
-    with or without modification, are permitted provided that:
-       The above copyright notice and this permission notice appear in all
-        copies and supporting documentation;
+    http://www.apache.org/licenses/LICENSE-2.0
 
-        The name, identifiers, and trademarks of Rensselaer Polytechnic
-        Institute are not used in advertising or publicity without the
-        express prior written permission of Rensselaer Polytechnic Institute;
-
-    DISCLAIMER: The software is distributed" AS IS" without any express or
-    implied warranty, including but not limited to, any implied warranties
-    of merchantability or fitness for a particular purpose or any warrant)'
-    of non-infringement of any current or pending patent rights. The authors
-    of the software make no representations about the suitability of this
-    software for any particular purpose. The entire risk as to the quality
-    and performance of the software is with the user. Should the software
-    prove defective, the user assumes the cost of all necessary servicing,
-    repair or correction. In particular, neither Rensselaer Polytechnic
-    Institute, nor the authors of the software are liable for any indirect,
-    special, consequential, or incidental damages related to the software,
-    to the maximum extent the law permits.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
-
-package org.bedework.exchgsynch.web;
-
-import org.bedework.exchgsynch.ExchangeSynch;
-import org.bedework.exchgsynch.intf.SynchException;
-import org.bedework.exchgsynch.web.MethodBase.MethodInfo;
+package org.bedework.synch.web;
 
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
 import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
 
 import org.apache.log4j.Logger;
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchException;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -59,7 +49,7 @@ import javax.xml.namespace.QName;
  * @author Mike Douglass   douglm@rpi.edu
  * @version 1.0
  */
-public class ExsynchServlet extends HttpServlet
+public class SynchServlet extends HttpServlet
         implements HttpSessionListener {
   protected boolean debug;
 
@@ -94,7 +84,7 @@ public class ExsynchServlet extends HttpServlet
   protected void service(final HttpServletRequest req,
                          HttpServletResponse resp)
       throws ServletException, IOException {
-    ExchangeSynch syncher = null;
+	SynchEngine syncher = null;
     boolean serverError = false;
 
     try {
@@ -107,7 +97,7 @@ public class ExsynchServlet extends HttpServlet
 
       tryWait(req, true);
 
-      syncher = ExchangeSynch.getSyncher();
+      syncher = SynchEngine.getSyncher();
 
       if (req.getCharacterEncoding() == null) {
         req.setCharacterEncoding("UTF-8");
@@ -191,7 +181,7 @@ public class ExsynchServlet extends HttpServlet
   }
 
   /* Return true if it's a server error */
-  private boolean handleException(final ExchangeSynch syncher, final Throwable t,
+  private boolean handleException(final SynchEngine syncher, final Throwable t,
                                   final HttpServletResponse resp,
                                   boolean serverError) {
     if (serverError) {
@@ -220,7 +210,7 @@ public class ExsynchServlet extends HttpServlet
     }
   }
 
-  private void sendError(final ExchangeSynch syncher, final Throwable t,
+  private void sendError(final SynchEngine syncher, final Throwable t,
                          final HttpServletResponse resp) {
     try {
       if (t instanceof SynchException) {
@@ -264,7 +254,7 @@ public class ExsynchServlet extends HttpServlet
     }
   }
 
-  private boolean emitError(final ExchangeSynch syncher,
+  private boolean emitError(final SynchEngine syncher,
                             final QName errorTag,
                             final String extra,
                             final Writer wtr) {
@@ -318,7 +308,7 @@ public class ExsynchServlet extends HttpServlet
    * @return method
    * @throws SynchException
    */
-  public MethodBase getMethod(final ExchangeSynch syncher,
+  public MethodBase getMethod(final SynchEngine syncher,
                               final String name) throws SynchException {
     MethodInfo mi = methods.get(name.toUpperCase());
 

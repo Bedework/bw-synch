@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.intf;
+package org.bedework.synch;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;

@@ -16,22 +16,21 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.intf;
+package org.bedework.synch;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
-import org.bedework.synch.SynchException;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 
-/** Calls from exchange synch processor to the service.
+/** The interface implemented by connectors.
  *
  * @author Mike Douglass
  */
-public interface ExchangeSynchIntf extends Defs {
+public interface ConnectorIntf<S extends BaseSubscription> {
   /** Called to initialize the exchange synch process. A response of null means
    * no exchange synch. Note that users can synchronize with exchange systems in
    * other domains, so even if your site doesn't run exchange you may want to to

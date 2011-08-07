@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.intf;
+package org.bedework.synch;
 
 import java.util.UUID;
 
@@ -36,30 +36,20 @@ import java.util.UUID;
  *
  * @author Mike Douglass
  */
-public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
+public class BaseSubscription implements Comparable<BaseSubscription> {
   private long id;
 
   private int seq;
 
   private String subscriptionId;
 
-  private String calPath;
+  private String localConnectorId;
 
-  private String principalHref;
+  private String localConnectorProperties;
 
-  private String exchangeCalendar;
+  private String remoteConnectorId;
 
-  private String exchangeId;
-
-  private String exchangePw;
-
-  private String exchangeURI;
-
-  private String exchangeSubscriptionId;
-
-  private String exchangeWatermark;
-
-  private String exchangeError;
+  private String remoteConnectorProperties;
 
   /* Following not persisted */
 
@@ -67,46 +57,24 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
   private boolean subscribe;
 
   /* Process outstanding after this */
-  private ExchangeSubscription outstandingSubscription;
+  private BaseSubscription outstandingSubscription;
 
   /** null constructor for hibernate
    *
    */
-  public ExchangeSubscription() {
+  public BaseSubscription() {
   }
 
-  /** Constructor
+  /** Constructor to create a new subscription.
    *
    * @param subscriptionId - null means generate one
-   * @param calPath
-   * @param principalHref
-   * @param exchangeCalendar
-   * @param exchangeId
-   * @param exchangePw
-   * @param exchangeURI
-   * @param subscribe
    */
-  public ExchangeSubscription(final String subscriptionId,
-                              final String calPath,
-                              final String principalHref,
-                              final String exchangeCalendar,
-                              final String exchangeId,
-                              final String exchangePw,
-                              final String exchangeURI,
-                              final boolean subscribe) {
+  public BaseSubscription(final String subscriptionId) {
     if (subscriptionId == null) {
       this.subscriptionId = UUID.randomUUID().toString();
     } else {
       this.subscriptionId = subscriptionId;
     }
-
-    this.principalHref = principalHref;
-    this.calPath = calPath;
-    this.exchangeCalendar = exchangeCalendar;
-    this.exchangeId = exchangeId;
-    this.exchangePw = exchangePw;
-    this.exchangeURI = exchangeURI;
-    this.subscribe = subscribe;
   }
 
   /**
@@ -162,149 +130,66 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
     return subscriptionId;
   }
 
-  /** Path to this systems calendar collection.
+  /** Id of the local connector.
    *
    * @param val    String
    */
-  public void setCalPath(final String val) {
-    calPath = val;
+  public void setLocalConnectorId(final String val) {
+	  localConnectorId = val;
   }
 
-  /** Path to this systems calendar collection
-   *
+  /** 
    * @return String
    */
-  public String getCalPath() {
-    return calPath;
+  public String getLocalConnectorId() {
+    return localConnectorId;
   }
 
-
-  /** Principal requesting synch service
+  /** Serialized and encrypted properties
    *
    * @param val    String
    */
-  public void setprincipalHref(final String val) {
-    principalHref = val;
+  public void setLocalConnectorProperties(final String val) {
+	  localConnectorProperties = val;
   }
 
-  /** Principal requesting synch service
+  /** Serialized and encrypted properties
    *
    * @return String
    */
-  public String getprincipalHref() {
-    return principalHref;
+  public String getLocalConnectorProperties() {
+    return localConnectorProperties;
   }
 
-  /** Exchange Calendar
+  /** Id of the remote connector.
    *
    * @param val    String
    */
-  public void setExchangeCalendar(final String val) {
-    exchangeCalendar = val;
+  public void setRemoteConnectorId(final String val) {
+	  remoteConnectorId = val;
   }
 
-  /** Exchange Calendar
-   *
+  /** 
    * @return String
    */
-  public String getExchangeCalendar() {
-    return exchangeCalendar;
+  public String getRemoteConnectorId() {
+    return remoteConnectorId;
   }
 
-  /** Exchange Calendar id
+  /** Serialized and encrypted properties
    *
    * @param val    String
    */
-  public void setExchangeId(final String val) {
-    exchangeId = val;
+  public void setRemoteConnectorProperties(final String val) {
+	  remoteConnectorProperties = val;
   }
 
-  /** Exchange Calendar id
+  /** Serialized and encrypted properties
    *
    * @return String
    */
-  public String getExchangeId() {
-    return exchangeId;
-  }
-
-  /** Encoded exchange Calendar pw
-   *
-   * @param val    String
-   */
-  public void setExchangePw(final String val) {
-    exchangePw = val;
-  }
-
-  /** Encoded xchange Calendar pw
-   *
-   * @return String
-   */
-  public String getExchangePw() {
-    return exchangePw;
-  }
-
-  /** Exchange web service uri
-   *
-   * @param val    String
-   */
-  public void setExchangeURI(final String val) {
-    exchangeURI = val;
-  }
-
-  /** Exchange web service uri
-   *
-   * @return String
-   */
-  public String getExchangeURI() {
-    return exchangeURI;
-  }
-
-  /** Exchange system subscriptionId.
-   *
-   * @param val    String
-   */
-  public void setExchangeSubscriptionId(final String val) {
-    exchangeSubscriptionId = val;
-  }
-
-  /** Exchange system subscriptionId.
-   *
-   * @return String
-   */
-  public String getExchangeSubscriptionId() {
-    return exchangeSubscriptionId;
-  }
-
-  /** Exchange watermark.
-   *
-   * @param val    String
-   */
-  public void setExchangeWatermark(final String val) {
-    exchangeWatermark = val;
-  }
-
-  /** Exchange watermark.
-   *
-   * @return String
-   */
-  public String getExchangeWatermark() {
-    return exchangeWatermark;
-  }
-
-  /** Exchange error code.
-   *
-   * @param val    String
-   */
-  public void setExchangeError(final String val) {
-    exchangeError = val;
-  }
-
-  /** Exchange error code.
-   *
-   * @return String
-   */
-  public String getExchangeError() {
-    return exchangeError;
+  public String getRemoteConnectorProperties() {
+    return remoteConnectorProperties;
   }
 
   /** (un)subscribe?
@@ -327,7 +212,7 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
    *
    * @param val    ExchangeSubscription
    */
-  public void setOutstandingSubscription(final ExchangeSubscription val) {
+  public void setOutstandingSubscription(final BaseSubscription val) {
     outstandingSubscription = val;
   }
 
@@ -335,7 +220,7 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
    *
    * @return ExchangeSubscription
    */
-  public ExchangeSubscription getOutstandingSubscription() {
+  public BaseSubscription getOutstandingSubscription() {
     return outstandingSubscription;
   }
 
@@ -344,20 +229,24 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
    * @param that
    * @return true if anything changed
    */
-  public boolean changed(final ExchangeSubscription that) {
+  public boolean changed(final BaseSubscription that) {
     if (!equals(that)) {
       return true;
     }
 
-    if (!getprincipalHref().equals(that.getprincipalHref())) {
+    if (!getLocalConnectorId().equals(that.getLocalConnectorId())) {
       return true;
     }
 
-    if (!getExchangeCalendar().equals(that.getExchangeCalendar())) {
+    if (!getLocalConnectorProperties().equals(that.getLocalConnectorProperties())) {
       return true;
     }
 
-    if (!getExchangeURI().equals(that.getExchangeURI())) {
+    if (!getRemoteConnectorId().equals(that.getRemoteConnectorId())) {
+      return true;
+    }
+
+    if (!getRemoteConnectorProperties().equals(that.getRemoteConnectorProperties())) {
       return true;
     }
 
@@ -397,7 +286,7 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
   /* (non-Javadoc)
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
-  public int compareTo(final ExchangeSubscription that) {
+  public int compareTo(final BaseSubscription that) {
     if (this == that) {
       return 0;
     }
@@ -407,7 +296,7 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
 
   @Override
   public boolean equals(final Object o) {
-    return compareTo((ExchangeSubscription)o) == 0;
+    return compareTo((BaseSubscription)o) == 0;
   }
 
   /* ====================================================================
@@ -428,20 +317,24 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("calPath = ");
-    sb.append(getCalPath());
+    sb.append("localConnectorId = ");
+    sb.append(getLocalConnectorId());
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("principalHref = ");
-    sb.append(getprincipalHref());
+    sb.append("localConnectorProperties = ");
+    sb.append(getLocalConnectorProperties());
+
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("exchangeCalendar = ");
-    sb.append(getExchangeCalendar());
-    sb.append(", exchangeURI = ");
-    sb.append(getExchangeURI());
+    sb.append("remoteConnectorId = ");
+    sb.append(getRemoteConnectorId());
+
+    sb.append(",\n");
+    sb.append(indent);
+    sb.append("remoteConnectorProperties = ");
+    sb.append(getRemoteConnectorProperties());
 
     sb.append(",\n");
     sb.append(indent);

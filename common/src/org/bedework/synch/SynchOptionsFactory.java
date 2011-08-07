@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch;
+package org.bedework.synch;
 
 import edu.rpi.sss.util.OptionsException;
 import edu.rpi.sss.util.OptionsFactory;
@@ -25,7 +25,7 @@ import edu.rpi.sss.util.OptionsI;
 /** Obtain an options object.
  *
  */
-public class ExsynchOptionsFactory extends OptionsFactory {
+public class SynchOptionsFactory extends OptionsFactory {
   /* Options class if we've already been called */
   private static volatile OptionsI opts;
 

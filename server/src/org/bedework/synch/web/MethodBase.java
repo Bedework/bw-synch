@@ -1,35 +1,26 @@
-/* **********************************************************************
-    Copyright 2005 Rensselaer Polytechnic Institute. All worldwide rights reserved.
+/* ********************************************************************
+    Licensed to Jasig under one or more contributor license
+    agreements. See the NOTICE file distributed with this work
+    for additional information regarding copyright ownership.
+    Jasig licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a
+    copy of the License at:
 
-    Redistribution and use of this distribution in source and binary forms,
-    with or without modification, are permitted provided that:
-       The above copyright notice and this permission notice appear in all
-        copies and supporting documentation;
+    http://www.apache.org/licenses/LICENSE-2.0
 
-        The name, identifiers, and trademarks of Rensselaer Polytechnic
-        Institute are not used in advertising or publicity without the
-        express prior written permission of Rensselaer Polytechnic Institute;
-
-    DISCLAIMER: The software is distributed" AS IS" without any express or
-    implied warranty, including but not limited to, any implied warranties
-    of merchantability or fitness for a particular purpose or any warrant)'
-    of non-infringement of any current or pending patent rights. The authors
-    of the software make no representations about the suitability of this
-    software for any particular purpose. The entire risk as to the quality
-    and performance of the software is with the user. Should the software
-    prove defective, the user assumes the cost of all necessary servicing,
-    repair or correction. In particular, neither Rensselaer Polytechnic
-    Institute, nor the authors of the software are liable for any indirect,
-    special, consequential, or incidental damages related to the software,
-    to the maximum extent the law permits.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
-
-package org.bedework.exchgsynch.web;
-
-import org.bedework.exchgsynch.ExchangeSynch;
-import org.bedework.exchgsynch.intf.SynchException;
+package org.bedework.synch.web;
 
 import org.apache.log4j.Logger;
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchException;
 import org.w3c.dom.Document;
 
 import java.net.URLDecoder;
@@ -51,7 +42,7 @@ public abstract class MethodBase {
 
   protected transient Logger log;
 
-  protected ExchangeSynch syncher;
+  protected SynchEngine syncher;
 
   //private String resourceUri;
 
@@ -118,7 +109,7 @@ public abstract class MethodBase {
    * @param dumpContent
    * @throws SynchException
    */
-  public void init(final ExchangeSynch syncher,
+  public void init(final SynchEngine syncher,
                    final boolean dumpContent) throws SynchException {
     this.syncher = syncher;
     this.dumpContent = dumpContent;
@@ -136,7 +127,7 @@ public abstract class MethodBase {
    *
    * @return ExchangeSynch
    */
-  public ExchangeSynch getSyncher() {
+  public SynchEngine getSyncher() {
     return syncher;
   }
 

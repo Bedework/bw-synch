@@ -16,28 +16,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch;
+package org.bedework.synch;
 
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
-import org.bedework.exchgsynch.intf.ExchangeSynchIntf;
-import org.bedework.exchgsynch.intf.ExchangeSynchIntf.ItemInfo;
-import org.bedework.exchgsynch.intf.SynchException;
-import org.bedework.exchgsynch.messages.FindItemsRequest;
-import org.bedework.exchgsynch.messages.GetItemsRequest;
-import org.bedework.exchgsynch.messages.SubscribeRequest;
-import org.bedework.exchgsynch.responses.ExsynchSubscribeResponse;
-import org.bedework.exchgsynch.responses.FinditemsResponse;
-import org.bedework.exchgsynch.responses.FinditemsResponse.SynchInfo;
-import org.bedework.exchgsynch.responses.Notification;
-import org.bedework.exchgsynch.responses.Notification.NotificationItem;
-import org.bedework.exchgsynch.wsimpl.BwSynchIntfImpl;
 import org.bedework.exsynch.wsmessages.AddItemResponseType;
 import org.bedework.exsynch.wsmessages.FetchItemResponseType;
 import org.bedework.exsynch.wsmessages.StatusType;
 import org.bedework.exsynch.wsmessages.UpdateItemResponseType;
+import org.bedework.synch.wsimpl.BwSynchIntfImpl;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
-import edu.rpi.cmt.calendar.diff.XmlIcalCompare.XpathUpdate;
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.sss.util.OptionsI;
 import edu.rpi.sss.util.xml.NsContext;
@@ -81,7 +68,41 @@ import com.microsoft.schemas.exchange.services._2006.types.MailboxCultureType;
 import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
 import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
 
-/** Exchange synch processor.
+/** Synch processor.
+ * <p>The synch processor manages subscriptions made by a subscriber to a target.
+ * Such a subscription might be one way or two way. 
+ * 
+ * <p>There are two ends to a subscription handled by connectors. The connectors
+ * implement a standard interface which provides sufficient information for the 
+ * synch process. 
+ * 
+ * <p>Synchronization is triggered either when a change takes place - through 
+ * some sort of push-notification or periodically.
+ * 
+ * <p>For example, we might have a one way subscription from bedework to 
+ * exchange. Exchange will post notifications to the synch engine which will
+ * then resymch the modified entity.
+ * 
+ * <p>Alternatively we might have a subscription to a file which we refresh each 
+ * day at 4am.
+ * 
+ * <p>A subscription may be in the following states:<ul>
+ * <li>dormant - that is there is no current activity, for
+ * example a file subscription with a periodic update,</li>
+ * <li>active - there is some active connection associated with it, for example,
+ * an Exchange push subscription waiting for a notification</li>
+ * <li>processing - for example, an Exchange push subscription which is 
+ * processing a notification</li>
+ * <li>unsubscribing - the user has asked to unsubscribe but there is some
+ * activity we are waiting for<li>
+ * </ul>
+ * 
+ * <p>Interactions with the calendars is carried out through an interface which
+ * assumes the CalWs-SOAP protocol. Messages and responses are of that form
+ * though the actual implementation may not use the protocol if the target does
+ * not support it. For example we convert CalWs-SOAP interactions into ExchangeWS.
+ * 
+ * --------------------- ignore below ----------------------------------------
  *
  * <p>This process manages the setting up of push-subscriptions with the exchange
  * service and provides support for the resulting call-back from Exchange. There
@@ -110,7 +131,7 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  *
  * @author Mike Douglass
  */
-public class ExchangeSynch {
+public class SynchEngine {
   private boolean debug;
 
   private static String appname = "Exsynch";
@@ -120,8 +141,8 @@ public class ExchangeSynch {
   /* Map of currently active subscriptions - that is - we have traffic between
    * us and Exchange
    */
-  private Map<String, ExchangeSubscription> subs =
-    new HashMap<String, ExchangeSubscription>();
+  private Map<String, BaseSubscription> subs =
+    new HashMap<String, BaseSubscription>();
 
   ///* Line up subscriptions for processing */
   //private Queue<ExchangeSubscription> subscribeQueue =
@@ -129,7 +150,7 @@ public class ExchangeSynch {
 
   //private ExchangeSynchIntf intf;
 
-  private ExchangeSynchIntf exintf;
+  private ConnectorIntf exintf;
 
   /* If non-null this is the token we currently have for the remote service */
   private String remoteToken;
@@ -147,12 +168,12 @@ public class ExchangeSynch {
 
   private static Object getSyncherLock = new Object();
 
-  private static ExchangeSynch syncher;
+  private static SynchEngine syncher;
 
   private Timezones timezones;
 
   /* Where we keep subscriptions that come in while we are starting */
-  private List<ExchangeSubscription> subsList;
+  private List<BaseSubscription> subsList;
 
   private ExsynchDb db;
 
@@ -165,7 +186,7 @@ public class ExchangeSynch {
    *
    * @param exintf
    */
-  private ExchangeSynch(final ExchangeSynchIntf exintf) throws SynchException {
+  private SynchEngine(final ConnectorIntf exintf) throws SynchException {
     this.exintf = exintf;
     debug = getLogger().isDebugEnabled();
 
@@ -177,7 +198,7 @@ public class ExchangeSynch {
      */
     OptionsI opts;
     try {
-      opts = ExsynchOptionsFactory.getOptions();
+      opts = SynchOptionsFactory.getOptions();
       config = (ExsynchConfig)opts.getAppProperty(appname);
       if (config == null) {
         config = new ExsynchConfig();
@@ -202,7 +223,7 @@ public class ExchangeSynch {
    * @return the syncher
    * @throws SynchException
    */
-  public static ExchangeSynch getSyncher() throws SynchException {
+  public static SynchEngine getSyncher() throws SynchException {
     // This needs to use config
     if (syncher != null) {
       return syncher;
@@ -212,7 +233,7 @@ public class ExchangeSynch {
       if (syncher != null) {
         return syncher;
       }
-      syncher = new ExchangeSynch(new BwSynchIntfImpl());
+      syncher = new SynchEngine(new BwSynchIntfImpl());
       return syncher;
     }
   }
@@ -292,7 +313,7 @@ public class ExchangeSynch {
 
       try {
         db.open();
-        List<ExchangeSubscription> startList = db.getAll();
+        List<BaseSubscription> startList = db.getAll();
         db.close();
 
         startup:
@@ -301,7 +322,7 @@ public class ExchangeSynch {
             trace("startList has " + startList.size() + " subscriptions");
           }
 
-          for (ExchangeSubscription es: startList) {
+          for (BaseSubscription es: startList) {
             if (stopping) {
               break startup;
             }
@@ -435,7 +456,7 @@ public class ExchangeSynch {
    * @return status
    * @throws SynchException
    */
-  public StatusType subscribeRequest(final ExchangeSubscription sub) throws SynchException {
+  public StatusType subscribeRequest(final BaseSubscription sub) throws SynchException {
     if (debug) {
       trace("new subscription " + sub);
     }
@@ -443,7 +464,7 @@ public class ExchangeSynch {
     synchronized (this) {
       if (starting) {
         if (subsList == null) {
-          subsList = new ArrayList<ExchangeSubscription>();
+          subsList = new ArrayList<BaseSubscription>();
         }
 
         subsList.add(sub);
@@ -463,7 +484,7 @@ public class ExchangeSynch {
    * @param note
    * @throws SynchException
    */
-  public void handleNotification(final ExchangeSubscription sub,
+  public void handleNotification(final BaseSubscription sub,
                                  final Notification note) throws SynchException {
     for (NotificationItem ni: note.getNotifications()) {
       if (ni.getItemId() == null) {
@@ -496,7 +517,7 @@ public class ExchangeSynch {
    *                        Notification methods
    * ==================================================================== */
 
-  private void addItem(final ExchangeSubscription sub,
+  private void addItem(final BaseSubscription sub,
                        final NotificationItem ni) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
 
@@ -517,7 +538,7 @@ public class ExchangeSynch {
     }
   }
 
-  private void updateItem(final ExchangeSubscription sub,
+  private void updateItem(final BaseSubscription sub,
                           final NotificationItem ni) throws SynchException {
     CalendarItem ci = fetchItem(sub, ni.getItemId());
 
@@ -532,7 +553,7 @@ public class ExchangeSynch {
     updateItem(sub, ci);
   }
 
-  private void updateItem(final ExchangeSubscription sub,
+  private void updateItem(final BaseSubscription sub,
                           final CalendarItem ci) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
 
@@ -601,7 +622,7 @@ public class ExchangeSynch {
    * @return subscription
    * @throws SynchException
    */
-  public ExchangeSubscription getSubscription(final String id) throws SynchException {
+  public BaseSubscription getSubscription(final String id) throws SynchException {
     db.open();
     try {
       return db.get(id);
@@ -614,7 +635,7 @@ public class ExchangeSynch {
    * @param sub
    * @throws SynchException
    */
-  public void updateSubscription(final ExchangeSubscription sub) throws SynchException {
+  public void updateSubscription(final BaseSubscription sub) throws SynchException {
     db.open();
     try {
       db.update(sub);
@@ -627,7 +648,7 @@ public class ExchangeSynch {
    * @param sub
    * @throws SynchException
    */
-  public void deleteSubscription(final ExchangeSubscription sub) throws SynchException {
+  public void deleteSubscription(final BaseSubscription sub) throws SynchException {
     db.open();
     try {
       db.delete(sub);
@@ -644,7 +665,7 @@ public class ExchangeSynch {
    * @return matching subscriptions
    * @throws SynchException
    */
-  public List<ExchangeSubscription> find(final String calPath,
+  public List<BaseSubscription> find(final String calPath,
                                          final String exCal,
                                          final String exId) throws SynchException {
     db.open();
@@ -659,7 +680,7 @@ public class ExchangeSynch {
    *                        private methods
    * ==================================================================== */
 
-  private StatusType subscribe(final ExchangeSubscription sub) throws SynchException {
+  private StatusType subscribe(final BaseSubscription sub) throws SynchException {
     if (debug) {
       trace("Handle subscription " + sub);
     }
@@ -670,7 +691,7 @@ public class ExchangeSynch {
     }
 
     synchronized (subs) {
-      ExchangeSubscription tsub = subs.get(sub.getCalPath());
+      BaseSubscription tsub = subs.get(sub.getCalPath());
 
       boolean synchThis = sub.getExchangeWatermark() == null;
 
@@ -700,14 +721,14 @@ public class ExchangeSynch {
    * @return status
    * @throws SynchException
    */
-  public StatusType unsubscribe(final ExchangeSubscription sub) throws SynchException {
+  public StatusType unsubscribe(final BaseSubscription sub) throws SynchException {
     if (!checkAccess(sub)) {
       info("No access for subscription " + sub);
       return StatusType.NO_ACCESS;
     }
 
     synchronized (subs) {
-      ExchangeSubscription tsub = subs.get(sub.getCalPath());
+      BaseSubscription tsub = subs.get(sub.getCalPath());
 
       if (tsub == null) {
         // Nothing active
@@ -726,7 +747,7 @@ public class ExchangeSynch {
     return StatusType.OK;
   }
 
-  private ExsynchSubscribeResponse doSubscription(final ExchangeSubscription sub) throws SynchException {
+  private ExsynchSubscribeResponse doSubscription(final BaseSubscription sub) throws SynchException {
     try {
       /* Send a request for a new subscription to exchange */
       SubscribeRequest s = new SubscribeRequest(sub,
@@ -770,7 +791,7 @@ public class ExchangeSynch {
     }
   }
 
-  private ExchangeServicePortType getPort(final ExchangeSubscription sub) throws SynchException {
+  private ExchangeServicePortType getPort(final BaseSubscription sub) throws SynchException {
     try {
       return getExchangeServicePort(sub.getExchangeId(),
                                     sub.getExchangePw().toCharArray()); // XXX need to en/decrypt
@@ -781,7 +802,7 @@ public class ExchangeSynch {
     }
   }
 
-  private StatusType getItems(final ExchangeSubscription sub) throws SynchException {
+  private StatusType getItems(final BaseSubscription sub) throws SynchException {
     try {
       /* Trying to use the synch approach
       // XXX Need to allow a distinguished id or a folder id
@@ -940,7 +961,7 @@ public class ExchangeSynch {
     }
   }
 
-  private void updateRemote(final ExchangeSubscription sub,
+  private void updateRemote(final BaseSubscription sub,
                             final List<CalendarItem> cis,
                             final Map<String, SynchInfo> sinfos) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
@@ -967,7 +988,7 @@ public class ExchangeSynch {
     }
   }
 
-  private CalendarItem fetchItem(final ExchangeSubscription sub,
+  private CalendarItem fetchItem(final BaseSubscription sub,
                                  final BaseItemIdType id) throws SynchException {
     List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
 
@@ -982,7 +1003,7 @@ public class ExchangeSynch {
     return items.get(0);
   }
 
-  private List<CalendarItem> fetchItems(final ExchangeSubscription sub,
+  private List<CalendarItem> fetchItems(final BaseSubscription sub,
                                         final List<BaseItemIdType> toFetch) throws SynchException {
     GetItemsRequest gir = new GetItemsRequest(toFetch);
 
@@ -1063,7 +1084,7 @@ public class ExchangeSynch {
     return 0;
   }
 
-  private boolean checkAccess(final ExchangeSubscription sub) throws SynchException {
+  private boolean checkAccess(final BaseSubscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
   }

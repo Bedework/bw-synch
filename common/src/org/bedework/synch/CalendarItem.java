@@ -16,10 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch;
-
-import org.bedework.exchgsynch.intf.Defs;
-import org.bedework.exchgsynch.intf.SynchException;
+package org.bedework.synch;
 
 import edu.rpi.sss.util.Util;
 
@@ -48,6 +45,7 @@ import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.XProperty;
 
 import org.apache.log4j.Logger;
+import org.bedework.synch.intf.Defs;
 
 import java.util.List;
 
@@ -1245,13 +1243,13 @@ public class CalendarItem extends CalendarItemType implements Defs {
       if ((extzid != null) && (extzid.equals(t.id))) {
         t.id = null;
       } else {
-        t.tz = ExchangeSynch.getTz(t.id);
+        t.tz = SynchEngine.getTz(t.id);
         return t;
       }
     }
 
     if (extzid != null) {
-      t.tz = ExchangeSynch.getTz(extzid);
+      t.tz = SynchEngine.getTz(extzid);
     }
 
     return t;

@@ -16,10 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch;
-
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
-import org.bedework.exchgsynch.intf.SynchException;
+package org.bedework.synch;
 
 import edu.rpi.cmt.db.hibernate.HibException;
 import edu.rpi.cmt.db.hibernate.HibSession;
@@ -27,6 +24,7 @@ import edu.rpi.cmt.db.hibernate.HibSessionFactory;
 import edu.rpi.cmt.db.hibernate.HibSessionImpl;
 
 import org.apache.log4j.Logger;
+import org.bedework.exchgsynch.intf.ExchangeSubscription;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -36,7 +34,7 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public class ExsynchDb implements Serializable {
+public class SynchDb implements Serializable {
   private transient Logger log;
 
   private boolean debug;
@@ -54,7 +52,7 @@ public class ExsynchDb implements Serializable {
   /**
    *
    */
-  public ExsynchDb() {
+  public SynchDb() {
     debug = getLogger().isDebugEnabled();
   }
 
@@ -100,11 +98,11 @@ public class ExsynchDb implements Serializable {
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
-  public List<ExchangeSubscription> getAll() throws SynchException {
+  public List<BaseSubscription> getAll() throws SynchException {
     StringBuilder sb = new StringBuilder();
 
     sb.append("from ");
-    sb.append(ExchangeSubscription.class.getName());
+    sb.append(BaseSubscription.class.getName());
 
     try {
       sess.createQuery(sb.toString());
@@ -122,18 +120,18 @@ public class ExsynchDb implements Serializable {
    * @return a matching subscription or null
    * @throws SynchException
    */
-  public ExchangeSubscription get(final String id) throws SynchException {
+  public BaseSubscription get(final String id) throws SynchException {
     try {
       StringBuilder sb = new StringBuilder();
 
       sb.append("from ");
-      sb.append(ExchangeSubscription.class.getName());
+      sb.append(BaseSubscription.class.getName());
       sb.append(" sub where sub.subscriptionId=:subid");
 
       sess.createQuery(sb.toString());
       sess.setString("subid", id);
 
-      return (ExchangeSubscription)sess.getUnique();
+      return (BaseSubscription)sess.getUnique();
     } catch (HibException he) {
       throw new SynchException(he);
     }
@@ -148,14 +146,14 @@ public class ExsynchDb implements Serializable {
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
-  public List<ExchangeSubscription> find(final String calPath,
+  public List<BaseSubscription> find(final String calPath,
                                          final String exCal,
                                          final String exId) throws SynchException {
     try {
       StringBuilder sb = new StringBuilder();
 
       sb.append("from ");
-      sb.append(ExchangeSubscription.class.getName());
+      sb.append(BaseSubscription.class.getName());
       sb.append(" sub where sub.calPath=:calPath");
       sb.append(" and where sub.exchangeCalendar=:exCal");
       sb.append(" and where sub.exchangeId=:exId");
@@ -176,7 +174,7 @@ public class ExsynchDb implements Serializable {
    * @param sub
    * @throws SynchException
    */
-  public void update(final ExchangeSubscription sub) throws SynchException {
+  public void update(final BaseSubscription sub) throws SynchException {
 
   }
 
@@ -185,7 +183,7 @@ public class ExsynchDb implements Serializable {
    * @param sub
    * @throws SynchException
    */
-  public void delete(final ExchangeSubscription sub) throws SynchException {
+  public void delete(final BaseSubscription sub) throws SynchException {
     try {
       sess.delete(sub);
     } catch (HibException he) {

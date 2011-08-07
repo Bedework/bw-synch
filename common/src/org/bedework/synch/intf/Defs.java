@@ -16,10 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.intf;
+package org.bedework.synch.intf;
 
-
-/** Definitions for exchange synch classes
+/** Definitions for synch classes
  *
  *   @author Mike Douglass   douglm  rpi.edu
  */
