@@ -18,35 +18,25 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import java.util.UUID;
+import org.bedework.synch.BaseSubscription;
 
 /** Represents a subscription for the synch engine.
- * 
+ *
  * <p>A subscription has 2 connectors for each end of the subscription. We will
  * refer to these as the local and remote ends even though the subscription can
  * be symmetric and either end can be nominated the 'master' calendar.
- * 
+ *
  * <p>Each connector has a kind which is a name used to retrieve a connector
  * from the connector manager. The retrieved connector implements the SynchIntf
  * interface and provides a serializable object to store connection specific
  * properties such as id and password.
- * 
- * <p>These properties are obtained by presenting the user with a list of 
+ *
+ * <p>These properties are obtained by presenting the user with a list of
  * required properties and then encrypting and storing the response.
  *
  * @author Mike Douglass
  */
-public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
-  private long id;
-
-  private int seq;
-
-  private String subscriptionId;
-
-  private String calPath;
-
-  private String principalHref;
-
+public class ExchangeSubscription extends BaseSubscription<ExchangeSubscription> {
   private String exchangeCalendar;
 
   private String exchangeId;
@@ -61,14 +51,6 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
 
   private String exchangeError;
 
-  /* Following not persisted */
-
-  /* False for unsubscribe */
-  private boolean subscribe;
-
-  /* Process outstanding after this */
-  private ExchangeSubscription outstandingSubscription;
-
   /** null constructor for hibernate
    *
    */
@@ -78,121 +60,27 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
   /** Constructor
    *
    * @param subscriptionId - null means generate one
+   * @param subscribe
    * @param calPath
    * @param principalHref
    * @param exchangeCalendar
    * @param exchangeId
    * @param exchangePw
    * @param exchangeURI
-   * @param subscribe
    */
   public ExchangeSubscription(final String subscriptionId,
-                              final String calPath,
+                              final boolean subscribe,
                               final String principalHref,
                               final String exchangeCalendar,
                               final String exchangeId,
                               final String exchangePw,
-                              final String exchangeURI,
-                              final boolean subscribe) {
-    if (subscriptionId == null) {
-      this.subscriptionId = UUID.randomUUID().toString();
-    } else {
-      this.subscriptionId = subscriptionId;
-    }
+                              final String exchangeURI) {
+    super(subscriptionId, principalHref, subscribe);
 
-    this.principalHref = principalHref;
-    this.calPath = calPath;
     this.exchangeCalendar = exchangeCalendar;
     this.exchangeId = exchangeId;
     this.exchangePw = exchangePw;
     this.exchangeURI = exchangeURI;
-    this.subscribe = subscribe;
-  }
-
-  /**
-   * @param val
-   */
-  public void setId(final Long val) {
-    id = val;
-  }
-
-  /**
-   * @return Long id
-   */
-  public Long getId() {
-    return id;
-  }
-
-  /**
-   * @return true if this entity is not saved.
-   */
-  public boolean unsaved() {
-    return getId() == null;
-  }
-
-  /** Set the seq for this entity
-   *
-   * @param val    int seq
-   */
-  public void setSeq(final Integer val) {
-    seq = val;
-  }
-
-  /** Get the entity seq
-   *
-   * @return int    the entity seq
-   */
-  public Integer getSeq() {
-    return seq;
-  }
-
-  /** Our generated subscriptionId.
-   *
-   * @param val    String
-   */
-  public void setSubscriptionId(final String val) {
-    subscriptionId = val;
-  }
-
-  /** Our generated subscriptionId.
-   *
-   * @return String
-   */
-  public String getSubscriptionId() {
-    return subscriptionId;
-  }
-
-  /** Path to this systems calendar collection.
-   *
-   * @param val    String
-   */
-  public void setCalPath(final String val) {
-    calPath = val;
-  }
-
-  /** Path to this systems calendar collection
-   *
-   * @return String
-   */
-  public String getCalPath() {
-    return calPath;
-  }
-
-
-  /** Principal requesting synch service
-   *
-   * @param val    String
-   */
-  public void setprincipalHref(final String val) {
-    principalHref = val;
-  }
-
-  /** Principal requesting synch service
-   *
-   * @return String
-   */
-  public String getprincipalHref() {
-    return principalHref;
   }
 
   /** Exchange Calendar
@@ -307,49 +195,14 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
     return exchangeError;
   }
 
-  /** (un)subscribe?
-   *
-   * @param val    boolean
-   */
-  public void setSubscribe(final boolean val) {
-    subscribe = val;
-  }
-
-  /** (un)subscribe?
-   *
-   * @return boolean
-   */
-  public boolean getSubscribe() {
-    return subscribe;
-  }
-
-  /** An outstanding request that requires an unsubscribe to complete first
-   *
-   * @param val    ExchangeSubscription
-   */
-  public void setOutstandingSubscription(final ExchangeSubscription val) {
-    outstandingSubscription = val;
-  }
-
-  /** An outstanding request that requires an unsubscribe to complete first
-   *
-   * @return ExchangeSubscription
-   */
-  public ExchangeSubscription getOutstandingSubscription() {
-    return outstandingSubscription;
-  }
-
   /** equality just checks the path. Look at the rest.
    *
    * @param that
    * @return true if anything changed
    */
+  @Override
   public boolean changed(final ExchangeSubscription that) {
-    if (!equals(that)) {
-      return true;
-    }
-
-    if (!getprincipalHref().equals(that.getprincipalHref())) {
+    if (super.changed(that)) {
       return true;
     }
 
@@ -361,11 +214,24 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
       return true;
     }
 
-    if (getSubscribe() != that.getSubscribe()) {
-      return true;
-    }
-
     return false;
+  }
+
+  /* ====================================================================
+   *                   Convenience methods
+   * ==================================================================== */
+
+  @Override
+  protected void toStringSegment(final StringBuilder sb,
+                              final String indent) {
+    super.toStringSegment(sb, indent);
+
+    sb.append(",\n");
+    sb.append(indent);
+    sb.append("exchangeCalendar = ");
+    sb.append(getExchangeCalendar());
+    sb.append(", exchangeURI = ");
+    sb.append(getExchangeURI());
   }
 
   /* ====================================================================
@@ -397,6 +263,7 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
   /* (non-Javadoc)
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
+  @Override
   public int compareTo(final ExchangeSubscription that) {
     if (this == that) {
       return 0;
@@ -408,44 +275,5 @@ public class ExchangeSubscription implements Comparable<ExchangeSubscription> {
   @Override
   public boolean equals(final Object o) {
     return compareTo((ExchangeSubscription)o) == 0;
-  }
-
-  /* ====================================================================
-   *                        Private methods
-   * ==================================================================== */
-
-  private void toStringSegment(final StringBuilder sb,
-                              final String indent) {
-    sb.append("id = ");
-    sb.append(getId());
-    sb.append(", seq = ");
-    sb.append(getSeq());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("subscriptionId = ");
-    sb.append(getSubscriptionId());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("calPath = ");
-    sb.append(getCalPath());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("principalHref = ");
-    sb.append(getprincipalHref());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("exchangeCalendar = ");
-    sb.append(getExchangeCalendar());
-    sb.append(", exchangeURI = ");
-    sb.append(getExchangeURI());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("subscribe = ");
-    sb.append(getSubscribe());
   }
 }

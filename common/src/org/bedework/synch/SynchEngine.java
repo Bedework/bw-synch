@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.ConnectorInstance.ItemInfo;
 import org.bedework.synch.messages.FindItemsRequest;
 import org.bedework.synch.messages.GetItemsRequest;
 import org.bedework.synch.messages.SubscribeRequest;
@@ -149,7 +150,7 @@ public class SynchEngine {
   private final Map<String, BaseSubscription> subs =
     new HashMap<String, BaseSubscription>();
 
-  private final ConnectorIntf exintf;
+  private final ConnectorInstance exintf;
 
   /* If non-null this is the token we currently have for the remote service */
   private String remoteToken;
@@ -185,7 +186,7 @@ public class SynchEngine {
    *
    * @param exintf
    */
-  private SynchEngine(final ConnectorIntf exintf) throws SynchException {
+  private SynchEngine(final ConnectorInstance exintf) throws SynchException {
     this.exintf = exintf;
     debug = getLogger().isDebugEnabled();
 
@@ -294,7 +295,7 @@ public class SynchEngine {
       }
 
       info("**************************************************");
-      info("Starting Exchange synch");
+      info("Starting synch");
       info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
       info("      callback URI: " + config.getExchangeWsPushURI());
       info("**************************************************");
@@ -308,7 +309,7 @@ public class SynchEngine {
        * While starting, new subscribe requests get added to the list.
        */
 
-      db = new ExsynchDb();
+      db = new SynchDb();
 
       try {
         db.open();
@@ -353,7 +354,7 @@ public class SynchEngine {
       }
 
       info("**************************************************");
-      info("Exchange synch started");
+      info("Synch started");
       info("**************************************************");
     } catch (SynchException se) {
       error(se);

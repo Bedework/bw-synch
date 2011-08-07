@@ -16,39 +16,45 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.cnctrs.exchange;
+package org.bedework.synch;
+
+import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
-import org.bedework.synch.SynchException;
-import org.bedework.synch.intf.Defs;
-
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
-
-/** Calls from exchange synch processor to the service.
+/** The interface implemented by connectors.
  *
  * @author Mike Douglass
  */
-public interface ExchangeSynchIntf extends Defs {
-  /** Called to initialize the exchange synch process. A response of null means
-   * no exchange synch. Note that users can synchronize with exchange systems in
-   * other domains, so even if your site doesn't run exchange you may want to to
-   * run the synch process,
+public interface ConnectorInstance<S extends BaseSubscription> {
+  /** Called to initialize the connector for a subscription.
+   * A response of null means no synch available.
    *
-   * The return value is a random uid which is used to validate incoming
-   * requests from the remote server.
+   * <p>The return value is a random uid which is used to validate incoming
+   * callback requests from the remote server.
    *
-   * @param conf
+   * <p>The callback url is unique to the connector. It will be used as a path
+   * prefix to allow the callback service to locate the handler for incoming
+   * callback requests.
+   *
+   * <p>For example, if the callback context is /synchcb/ and the connector id
+   * is "bedework" then the callback uri might be /synchcb/bedework/. The
+   * connector might append a uid to that path to allow it to locate the
+   * active subscription for which the callback is intended.
+   *
+   * @param callbackUri
    * @param token - null for new connection - current token for ping
    * @return null for no synch else a random uid.
    * @throws SynchException
    */
-  String initExchangeSynch(ExsynchConfig conf,
-                           String token) throws SynchException;
+  String init(S sub,
+              String callbackUri,
+              String token) throws SynchException;
 
   /** Information used to synch remote with Exchange
    * This information is only valid in the context of a given subscription.
@@ -92,45 +98,36 @@ public interface ExchangeSynchIntf extends Defs {
   /** Get information about items in the subscribed calendar. Used for initial
    * synch.
    *
-   * @param sub
    * @return List of items - never null, maybe empty.
    * @throws SynchException
    */
-  List<ItemInfo> getItemsInfo(ExchangeSubscription sub) throws SynchException;
+  List<ItemInfo> getItemsInfo() throws SynchException;
 
   /** Add a calendar component
    *
-   * @param sub
    * @param uid of item
    * @param val
    * @return response
    * @throws SynchException
    */
-  AddItemResponseType addItem(ExchangeSubscription sub,
-                          String uid,
-                          IcalendarType val) throws SynchException;
+  AddItemResponseType addItem(String uid,
+                              IcalendarType val) throws SynchException;
 
   /** Fetch a calendar component
    *
-   * @param sub
    * @param uid of item
    * @return response
    * @throws SynchException
    */
-  FetchItemResponseType fetchItem(ExchangeSubscription sub,
-                                  String uid) throws SynchException;
+  FetchItemResponseType fetchItem(String uid) throws SynchException;
 
   /** Update a calendar component
    *
-   * @param sub
    * @param uid of item
    * @param updates
-   * @param nsc - used to set namespaces
    * @return response
    * @throws SynchException
    */
-  UpdateItemResponseType updateItem(ExchangeSubscription sub,
-                                String uid,
-                                List<XpathUpdate> updates,
-                                edu.rpi.sss.util.xml.NsContext nsc) throws SynchException;
+  UpdateItemResponseType updateItem(String uid,
+                                    UpdateItemType updates) throws SynchException;
 }
