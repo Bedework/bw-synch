@@ -18,14 +18,12 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.exsynch.wsmessages.ObjectFactory;
-import org.bedework.exsynch.wsmessages.StatusType;
-import org.bedework.exsynch.wsmessages.SubscribeRequestType;
-import org.bedework.exsynch.wsmessages.SubscribeResponseType;
-import org.bedework.exsynch.wsmessages.UnsubscribeRequestType;
-import org.bedework.exsynch.wsmessages.UnsubscribeResponseType;
+import org.bedework.synch.BaseSubscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.wsmessages.SubscribeRequestType;
+import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 
 import java.util.List;
 
@@ -140,7 +138,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
     }
 
     // Ensure fields match
-    if (!sub.getprincipalHref().equals(u.getPrincipalHref()) ||
+    if (!sub.getPrincipalHref().equals(u.getPrincipalHref()) ||
         !sub.getCalPath().equals(u.getCalendarHref())) {
       info("No access for subscription - unmatched parameters " + sub);
       return;

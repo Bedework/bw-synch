@@ -1,34 +1,28 @@
-/* **********************************************************************
-    Copyright 2010 Rensselaer Polytechnic Institute. All worldwide rights reserved.
+/* ********************************************************************
+    Licensed to Jasig under one or more contributor license
+    agreements. See the NOTICE file distributed with this work
+    for additional information regarding copyright ownership.
+    Jasig licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file
+    except in compliance with the License. You may obtain a
+    copy of the License at:
 
-    Redistribution and use of this distribution in source and binary forms,
-    with or without modification, are permitted provided that:
-       The above copyright notice and this permission notice appear in all
-        copies and supporting documentation;
+    http://www.apache.org/licenses/LICENSE-2.0
 
-        The name, identifiers, and trademarks of Rensselaer Polytechnic
-        Institute are not used in advertising or publicity without the
-        express prior written permission of Rensselaer Polytechnic Institute;
-
-    DISCLAIMER: The software is distributed" AS IS" without any express or
-    implied warranty, including but not limited to, any implied warranties
-    of merchantability or fitness for a particular purpose or any warrant)'
-    of non-infringement of any current or pending patent rights. The authors
-    of the software make no representations about the suitability of this
-    software for any particular purpose. The entire risk as to the quality
-    and performance of the software is with the user. Should the software
-    prove defective, the user assumes the cost of all necessary servicing,
-    repair or correction. In particular, neither Rensselaer Polytechnic
-    Institute, nor the authors of the software are liable for any indirect,
-    special, consequential, or incidental damages related to the software,
-    to the maximum extent the law permits.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs.exchange;
+
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchException;
+import org.bedework.synch.intf.Defs;
 
 import org.apache.log4j.Logger;
-import org.bedework.synch.CalendarItem.ItemType;
-import org.bedework.synch.CalendarItem.TzStuff;
-import org.bedework.synch.intf.Defs;
 
 import ietf.params.xml.ns.icalendar_2.ActionPropType;
 import ietf.params.xml.ns.icalendar_2.ArrayOfEventTodoContainedComponents;
@@ -77,10 +71,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
+import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
 import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
 import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfAttendeesType;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseTypeType;
 import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services._2006.types.TimeZoneDefinitionType;
 
 /** This class manages conversions to and from Xml ICalendar to Exchange.
 *
@@ -91,14 +87,35 @@ public class XmlIcalConvert implements Defs {
 
   private boolean debug;
 
-  private ObjectFactory xcalOF = new ObjectFactory();
+  private final ObjectFactory xcalOF = new ObjectFactory();
+
+  /**
+   */
+  public enum ItemType {
+    /** */
+    Note,
+    /** */
+    Post,
+    /** */
+    Event,
+    /** */
+    Task,
+    /** */
+    Contact,
+    /** */
+    Journal,
+    /** */
+    DistList,
+    /** */
+    StickyNote
+  }
 
   /**
    * @param cal
    * @return Icalendar
    * @throws SynchException
    */
-  public IcalendarType toXml(final CalendarItem cal) throws SynchException {
+  public IcalendarType toXml(final CalendarItemType cal) throws SynchException {
     /* TODO
      * Transparency - derived from what?
      */
@@ -114,11 +131,13 @@ public class XmlIcalConvert implements Defs {
 
     JAXBElement<? extends BaseComponentType> el;
 
-    if (cal.getItemType() == ItemType.Event) {
+    ItemType itemType = makeItemType(cal.getItemClass());
+
+    if (itemType == ItemType.Event) {
       el = xcalOF.createVevent(new VeventType());
-    } else if (cal.getItemType() == ItemType.Task) {
+    } else if (itemType == ItemType.Task) {
       el = xcalOF.createVtodo(new VtodoType());
-    } else if (cal.getItemType() == ItemType.Journal) {
+    } else if (itemType == ItemType.Journal) {
       el = xcalOF.createVjournal(new VjournalType());
     } else {
       throw new SynchException(SynchException.unknownCalendarItemType);
@@ -159,8 +178,8 @@ public class XmlIcalConvert implements Defs {
     }
 
     /* Tz service will map the id for us */
-    TzStuff startTz = CalendarItem.getTz(cal.getStartTimeZone(), extzid);
-    TzStuff endTz = CalendarItem.getTz(cal.getEndTimeZone(), extzid);
+    TzStuff startTz = getTz(cal.getStartTimeZone(), extzid);
+    TzStuff endTz = getTz(cal.getEndTimeZone(), extzid);
 
     JAXBElement<? extends BasePropertyType> ddp = makeDateProp(startTz.tz, cal.getStart(),
                                                 Boolean.valueOf(cal.isIsAllDayEvent()),
@@ -171,7 +190,7 @@ public class XmlIcalConvert implements Defs {
 
     Dtype dtype;
 
-    if (cal.getItemType() == ItemType.Task) {
+    if (itemType == ItemType.Task) {
       dtype = Dtype.due;
     } else {
       dtype = Dtype.end;
@@ -472,8 +491,8 @@ public class XmlIcalConvert implements Defs {
       ArrayOfEventTodoContainedComponents comps = new ArrayOfEventTodoContainedComponents();
       comps.getValarm().add(xcalOF.createValarm(al).getValue());
 
-      if ((cal.getItemType() == ItemType.Event) ||
-          (cal.getItemType() == ItemType.Task)) {
+      if ((itemType == ItemType.Event) ||
+          (itemType == ItemType.Task)) {
         ((EventTodoComponentType)comp).setComponents(comps);
       }
     }
@@ -528,6 +547,81 @@ public class XmlIcalConvert implements Defs {
      *
      */
     return ical;
+  }
+
+  private ItemType makeItemType(final String val) throws SynchException {
+    ItemType iytemType;
+
+    String uval = val.toUpperCase();
+
+    if (uval.equals("IPM.NOTE")) {
+      return ItemType.Note;
+    }
+
+    if (uval.equals("IPM.POST")) {
+      return ItemType.Post;
+    }
+
+    if (uval.equals("IPM.APPOINTMENT")) {
+      return ItemType.Event;
+    }
+
+    if (uval.equals("IPM.TASK")) {
+      return ItemType.Task;
+    }
+
+    if (uval.equals("IPM.CONTACT")) {
+      return ItemType.Contact;
+    }
+
+    if (uval.equals("IPM.ACTIVITY")) {
+      return ItemType.Journal;
+    }
+
+    if (uval.equals("IPM.DISTLIST")) {
+      return ItemType.DistList;
+    }
+
+    if (uval.equals("IPM.STICKYNOTE")) {
+      return ItemType.StickyNote;
+    }
+
+    throw new SynchException(SynchException.unknownCalendarItemType);
+  }
+
+  /**
+   * @author douglm
+   */
+  public static class TzStuff {
+    String id;
+    TimeZone tz;
+  }
+
+  /**
+   * @param tzdef
+   * @param extzid
+   * @return tz stuff
+   * @throws SynchException
+   */
+  public static TzStuff getTz(final TimeZoneDefinitionType tzdef,
+                              final String extzid) throws SynchException {
+    TzStuff t = new TzStuff();
+
+    if (tzdef != null) {
+      t.id = tzdef.getId();
+      if ((extzid != null) && (extzid.equals(t.id))) {
+        t.id = null;
+      } else {
+        t.tz = SynchEngine.getTz(t.id);
+        return t;
+      }
+    }
+
+    if (extzid != null) {
+      t.tz = SynchEngine.getTz(extzid);
+    }
+
+    return t;
   }
 
   private JAXBElement<? extends OrganizerPropType>

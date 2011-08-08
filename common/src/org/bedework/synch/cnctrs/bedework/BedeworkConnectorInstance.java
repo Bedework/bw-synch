@@ -20,7 +20,13 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.wsmessages.GetSynchInfoType;
+import org.bedework.synch.wsmessages.SynchIdTokenType;
+import org.bedework.synch.wsmessages.SynchInfoResponseType;
+import org.bedework.synch.wsmessages.SynchInfoResponseType.SynchInfoResponses;
+import org.bedework.synch.wsmessages.SynchInfoType;
 
+import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
@@ -45,12 +51,20 @@ import javax.xml.namespace.QName;
  */
 public class BedeworkConnectorInstance
       implements ConnectorInstance<BedeworkSubscription> {
-  private BedeworkConnector cnctr;
+  private final BedeworkConnector cnctr;
 
-  private BedeworkSubscription sub;
+  private final BedeworkSubscription sub;
 
-  void init(final BedeworkSubscription sub) {
+  private transient Logger log;
 
+  private final boolean debug;
+
+  BedeworkConnectorInstance(final BedeworkConnector cnctr,
+                            final BedeworkSubscription sub) {
+    this.cnctr = cnctr;
+    this.sub = sub;
+
+    debug = getLogger().isDebugEnabled();
   }
 
   @Override
@@ -60,7 +74,7 @@ public class BedeworkConnectorInstance
     GetSynchInfoType gsi = new GetSynchInfoType();
 
     gsi.setCalendarHref(sub.getCalPath());
-    gsi.setPrincipalHref(sub.getprincipalHref());
+    gsi.setPrincipalHref(sub.getPrincipalHref());
     gsi.setSynchToken(curToken);
 
     SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(gsi);
@@ -139,81 +153,56 @@ public class BedeworkConnectorInstance
                                            final UpdateItemType updates) throws SynchException {
     UpdateItemType upd = new UpdateItemType();
 
-    ArrayOfNamespaces aon = new ArrayOfNamespaces();
-    String defaultNs = nsc.getDefaultNS();
+    upd.setHref(sub.getCalPath());
+    upd.setEtoken(???);
 
-    for (String pfx: nsc.getPrefixes()) {
-      String uri = nsc.getNamespaceURI(pfx);
+    return cnctr.getPort().updateItem(getIdToken(), upd);
+  }
 
-      NamespaceType ns = new NamespaceType();
-      if ((defaultNs == null) || !defaultNs.equals(uri)) {
-        ns.setPrefix(pfx);
-      }
+  /* ====================================================================
+   *                   Protected methods
+   * ==================================================================== */
 
-      ns.setUri(uri);
+  protected void info(final String msg) {
+    getLogger().info(msg);
+  }
 
-      aon.getNamespace().add(ns);
+  protected void trace(final String msg) {
+    getLogger().debug(msg);
+  }
+
+  protected void error(final Throwable t) {
+    getLogger().error(this, t);
+  }
+
+  protected void error(final String msg) {
+    getLogger().error(msg);
+  }
+
+  protected void warn(final String msg) {
+    getLogger().warn(msg);
+  }
+
+  /* Get a logger for messages
+   */
+  protected Logger getLogger() {
+    if (log == null) {
+      log = Logger.getLogger(this.getClass());
     }
 
-    upd.setNamespaces(aon);
+    return log;
+  }
 
-    upd.setCalendarHref(sub.getCalPath());
-    upd.setPrincipalHref(sub.getprincipalHref());
-    upd.setSynchToken(curToken);
-    upd.setUid(uid);
+  /* ====================================================================
+   *                   Private methods
+   * ==================================================================== */
 
-    ArrayOfUpdates aupd = new ArrayOfUpdates();
-    upd.setUpdates(aupd);
+  private SynchIdTokenType getIdToken() {
+    SynchIdTokenType idToken = new SynchIdTokenType();
 
-    ObjectFactory of = new ObjectFactory();
+    idToken.setPrincipalHref(sub.getPrincipalHref());
+    idToken.setSynchToken(curToken);
 
-    for (XpathUpdate xupd: updates) {
-      QName name = xupd.getName();
-
-      JAXBElement<? extends BaseUpdateType> jel;
-
-      if (xupd.add) {
-        jel = of.createAdd(new AddType());
-      } else if (xupd.delete) {
-        jel = of.createRemove(new RemoveType());
-      } else {
-        jel = of.createReplace(new ReplaceType());
-      }
-
-      BaseUpdateType but = jel.getValue();
-
-      but.setSel(xupd.getXpath());
-
-      if (but instanceof NewValueType) {
-        NewValueType nv = (NewValueType)but;
-
-        if (xupd.getBaseComponent() != null) {
-          Object newEntity = xupd.getBaseComponent();
-
-          JAXBElement<? extends BaseComponentType> el = new JAXBElement(name,
-                                                                       newEntity.getClass(),
-                                                                       newEntity);
-          nv.setBaseComponent(el);
-        } else if (xupd.getBaseProperty() != null) {
-          Object newEntity = xupd.getBaseProperty();
-
-          JAXBElement<? extends BasePropertyType> el = new JAXBElement(name,
-                                                                       newEntity.getClass(),
-                                                                       newEntity);
-          nv.setBaseProperty(el);
-        } else if (xupd.getBaseParameter() != null) {
-          Object newEntity = xupd.getBaseParameter();
-
-          JAXBElement<? extends BaseParameterType> el = new JAXBElement(name,
-                                                                       newEntity.getClass(),
-                                                                       newEntity);
-          nv.setBaseParameter(el);
-        }
-      }
-
-      aupd.getBaseUpdate().add(jel);
-    }
-
-    return getPort().updateItem(upd);
+    return idToken;
   }
 }

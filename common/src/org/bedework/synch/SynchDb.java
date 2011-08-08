@@ -24,7 +24,6 @@ import edu.rpi.cmt.db.hibernate.HibSessionFactory;
 import edu.rpi.cmt.db.hibernate.HibSessionImpl;
 
 import org.apache.log4j.Logger;
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -37,7 +36,7 @@ import java.util.List;
 public class SynchDb implements Serializable {
   private transient Logger log;
 
-  private boolean debug;
+  private final boolean debug;
 
   /** */
   protected boolean open;

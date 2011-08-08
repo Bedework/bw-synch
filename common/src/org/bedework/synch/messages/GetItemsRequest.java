@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.messages;
+package org.bedework.synch.messages;
 
 import java.util.List;
 

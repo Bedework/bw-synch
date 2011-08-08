@@ -18,44 +18,23 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.ConnectorInstance.ItemInfo;
 import org.bedework.synch.cnctrs.exchange.ExsynchSubscribeResponse;
-import org.bedework.synch.cnctrs.exchange.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.Notification;
-import org.bedework.synch.cnctrs.exchange.FinditemsResponse.SynchInfo;
 import org.bedework.synch.cnctrs.exchange.Notification.NotificationItem;
-import org.bedework.synch.messages.FindItemsRequest;
 import org.bedework.synch.wsimpl.BwSynchIntfImpl;
 
-import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.sss.util.OptionsI;
-import edu.rpi.sss.util.xml.NsContext;
 
 import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
-import ietf.params.xml.ns.icalendar_2.VcalendarType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.ws.Holder;
-
-import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.types.BaseItemIdType;
-import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
-import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
 
 /** Synch processor.
  * <p>The synch processor manages subscriptions made by a subscriber to a target.
@@ -70,7 +49,7 @@ import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderId
  *
  * <p>For example, we might have a one way subscription from bedework to
  * exchange. Exchange will post notifications to the synch engine which will
- * then resymch the modified entity.
+ * then resynch the modified entity.
  *
  * <p>Alternatively we might have a subscription to a file which we refresh each
  * day at 4am.
@@ -471,106 +450,6 @@ public class SynchEngine {
   }
 
   /* ====================================================================
-   *                        Notification methods
-   * ==================================================================== */
-
-  private void addItem(final BaseSubscription sub,
-                       final NotificationItem ni) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
-
-    CalendarItem ci = fetchItem(sub, ni.getItemId());
-
-    if (ci == null) {
-      if (debug) {
-        trace("No item found");
-      }
-
-      return;
-    }
-
-    AddItemResponseType air = exintf.addItem(sub, ci.getUID(), cnv.toXml(ci));
-    if (debug) {
-      trace("Add: status=" + air.getStatus() +
-            " msg=" + air.getMessage());
-    }
-  }
-
-  private void updateItem(final BaseSubscription sub,
-                          final NotificationItem ni) throws SynchException {
-    CalendarItem ci = fetchItem(sub, ni.getItemId());
-
-    if (ci == null) {
-      if (debug) {
-        trace("No item found");
-      }
-
-      return;
-    }
-
-    updateItem(sub, ci);
-  }
-
-  private void updateItem(final BaseSubscription sub,
-                          final CalendarItem ci) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
-
-    /* Fetch the item from the remote service */
-    FetchItemResponseType fir = exintf.fetchItem(sub, ci.getUID());
-    if (debug) {
-      trace("fetch: status=" + fir.getStatus() +
-            " msg=" + fir.getMessage());
-    }
-
-    if (fir.getStatus() != StatusType.OK) {
-      return;
-    }
-
-    IcalendarType exical = cnv.toXml(ci);
-
-    IcalendarType rmtical = fir.getIcalendar();
-
-    /* We expect a single vcalendar for both */
-
-    VcalendarType exvcal = get1vcal(exical);
-    VcalendarType rmtvcal = get1vcal(rmtical);
-
-    if ((exvcal == null) || (rmtvcal == null)) {
-      return;
-    }
-
-    /* Build a diff list from properties and components. */
-
-//    NsContext nsc = new NsContext("urn:ietf:params:xml:ns:icalendar-2.0");
-    NsContext nsc = new NsContext(null);
-    XmlIcalCompare comp = new XmlIcalCompare(nsc);
-
-//    if (!comp.differ(excomp, rmtcomp)) {
-    if (!comp.differ(exvcal, rmtvcal)) {
-      return;
-    }
-
-    // Use the update list to update the remote end.
-
-    List<XpathUpdate> updates = comp.getUpdates();
-
-    UpdateItemResponseType uir = exintf.updateItem(sub, ci.getUID(), updates, nsc);
-    if (debug) {
-      trace("Update: status=" + uir.getStatus() +
-            " msg=" + uir.getMessage());
-    }
-  }
-
-  private VcalendarType get1vcal(final IcalendarType ical) {
-    List<VcalendarType> vcals = ical.getVcalendar();
-
-    if (vcals.size() != 1) {
-      return null;
-    }
-
-    return vcals.get(0);
-  }
-
-  /* ====================================================================
    *                        db methods
    * ==================================================================== */
 
@@ -702,222 +581,6 @@ public class SynchEngine {
     }
 
     return StatusType.OK;
-  }
-
-  private StatusType getItems(final BaseSubscription sub) throws SynchException {
-    try {
-      /* Trying to use the synch approach
-      // XXX Need to allow a distinguished id or a folder id
-      DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
-      fid.setId(DistinguishedFolderIdNameType.fromValue(sub.getExchangeCalendar()));
-
-      SyncFolderItemsRequest sfir = new SyncFolderItemsRequest(fid);
-
-      Holder<SyncFolderItemsResponseType> syncResult = new Holder<SyncFolderItemsResponseType>();
-
-      getPort(sub).syncFolderItems(sfir.getRequest(),
-                                   getMailboxCulture(),
-                                   // null, // impersonation,
-                                   getRequestServerVersion(),
-                                   syncResult,
-                                   getServerVersionInfoHolder());
-
-      List<JAXBElement<? extends ResponseMessageType>> rms =
-        syncResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-
-      for (JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
-        SyncFolderItemsResponseMessageType srm = (SyncFolderItemsResponseMessageType)jaxbrm.getValue();
-
-        SyncFolderitemsResponse sfr = new SyncFolderitemsResponse(srm);
-      }
-      */
-
-      /* ===================================================================
-       * Use FindItem to get list of ids to fetch from Exchange.
-       * (Misnamed - it fetches multiple items)
-       * =================================================================== */
-      DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
-      fid.setId(DistinguishedFolderIdNameType.fromValue(sub.getExchangeCalendar()));
-      FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
-
-      Holder<FindItemResponseType> fiResult = new Holder<FindItemResponseType>();
-
-      getPort(sub).findItem(fir.getRequest(),
-                            // null, // impersonation,
-                            getMailboxCulture(),
-                            getRequestServerVersion(),
-                            // null, // timeZoneContext
-                            fiResult,
-                            getServerVersionInfoHolder());
-
-      List<JAXBElement<? extends ResponseMessageType>> rms =
-        fiResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-
-      /* The action here depends on which way we are synching. Below we refer
-       * to Exchange events. These are signified by particular X-properties we
-       * added to the event.
-       *
-       * For Exchange to Remote
-       * If the item does not exist on the remote system then add it.
-       * If the lastmod on the remote is prior to the exchange one - update.
-       * Otherwise ignore.
-       * We should remove all exchange created remote events that have no
-       * counterpart on Exchange.
-       *
-       * For Remote to Exchange
-       * Just the reverse of the above.
-       *
-       * For both ways:
-       * One end may the master.
-       * A non-exchange event on the remote is copied into exchange (at which
-       * point it might become an exchange event)
-       * An exchange event not on the remote is copied on to the remote.
-       * One on both which differs is copied from the master end if one is
-       * nominated, or we try to take the latest.
-       */
-
-      // XXX just do Exchange to remote for the moment
-
-      /* ===================================================================
-       * Get the list of items that already exist in the remote calendar
-       * collection
-       * =================================================================== */
-      List<ItemInfo> iis = exintf.getItemsInfo(sub);
-      if (iis == null) {
-        throw new SynchException("Unable to fetch SynchInfo");
-      }
-
-      /* Items is a table built from the remote calendar */
-      Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
-
-      /* sinfos provides state information about each item */
-      Map<String, SynchInfo> sinfos = new HashMap<String, SynchInfo>();
-
-      for (ItemInfo ii: iis) {
-        if (debug) {
-          trace(ii.toString());
-        }
-        ii.seen = false;
-        items.put(ii.uid, ii);
-      }
-
-      for (JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
-        FindItemResponseMessageType firm = (FindItemResponseMessageType)jaxbrm.getValue();
-
-        FinditemsResponse resp = new FinditemsResponse(firm,
-                                                       true);
-
-        if (debug) {
-          trace(resp.toString());
-        }
-
-        List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
-
-        for (SynchInfo si: resp.getSynchInfo()) {
-          ItemInfo ii = items.get(si.uid);
-          sinfos.put(si.uid, si);
-
-          if (ii == null) {
-            if (debug) {
-              trace("Need to add to remote: uid:" + si.uid);
-            }
-
-            si.addToRemote = true;
-            toFetch.add(si.itemId);
-          } else {
-            int cmp = cmpLastMods(ii.lastMod, si.lastMod);
-            if (cmp < 0) {
-              if (debug) {
-                trace("Need to update remote: uid:" + si.uid);
-              }
-
-              si.updateRemote = true;
-              toFetch.add(si.itemId);
-            }
-          }
-
-          if (toFetch.size() > getItemsBatchSize) {
-            // Fetch this batch of items and process them.
-            updateRemote(sub,
-                         fetchItems(sub, toFetch),
-                         sinfos);
-            toFetch.clear();
-          }
-        }
-
-        if (toFetch.size() > 0) {
-          // Fetch the remaining items and process them.
-          updateRemote(sub,
-                       fetchItems(sub, toFetch),
-                       sinfos);
-          toFetch.clear();
-        }
-
-      }
-
-      return StatusType.OK;
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  private void updateRemote(final BaseSubscription sub,
-                            final List<CalendarItem> cis,
-                            final Map<String, SynchInfo> sinfos) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
-
-    for (CalendarItem ci: cis) {
-      SynchInfo si = sinfos.get(ci.getUID());
-
-      if (si == null) {
-        continue;
-      }
-
-      if (si.addToRemote) {
-        AddItemResponseType air = exintf.addItem(sub, ci.getUID(), cnv.toXml(ci));
-        if (debug) {
-          trace("Add: status=" + air.getStatus() +
-                " msg=" + air.getMessage());
-        }
-
-        continue;
-      }
-
-      // Update the far end.
-      updateItem(sub, ci);
-    }
-  }
-
-  private int cmpLastMods(final String calLmod, final String exLmod) {
-    int exi = 0;
-    if (calLmod == null) {
-      return -1;
-    }
-
-    for (int i = 0; i < 16; i++) {
-      char cal = calLmod.charAt(i);
-      char ex = exLmod.charAt(exi);
-
-      if (cal < ex) {
-        return -1;
-      }
-
-      if (cal > ex) {
-        return 1;
-      }
-
-      exi++;
-
-      // yyyy-mm-ddThh:mm:ssZ
-      //     4  7     12 15
-      if ((exi == 4) || (exi == 7) || (exi == 12) || (exi == 15)) {
-        exi++;
-      }
-    }
-
-    return 0;
   }
 
   private boolean checkAccess(final BaseSubscription sub) throws SynchException {

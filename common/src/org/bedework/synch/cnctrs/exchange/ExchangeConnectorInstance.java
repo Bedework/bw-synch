@@ -18,13 +18,12 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.CalendarItem;
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.cnctrs.exchange.FinditemsResponse.SynchInfo;
+import org.bedework.synch.messages.FindItemsRequest;
 import org.bedework.synch.messages.GetItemsRequest;
 import org.bedework.synch.messages.SubscribeRequest;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
@@ -40,6 +39,8 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 
+import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.GetItemResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.ItemInfoResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
@@ -47,7 +48,10 @@ import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseM
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
+import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
+import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
+import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemType;
 import com.microsoft.schemas.exchange.services._2006.types.MailboxCultureType;
 import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
@@ -59,15 +63,86 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  */
 public class ExchangeConnectorInstance
       implements ConnectorInstance<ExchangeSubscription> {
-  private ExchangeConnector cnctr;
+  private final ExchangeConnector cnctr;
 
-  private ExchangeSubscription sub;
+  private final ExchangeSubscription sub;
 
   private transient Logger log;
 
+  private final boolean debug;
+
+  private final XmlIcalConvert icalConverter = new XmlIcalConvert();
+
+  ExchangeConnectorInstance(final ExchangeConnector cnctr,
+                            final ExchangeSubscription sub) {
+    this.cnctr = cnctr;
+    this.sub = sub;
+
+    debug = getLogger().isDebugEnabled();
+  }
+
+  /** This class is passed back and contans the publicly visible uid and lastmod
+   * but also a private BaseItemIdType used to retrieve the item from Exchange.
+   *
+   * @author douglm
+   */
+  class ExchangeItemInfo extends ItemInfo {
+    private final ItemIdType itemId;
+
+    public ExchangeItemInfo(final String uid,
+                            final String lastMod,
+                            final ItemIdType itemId) {
+      super(uid, lastMod);
+
+      this.itemId = itemId;
+    }
+
+    ItemIdType getItemId() {
+      return itemId;
+    }
+  }
+
   @Override
   public List<ItemInfo> getItemsInfo() throws SynchException {
-    return null;
+    DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
+    fid.setId(DistinguishedFolderIdNameType.fromValue(sub.getExchangeCalendar()));
+    FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
+
+    Holder<FindItemResponseType> fiResult = new Holder<FindItemResponseType>();
+
+    cnctr.getPort(sub).findItem(fir.getRequest(),
+                                // null, // impersonation,
+                                getMailboxCulture(),
+                                getRequestServerVersion(),
+                                // null, // timeZoneContext
+                                fiResult,
+                                getServerVersionInfoHolder());
+
+    List<JAXBElement<? extends ResponseMessageType>> rms =
+      fiResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
+
+    List<ItemInfo> res = new ArrayList<ItemInfo>();
+
+    for (JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
+      FindItemResponseMessageType firm = (FindItemResponseMessageType)jaxbrm.getValue();
+
+      FinditemsResponse resp = new FinditemsResponse(firm,
+                                                     true);
+
+      if (debug) {
+        trace(resp.toString());
+      }
+
+      for (SynchInfo si: resp.getSynchInfo()) {
+        ExchangeItemInfo eii = new ExchangeItemInfo(si.uid,
+                                                    si.lastMod,
+                                                    si.itemId);
+
+        res.add(eii);
+      }
+    }
+
+    return res;
   }
 
   /** Add a calendar component
@@ -157,12 +232,12 @@ public class ExchangeConnectorInstance
    *                   Private methods
    * ==================================================================== */
 
-  private CalendarItem fetchItem(final BaseItemIdType id) throws SynchException {
+  private IcalendarType fetchItem(final BaseItemIdType id) throws SynchException {
     List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
 
     toFetch.add(id);
 
-    List<CalendarItem> items = fetchItems(toFetch);
+    List<IcalendarType> items = fetchItems(toFetch);
 
     if (items.size() != 1) {
       return null;
@@ -215,7 +290,7 @@ public class ExchangeConnectorInstance
     }
   }
 
-  private List<CalendarItem> fetchItems(final List<BaseItemIdType> toFetch) throws SynchException {
+  private List<IcalendarType> fetchItems(final List<BaseItemIdType> toFetch) throws SynchException {
     GetItemsRequest gir = new GetItemsRequest(toFetch);
 
     Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();
@@ -231,7 +306,7 @@ public class ExchangeConnectorInstance
     List<JAXBElement<? extends ResponseMessageType>> girms =
       giResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
-    List<CalendarItem> items = new ArrayList<CalendarItem>();
+    List<IcalendarType> items = new ArrayList<IcalendarType>();
 
     for (JAXBElement<? extends ResponseMessageType> jaxbgirm: girms) {
       Object o = jaxbgirm.getValue();
@@ -251,14 +326,13 @@ public class ExchangeConnectorInstance
           continue;
         }
 
-        CalendarItem ci = new CalendarItem((CalendarItemType)item);
+        IcalendarType ical = icalConverter.toXml((CalendarItemType)item);
         if (debug) {
-          CalendarComponent comp = ci.toComp();
-
-          trace(comp.toString());
+          // serialize and print
+          //trace(comp.toString());
         }
 
-        items.add(ci);
+        items.add(ical);
       }
     }
 
