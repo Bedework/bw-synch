@@ -145,17 +145,8 @@ public class ExchangeConnectorInstance
     return res;
   }
 
-  /** Add a calendar component
-   *
-   * @param sub
-   * @param uid of item
-   * @param val
-   * @return response
-   * @throws SynchException
-   */
   @Override
-  public AddItemResponseType addItem(final String uid,
-                                     final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
     return null;
   }
 

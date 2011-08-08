@@ -37,7 +37,7 @@ import com.microsoft.schemas.exchange.services._2006.types.NotificationType;
 /** Notification from Exchange.
  *
  */
-public class Notification extends ExchangeResponse {
+public class ExchangeNotificationMessage extends ExchangeResponse {
   private final String subscriptionId;
   private final String previousWatermark;
 
@@ -47,7 +47,7 @@ public class Notification extends ExchangeResponse {
    * @param snrm
    * @throws SynchException
    */
-  public Notification(final SendNotificationResponseMessageType snrm) throws SynchException {
+  public ExchangeNotificationMessage(final SendNotificationResponseMessageType snrm) throws SynchException {
     super(snrm);
 
     NotificationType nt = snrm.getNotification();

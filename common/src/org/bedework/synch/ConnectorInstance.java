@@ -81,13 +81,11 @@ public interface ConnectorInstance<S extends BaseSubscription> {
 
   /** Add a calendar component
    *
-   * @param uid of item
    * @param val
    * @return response
    * @throws SynchException
    */
-  AddItemResponseType addItem(String uid,
-                              IcalendarType val) throws SynchException;
+  AddItemResponseType addItem(IcalendarType val) throws SynchException;
 
   /** Fetch a calendar component
    *

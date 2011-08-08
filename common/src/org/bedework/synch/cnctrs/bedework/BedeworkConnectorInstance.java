@@ -74,10 +74,8 @@ public class BedeworkConnectorInstance
     GetSynchInfoType gsi = new GetSynchInfoType();
 
     gsi.setCalendarHref(sub.getCalPath());
-    gsi.setPrincipalHref(sub.getPrincipalHref());
-    gsi.setSynchToken(curToken);
 
-    SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(gsi);
+    SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(), gsi);
 
     if (!sir.getCalendarHref().equals(sub.getCalPath())) {
       warn("Mismatched calpath in response to GetSycnchInfo: expected '" +
@@ -98,26 +96,14 @@ public class BedeworkConnectorInstance
     return items;
   }
 
-  /** Add a calendar component
-   *
-   * @param sub
-   * @param uid of item
-   * @param val
-   * @return response
-   * @throws SynchException
-   */
   @Override
-  public AddItemResponseType addItem(final String uid,
-                                     final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
     AddItemType ai = new AddItemType();
 
-    ai.setCalendarHref(sub.getCalPath());
-    ai.setPrincipalHref(sub.getprincipalHref());
-    ai.setSynchToken(curToken);
-    ai.setUid(uid);
+    ai.setHref(sub.getCalPath());
     ai.setIcalendar(val);
 
-    return cnctr.getPort().addItem(ai);
+    return cnctr.getPort().addItem(getIdToken(), ai);
   }
 
   /** Fetch a calendar component
@@ -131,12 +117,10 @@ public class BedeworkConnectorInstance
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
     FetchItemType fi = new FetchItemType();
 
-    fi.setCalendarHref(sub.getCalPath());
-    fi.setPrincipalHref(sub.getPrincipalHref());
-    fi.setSynchToken(curToken);
+    fi.setHref(sub.getCalPath());
     fi.setUid(uid);
 
-    return cnctr.getPort().fetchItem(fi);
+    return cnctr.getPort().fetchItem(getIdToken(), fi);
   }
 
   /** Update a calendar component

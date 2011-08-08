@@ -20,11 +20,14 @@ package org.bedework.synch;
 
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /** The interface implemented by connectors. This represents the kind of object
  * used to communicate with a particular system or entity. We may implement
  * connectors for files, for exchange for bedework etc.
  *
- * <p>The connector instance carries out global initialisation and provides
+ * <p>The connector instance carries out global initialization and provides
  * ConncetorInstance objects per subscription.
  *
  * @author Mike Douglass
@@ -52,14 +55,33 @@ public interface Connector<S extends BaseSubscription,
   /** Called to obtain a connector instance for a subscription.
    * A response of null means no synch available.
    *
-   * <p>The return value is a random uid which is used to validate incoming
-   * callback requests from the remote server.
-   *
-   * @param token - null for new connection - current token for ping
-   * @return null for no synch else a random uid.
+   * @param sub - the subscription
+   * @return null for no synch else a connector instance.
    * @throws SynchException
    */
   C getConnectorInstance(S sub) throws SynchException;
+
+  /** Will create a notification object which will be passed to a synchling for
+   * processing. When processing is complete respond will be called.
+   *
+   * @param req
+   * @param resp
+   * @param resourceUri
+   * @return Notification with 1 or more Notification items or null for no action.
+   * @throws SynchException
+   */
+  Notification handleCallback(HttpServletRequest req,
+                              HttpServletResponse resp,
+                              String resourceUri) throws SynchException;
+
+  /** Will respond to a notification.
+   *
+   * @param resp
+   * @param notification from handleCallback.
+   * @throws SynchException
+   */
+  void respondCallback(HttpServletResponse resp,
+                       Notification notification) throws SynchException;
 
   void stop() throws SynchException;
 }

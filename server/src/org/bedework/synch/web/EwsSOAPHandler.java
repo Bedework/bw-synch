@@ -21,7 +21,7 @@ package org.bedework.synch.web;
 import org.bedework.synch.BaseSubscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
-import org.bedework.synch.cnctrs.exchange.Notification;
+import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage;
 
 import java.util.List;
 
@@ -86,7 +86,7 @@ public class EwsSOAPHandler extends SOAPHandler {
         snr.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
       for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
-        Notification note = new Notification((SendNotificationResponseMessageType)el.getValue());
+        ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
         if (debug) {
           trace(note.toString());

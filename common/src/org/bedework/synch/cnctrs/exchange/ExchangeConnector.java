@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Connector;
+import org.bedework.synch.Notification;
 import org.bedework.synch.SynchException;
 
 import java.net.Authenticator;
@@ -26,6 +27,8 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
@@ -49,9 +52,26 @@ public class ExchangeConnector
   }
 
   @Override
+  public Notification handleCallback(final HttpServletRequest req,
+                                     final HttpServletResponse resp,
+                                     final String resourceUri) throws SynchException {
+    return null;
+  }
+
+  @Override
+  public void respondCallback(final HttpServletResponse resp,
+                              final Notification notification) throws SynchException {
+
+  }
+
+  @Override
   public void stop() throws SynchException {
 
   }
+
+  /* ====================================================================
+   *                        package methods
+   * ==================================================================== */
 
   ExchangeServicePortType getPort(final ExchangeSubscription sub) throws SynchException {
     try {
@@ -63,6 +83,10 @@ public class ExchangeConnector
       throw new SynchException(t);
     }
   }
+
+  /* ====================================================================
+   *                        private methods
+   * ==================================================================== */
 
   private ExchangeServicePortType getExchangeServicePort(final String user,
                                                          final char[] pw) throws SynchException {
