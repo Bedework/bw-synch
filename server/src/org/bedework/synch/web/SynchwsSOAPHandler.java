@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.BaseSubscription;
+import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
@@ -93,7 +93,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
 
     /* Look for a subscription that matches the 2 end points */
 
-    List<BaseSubscription> ess = getSyncher().find(sr.getCalendarHref(),
+    List<Subscription> ess = getSyncher().find(sr.getCalendarHref(),
                                                        sr.getExchangeFolderId(),
                                                        sr.getExchangeUser());
     ObjectFactory of = new ObjectFactory();
@@ -103,7 +103,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
     if (!ess.isEmpty()) {
       sresp.setSubscribeStatus(StatusType.ALREADY_SUBSCRIBED);
     } else {
-      BaseSubscription sub = new BaseSubscription(null,
+      Subscription sub = new Subscription(null,
                                                           sr.getCalendarHref(),
                                                           sr.getPrincipalHref(),
                                                           sr.getExchangeFolderId(),
@@ -128,7 +128,7 @@ public class SynchwsSOAPHandler extends SOAPHandler {
       trace("Handle unsubscribe " +  u.getSubscriptionId());
     }
 
-    BaseSubscription sub;
+    Subscription sub;
 
     sub = getSyncher().getSubscription(u.getSubscriptionId());
 

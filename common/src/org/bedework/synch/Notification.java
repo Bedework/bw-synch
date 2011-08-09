@@ -35,14 +35,19 @@ import java.util.List;
  * object of this class will contain a list of notification items. Presumably
  * these reflect activity since the last notification.
  *
+ * @author douglm
+ *
+ * @param <NI>
  */
-public class Notification<NI extends Notification.NotificationItem,
-                          S extends BaseSubscription> {
-  private S sub;
+public class Notification<NI extends Notification.NotificationItem> {
+  private Subscription sub;
 
   private List<NI> notifications = new ArrayList<NI>();
 
-  public Notification(final S sub) {
+  /** Create a notification for a subscription
+   * @param sub
+   */
+  public Notification(final Subscription sub) {
     this.sub = sub;
   }
 
@@ -51,16 +56,16 @@ public class Notification<NI extends Notification.NotificationItem,
    * @param sub
    * @param notificationItem
    */
-  public Notification(final S sub,
+  public Notification(final Subscription sub,
                       final NI notificationItem) {
     this(sub);
     addNotificationItem(notificationItem);
   }
 
   /**
-   * @return S
+   * @return Subscription
    */
-  public S getSub() {
+  public Subscription getSub() {
     return sub;
   }
 
@@ -71,6 +76,9 @@ public class Notification<NI extends Notification.NotificationItem,
     return notifications;
   }
 
+  /**
+   * @param val
+   */
   public void addNotificationItem(final NI val) {
     notifications.add(val);
   }
@@ -100,6 +108,14 @@ public class Notification<NI extends Notification.NotificationItem,
     }
 
     private ActionType action;
+
+    /** Create a notification item for an action.
+     *
+     * @param action
+     */
+    public NotificationItem(final ActionType action) {
+      this.action = action;
+    }
 
     /**
      * @return the action

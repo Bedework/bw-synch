@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public interface ConnectorInstance<S extends BaseSubscription> {
+public interface ConnectorInstance {
   /** Information used to synch remote with Exchange
    * This information is only valid in the context of a given subscription.
    */

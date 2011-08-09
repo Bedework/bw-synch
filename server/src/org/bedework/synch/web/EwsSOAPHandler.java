@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.BaseSubscription;
+import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage;
@@ -63,7 +63,7 @@ public class EwsSOAPHandler extends SOAPHandler {
         return;
       }
 
-      BaseSubscription sub = getSyncher().getSubscription(id);
+      Subscription sub = getSyncher().getSubscription(id);
 
       if (sub == null) {
         if (debug) {

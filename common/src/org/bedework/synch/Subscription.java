@@ -37,20 +37,26 @@ import java.util.UUID;
  * @author Mike Douglass
  */
 @SuppressWarnings("rawtypes")
-public class BaseSubscription<S extends BaseSubscription> implements Comparable<S> {
+public class Subscription implements Comparable<Subscription> {
   private long id;
 
   private int seq;
 
   private String subscriptionId;
 
-  private String localConnectorId;
+  private SubscriptionConnectorInfo localConnectorInfo;
 
-  private String localConnectorProperties;
+  private SubscriptionConnectorInfo remoteConnectorInfo;
 
-  private String remoteConnectorId;
+  private enum MasteryType {
+    NONE,
 
-  private String remoteConnectorProperties;
+    LOCAL,
+
+    REMOTE
+  }
+
+  private MasteryType master;
 
   /* Following not persisted */
 
@@ -58,12 +64,12 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
   private boolean subscribe;
 
   /* Process outstanding after this */
-  private S outstandingSubscription;
+  private Subscription outstandingSubscription;
 
   /** null constructor for hibernate
    *
    */
-  public BaseSubscription() {
+  public Subscription() {
   }
 
   /** Constructor to create a new subscription.
@@ -71,8 +77,8 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
    * @param subscriptionId - null means generate one
    * @param subscribe
    */
-  public BaseSubscription(final String subscriptionId,
-                          final boolean subscribe) {
+  public Subscription(final String subscriptionId,
+                      final boolean subscribe) {
     if (subscriptionId == null) {
       this.subscriptionId = UUID.randomUUID().toString();
     } else {
@@ -134,66 +140,34 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
     return subscriptionId;
   }
 
-  /** Id of the local connector.
+  /** Info for the local connector.
    *
-   * @param val    String
+   * @param valSubscriptionConnectorInfo
    */
-  public void setLocalConnectorId(final String val) {
-	  localConnectorId = val;
+  public void setLocalConnectorInfo(final SubscriptionConnectorInfo val) {
+	  localConnectorInfo = val;
   }
 
   /**
-   * @return String
+   * @return SubscriptionConnectorInfo
    */
-  public String getLocalConnectorId() {
-    return localConnectorId;
+  public SubscriptionConnectorInfo getLocalConnectorInfo() {
+    return localConnectorInfo;
   }
 
-  /** Serialized and encrypted properties
+  /** Info for the remote connector.
    *
    * @param val    String
    */
-  public void setLocalConnectorProperties(final String val) {
-	  localConnectorProperties = val;
-  }
-
-  /** Serialized and encrypted properties
-   *
-   * @return String
-   */
-  public String getLocalConnectorProperties() {
-    return localConnectorProperties;
-  }
-
-  /** Id of the remote connector.
-   *
-   * @param val    String
-   */
-  public void setRemoteConnectorId(final String val) {
-	  remoteConnectorId = val;
+  public void setRemoteConnectorInfo(final SubscriptionConnectorInfo val) {
+	  remoteConnectorInfo = val;
   }
 
   /**
-   * @return String
+   * @return SubscriptionConnectorInfo
    */
-  public String getRemoteConnectorId() {
-    return remoteConnectorId;
-  }
-
-  /** Serialized and encrypted properties
-   *
-   * @param val    String
-   */
-  public void setRemoteConnectorProperties(final String val) {
-	  remoteConnectorProperties = val;
-  }
-
-  /** Serialized and encrypted properties
-   *
-   * @return String
-   */
-  public String getRemoteConnectorProperties() {
-    return remoteConnectorProperties;
+  public SubscriptionConnectorInfo getRemoteConnectorInfo() {
+    return remoteConnectorInfo;
   }
 
   /** (un)subscribe?
@@ -214,17 +188,17 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
 
   /** An outstanding request that requires an unsubscribe to complete first
    *
-   * @param val    S
+   * @param val Subscription
    */
-  public void setOutstandingSubscription(final S val) {
+  public void setOutstandingSubscription(final Subscription val) {
     outstandingSubscription = val;
   }
 
   /** An outstanding request that requires an unsubscribe to complete first
    *
-   * @return S
+   * @return Subscription
    */
-  public S getOutstandingSubscription() {
+  public Subscription getOutstandingSubscription() {
     return outstandingSubscription;
   }
 
@@ -233,24 +207,16 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
    * @param that
    * @return true if anything changed
    */
-  public boolean changed(final S that) {
+  public boolean changed(final Subscription that) {
     if (!equals(that)) {
       return true;
     }
 
-    if (!getLocalConnectorId().equals(that.getLocalConnectorId())) {
+    if (!getLocalConnectorInfo().equals(that.getLocalConnectorInfo())) {
       return true;
     }
 
-    if (!getLocalConnectorProperties().equals(that.getLocalConnectorProperties())) {
-      return true;
-    }
-
-    if (!getRemoteConnectorId().equals(that.getRemoteConnectorId())) {
-      return true;
-    }
-
-    if (!getRemoteConnectorProperties().equals(that.getRemoteConnectorProperties())) {
+    if (!getRemoteConnectorInfo().equals(that.getRemoteConnectorInfo())) {
       return true;
     }
 
@@ -309,24 +275,13 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("localConnectorId = ");
-    sb.append(getLocalConnectorId());
+    sb.append("localConnectorInfo = ");
+    sb.append(getLocalConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("localConnectorProperties = ");
-    sb.append(getLocalConnectorProperties());
-
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("remoteConnectorId = ");
-    sb.append(getRemoteConnectorId());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("remoteConnectorProperties = ");
-    sb.append(getRemoteConnectorProperties());
+    sb.append("remoteConnectorInfo = ");
+    sb.append(getRemoteConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);
@@ -348,20 +303,17 @@ public class BaseSubscription<S extends BaseSubscription> implements Comparable<
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override
-  public int compareTo(final S that) {
-    throw new RuntimeException("compareTo must be implemented for a subscription");
-    /*
+  public int compareTo(final Subscription that) {
     if (this == that) {
       return 0;
     }
 
     return getSubscriptionId().compareTo(that.getSubscriptionId());
-    */
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public boolean equals(final Object o) {
-    return compareTo((S)o) == 0;
+    return compareTo((Subscription)o) == 0;
   }
 }

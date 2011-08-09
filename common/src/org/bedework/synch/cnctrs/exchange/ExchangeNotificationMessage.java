@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchException;
 
 import java.util.ArrayList;
@@ -89,26 +90,6 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
    * @author douglm
    */
   public static class NotificationItem extends BaseObjectChangedEventType {
-    /**
-     * @author douglm
-     */
-    public enum ActionType {
-      /** */
-      CopiedEvent,
-      /** */
-      CreatedEvent,
-      /** */
-      DeletedEvent,
-      /** */
-      ModifiedEvent,
-      /** */
-      MovedEvent,
-      /** */
-      NewMailEvent,
-      /** */
-      StatusEvent
-    }
-
     private ActionType action;
 
     // Moved or copied fields

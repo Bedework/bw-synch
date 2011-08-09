@@ -19,49 +19,101 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Connector;
-import org.bedework.synch.Notification;
+import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.net.URL;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.namespace.QName;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPMessage;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
-import com.microsoft.schemas.exchange.services._2006.messages.ExchangeWebService;
+import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
 
 /** Calls from exchange synch processor to the service.
  *
  * @author Mike Douglass
  */
 public class ExchangeConnector
-      implements Connector<ExchangeSubscription, ExchangeConnectorInstance> {
+      implements Connector<ExchangeConnectorInstance,
+                           ExchangeNotification> {
+  private SynchEngine syncher;
+
+  // Are these thread safe?
+  private MessageFactory soapMsgFactory;
+  private JAXBContext ewsjc;
+
   @Override
   public void start(final Properties props,
-                    final String callbackUri) throws SynchException {
-
+                    final String callbackUri,
+                    final SynchEngine syncher) throws SynchException {
+    this.syncher = syncher;
   }
 
   @Override
-  public ExchangeConnectorInstance getConnectorInstance(final ExchangeSubscription sub) throws SynchException {
+  public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
+                                                        final boolean local) throws SynchException {
+    ExchangeSubscriptionInfo info;
+
+    if (local) {
+      info = new ExchangeSubscriptionInfo(sub.getLocalConnectorInfo());
+    } else {
+      info = new ExchangeSubscriptionInfo(sub.getRemoteConnectorInfo());
+    }
+
     return null;
   }
 
+  class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
+  }
+
   @Override
-  public Notification handleCallback(final HttpServletRequest req,
+  public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
                                      final String resourceUri) throws SynchException {
+    String id = resourceUri;
+
+    if (id.endsWith("/")) {
+      // starts with "/"
+      id = id.substring(1, id.length() - 1);
+    }
+
+    Subscription sub = syncher.getSubscription(id);
+
+    /* WRONG - we should register our callback uri along with a connector id.
+     *
+     */
+
+    SendNotificationResponseType snr = (SendNotificationResponseType)unmarshalBody(req);
+
+    ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
+
+    List<JAXBElement<? extends ResponseMessageType>> responseMessages =
+      snr.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
+
+    for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
+      ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
+
+      ExchangeNotification en = new ExchangeNotification(sub, note);
+      syncher.handleNotification(sub, note);
+    }
+
     return null;
   }
 
   @Override
   public void respondCallback(final HttpServletResponse resp,
-                              final Notification notification) throws SynchException {
-
+                              final NotificationBatch<ExchangeNotification> notifications)
+                                                    throws SynchException {
   }
 
   @Override
@@ -73,13 +125,52 @@ public class ExchangeConnector
    *                        package methods
    * ==================================================================== */
 
-  ExchangeServicePortType getPort(final ExchangeSubscription sub) throws SynchException {
+  Object unmarshalBody(final HttpServletRequest req) throws SynchException {
     try {
-      return getExchangeServicePort(sub.getExchangeId(),
-                                    sub.getExchangePw().toCharArray()); // XXX need to en/decrypt
+      SOAPMessage msg = getSoapMsgFactory().createMessage(null, // headers
+                                                          req.getInputStream());
+
+      SOAPBody body = msg.getSOAPBody();
+
+      Unmarshaller u = getEwsJAXBContext().createUnmarshaller();
+
+      Object o = u.unmarshal(body.getFirstChild());
+
+      if (o instanceof JAXBElement) {
+        // Some of them get wrapped.
+        o = ((JAXBElement)o).getValue();
+      }
+
+      return o;
     } catch (SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch(Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  MessageFactory getSoapMsgFactory() throws SynchException {
+    try {
+      if (soapMsgFactory == null) {
+        soapMsgFactory = MessageFactory.newInstance();
+      }
+
+      return soapMsgFactory;
+    } catch(Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  JAXBContext getEwsJAXBContext() throws SynchException {
+    try {
+      if (ewsjc == null) {
+        ewsjc = JAXBContext.newInstance(
+                     "com.microsoft.schemas.exchange.services._2006.messages:" +
+                     "com.microsoft.schemas.exchange.services._2006.types");
+      }
+
+      return ewsjc;
+    } catch(Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -87,47 +178,4 @@ public class ExchangeConnector
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
-
-  private ExchangeServicePortType getExchangeServicePort(final String user,
-                                                         final char[] pw) throws SynchException {
-    try {
-      URL wsdlURL = new URL(config.getExchangeWSDLURI());
-
-      Authenticator.setDefault(new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(
-                user,
-                pw);
-        }
-    });
-
-      ExchangeWebService ews =
-        new ExchangeWebService(wsdlURL,
-                               new QName("http://schemas.microsoft.com/exchange/services/2006/messages",
-                                         "ExchangeWebService"));
-      ExchangeServicePortType port = ews.getExchangeWebPort();
-
-//      Map<String, Object> context = ((BindingProvider)port).getRequestContext();
-
-  //    context.put(BindingProvider.USERNAME_PROPERTY, user);
-    //  context.put(BindingProvider.PASSWORD_PROPERTY, new String(pw));
-
-      /*
-        $client->__setSoapHeaders(
-        new SOAPHeader('http://schemas.microsoft.com/exchange/services/2006/types',
-        'RequestServerVersion',
-        array("Version"=>"Exchange2007_SP1"))
-        );
-
-        $client is the SoapClient Instance.
-
-      */
-
-
-      return port;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
-  }
 }

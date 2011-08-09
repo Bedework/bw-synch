@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.ConnectorInstance;
+import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.cnctrs.exchange.FinditemsResponse.SynchInfo;
 import org.bedework.synch.messages.FindItemsRequest;
@@ -33,12 +34,18 @@ import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 
+import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
+import com.microsoft.schemas.exchange.services._2006.messages.ExchangeWebService;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseType;
 import com.microsoft.schemas.exchange.services._2006.messages.GetItemResponseType;
@@ -61,11 +68,12 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  *
  * @author Mike Douglass
  */
-public class ExchangeConnectorInstance
-      implements ConnectorInstance<ExchangeSubscription> {
+public class ExchangeConnectorInstance implements ConnectorInstance {
   private final ExchangeConnector cnctr;
 
-  private final ExchangeSubscription sub;
+  private ExchangeSubscriptionInfo info;
+
+  private final Subscription sub;
 
   private transient Logger log;
 
@@ -74,9 +82,11 @@ public class ExchangeConnectorInstance
   private final XmlIcalConvert icalConverter = new XmlIcalConvert();
 
   ExchangeConnectorInstance(final ExchangeConnector cnctr,
-                            final ExchangeSubscription sub) {
+                            final Subscription sub,
+                            final ExchangeSubscriptionInfo info) {
     this.cnctr = cnctr;
     this.sub = sub;
+    this.info = info;
 
     debug = getLogger().isDebugEnabled();
   }
@@ -105,18 +115,18 @@ public class ExchangeConnectorInstance
   @Override
   public List<ItemInfo> getItemsInfo() throws SynchException {
     DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
-    fid.setId(DistinguishedFolderIdNameType.fromValue(sub.getExchangeCalendar()));
+    fid.setId(DistinguishedFolderIdNameType.fromValue(info.getExchangeCalendar()));
     FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
 
     Holder<FindItemResponseType> fiResult = new Holder<FindItemResponseType>();
 
-    cnctr.getPort(sub).findItem(fir.getRequest(),
-                                // null, // impersonation,
-                                getMailboxCulture(),
-                                getRequestServerVersion(),
-                                // null, // timeZoneContext
-                                fiResult,
-                                getServerVersionInfoHolder());
+    getPort(info).findItem(fir.getRequest(),
+                           // null, // impersonation,
+                           getMailboxCulture(),
+                           getRequestServerVersion(),
+                           // null, // timeZoneContext
+                           fiResult,
+                           getServerVersionInfoHolder());
 
     List<JAXBElement<? extends ResponseMessageType>> rms =
       fiResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
@@ -219,9 +229,63 @@ public class ExchangeConnectorInstance
     return log;
   }
 
+  ExchangeServicePortType getPort(final ExchangeSubscriptionInfo sub) throws SynchException {
+    try {
+      return getExchangeServicePort(sub.getExchangeId(),
+                                    sub.getExchangePw().toCharArray()); // XXX need to en/decrypt
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
+
+  private ExchangeServicePortType getExchangeServicePort(final String user,
+                                                         final char[] pw) throws SynchException {
+    try {
+      URL wsdlURL = new URL(config.getExchangeWSDLURI());
+
+      Authenticator.setDefault(new Authenticator() {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(
+                user,
+                pw);
+        }
+    });
+
+      ExchangeWebService ews =
+        new ExchangeWebService(wsdlURL,
+                               new QName("http://schemas.microsoft.com/exchange/services/2006/messages",
+                                         "ExchangeWebService"));
+      ExchangeServicePortType port = ews.getExchangeWebPort();
+
+//      Map<String, Object> context = ((BindingProvider)port).getRequestContext();
+
+  //    context.put(BindingProvider.USERNAME_PROPERTY, user);
+    //  context.put(BindingProvider.PASSWORD_PROPERTY, new String(pw));
+
+      /*
+        $client->__setSoapHeaders(
+        new SOAPHeader('http://schemas.microsoft.com/exchange/services/2006/types',
+        'RequestServerVersion',
+        array("Version"=>"Exchange2007_SP1"))
+        );
+
+        $client is the SoapClient Instance.
+
+      */
+
+
+      return port;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
 
   private IcalendarType fetchItem(final BaseItemIdType id) throws SynchException {
     List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
@@ -243,16 +307,16 @@ public class ExchangeConnectorInstance
       SubscribeRequest s = new SubscribeRequest(sub,
                                                 config);
 
-      s.setFolderId(sub.getExchangeCalendar());
+      s.setFolderId(info.getExchangeCalendar());
 
       Holder<SubscribeResponseType> subscribeResult = new Holder<SubscribeResponseType>();
 
-      cnctr.getPort(sub).subscribe(s.getRequest(),
-                                   // null, // impersonation,
-                                   getMailboxCulture(),
-                                   getRequestServerVersion(),
-                                   subscribeResult,
-                                   getServerVersionInfoHolder());
+      getPort(info).subscribe(s.getRequest(),
+                              // null, // impersonation,
+                              getMailboxCulture(),
+                              getRequestServerVersion(),
+                              subscribeResult,
+                              getServerVersionInfoHolder());
 
       if (debug) {
         trace(subscribeResult.toString());
@@ -286,13 +350,13 @@ public class ExchangeConnectorInstance
 
     Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();
 
-    cnctr.getPort(sub).getItem(gir.getRequest(),
-                         // null, // impersonation,
-                         getMailboxCulture(),
-                         getRequestServerVersion(),
-                         // null, // timeZoneContext
-                         giResult,
-                         getServerVersionInfoHolder());
+    getPort(info).getItem(gir.getRequest(),
+                          // null, // impersonation,
+                          getMailboxCulture(),
+                          getRequestServerVersion(),
+                          // null, // timeZoneContext
+                          giResult,
+                          getServerVersionInfoHolder());
 
     List<JAXBElement<? extends ResponseMessageType>> girms =
       giResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();

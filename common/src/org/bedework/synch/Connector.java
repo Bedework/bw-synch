@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +34,8 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Mike Douglass
  */
-public interface Connector<S extends BaseSubscription,
-                           C extends ConnectorInstance<S>> {
+public interface Connector<C extends ConnectorInstance,
+                           N extends Notification> {
   /** Start the connector. A response of null means no synch available.
    *
    * <p>The callback url is unique to the connector. It will be used as a path
@@ -47,22 +49,50 @@ public interface Connector<S extends BaseSubscription,
    *
    * @param props
    * @param callbackUri
+   * @param syncher
    * @throws SynchException
    */
   void start(Properties props,
-             String callbackUri) throws SynchException;
+             String callbackUri,
+             SynchEngine syncher) throws SynchException;
 
   /** Called to obtain a connector instance for a subscription.
    * A response of null means no synch available.
    *
    * @param sub - the subscription
+   * @param local - true if this is 'local' end of subscription
    * @return null for no synch else a connector instance.
    * @throws SynchException
    */
-  C getConnectorInstance(S sub) throws SynchException;
+  C getConnectorInstance(Subscription sub,
+                         boolean local) throws SynchException;
 
-  /** Will create a notification object which will be passed to a synchling for
+  static class NotificationBatch<N extends Notification> {
+    private List<N> notifications = new ArrayList<N>();
+
+    public NotificationBatch() {
+    }
+
+    public NotificationBatch(final N notification) {
+      notifications.add(notification);
+    }
+
+    public List<N> getNotifications() {
+      return notifications;
+    }
+
+    public void addNotification(final N notification) {
+      notifications.add(notification);
+    }
+  }
+
+  /** Will create a notification batch object which will be passed to a synchling for
    * processing. When processing is complete respond will be called.
+   *
+   * <p>The resource URI has been stripped of the context element and the
+   * element which identifies the connector. What remains is used by the connector
+   * to determine a subscription id allowing retrieval of the subscription from
+   * the synch engine.
    *
    * @param req
    * @param resp
@@ -70,9 +100,9 @@ public interface Connector<S extends BaseSubscription,
    * @return Notification with 1 or more Notification items or null for no action.
    * @throws SynchException
    */
-  Notification handleCallback(HttpServletRequest req,
-                              HttpServletResponse resp,
-                              String resourceUri) throws SynchException;
+  NotificationBatch<N> handleCallback(HttpServletRequest req,
+                                      HttpServletResponse resp,
+                                      String resourceUri) throws SynchException;
 
   /** Will respond to a notification.
    *
@@ -81,7 +111,7 @@ public interface Connector<S extends BaseSubscription,
    * @throws SynchException
    */
   void respondCallback(HttpServletResponse resp,
-                       Notification notification) throws SynchException;
+                       NotificationBatch<N> notifications) throws SynchException;
 
   void stop() throws SynchException;
 }

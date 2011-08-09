@@ -67,7 +67,7 @@ public class Synchling {
   private Timezones timezones;
 
   /* Where we keep subscriptions that come in while we are starting */
-  private List<BaseSubscription> subsList;
+  private List<Subscription> subsList;
 
   private SynchDb db;
 
@@ -86,7 +86,7 @@ public class Synchling {
    * @return status
    * @throws SynchException
    */
-  public StatusType subscribeRequest(final BaseSubscription sub) throws SynchException {
+  public StatusType subscribeRequest(final Subscription sub) throws SynchException {
     if (debug) {
       trace("new subscription " + sub);
     }
@@ -94,7 +94,7 @@ public class Synchling {
     synchronized (this) {
       if (starting) {
         if (subsList == null) {
-          subsList = new ArrayList<BaseSubscription>();
+          subsList = new ArrayList<Subscription>();
         }
 
         subsList.add(sub);
@@ -114,7 +114,7 @@ public class Synchling {
    * @param note
    * @throws SynchException
    */
-  public void handleNotification(final BaseSubscription sub,
+  public void handleNotification(final Subscription sub,
                                  final ExchangeNotificationMessage note) throws SynchException {
     for (NotificationItem ni: note.getNotifications()) {
       if (ni.getItemId() == null) {
@@ -147,7 +147,7 @@ public class Synchling {
    *                        Notification methods
    * ==================================================================== */
 
-  private void addItem(final BaseSubscription sub,
+  private void addItem(final Subscription sub,
                        final NotificationItem ni) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
 
@@ -168,7 +168,7 @@ public class Synchling {
     }
   }
 
-  private void updateItem(final BaseSubscription sub,
+  private void updateItem(final Subscription sub,
                           final NotificationItem ni) throws SynchException {
     CalendarItem ci = fetchItem(sub, ni.getItemId());
 
@@ -183,7 +183,7 @@ public class Synchling {
     updateItem(sub, ci);
   }
 
-  private void updateItem(final BaseSubscription sub,
+  private void updateItem(final Subscription sub,
                           final CalendarItem ci) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
 
@@ -247,7 +247,7 @@ public class Synchling {
    *                        private methods
    * ==================================================================== */
 
-  private StatusType subscribe(final BaseSubscription sub) throws SynchException {
+  private StatusType subscribe(final Subscription sub) throws SynchException {
     if (debug) {
       trace("Handle subscription " + sub);
     }
@@ -258,7 +258,7 @@ public class Synchling {
     }
 
     synchronized (subs) {
-      BaseSubscription tsub = subs.get(sub.getCalPath());
+      Subscription tsub = subs.get(sub.getCalPath());
 
       boolean synchThis = sub.getExchangeWatermark() == null;
 
@@ -288,14 +288,14 @@ public class Synchling {
    * @return status
    * @throws SynchException
    */
-  public StatusType unsubscribe(final BaseSubscription sub) throws SynchException {
+  public StatusType unsubscribe(final Subscription sub) throws SynchException {
     if (!checkAccess(sub)) {
       info("No access for subscription " + sub);
       return StatusType.NO_ACCESS;
     }
 
     synchronized (subs) {
-      BaseSubscription tsub = subs.get(sub.getCalPath());
+      Subscription tsub = subs.get(sub.getCalPath());
 
       if (tsub == null) {
         // Nothing active
@@ -352,7 +352,7 @@ public class Synchling {
     }
   }
 
-  private StatusType getItems(final BaseSubscription sub) throws SynchException {
+  private StatusType getItems(final Subscription sub) throws SynchException {
     try {
       /* The action here depends on which way we are synching. Below we refer
        * to Exchange events. These are signified by particular X-properties we
@@ -481,7 +481,7 @@ public class Synchling {
     }
   }
 
-  private void updateRemote(final BaseSubscription sub,
+  private void updateRemote(final Subscription sub,
                             final List<CalendarItem> cis,
                             final Map<String, SynchInfo> sinfos) throws SynchException {
     XmlIcalConvert cnv = new XmlIcalConvert();
@@ -538,7 +538,7 @@ public class Synchling {
     return 0;
   }
 
-  private boolean checkAccess(final BaseSubscription sub) throws SynchException {
+  private boolean checkAccess(final Subscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
   }

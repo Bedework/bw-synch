@@ -19,6 +19,9 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.Connector;
+import org.bedework.synch.Notification;
+import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
@@ -35,6 +38,8 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 /** Calls from exchange synch processor to the service.
@@ -42,7 +47,10 @@ import javax.xml.namespace.QName;
  * @author Mike Douglass
  */
 public class BedeworkConnector
-      implements Connector<BedeworkSubscription, BedeworkConnectorInstance> {
+      implements Connector<BedeworkConnectorInstance,
+                           Notification> {
+  private SynchEngine syncher;
+
   /* Properties we require and their types
    */
   public static final String keepAliveIntervalProp =
@@ -50,7 +58,7 @@ public class BedeworkConnector
 
   private transient Logger log;
 
-  private boolean running;
+  private static boolean running;
 
   private long keepAliveInterval = 10 * 1000;
 
@@ -102,11 +110,12 @@ public class BedeworkConnector
     }
   }
 
-  private PingThread pinger;
+  private static PingThread pinger;
 
   @Override
   public void start(final Properties props,
-                    final String callbackUri) throws SynchException {
+                    final String callbackUri,
+                    final SynchEngine syncher) throws SynchException {
     if (props == null) {
       throw new SynchException("No properties");
     }
@@ -124,11 +133,30 @@ public class BedeworkConnector
       pinger = new PingThread(getName());
       pinger.start();
     }
+
+    this.syncher = syncher;
   }
 
   @Override
-  public BedeworkConnectorInstance getConnectorInstance(final BedeworkSubscription sub) throws SynchException {
+  public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
+                                                        final boolean local) throws SynchException {
     return null;
+  }
+
+  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
+  }
+
+  @Override
+  public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
+                                     final HttpServletResponse resp,
+                                     final String resourceUri) throws SynchException {
+    return null;
+  }
+
+  @Override
+  public void respondCallback(final HttpServletResponse resp,
+                              final NotificationBatch<Notification> notifications)
+                                                    throws SynchException {
   }
 
   @Override

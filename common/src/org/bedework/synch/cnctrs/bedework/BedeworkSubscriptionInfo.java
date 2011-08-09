@@ -18,7 +18,8 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.BaseSubscription;
+import org.bedework.synch.SubscriptionConnectorInfo;
+import org.bedework.synch.SynchException;
 
 /** Represents a subscription for the synch engine.
  *
@@ -36,15 +37,25 @@ import org.bedework.synch.BaseSubscription;
  *
  * @author Mike Douglass
  */
-public class BedeworkSubscription extends BaseSubscription<BedeworkSubscription> {
+public class BedeworkSubscriptionInfo {
+  private SubscriptionConnectorInfo info;
+
   private String calPath;
 
   private String principalHref;
 
-  /** null constructor for hibernate
-   *
+  /**
+   * @param info
+   * @throws SynchException
    */
-  public BedeworkSubscription() {
+  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+    this.info = info;
+
+    if (info.getConnectorProperties() != null) {
+      info.resetProps(info.getConnectorProperties());
+    } else {
+      info.resetProps("");
+    }
   }
 
   /** Constructor
@@ -54,14 +65,15 @@ public class BedeworkSubscription extends BaseSubscription<BedeworkSubscription>
    * @param calPath
    * @param principalHref
    */
-  public BedeworkSubscription(final String subscriptionId,
+  public BedeworkSubscriptionInfo(final String subscriptionId,
                               final boolean subscribe,
                               final String calPath,
                               final String principalHref) {
-    super(subscriptionId, subscribe);
+    info = new SubscriptionConnectorInfo();
+    info.resetProps("");
 
-    this.principalHref = principalHref;
-    this.calPath = calPath;
+    setPrincipalHref(principalHref);
+    setCalPath(calPath);
   }
 
   /** Path to this systems calendar collection.
@@ -97,37 +109,12 @@ public class BedeworkSubscription extends BaseSubscription<BedeworkSubscription>
     return principalHref;
   }
 
-  /** equality just checks the path. Look at the rest.
-   *
-   * @param that
-   * @return true if anything changed
-   */
-  @Override
-  public boolean changed(final BedeworkSubscription that) {
-    if (super.changed(that)) {
-      return true;
-    }
-
-    if (!getCalPath().equals(that.getCalPath())) {
-      return true;
-    }
-
-    if (!getPrincipalHref().equals(that.getPrincipalHref())) {
-      return true;
-    }
-
-    return false;
-  }
-
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
 
-  @Override
   protected void toStringSegment(final StringBuilder sb,
                               final String indent) {
-    super.toStringSegment(sb, indent);
-
     sb.append(",\n");
     sb.append(indent);
     sb.append("calPath = ");
@@ -141,41 +128,12 @@ public class BedeworkSubscription extends BaseSubscription<BedeworkSubscription>
    * ==================================================================== */
 
   @Override
-  public int hashCode() {
-    return getSubscriptionId().hashCode();
-  }
-
-  @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("ExchangeSubscription{");
+    StringBuilder sb = new StringBuilder("BedeworkSubscriptionInfo{");
 
     toStringSegment(sb, "  ");
 
-    if (getOutstandingSubscription() != null) {
-      sb.append(", \n  OustandingSubscription{");
-
-      toStringSegment(sb, "    ");
-      sb.append("  }");
-    }
-
     sb.append("}");
     return sb.toString();
-  }
-
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
-  @Override
-  public int compareTo(final BedeworkSubscription that) {
-    if (this == that) {
-      return 0;
-    }
-
-    return getSubscriptionId().compareTo(that.getSubscriptionId());
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    return compareTo((BedeworkSubscription)o) == 0;
   }
 }

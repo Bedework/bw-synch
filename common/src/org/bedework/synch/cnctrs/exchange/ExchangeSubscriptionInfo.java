@@ -18,25 +18,17 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.BaseSubscription;
+import org.bedework.synch.SubscriptionConnectorInfo;
+import org.bedework.synch.SynchException;
 
-/** Represents a subscription for the synch engine.
- *
- * <p>A subscription has 2 connectors for each end of the subscription. We will
- * refer to these as the local and remote ends even though the subscription can
- * be symmetric and either end can be nominated the 'master' calendar.
- *
- * <p>Each connector has a kind which is a name used to retrieve a connector
- * from the connector manager. The retrieved connector implements the SynchIntf
- * interface and provides a serializable object to store connection specific
- * properties such as id and password.
- *
- * <p>These properties are obtained by presenting the user with a list of
- * required properties and then encrypting and storing the response.
+
+/** The deserialized information for an Exchange connection.
  *
  * @author Mike Douglass
  */
-public class ExchangeSubscription extends BaseSubscription<ExchangeSubscription> {
+public class ExchangeSubscriptionInfo {
+  private SubscriptionConnectorInfo info;
+
   private String exchangeCalendar;
 
   private String exchangeId;
@@ -51,36 +43,39 @@ public class ExchangeSubscription extends BaseSubscription<ExchangeSubscription>
 
   private String exchangeError;
 
-  /** null constructor for hibernate
+  /**
    *
+   * @param info
+   * @throws SynchException
    */
-  public ExchangeSubscription() {
+  public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+    this.info = info;
+
+    if (info.getConnectorProperties() != null) {
+      info.resetProps(info.getConnectorProperties());
+    } else {
+      info.resetProps("");
+    }
   }
 
   /** Constructor
    *
-   * @param subscriptionId - null means generate one
-   * @param subscribe
-   * @param calPath
-   * @param principalHref
    * @param exchangeCalendar
    * @param exchangeId
    * @param exchangePw
    * @param exchangeURI
    */
-  public ExchangeSubscription(final String subscriptionId,
-                              final boolean subscribe,
-                              final String principalHref,
-                              final String exchangeCalendar,
-                              final String exchangeId,
-                              final String exchangePw,
-                              final String exchangeURI) {
-    super(subscriptionId, principalHref, subscribe);
+  public ExchangeSubscriptionInfo(final String exchangeCalendar,
+                                  final String exchangeId,
+                                  final String exchangePw,
+                                  final String exchangeURI) {
+    info = new SubscriptionConnectorInfo();
+    info.resetProps("");
 
-    this.exchangeCalendar = exchangeCalendar;
-    this.exchangeId = exchangeId;
-    this.exchangePw = exchangePw;
-    this.exchangeURI = exchangeURI;
+    setExchangeCalendar(exchangeCalendar);
+    setExchangeId(exchangeId);
+    setExchangePw(exchangePw);
+    setExchangeURI(exchangeURI);
   }
 
   /** Exchange Calendar
@@ -195,37 +190,12 @@ public class ExchangeSubscription extends BaseSubscription<ExchangeSubscription>
     return exchangeError;
   }
 
-  /** equality just checks the path. Look at the rest.
-   *
-   * @param that
-   * @return true if anything changed
-   */
-  @Override
-  public boolean changed(final ExchangeSubscription that) {
-    if (super.changed(that)) {
-      return true;
-    }
-
-    if (!getExchangeCalendar().equals(that.getExchangeCalendar())) {
-      return true;
-    }
-
-    if (!getExchangeURI().equals(that.getExchangeURI())) {
-      return true;
-    }
-
-    return false;
-  }
-
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
 
-  @Override
   protected void toStringSegment(final StringBuilder sb,
                               final String indent) {
-    super.toStringSegment(sb, indent);
-
     sb.append(",\n");
     sb.append(indent);
     sb.append("exchangeCalendar = ");
@@ -239,41 +209,12 @@ public class ExchangeSubscription extends BaseSubscription<ExchangeSubscription>
    * ==================================================================== */
 
   @Override
-  public int hashCode() {
-    return getSubscriptionId().hashCode();
-  }
-
-  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("ExchangeSubscription{");
 
     toStringSegment(sb, "  ");
 
-    if (getOutstandingSubscription() != null) {
-      sb.append(", \n  OustandingSubscription{");
-
-      toStringSegment(sb, "    ");
-      sb.append("  }");
-    }
-
     sb.append("}");
     return sb.toString();
-  }
-
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
-  @Override
-  public int compareTo(final ExchangeSubscription that) {
-    if (this == that) {
-      return 0;
-    }
-
-    return getSubscriptionId().compareTo(that.getSubscriptionId());
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    return compareTo((ExchangeSubscription)o) == 0;
   }
 }

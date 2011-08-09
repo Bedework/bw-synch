@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.ConnectorInstance;
+import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.GetSynchInfoType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -50,19 +51,23 @@ import javax.xml.namespace.QName;
  * @author Mike Douglass
  */
 public class BedeworkConnectorInstance
-      implements ConnectorInstance<BedeworkSubscription> {
+      implements ConnectorInstance {
   private final BedeworkConnector cnctr;
 
-  private final BedeworkSubscription sub;
+  private BedeworkSubscriptionInfo info;
+
+  private final Subscription sub;
 
   private transient Logger log;
 
   private final boolean debug;
 
   BedeworkConnectorInstance(final BedeworkConnector cnctr,
-                            final BedeworkSubscription sub) {
+                            final Subscription sub,
+                            final BedeworkSubscriptionInfo info) {
     this.cnctr = cnctr;
     this.sub = sub;
+    this.info = info;
 
     debug = getLogger().isDebugEnabled();
   }
@@ -73,13 +78,13 @@ public class BedeworkConnectorInstance
 
     GetSynchInfoType gsi = new GetSynchInfoType();
 
-    gsi.setCalendarHref(sub.getCalPath());
+    gsi.setCalendarHref(info.getCalPath());
 
     SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(), gsi);
 
-    if (!sir.getCalendarHref().equals(sub.getCalPath())) {
+    if (!sir.getCalendarHref().equals(info.getCalPath())) {
       warn("Mismatched calpath in response to GetSycnchInfo: expected '" +
-           sub.getCalPath() + "' but received '" +
+          info.getCalPath() + "' but received '" +
            sir.getCalendarHref() + "'");
       return null;
     }
@@ -100,7 +105,7 @@ public class BedeworkConnectorInstance
   public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
     AddItemType ai = new AddItemType();
 
-    ai.setHref(sub.getCalPath());
+    ai.setHref(info.getCalPath());
     ai.setIcalendar(val);
 
     return cnctr.getPort().addItem(getIdToken(), ai);
@@ -117,7 +122,7 @@ public class BedeworkConnectorInstance
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
     FetchItemType fi = new FetchItemType();
 
-    fi.setHref(sub.getCalPath());
+    fi.setHref(info.getCalPath());
     fi.setUid(uid);
 
     return cnctr.getPort().fetchItem(getIdToken(), fi);
@@ -137,7 +142,7 @@ public class BedeworkConnectorInstance
                                            final UpdateItemType updates) throws SynchException {
     UpdateItemType upd = new UpdateItemType();
 
-    upd.setHref(sub.getCalPath());
+    upd.setHref(info.getCalPath());
     upd.setEtoken(???);
 
     return cnctr.getPort().updateItem(getIdToken(), upd);
@@ -184,7 +189,7 @@ public class BedeworkConnectorInstance
   private SynchIdTokenType getIdToken() {
     SynchIdTokenType idToken = new SynchIdTokenType();
 
-    idToken.setPrincipalHref(sub.getPrincipalHref());
+    idToken.setPrincipalHref(info.getPrincipalHref());
     idToken.setSynchToken(curToken);
 
     return idToken;

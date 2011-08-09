@@ -97,11 +97,11 @@ public class SynchDb implements Serializable {
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
-  public List<BaseSubscription> getAll() throws SynchException {
+  public List<Subscription> getAll() throws SynchException {
     StringBuilder sb = new StringBuilder();
 
     sb.append("from ");
-    sb.append(BaseSubscription.class.getName());
+    sb.append(Subscription.class.getName());
 
     try {
       sess.createQuery(sb.toString());
@@ -119,18 +119,18 @@ public class SynchDb implements Serializable {
    * @return a matching subscription or null
    * @throws SynchException
    */
-  public BaseSubscription get(final String id) throws SynchException {
+  public Subscription get(final String id) throws SynchException {
     try {
       StringBuilder sb = new StringBuilder();
 
       sb.append("from ");
-      sb.append(BaseSubscription.class.getName());
+      sb.append(Subscription.class.getName());
       sb.append(" sub where sub.subscriptionId=:subid");
 
       sess.createQuery(sb.toString());
       sess.setString("subid", id);
 
-      return (BaseSubscription)sess.getUnique();
+      return (Subscription)sess.getUnique();
     } catch (HibException he) {
       throw new SynchException(he);
     }
@@ -145,14 +145,14 @@ public class SynchDb implements Serializable {
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
-  public List<BaseSubscription> find(final String calPath,
+  public List<Subscription> find(final String calPath,
                                          final String exCal,
                                          final String exId) throws SynchException {
     try {
       StringBuilder sb = new StringBuilder();
 
       sb.append("from ");
-      sb.append(BaseSubscription.class.getName());
+      sb.append(Subscription.class.getName());
       sb.append(" sub where sub.calPath=:calPath");
       sb.append(" and where sub.exchangeCalendar=:exCal");
       sb.append(" and where sub.exchangeId=:exId");
@@ -173,7 +173,7 @@ public class SynchDb implements Serializable {
    * @param sub
    * @throws SynchException
    */
-  public void update(final BaseSubscription sub) throws SynchException {
+  public void update(final Subscription sub) throws SynchException {
 
   }
 
@@ -182,7 +182,7 @@ public class SynchDb implements Serializable {
    * @param sub
    * @throws SynchException
    */
-  public void delete(final BaseSubscription sub) throws SynchException {
+  public void delete(final Subscription sub) throws SynchException {
     try {
       sess.delete(sub);
     } catch (HibException he) {

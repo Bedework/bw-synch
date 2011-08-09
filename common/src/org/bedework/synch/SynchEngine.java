@@ -109,8 +109,8 @@ public class SynchEngine {
   /* Map of currently active subscriptions - that is - we have traffic between
    * local and remote systems.
    */
-  private final Map<String, BaseSubscription> subs =
-    new HashMap<String, BaseSubscription>();
+  private final Map<String, Subscription> subs =
+    new HashMap<String, Subscription>();
 
   private final ConnectorInstance exintf;
 
@@ -132,7 +132,7 @@ public class SynchEngine {
   private Timezones timezones;
 
   /* Where we keep subscriptions that come in while we are starting */
-  private List<BaseSubscription> subsList;
+  private List<Subscription> subsList;
 
   private SynchDb db;
 
@@ -265,7 +265,7 @@ public class SynchEngine {
 
       try {
         db.open();
-        List<BaseSubscription> startList = db.getAll();
+        List<Subscription> startList = db.getAll();
         db.close();
 
         startup:
@@ -274,7 +274,7 @@ public class SynchEngine {
             trace("startList has " + startList.size() + " subscriptions");
           }
 
-          for (BaseSubscription es: startList) {
+          for (Subscription es: startList) {
             if (stopping) {
               break startup;
             }
@@ -392,7 +392,7 @@ public class SynchEngine {
    * @return status
    * @throws SynchException
    */
-  public StatusType subscribeRequest(final BaseSubscription sub) throws SynchException {
+  public StatusType subscribeRequest(final Subscription sub) throws SynchException {
     if (debug) {
       trace("new subscription " + sub);
     }
@@ -400,7 +400,7 @@ public class SynchEngine {
     synchronized (this) {
       if (starting) {
         if (subsList == null) {
-          subsList = new ArrayList<BaseSubscription>();
+          subsList = new ArrayList<Subscription>();
         }
 
         subsList.add(sub);
@@ -420,7 +420,7 @@ public class SynchEngine {
    * @param note
    * @throws SynchException
    */
-  public void handleNotification(final BaseSubscription sub,
+  public void handleNotification(final Subscription sub,
                                  final ExchangeNotificationMessage note) throws SynchException {
     for (NotificationItem ni: note.getNotifications()) {
       if (ni.getItemId() == null) {
@@ -458,7 +458,7 @@ public class SynchEngine {
    * @return subscription
    * @throws SynchException
    */
-  public BaseSubscription getSubscription(final String id) throws SynchException {
+  public Subscription getSubscription(final String id) throws SynchException {
     db.open();
     try {
       return db.get(id);
@@ -471,7 +471,7 @@ public class SynchEngine {
    * @param sub
    * @throws SynchException
    */
-  public void updateSubscription(final BaseSubscription sub) throws SynchException {
+  public void updateSubscription(final Subscription sub) throws SynchException {
     db.open();
     try {
       db.update(sub);
@@ -484,7 +484,7 @@ public class SynchEngine {
    * @param sub
    * @throws SynchException
    */
-  public void deleteSubscription(final BaseSubscription sub) throws SynchException {
+  public void deleteSubscription(final Subscription sub) throws SynchException {
     db.open();
     try {
       db.delete(sub);
@@ -501,7 +501,7 @@ public class SynchEngine {
    * @return matching subscriptions
    * @throws SynchException
    */
-  public List<BaseSubscription> find(final String calPath,
+  public List<Subscription> find(final String calPath,
                                          final String exCal,
                                          final String exId) throws SynchException {
     db.open();
@@ -516,7 +516,7 @@ public class SynchEngine {
    *                        private methods
    * ==================================================================== */
 
-  private StatusType subscribe(final BaseSubscription sub) throws SynchException {
+  private StatusType subscribe(final Subscription sub) throws SynchException {
     if (debug) {
       trace("Handle subscription " + sub);
     }
@@ -527,7 +527,7 @@ public class SynchEngine {
     }
 
     synchronized (subs) {
-      BaseSubscription tsub = subs.get(sub.getCalPath());
+      Subscription tsub = subs.get(sub.getCalPath());
 
       boolean synchThis = sub.getExchangeWatermark() == null;
 
@@ -557,14 +557,14 @@ public class SynchEngine {
    * @return status
    * @throws SynchException
    */
-  public StatusType unsubscribe(final BaseSubscription sub) throws SynchException {
+  public StatusType unsubscribe(final Subscription sub) throws SynchException {
     if (!checkAccess(sub)) {
       info("No access for subscription " + sub);
       return StatusType.NO_ACCESS;
     }
 
     synchronized (subs) {
-      BaseSubscription tsub = subs.get(sub.getCalPath());
+      Subscription tsub = subs.get(sub.getCalPath());
 
       if (tsub == null) {
         // Nothing active
@@ -583,7 +583,7 @@ public class SynchEngine {
     return StatusType.OK;
   }
 
-  private boolean checkAccess(final BaseSubscription sub) throws SynchException {
+  private boolean checkAccess(final Subscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
   }
