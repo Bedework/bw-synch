@@ -18,13 +18,15 @@
 */
 package org.bedework.synch.web;
 
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchException;
+import org.bedework.synch.web.MethodBase.MethodInfo;
+
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
 import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
 
 import org.apache.log4j.Logger;
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -375,12 +377,14 @@ public class SynchServlet extends HttpServlet
   /* (non-Javadoc)
    * @see javax.servlet.http.HttpSessionListener#sessionCreated(javax.servlet.http.HttpSessionEvent)
    */
+  @Override
   public void sessionCreated(final HttpSessionEvent se) {
   }
 
   /* (non-Javadoc)
    * @see javax.servlet.http.HttpSessionListener#sessionDestroyed(javax.servlet.http.HttpSessionEvent)
    */
+  @Override
   public void sessionDestroyed(final HttpSessionEvent se) {
     HttpSession session = se.getSession();
     String sessid = session.getId();

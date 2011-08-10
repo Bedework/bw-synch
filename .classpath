@@ -15,5 +15,8 @@
 	<classpathentry kind="lib" path="/bwxml/dist/bw-calws-soapschema-3.7.jar" sourcepath="/bwxml/calws-soap/gensrc"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-exchangewsschema-3.7.jar" sourcepath="/bwxml/exchangews/gensrc/src"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-synchwsschema-3.7.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-beans-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

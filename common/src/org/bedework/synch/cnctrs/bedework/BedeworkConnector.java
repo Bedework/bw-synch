@@ -49,6 +49,10 @@ import javax.xml.namespace.QName;
 public class BedeworkConnector
       implements Connector<BedeworkConnectorInstance,
                            Notification> {
+  private BedeworkConnectorConfig config;
+
+  private String connectorId;
+
   private SynchEngine syncher;
 
   /* Properties we require and their types
@@ -113,9 +117,12 @@ public class BedeworkConnector
   private static PingThread pinger;
 
   @Override
-  public void start(final Properties props,
+  public void start(final String connectorId,
+                    final Properties props,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
+    this.connectorId = connectorId;
+
     if (props == null) {
       throw new SynchException("No properties");
     }
@@ -130,7 +137,7 @@ public class BedeworkConnector
     }
 
     if (pinger == null) {
-      pinger = new PingThread(getName());
+      pinger = new PingThread(connectorId);
       pinger.start();
     }
 
@@ -204,7 +211,7 @@ public class BedeworkConnector
 
   SynchRemoteServicePortType getPort() throws SynchException {
     try {
-      URL wsURL = new URL(conf.getRemoteWSDLURI());
+      URL wsURL = new URL(config.getBwWSDLURI());
 
       SynchRemoteService ers =
         new SynchRemoteService(wsURL,
@@ -237,7 +244,6 @@ public class BedeworkConnector
 
   private String initConnection(final String token) {
     String curToken;
-    conf = val;
 
     if (sysInfo == null) {
       // Try to get info first

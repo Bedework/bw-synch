@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Notification.NotificationItem.ActionType;
+import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.SynchException;
 
 import java.util.ArrayList;

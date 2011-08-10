@@ -34,9 +34,6 @@ public class SynchConfig implements Serializable {
   /* Path to keystore - null for use default */
   private String keystore;
 
-  /* WSDL for remote service */
-  private String remoteWSDLURI;
-
   /* Remote system ws url */
   private String remoteWsURL;
 
@@ -86,22 +83,6 @@ public class SynchConfig implements Serializable {
    */
   public String getKeystore() {
     return keystore;
-  }
-
-  /** Remote web service WSDL uri
-   *
-   * @param val    String
-   */
-  public void setRemoteWSDLURI(final String val) {
-    remoteWSDLURI = val;
-  }
-
-  /** Remote web service WSDL uri
-   *
-   * @return String
-   */
-  public String getRemoteWSDLURI() {
-    return remoteWSDLURI;
   }
 
   /** Remote web service url

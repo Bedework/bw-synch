@@ -111,6 +111,9 @@
     <getJar name="ejb3-persistence" version="3.4.0.GA" />
     <getJar name="hibernate" version="3.3.1.ga" />
     <getJar name="hibernate-annotations" version="3.4.0.GA" />
+    <getJar name="spring-beans" version="3.0.5.RELEASE" />
+    <getJar name="spring-context" version="3.0.5.RELEASE" />
+    <getJar name="spring-core" version="3.0.5.RELEASE" />
 
     <getJar name="bw-exchangewsschema" version="${org.bedework.bwxml.version}"
             project="bwxml"

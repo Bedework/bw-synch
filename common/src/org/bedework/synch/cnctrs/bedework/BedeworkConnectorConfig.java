@@ -16,28 +16,29 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.cnctrs.exchange;
+package org.bedework.synch.cnctrs.bedework;
 
-/** Exchange synch connector config
-*
-* @author douglm
-*/
-public class ExchangeConnectorConfig {
-  private String exchangeWSDLURI;
+/** Bedework synch connector config
+ *
+ * @author douglm
+ */
+public class BedeworkConnectorConfig {
+  /* WSDL for remote service */
+  private String bwWSDLURI;
 
-  /** Exchange web service WSDL uri
+  /** bedework web service WSDL uri
    *
    * @param val    String
    */
-  public void setExchangeWSDLURI(final String val) {
-    exchangeWSDLURI = val;
+  public void setBwWSDLURI(final String val) {
+    bwWSDLURI = val;
   }
 
-  /** Exchange web service WSDL uri
+  /** Bedework web service WSDL uri
    *
    * @return String
    */
-  public String getExchangeWSDLURI() {
-    return exchangeWSDLURI;
+  public String getBwWSDLURI() {
+    return bwWSDLURI;
   }
 }

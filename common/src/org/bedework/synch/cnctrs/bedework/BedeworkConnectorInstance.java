@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.bedework;
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.cnctrs.exchange.ExchangeConnectorConfig;
 import org.bedework.synch.wsmessages.GetSynchInfoType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
 import org.bedework.synch.wsmessages.SynchInfoResponseType;
@@ -52,6 +53,8 @@ import javax.xml.namespace.QName;
  */
 public class BedeworkConnectorInstance
       implements ConnectorInstance {
+  private BedeworkConnectorConfig config;
+
   private final BedeworkConnector cnctr;
 
   private BedeworkSubscriptionInfo info;
@@ -62,9 +65,11 @@ public class BedeworkConnectorInstance
 
   private final boolean debug;
 
-  BedeworkConnectorInstance(final BedeworkConnector cnctr,
+  BedeworkConnectorInstance(final BedeworkConnectorConfig config,
+                            final BedeworkConnector cnctr,
                             final Subscription sub,
                             final BedeworkSubscriptionInfo info) {
+    this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
     this.info = info;

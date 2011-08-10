@@ -20,7 +20,7 @@ package org.bedework.synch;
 
 import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage;
 import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage.NotificationItem;
-import org.bedework.synch.cnctrs.exchange.ExsynchSubscribeResponse;
+import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
 
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.sss.util.OptionsI;

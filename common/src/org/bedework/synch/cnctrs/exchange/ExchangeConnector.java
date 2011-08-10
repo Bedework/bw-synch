@@ -24,6 +24,8 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.List;
 import java.util.Properties;
@@ -56,6 +58,8 @@ public class ExchangeConnector
 
   private String callbackUri;
 
+  private String connectorId;
+
   // Are these thread safe?
   private MessageFactory soapMsgFactory;
   private JAXBContext ewsjc;
@@ -65,14 +69,24 @@ public class ExchangeConnector
                     final Properties props,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
-    this.syncher = syncher;
-    this.callbackUri = callbackUri;
+    try {
+      this.connectorId = connectorId;
+      this.syncher = syncher;
+      this.callbackUri = callbackUri;
 
-    info("**************************************************");
-    info("Starting exchange connector " + connectorId);
-    info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
-    info("      callback URI: " + callbackUri);
-    info("**************************************************");
+      ApplicationContext ctx = new ClassPathXmlApplicationContext(
+          "synch-connectors.xml");
+      config = (ExchangeConnectorConfig)ctx.getBean(connectorId + "ExchangeConfig");
+
+      info("**************************************************");
+      info("Starting exchange connector " + connectorId);
+      info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
+      info("      callback URI: " + callbackUri);
+      info("**************************************************");
+    } catch (Throwable t) {
+      error(t);
+      throw new SynchException(t);
+    }
   }
 
   @Override
@@ -121,10 +135,12 @@ public class ExchangeConnector
       ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
       ExchangeNotification en = new ExchangeNotification(sub, note);
+
+      enb.addNotification(en);
       syncher.handleNotification(sub, note);
     }
 
-    return null;
+    return enb;
   }
 
   @Override
