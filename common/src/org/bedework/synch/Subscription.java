@@ -142,7 +142,7 @@ public class Subscription implements Comparable<Subscription> {
 
   /** Info for the local connector.
    *
-   * @param valSubscriptionConnectorInfo
+   * @param val SubscriptionConnectorInfo
    */
   public void setLocalConnectorInfo(final SubscriptionConnectorInfo val) {
 	  localConnectorInfo = val;
@@ -168,6 +168,21 @@ public class Subscription implements Comparable<Subscription> {
    */
   public SubscriptionConnectorInfo getRemoteConnectorInfo() {
     return remoteConnectorInfo;
+  }
+
+  /** Which end is master?
+   *
+   * @param val
+   */
+  public void setMaster(final MasteryType val) {
+    master = val;
+  }
+
+  /**
+   * @return who's master
+   */
+  public MasteryType getMaster() {
+    return master;
   }
 
   /** (un)subscribe?
@@ -228,32 +243,6 @@ public class Subscription implements Comparable<Subscription> {
   }
 
   /* ====================================================================
-   *                        Object methods
-   * ==================================================================== */
-
-  @Override
-  public int hashCode() {
-    return getSubscriptionId().hashCode();
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("ExchangeSubscription{");
-
-    toStringSegment(sb, "  ");
-
-    if (getOutstandingSubscription() != null) {
-      sb.append(", \n  OustandingSubscription{");
-
-      toStringSegment(sb, "    ");
-      sb.append("  }");
-    }
-
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
 
@@ -299,6 +288,11 @@ public class Subscription implements Comparable<Subscription> {
    * The following are required for a db object.
    * ==================================================================== */
 
+  @Override
+  public int hashCode() {
+    return getSubscriptionId().hashCode();
+  }
+
   /* (non-Javadoc)
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
@@ -311,9 +305,25 @@ public class Subscription implements Comparable<Subscription> {
     return getSubscriptionId().compareTo(that.getSubscriptionId());
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public boolean equals(final Object o) {
     return compareTo((Subscription)o) == 0;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("ExchangeSubscription{");
+
+    toStringSegment(sb, "  ");
+
+    if (getOutstandingSubscription() != null) {
+      sb.append(", \n  OustandingSubscription{");
+
+      toStringSegment(sb, "    ");
+      sb.append("  }");
+    }
+
+    sb.append("}");
+    return sb.toString();
   }
 }

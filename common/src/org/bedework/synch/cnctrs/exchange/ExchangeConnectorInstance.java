@@ -22,9 +22,9 @@ import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.cnctrs.exchange.FinditemsResponse.SynchInfo;
-import org.bedework.synch.messages.FindItemsRequest;
-import org.bedework.synch.messages.GetItemsRequest;
-import org.bedework.synch.messages.SubscribeRequest;
+import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
+import org.bedework.synch.cnctrs.exchange.messages.GetItemsRequest;
+import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
@@ -69,6 +69,8 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  * @author Mike Douglass
  */
 public class ExchangeConnectorInstance implements ConnectorInstance {
+  private ExchangeConnectorConfig config;
+
   private final ExchangeConnector cnctr;
 
   private ExchangeSubscriptionInfo info;
@@ -81,9 +83,11 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
 
   private final XmlIcalConvert icalConverter = new XmlIcalConvert();
 
-  ExchangeConnectorInstance(final ExchangeConnector cnctr,
+  ExchangeConnectorInstance(final ExchangeConnectorConfig config,
+                            final ExchangeConnector cnctr,
                             final Subscription sub,
                             final ExchangeSubscriptionInfo info) {
+    this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
     this.info = info;

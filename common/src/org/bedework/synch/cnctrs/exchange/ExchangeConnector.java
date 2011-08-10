@@ -23,6 +23,8 @@ import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
+import org.apache.log4j.Logger;
+
 import java.util.List;
 import java.util.Properties;
 
@@ -46,22 +48,37 @@ import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationRe
 public class ExchangeConnector
       implements Connector<ExchangeConnectorInstance,
                            ExchangeNotification> {
+  protected transient Logger log;
+
   private SynchEngine syncher;
+
+  private ExchangeConnectorConfig config;
+
+  private String callbackUri;
 
   // Are these thread safe?
   private MessageFactory soapMsgFactory;
   private JAXBContext ewsjc;
 
   @Override
-  public void start(final Properties props,
+  public void start(final String connectorId,
+                    final Properties props,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
     this.syncher = syncher;
+    this.callbackUri = callbackUri;
+
+    info("**************************************************");
+    info("Starting exchange connector " + connectorId);
+    info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
+    info("      callback URI: " + callbackUri);
+    info("**************************************************");
   }
 
   @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final boolean local) throws SynchException {
+    //debug = getLogger().isDebugEnabled();
     ExchangeSubscriptionInfo info;
 
     if (local) {
@@ -70,7 +87,7 @@ public class ExchangeConnector
       info = new ExchangeSubscriptionInfo(sub.getRemoteConnectorInfo());
     }
 
-    return null;
+    return new ExchangeConnectorInstance(config, this, sub, info);
   }
 
   class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
@@ -178,4 +195,28 @@ public class ExchangeConnector
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
+
+  private Logger getLogger() {
+    if (log == null) {
+      log = Logger.getLogger(this.getClass());
+    }
+
+    return log;
+  }
+
+  private void trace(final String msg) {
+    getLogger().debug(msg);
+  }
+
+  private void warn(final String msg) {
+    getLogger().warn(msg);
+  }
+
+  private void error(final Throwable t) {
+    getLogger().error(this, t);
+  }
+
+  private void info(final String msg) {
+    getLogger().info(msg);
+  }
 }

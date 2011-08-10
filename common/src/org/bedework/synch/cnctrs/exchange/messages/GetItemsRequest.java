@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.messages;
+package org.bedework.synch.cnctrs.exchange.messages;
 
 import java.util.List;
 

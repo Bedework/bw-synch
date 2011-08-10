@@ -47,12 +47,14 @@ public interface Connector<C extends ConnectorInstance,
    * connector might append a uid to that path to allow it to locate the
    * active subscription for which the callback is intended.
    *
+   * @param connectorId - registered id for the connector
    * @param props
    * @param callbackUri
    * @param syncher
    * @throws SynchException
    */
-  void start(Properties props,
+  void start(String connectorId,
+             Properties props,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
 

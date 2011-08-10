@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.messages;
+package org.bedework.synch.cnctrs.exchange.messages;
 
 import javax.xml.bind.JAXBElement;
 

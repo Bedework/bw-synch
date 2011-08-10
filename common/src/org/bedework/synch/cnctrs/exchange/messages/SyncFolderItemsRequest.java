@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.messages;
+package org.bedework.synch.cnctrs.exchange.messages;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SyncFolderItemsType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderIdType;

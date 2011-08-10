@@ -59,7 +59,7 @@ public class Synchling {
 
   private final ConnectorInstance remoteCnctr;
 
-  private ExsynchConfig config;
+  private SynchConfig config;
 
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;

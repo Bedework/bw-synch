@@ -20,15 +20,13 @@ package org.bedework.synch;
 
 import java.io.Serializable;
 
-/** This class defines the various properties we need for an Exchange synch
+/** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
-public class ExsynchConfig implements Serializable {
+public class SynchConfig implements Serializable {
   /* From bedework build */
   private String appType;
-
-  private String exchangeWSDLURI;
 
   /* Exchange web service push callback uri - null for no exchange sync */
   private String exchangeWsPushURI;
@@ -56,22 +54,6 @@ public class ExsynchConfig implements Serializable {
    */
   public String getAppType() {
     return appType;
-  }
-
-  /** Exchange web service WSDL uri
-   *
-   * @param val    String
-   */
-  public void setExchangeWSDLURI(final String val) {
-    exchangeWSDLURI = val;
-  }
-
-  /** Exchange web service WSDL uri
-   *
-   * @return String
-   */
-  public String getExchangeWSDLURI() {
-    return exchangeWSDLURI;
   }
 
   /** Exchange web service push callback uri - null for no exchange sync

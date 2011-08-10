@@ -18,10 +18,9 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.cnctrs.exchange.ExsynchSubscribeResponse;
 import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage;
 import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage.NotificationItem;
-import org.bedework.synch.wsimpl.BwSynchIntfImpl;
+import org.bedework.synch.cnctrs.exchange.ExsynchSubscribeResponse;
 
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.sss.util.OptionsI;
@@ -120,7 +119,7 @@ public class SynchEngine {
 
   private boolean stopping;
 
-  private ExsynchConfig config;
+  private SynchConfig config;
 
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;
@@ -141,6 +140,8 @@ public class SynchEngine {
    */
   private final String remoteCallbackPathPrefix = "rmtcb/";
 
+  private Map<String, Connector> connectorMap = new HashMap<String, Connector>();
+
   /** Constructor
    *
    * @param exintf
@@ -158,9 +159,9 @@ public class SynchEngine {
     OptionsI opts;
     try {
       opts = SynchOptionsFactory.getOptions();
-      config = (ExsynchConfig)opts.getAppProperty(appname);
+      config = (SynchConfig)opts.getAppProperty(appname);
       if (config == null) {
-        config = new ExsynchConfig();
+        config = new SynchConfig();
       }
 
       String tzserverUri = opts.getGlobalStringProperty("timezonesUri");
@@ -171,6 +172,8 @@ public class SynchEngine {
 
       Timezones.initTimezones(tzserverUri);
       timezones = Timezones.getTimezones();
+
+
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
@@ -373,7 +376,7 @@ public class SynchEngine {
   /**
    * @return config object
    */
-  public ExsynchConfig getConfig() {
+  public SynchConfig getConfig() {
     return config;
   }
 
@@ -610,5 +613,21 @@ public class SynchEngine {
 
   private void info(final String msg) {
     getLogger().info(msg);
+  }
+
+  private void registerConnector(final String id,
+                                 final String className) throws SynchException {
+    try {
+      Class cl = Class.forName(className);
+
+      if (connectorMap.containsKey(id)) {
+        throw new SynchException("Connector " + id + " already registered");
+      }
+
+      Connector c = (Connector)cl.newInstance();
+      connectorMap.put(className, c);
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
   }
 }

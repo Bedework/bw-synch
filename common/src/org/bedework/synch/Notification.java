@@ -42,23 +42,30 @@ import java.util.List;
 public class Notification<NI extends Notification.NotificationItem> {
   private Subscription sub;
 
+  private boolean local;
+
   private List<NI> notifications = new ArrayList<NI>();
 
   /** Create a notification for a subscription
    * @param sub
+   * @param local
    */
-  public Notification(final Subscription sub) {
+  public Notification(final Subscription sub,
+                      final boolean local) {
     this.sub = sub;
+    this.local = local;
   }
 
   /** Create object with a single notification.
    *
    * @param sub
+   * @param local
    * @param notificationItem
    */
   public Notification(final Subscription sub,
+                      final boolean local,
                       final NI notificationItem) {
-    this(sub);
+    this(sub, local);
     addNotificationItem(notificationItem);
   }
 
@@ -67,6 +74,13 @@ public class Notification<NI extends Notification.NotificationItem> {
    */
   public Subscription getSub() {
     return sub;
+  }
+
+  /**
+   * @return boolean local flag
+   */
+  public boolean getLocal() {
+    return local;
   }
 
   /**
@@ -144,6 +158,9 @@ public class Notification<NI extends Notification.NotificationItem> {
   protected void toStringSegment(final StringBuilder sb) {
     sb.append("sub=");
     sb.append(getSub());
+
+    sb.append(", local=");
+    sb.append(getLocal());
 
     String delim = ",\n   notification items{\n      ";
     for (NI ni: getNotifications()) {

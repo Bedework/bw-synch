@@ -38,7 +38,7 @@ public class Synch implements SynchMBean {
 
   private SynchEngine syncher;
 
-  private ExsynchConfig conf;
+  private SynchConfig conf;
 
   private class ProcessorThread extends Thread {
     boolean showedTrace;

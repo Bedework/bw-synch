@@ -16,10 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.exchgsynch.messages;
+package org.bedework.synch.cnctrs.exchange.messages;
 
-import org.bedework.exchgsynch.ExsynchConfig;
-import org.bedework.exchgsynch.intf.ExchangeSubscription;
+import org.bedework.synch.Subscription;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
@@ -39,10 +38,12 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 
   /**
    * @param sub
-   * @param config
+   * @param watermark
+   * @param callBackUri
    */
-  public SubscribeRequest(final BaseSubscription sub,
-                          final ExsynchConfig config) {
+  public SubscribeRequest(final Subscription sub,
+                          final String watermark,
+                          final String callBackUri) {
     super();
 
     request = super.createSubscribeType();
@@ -70,9 +71,9 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 
     psr.setStatusFrequency(1);  // 1 minute poll
 
-    psr.setWatermark(sub.getExchangeWatermark());
+    psr.setWatermark(watermark);
 
-    String uri = config.getExchangeWsPushURI();
+    String uri = callBackUri;
     if (!uri.endsWith("/")) {
       uri += "/";
     }
