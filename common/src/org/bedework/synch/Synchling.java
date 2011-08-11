@@ -24,16 +24,15 @@ import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
 import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
-import edu.rpi.cmt.timezones.Timezones;
-import edu.rpi.sss.util.xml.NsContext;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.ComponentSelectionType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
-import ietf.params.xml.ns.icalendar_2.VcalendarType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,33 +49,31 @@ import java.util.Map;
  * @author Mike Douglass
  */
 public class Synchling {
-  private final boolean debug;
+  private boolean debug;
 
   protected transient Logger log;
 
-  private final ConnectorInstance localCnctr;
+  private ConnectorInstance localCnctr;
 
-  private final ConnectorInstance remoteCnctr;
+  private ConnectorInstance remoteCnctr;
 
-  private SynchConfig config;
+  private SynchEngine syncher;
 
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;
 
-  private Timezones timezones;
-
   /* Where we keep subscriptions that come in while we are starting */
   private List<Subscription> subsList;
 
-  private SynchDb db;
-
   /** Constructor
    *
-   * @param exintf
+   * @param syncher
+   * @throws SynchException
    */
-  private Synchling() throws SynchException {
+  public Synchling(final SynchEngine syncher) throws SynchException {
     debug = getLogger().isDebugEnabled();
 
+    this.syncher = syncher;
   }
 
   /** Update or add a subscription.
@@ -113,8 +110,7 @@ public class Synchling {
    * @param note
    * @throws SynchException
    */
-  public void handleNotification(final Subscription sub,
-                                 final Notification<NotificationItem> note) throws SynchException {
+  public void handleNotification(final Notification<NotificationItem> note) throws SynchException {
     for (NotificationItem ni: note.getNotifications()) {
       if (ni.getItemId() == null) {
         // Folder changes as well as item.
@@ -125,12 +121,12 @@ public class Synchling {
       case CopiedEvent:
         break;
       case CreatedEvent:
-        addItem(sub, ni);
+        addItem(note, ni);
         break;
       case DeletedEvent:
         break;
       case ModifiedEvent:
-        updateItem(sub, ni);
+        updateItem(note, ni);
         break;
       case MovedEvent:
         break;
@@ -146,13 +142,11 @@ public class Synchling {
    *                        Notification methods
    * ==================================================================== */
 
-  private void addItem(final Subscription sub,
+  private void addItem(final Notification note,
                        final NotificationItem ni) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
+    IcalendarType ical = ni.getIcal();
 
-    CalendarItem ci = fetchItem(sub, ni.getItemId());
-
-    if (ci == null) {
+    if (ical == null) {
       if (debug) {
         trace("No item found");
       }
@@ -160,18 +154,20 @@ public class Synchling {
       return;
     }
 
-    AddItemResponseType air = exintf.addItem(sub, ci.getUID(), cnv.toXml(ci));
+    ConnectorInstance cinst = getCinst(note.getSub(), !note.getLocal());
+
+    AddItemResponseType air = cinst.addItem(ical);
     if (debug) {
       trace("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
     }
   }
 
-  private void updateItem(final Subscription sub,
+  private void updateItem(final Notification note,
                           final NotificationItem ni) throws SynchException {
-    CalendarItem ci = fetchItem(sub, ni.getItemId());
+    IcalendarType ical = ni.getIcal();
 
-    if (ci == null) {
+    if (ical == null) {
       if (debug) {
         trace("No item found");
       }
@@ -179,67 +175,30 @@ public class Synchling {
       return;
     }
 
-    updateItem(sub, ci);
-  }
+    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
+                                                           !note.getLocal());
 
-  private void updateItem(final Subscription sub,
-                          final CalendarItem ci) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
-
-    /* Fetch the item from the remote service */
-    FetchItemResponseType fir = exintf.fetchItem(sub, ci.getUID());
+    FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
     if (debug) {
-      trace("fetch: status=" + fir.getStatus() +
-            " msg=" + fir.getMessage());
+      trace("Update: status=" + fresp.getStatus() +
+            " msg=" + fresp.getMessage());
     }
 
-    if (fir.getStatus() != StatusType.OK) {
+    if (fresp.getStatus() != StatusType.OK) {
       return;
     }
 
-    IcalendarType exical = cnv.toXml(ci);
+    IcalendarType targetIcal = fresp.getIcalendar();
 
-    IcalendarType rmtical = fir.getIcalendar();
+    XmlIcalCompare comp = new XmlIcalCompare();
 
-    /* We expect a single vcalendar for both */
+    ComponentSelectionType cst = comp.diff(icalOf, ical, targetIcal);
 
-    VcalendarType exvcal = get1vcal(exical);
-    VcalendarType rmtvcal = get1vcal(rmtical);
-
-    if ((exvcal == null) || (rmtvcal == null)) {
-      return;
-    }
-
-    /* Build a diff list from properties and components. */
-
-//    NsContext nsc = new NsContext("urn:ietf:params:xml:ns:icalendar-2.0");
-    NsContext nsc = new NsContext(null);
-    XmlIcalCompare comp = new XmlIcalCompare(nsc);
-
-//    if (!comp.differ(excomp, rmtcomp)) {
-    if (!comp.differ(exvcal, rmtvcal)) {
-      return;
-    }
-
-    // Use the update list to update the remote end.
-
-    List<XpathUpdate> updates = comp.getUpdates();
-
-    UpdateItemResponseType uir = exintf.updateItem(sub, ci.getUID(), updates, nsc);
+    UpdateItemResponseType uir = cinst.updateItem(cst);
     if (debug) {
       trace("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
     }
-  }
-
-  private VcalendarType get1vcal(final IcalendarType ical) {
-    List<VcalendarType> vcals = ical.getVcalendar();
-
-    if (vcals.size() != 1) {
-      return null;
-    }
-
-    return vcals.get(0);
   }
 
   /* ====================================================================

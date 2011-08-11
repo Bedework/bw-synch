@@ -23,14 +23,16 @@ import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage.Notificati
 import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
 
 import edu.rpi.cmt.timezones.Timezones;
-import edu.rpi.sss.util.OptionsI;
 
 import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,19 +101,24 @@ import java.util.Map;
  * @author Mike Douglass
  */
 public class SynchEngine {
+  protected transient Logger log;
+
   private final boolean debug;
 
-  private static String appname = "Exsynch";
+  private static String appname = "Synch";
 
-  protected transient Logger log;
+  private static final String synchConfigPath = "/properties/synch/synch-config.xml";
+
+  /* Config bean name */
+  private static String synchConfigName = "synchConfig";
+
+  private ApplicationContext appContext;
 
   /* Map of currently active subscriptions - that is - we have traffic between
    * local and remote systems.
    */
   private final Map<String, Subscription> subs =
     new HashMap<String, Subscription>();
-
-  private final ConnectorInstance exintf;
 
   private boolean starting;
 
@@ -146,38 +153,19 @@ public class SynchEngine {
    *
    * @param exintf
    */
-  private SynchEngine(final ConnectorInstance exintf) throws SynchException {
-    this.exintf = exintf;
+  private SynchEngine() throws SynchException {
     debug = getLogger().isDebugEnabled();
 
     System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
                        String.valueOf(debug));
 
-    /* Note that the options factory returns a static object and we should
-     * initialise the config once only
-     */
-    OptionsI opts;
-    try {
-      opts = SynchOptionsFactory.getOptions();
-      config = (SynchConfig)opts.getAppProperty(appname);
-      if (config == null) {
-        config = new SynchConfig();
-      }
+    appContext = new ClassPathXmlApplicationContext(synchConfigPath);
 
-      String tzserverUri = opts.getGlobalStringProperty("timezonesUri");
+    config = (SynchConfig)appContext.getBean(synchConfigName);
 
-      if (tzserverUri == null) {
-        throw new SynchException("No timezones server URI defined");
-      }
-
-      Timezones.initTimezones(tzserverUri);
-      timezones = Timezones.getTimezones();
-
-
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
+    if ((config.getCallbackURI() != null) &&
+        !config.getCallbackURI().endsWith("/")) {
+      throw new SynchException("callbackURI MUST end with '/'");
     }
   }
 
@@ -195,7 +183,7 @@ public class SynchEngine {
       if (syncher != null) {
         return syncher;
       }
-      syncher = new SynchEngine(new BwSynchIntfImpl());
+      syncher = new SynchEngine();
       return syncher;
     }
   }
@@ -251,13 +239,27 @@ public class SynchEngine {
 
       info("**************************************************");
       info("Starting synch");
-      info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
-      info("      callback URI: " + config.getExchangeWsPushURI());
+      info("      callback URI: " + config.getCallbackURI());
       info("**************************************************");
 
       if (config.getKeystore() != null) {
         System.setProperty("javax.net.ssl.trustStore", config.getKeystore());
         System.setProperty("javax.net.ssl.trustStorePassword", "bedework");
+      }
+
+      Map<String, String> connectors = config.getConnectors();
+
+      /* Register the connectors and start them */
+      for (String cnctrId: connectors.keySet()) {
+        info("Register and start connector " + cnctrId);
+
+        registerConnector(cnctrId, connectors.get(cnctrId));
+
+        Connector conn = getConnector(cnctrId);
+
+        conn.start(cnctrId,
+                   config.getCallbackURI() + cnctrId + "/",
+                   this);
       }
 
       /* Get the list of subscriptions from our database and process them.
@@ -331,6 +333,13 @@ public class SynchEngine {
     return running;
   }
 
+  /**
+   * @return Spring framework application context.
+   */
+  public ApplicationContext getAppContext() {
+    return appContext;
+  }
+
   /** Stop synch process.
    *
    * @throws SynchException
@@ -342,6 +351,15 @@ public class SynchEngine {
 
     stopping = true;
 
+    /* Call stop on each connector
+     */
+    for (Connector conn: getConnectors()) {
+      info("Stopping connector " + conn.getId());
+      conn.stop();
+    }
+
+    info("Connectors stopped");
+
     long maxWait = 1000 * 90; // 90 seconds - needs to be longer than longest poll interval
     long startTime = System.currentTimeMillis();
     long delay = 1000 * 5; // 5 sec delay
@@ -349,7 +367,7 @@ public class SynchEngine {
     while (subs.size() > 0) {
       if ((System.currentTimeMillis() - startTime) > maxWait) {
         warn("**************************************************");
-        warn("Exchange synch shutdown completed with " +
+        warn("Synch shutdown completed with " +
              subs.size() + " outstanding subscriptions");
         warn("**************************************************");
 
@@ -357,7 +375,7 @@ public class SynchEngine {
       }
 
       info("**************************************************");
-      info("Exchange synch shutdown - " +
+      info("Synch shutdown - " +
            subs.size() + " remaining subscriptions");
       info("**************************************************");
 
@@ -369,7 +387,7 @@ public class SynchEngine {
     }
 
     info("**************************************************");
-    info("Exchange synch shutdown complete");
+    info("Synch shutdown complete");
     info("**************************************************");
   }
 
@@ -378,6 +396,50 @@ public class SynchEngine {
    */
   public SynchConfig getConfig() {
     return config;
+  }
+
+  /** Gets an instance and implants it in the subscription object.
+   * @param sub
+   * @param local
+   * @return ConnectorInstance or throws Exception
+   * @throws SynchException
+   */
+  public ConnectorInstance getConnectorInstance(final Subscription sub,
+                                                final boolean local) throws SynchException {
+    ConnectorInstance cinst;
+    String connectorId;
+
+    if (local) {
+      cinst = sub.getLocalConn();
+      connectorId = sub.getLocalConnectorId();
+    } else {
+      cinst = sub.getRemoteConn();
+      connectorId = sub.getLocalConnectorId();
+    }
+
+    if (cinst != null) {
+      return cinst;
+    }
+
+
+    Connector conn = getConnector(connectorId);
+    if (conn == null) {
+      throw new SynchException("No connector for " + sub + "(" + local + ")");
+    }
+
+    cinst = conn.getConnectorInstance(sub, local);
+    if (cinst == null) {
+      throw new SynchException("No connector instance for " + sub +
+                               "(" + local + ")");
+    }
+
+    if (local) {
+      sub.setLocalConn(cinst);
+    } else {
+      sub.setRemoteConn(cinst);
+    }
+
+    return cinst;
   }
 
   /** Calls back from the remote system have resource uris that are prefixed with
@@ -613,6 +675,14 @@ public class SynchEngine {
 
   private void info(final String msg) {
     getLogger().info(msg);
+  }
+
+  private Connector getConnector(final String id) {
+    return connectorMap.get(id);
+  }
+
+  private Collection<Connector> getConnectors() {
+    return connectorMap.values();
   }
 
   private void registerConnector(final String id,

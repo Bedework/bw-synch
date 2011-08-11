@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,12 +125,32 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private ActionType action;
 
-    /** Create a notification item for an action.
+    private IcalendarType ical;
+
+    private String uid;
+
+    /** Create a notification item for an action that has an associated entity,
+     * for example add or update.
      *
      * @param action
+     * @param ical
      */
-    public NotificationItem(final ActionType action) {
+    public NotificationItem(final ActionType action,
+                            final IcalendarType ical) {
       this.action = action;
+      this.ical = ical;
+    }
+
+    /** Create a notification item for an action that has no associated entity,
+     * for example delete or moved.
+     *
+     * @param action
+     * @param uid
+     */
+    public NotificationItem(final ActionType action,
+                            final String uid) {
+      this.action = action;
+      this.uid = uid;
     }
 
     /**
@@ -138,14 +160,30 @@ public class Notification<NI extends Notification.NotificationItem> {
       return action;
     }
 
+    /**
+     * @return the icalendar entity we were notified about
+     */
+    public String getUid() {
+      return uid;
+    }
+
+    /**
+     * @return the uid of the icalendar entity we were notified about
+     */
+    public IcalendarType getIcal() {
+      return ical;
+    }
+
     protected void toStringSegment(final StringBuilder sb) {
       sb.append("action=");
       sb.append(getAction());
+      sb.append("uid=");
+      sb.append(getUid());
     }
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("NotificationItem{");
+      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
       toStringSegment(sb);
 
@@ -177,7 +215,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("Notification{");
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
     toStringSegment(sb);
 

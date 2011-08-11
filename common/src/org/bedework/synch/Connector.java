@@ -20,7 +20,6 @@ package org.bedework.synch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,15 +47,18 @@ public interface Connector<C extends ConnectorInstance,
    * active subscription for which the callback is intended.
    *
    * @param connectorId - registered id for the connector
-   * @param props
    * @param callbackUri
    * @param syncher
    * @throws SynchException
    */
   void start(String connectorId,
-             Properties props,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
+
+  /**
+   * @return id provided at start
+   */
+  String getId();
 
   /** Called to obtain a connector instance for a subscription.
    * A response of null means no synch available.
@@ -69,6 +71,11 @@ public interface Connector<C extends ConnectorInstance,
   C getConnectorInstance(Subscription sub,
                          boolean local) throws SynchException;
 
+  /** Far end may send a batch of notifications. These should not be batched
+   * arbitrarily. One batch per message and response.
+   *
+   * @param <N>
+   */
   static class NotificationBatch<N extends Notification> {
     private List<N> notifications = new ArrayList<N>();
 
@@ -109,11 +116,14 @@ public interface Connector<C extends ConnectorInstance,
   /** Will respond to a notification.
    *
    * @param resp
-   * @param notification from handleCallback.
+   * @param notifications from handleCallback.
    * @throws SynchException
    */
   void respondCallback(HttpServletResponse resp,
                        NotificationBatch<N> notifications) throws SynchException;
 
+  /** Shut down the connector
+   * @throws SynchException
+   */
   void stop() throws SynchException;
 }

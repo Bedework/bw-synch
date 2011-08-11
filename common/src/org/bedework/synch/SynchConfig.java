@@ -19,54 +19,35 @@
 package org.bedework.synch;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
 public class SynchConfig implements Serializable {
-  /* From bedework build */
-  private String appType;
-
-  /* Exchange web service push callback uri - null for no exchange sync */
-  private String exchangeWsPushURI;
+  /* web service push callback uri - null for no service */
+  private String callbackURI;
 
   /* Path to keystore - null for use default */
   private String keystore;
 
-  /* Remote system ws url */
-  private String remoteWsURL;
+  private Map<String, String> connectors;
 
-  private int remoteKeepAliveInterval;
-
-  /**
-   * @param val
-   */
-  public void setAppType(final String val) {
-    appType = val;
-  }
-
-  /**
-   * @return String
-   */
-  public String getAppType() {
-    return appType;
-  }
-
-  /** Exchange web service push callback uri - null for no exchange sync
+  /** web service push callback uri - null for no service
    *
    * @param val    String
    */
-  public void setExchangeWsPushURI(final String val) {
-    exchangeWsPushURI = val;
+  public void setCallbackURI(final String val) {
+    callbackURI = val;
   }
 
-  /** Exchange web service push callback uri - null for no exchange sync
+  /** web service push callback uri - null for no service
    *
    * @return String
    */
-  public String getExchangeWsPushURI() {
-    return exchangeWsPushURI;
+  public String getCallbackURI() {
+    return callbackURI;
   }
 
   /** Path to keystore - null for use default
@@ -85,35 +66,19 @@ public class SynchConfig implements Serializable {
     return keystore;
   }
 
-  /** Remote web service url
+  /** Map of (name, className)
    *
-   * @param val    String
+   * @param val
    */
-  public void setRemoteWsURL(final String val) {
-    remoteWsURL = val;
+  public void setConnectors(final Map<String, String> val) {
+    connectors = val;
   }
 
-  /** Remote web service url
+  /** Map of (name, className)
    *
-   * @return String
+   * @return map
    */
-  public String getRemoteWsURL() {
-    return remoteWsURL;
-  }
-
-  /** Remote KeepAliveInterval - seconds
-   *
-   * @param val    int seconds
-   */
-  public void setRemoteKeepAliveInterval(final int val) {
-    remoteKeepAliveInterval = val;
-  }
-
-  /** Remote KeepAliveInterval - seconds
-   *
-   * @return int seconds
-   */
-  public int getRemoteKeepAliveInterval() {
-    return remoteKeepAliveInterval;
+  public Map<String, String> getConnectors() {
+    return connectors;
   }
 }

@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.Connector;
+import org.bedework.synch.ConnectorInstanceMap;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
@@ -35,7 +36,6 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 
 import java.net.URL;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,14 +51,11 @@ public class BedeworkConnector
                            Notification> {
   private BedeworkConnectorConfig config;
 
+  private String callbackUri;
+
   private String connectorId;
 
   private SynchEngine syncher;
-
-  /* Properties we require and their types
-   */
-  public static final String keepAliveIntervalProp =
-      "org.bedework.synch.bedework.keepAliveInterval";
 
   private transient Logger log;
 
@@ -70,6 +67,9 @@ public class BedeworkConnector
   private String remoteToken;
 
   private XRDType sysInfo;
+
+  private ConnectorInstanceMap<BedeworkConnectorInstance> cinstMap =
+      new ConnectorInstanceMap<BedeworkConnectorInstance>();
 
   /** This process will send keep-alive notifications to the remote system.
    * During startup the first notification is sent so this process starts with
@@ -118,23 +118,13 @@ public class BedeworkConnector
 
   @Override
   public void start(final String connectorId,
-                    final Properties props,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
     this.connectorId = connectorId;
+    this.syncher = syncher;
+    this.callbackUri = callbackUri;
 
-    if (props == null) {
-      throw new SynchException("No properties");
-    }
-
-    if (props.get(keepAliveIntervalProp) != null) {
-      Long l = Long.valueOf(props.getProperty(keepAliveIntervalProp));
-      if (l != null) {
-        keepAliveInterval = Long.valueOf(props.getProperty(keepAliveIntervalProp));
-      } else {
-        throw new SynchException("Bad value for " + keepAliveIntervalProp);
-      }
-    }
+    config = (BedeworkConnectorConfig)syncher.getAppContext().getBean(connectorId + "BedeworkConfig");
 
     if (pinger == null) {
       pinger = new PingThread(connectorId);
@@ -145,9 +135,32 @@ public class BedeworkConnector
   }
 
   @Override
+  public String getId() {
+    return connectorId;
+  }
+
+  @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final boolean local) throws SynchException {
-    return null;
+    BedeworkConnectorInstance inst = cinstMap.find(sub, local);
+
+    if (inst != null) {
+      return inst;
+    }
+
+    //debug = getLogger().isDebugEnabled();
+    BedeworkSubscriptionInfo info;
+
+    if (local) {
+      info = new BedeworkSubscriptionInfo(sub.getLocalConnectorInfo());
+    } else {
+      info = new BedeworkSubscriptionInfo(sub.getRemoteConnectorInfo());
+    }
+
+    inst = new BedeworkConnectorInstance(config, this, sub, local, info);
+    cinstMap.add(sub, local, inst);
+
+    return inst;
   }
 
   class BedeworkNotificationBatch extends NotificationBatch<Notification> {
@@ -262,7 +275,7 @@ public class BedeworkConnector
 
     /* Set up the call back URL for incoming subscriptions */
 
-    String uri = conf.getExchangeWsPushURI();
+    String uri = callbackUri;
     if (!uri.endsWith("/")) {
       uri += "/";
     }

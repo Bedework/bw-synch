@@ -53,6 +53,10 @@ import javax.xml.namespace.QName;
  */
 public class BedeworkConnectorInstance
       implements ConnectorInstance {
+  private transient Logger log;
+
+  private final boolean debug;
+
   private BedeworkConnectorConfig config;
 
   private final BedeworkConnector cnctr;
@@ -61,17 +65,17 @@ public class BedeworkConnectorInstance
 
   private final Subscription sub;
 
-  private transient Logger log;
-
-  private final boolean debug;
+  private boolean local;
 
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
                             final Subscription sub,
+                            final boolean local,
                             final BedeworkSubscriptionInfo info) {
     this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
+    this.local = local;
     this.info = info;
 
     debug = getLogger().isDebugEnabled();

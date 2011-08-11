@@ -26,6 +26,8 @@ public class BedeworkConnectorConfig {
   /* WSDL for remote service */
   private String bwWSDLURI;
 
+  private int keepAliveInterval;
+
   /** bedework web service WSDL uri
    *
    * @param val    String
@@ -40,5 +42,21 @@ public class BedeworkConnectorConfig {
    */
   public String getBwWSDLURI() {
     return bwWSDLURI;
+  }
+
+  /** KeepAliveInterval - seconds
+   *
+   * @param val    int seconds
+   */
+  public void setKeepAliveInterval(final int val) {
+    keepAliveInterval = val;
+  }
+
+  /** KeepAliveInterval - seconds
+   *
+   * @return int seconds
+   */
+  public int getKeepAliveInterval() {
+    return keepAliveInterval;
   }
 }

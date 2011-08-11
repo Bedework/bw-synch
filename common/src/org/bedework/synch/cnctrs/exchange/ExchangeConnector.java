@@ -19,16 +19,14 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Connector;
+import org.bedework.synch.ConnectorInstanceMap;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,13 +58,15 @@ public class ExchangeConnector
 
   private String connectorId;
 
+  private ConnectorInstanceMap<ExchangeConnectorInstance> cinstMap =
+      new ConnectorInstanceMap<ExchangeConnectorInstance>();
+
   // Are these thread safe?
   private MessageFactory soapMsgFactory;
   private JAXBContext ewsjc;
 
   @Override
   public void start(final String connectorId,
-                    final Properties props,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
     try {
@@ -74,9 +74,7 @@ public class ExchangeConnector
       this.syncher = syncher;
       this.callbackUri = callbackUri;
 
-      ApplicationContext ctx = new ClassPathXmlApplicationContext(
-          "synch-connectors.xml");
-      config = (ExchangeConnectorConfig)ctx.getBean(connectorId + "ExchangeConfig");
+      config = (ExchangeConnectorConfig)syncher.getAppContext().getBean(connectorId + "ExchangeConfig");
 
       info("**************************************************");
       info("Starting exchange connector " + connectorId);
@@ -90,8 +88,19 @@ public class ExchangeConnector
   }
 
   @Override
+  public String getId() {
+    return connectorId;
+  }
+
+  @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final boolean local) throws SynchException {
+    ExchangeConnectorInstance inst = cinstMap.find(sub, local);
+
+    if (inst != null) {
+      return inst;
+    }
+
     //debug = getLogger().isDebugEnabled();
     ExchangeSubscriptionInfo info;
 
@@ -101,7 +110,10 @@ public class ExchangeConnector
       info = new ExchangeSubscriptionInfo(sub.getRemoteConnectorInfo());
     }
 
-    return new ExchangeConnectorInstance(config, this, sub, info);
+    inst = new ExchangeConnectorInstance(config, this, sub, local, info);
+    cinstMap.add(sub, local, inst);
+
+    return inst;
   }
 
   class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
@@ -116,6 +128,16 @@ public class ExchangeConnector
     if (id.endsWith("/")) {
       // starts with "/"
       id = id.substring(1, id.length() - 1);
+    }
+
+    boolean local;
+
+    if (id.startsWith("L")) {
+      local = true;
+    } else if (id.startsWith("R")) {
+      local = false;
+    } else {
+      throw new SynchException("Id not starting with L or R");
     }
 
     Subscription sub = syncher.getSubscription(id);
@@ -134,7 +156,9 @@ public class ExchangeConnector
     for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
       ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
-      ExchangeNotification en = new ExchangeNotification(sub, note);
+      ExchangeNotification en = new ExchangeNotification(sub, local, note);
+
+      // XXX fetch the event and put into notification.
 
       enb.addNotification(en);
       syncher.handleNotification(sub, note);

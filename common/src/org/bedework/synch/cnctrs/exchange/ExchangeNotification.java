@@ -31,12 +31,14 @@ public class ExchangeNotification extends
 
   /**
    * @param sub
+   * @param local
    * @param enm
    * @throws SynchException
    */
   public ExchangeNotification(final Subscription sub,
+                              final boolean local,
                               final ExchangeNotificationMessage enm) throws SynchException {
-    super(sub);
+    super(sub, local);
 
     this.enm = enm;
 

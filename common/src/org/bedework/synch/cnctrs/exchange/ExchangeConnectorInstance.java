@@ -71,27 +71,31 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  * @author Mike Douglass
  */
 public class ExchangeConnectorInstance implements ConnectorInstance {
+  private transient Logger log;
+
+  private boolean debug;
+
   private ExchangeConnectorConfig config;
 
-  private final ExchangeConnector cnctr;
+  private ExchangeConnector cnctr;
 
   private ExchangeSubscriptionInfo info;
 
-  private final Subscription sub;
+  private Subscription sub;
 
-  private transient Logger log;
-
-  private final boolean debug;
+  private boolean local;
 
   private final XmlIcalConvert icalConverter = new XmlIcalConvert();
 
   ExchangeConnectorInstance(final ExchangeConnectorConfig config,
                             final ExchangeConnector cnctr,
                             final Subscription sub,
+                            final boolean local,
                             final ExchangeSubscriptionInfo info) {
     this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
+    this.local = local;
     this.info = info;
 
     debug = getLogger().isDebugEnabled();
@@ -244,6 +248,31 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     } catch (Throwable t) {
       throw new SynchException(t);
     }
+  }
+
+  /* ====================================================================
+   *                   Object methods
+   * ==================================================================== */
+
+  @Override
+  public int hashCode() {
+    int res = sub.hashCode();
+    if (local) {
+      res += 13;
+    }
+
+    return res;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    ExchangeConnectorInstance that = (ExchangeConnectorInstance)o;
+
+    if (that.local != local) {
+      return false;
+    }
+
+    return sub.equals(that.sub);
   }
 
   /* ====================================================================
