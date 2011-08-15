@@ -87,7 +87,8 @@ public interface ConnectorInstance {
    */
   AddItemResponseType addItem(IcalendarType val) throws SynchException;
 
-  /** Fetch a calendar component
+  /** Fetch a calendar component.  The uid is required as a key as it is the
+   * only value which is guaranteed to be available at both ends.
    *
    * @param uid of item
    * @return response
@@ -97,11 +98,9 @@ public interface ConnectorInstance {
 
   /** Update a calendar component
    *
-   * @param uid of item
    * @param updates
    * @return response
    * @throws SynchException
    */
-  UpdateItemResponseType updateItem(String uid,
-                                    UpdateItemType updates) throws SynchException;
+  UpdateItemResponseType updateItem(UpdateItemType updates) throws SynchException;
 }

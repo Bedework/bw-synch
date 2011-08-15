@@ -18,8 +18,8 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.exchgsynch.CalendarItem;
-import org.bedework.exchgsynch.intf.SynchException;
+import org.bedework.synch.CalendarItem;
+import org.bedework.synch.SynchException;
 
 import net.fortuna.ical4j.model.component.CalendarComponent;
 

@@ -170,30 +170,13 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     return null;
   }
 
-  /** Fetch a calendar component
-   *
-   * @param sub
-   * @param uid of item
-   * @return response
-   * @throws SynchException
-   */
   @Override
-  public FetchItemResponseType fetchItem(final String uid) throws SynchException {
+  public FetchItemResponseType fetchItem(final String href) throws SynchException {
     return null;
   }
 
-  /** Update a calendar component
-   *
-   * @param sub
-   * @param uid of item
-   * @param updates
-   * @param nsc - used to set namespaces
-   * @return response
-   * @throws SynchException
-   */
   @Override
-  public UpdateItemResponseType updateItem(final String uid,
-                                           final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
     return null;
   }
 

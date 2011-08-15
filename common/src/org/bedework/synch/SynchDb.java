@@ -136,18 +136,14 @@ public class SynchDb implements Serializable {
     }
   }
 
-  /** Find subscriptions that match the end points.
+  /** Find any subscription that matches this one. There can only be one with
+   * the same endpoints
    *
-   * @param calPath - remote calendar
-   * @param exCal - Exchange calendar
-   * @param exId - Exchange principal
+   * @param sub
    * @return matching subscriptions
    * @throws SynchException
    */
-  @SuppressWarnings("unchecked")
-  public List<Subscription> find(final String calPath,
-                                         final String exCal,
-                                         final String exId) throws SynchException {
+  public Subscription find(final Subscription sub) throws SynchException {
     try {
       StringBuilder sb = new StringBuilder();
 

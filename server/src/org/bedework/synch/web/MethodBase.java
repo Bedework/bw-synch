@@ -18,9 +18,10 @@
 */
 package org.bedework.synch.web;
 
-import org.apache.log4j.Logger;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
+
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import java.net.URLDecoder;
@@ -131,13 +132,20 @@ public abstract class MethodBase {
     return syncher;
   }
 
-  /** Get the decoded and fixed resource URI
+  /** Get the decoded and fixed resource URI. This calls getServletPath() to
+   * obtain the path information. The description of that method is a little
+   * obscure in it's meaning. In a request of this form:<br/><br/>
+   * "GET /ucaldav/user/douglm/calendar/1302064354993-g.ics HTTP/1.1[\r][\n]"<br/><br/>
+   * getServletPath() will return <br/><br/>
+   * /user/douglm/calendar/1302064354993-g.ics<br/><br/>
+   * that is the context has been removed. In addition this method will URL
+   * decode the path. getRequestUrl() does neither.
    *
    * @param req      Servlet request object
    * @return String  fixed up uri
    * @throws SynchException
    */
-  public String getResourceUri(final HttpServletRequest req)
+  public String[] getResourceUri(final HttpServletRequest req)
       throws SynchException {
     String uri = req.getServletPath();
 
@@ -149,16 +157,16 @@ public abstract class MethodBase {
     return fixPath(uri);
   }
 
-  /** Return a path, beginning with a "/", after "." and ".." are removed.
+  /** Return a path, broken into its elements, after "." and ".." are removed.
    * If the parameter path attempts to go above the root we return null.
    *
    * Other than the backslash thing why not use URI?
    *
    * @param path      String path to be fixed
-   * @return String   fixed path
+   * @return String[]   fixed path broken into elements
    * @throws SynchException
    */
-  public static String fixPath(final String path) throws SynchException {
+  public static String[] fixPath(final String path) throws SynchException {
     if (path == null) {
       return null;
     }
@@ -192,10 +200,6 @@ public abstract class MethodBase {
       decoded = decoded.replaceAll("//", "/");
     }
 
-    if (decoded.indexOf("/.") < 0) {
-      return decoded;
-    }
-
     /** Somewhere we may have /./ or /../
      */
 
@@ -220,14 +224,7 @@ public abstract class MethodBase {
       }
     }
 
-    /** Reconstruct */
-    StringBuilder sb = new StringBuilder();
-    for (String s: al) {
-      sb.append('/');
-      sb.append(s);
-    }
-
-    return sb.toString();
+    return (String[])al.toArray();
   }
 
   /*

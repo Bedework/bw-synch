@@ -18,8 +18,7 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage;
-import org.bedework.synch.cnctrs.exchange.ExchangeNotificationMessage.NotificationItem;
+import org.bedework.synch.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
 
 import edu.rpi.cmt.timezones.Timezones;
@@ -480,38 +479,19 @@ public class SynchEngine {
     return subscribe(sub);
   }
 
-  /**
-   * @param sub
-   * @param note
+  /** Processes a batch of notifications. This must be done in a timely manner
+   * as a request is usually hanging on this.
+   *
+   * @param notes
+   * @return batch with status set and possibly elemnts deleted
    * @throws SynchException
    */
-  public void handleNotification(final Subscription sub,
-                                 final ExchangeNotificationMessage note) throws SynchException {
-    for (NotificationItem ni: note.getNotifications()) {
-      if (ni.getItemId() == null) {
-        // Folder changes as well as item.
-        continue;
-      }
-
-      switch (ni.getAction()) {
-      case CopiedEvent:
-        break;
-      case CreatedEvent:
-        addItem(sub, ni);
-        break;
-      case DeletedEvent:
-        break;
-      case ModifiedEvent:
-        updateItem(sub, ni);
-        break;
-      case MovedEvent:
-        break;
-      case NewMailEvent:
-        break;
-      case StatusEvent:
-        break;
-      }
+  public NotificationBatch<Notification> handleNotifications(
+            final NotificationBatch<Notification> notes) throws SynchException {
+    for (Notification note: notes.getNotifications()) {
     }
+
+    return null;
   }
 
   /* ====================================================================
@@ -558,23 +538,29 @@ public class SynchEngine {
     }
   }
 
-  /** Find subscriptions that match the end points.
+  /** Find any subscription that matches this one. There can only be one with
+   * the same endpoints
    *
-   * @param calPath - remote calendar
-   * @param exCal - Exchange calendar
-   * @param exId - Exchange principal
+   * @param sub
    * @return matching subscriptions
    * @throws SynchException
    */
-  public List<Subscription> find(final String calPath,
-                                         final String exCal,
-                                         final String exId) throws SynchException {
+  public Subscription find(final Subscription sub) throws SynchException {
     db.open();
     try {
-      return db.find(calPath, exCal, exId);
+      return db.find(sub);
     } finally {
       db.close();
     }
+  }
+
+  /** Return a registered connector witht he given id.
+   *
+   * @param id
+   * @return connector or null.
+   */
+  public Connector getConnector(final String id) {
+    return connectorMap.get(id);
   }
 
   /* ====================================================================
@@ -675,10 +661,6 @@ public class SynchEngine {
 
   private void info(final String msg) {
     getLogger().info(msg);
-  }
-
-  private Connector getConnector(final String id) {
-    return connectorMap.get(id);
   }
 
   private Collection<Connector> getConnectors() {

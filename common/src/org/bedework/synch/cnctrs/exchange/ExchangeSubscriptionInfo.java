@@ -50,12 +50,7 @@ public class ExchangeSubscriptionInfo {
    */
   public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
     this.info = info;
-
-    if (info.getConnectorProperties() != null) {
-      info.resetProps(info.getConnectorProperties());
-    } else {
-      info.resetProps("");
-    }
+    info.loadProperties();
   }
 
   /** Constructor
@@ -70,7 +65,6 @@ public class ExchangeSubscriptionInfo {
                                   final String exchangePw,
                                   final String exchangeURI) {
     info = new SubscriptionConnectorInfo();
-    info.resetProps("");
 
     setExchangeCalendar(exchangeCalendar);
     setExchangeId(exchangeId);

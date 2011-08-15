@@ -50,12 +50,7 @@ public class BedeworkSubscriptionInfo {
    */
   public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
     this.info = info;
-
-    if (info.getConnectorProperties() != null) {
-      info.resetProps(info.getConnectorProperties());
-    } else {
-      info.resetProps("");
-    }
+    info.loadProperties();
   }
 
   /** Constructor
@@ -70,7 +65,6 @@ public class BedeworkSubscriptionInfo {
                               final String calPath,
                               final String principalHref) {
     info = new SubscriptionConnectorInfo();
-    info.resetProps("");
 
     setPrincipalHref(principalHref);
     setCalPath(calPath);

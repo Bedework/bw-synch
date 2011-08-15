@@ -20,6 +20,7 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.Connector;
 import org.bedework.synch.ConnectorInstanceMap;
+import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
@@ -36,6 +37,8 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,15 +52,34 @@ import javax.xml.namespace.QName;
 public class BedeworkConnector
       implements Connector<BedeworkConnectorInstance,
                            Notification> {
+  private transient Logger log;
+
+  /** */
+  public static final String propnameCalendarHref = "calendar-href";
+
+  /** */
+  public static final String propnamePrincipal = "principal";
+
+  private static List<ConnectorPropertyInfo> propInfo =
+      new ArrayList<ConnectorPropertyInfo>();
+
+  static {
+    propInfo.add(new ConnectorPropertyInfo(propnameCalendarHref,
+                                           false,
+                                           ""));
+
+    propInfo.add(new ConnectorPropertyInfo(propnamePrincipal,
+                                           false,
+                                           ""));
+  }
+
+  private SynchEngine syncher;
+
   private BedeworkConnectorConfig config;
 
   private String callbackUri;
 
   private String connectorId;
-
-  private SynchEngine syncher;
-
-  private transient Logger log;
 
   private static boolean running;
 
@@ -140,6 +162,11 @@ public class BedeworkConnector
   }
 
   @Override
+  public List<ConnectorPropertyInfo> getPropertyInfo() {
+    return propInfo;
+  }
+
+  @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final boolean local) throws SynchException {
     BedeworkConnectorInstance inst = cinstMap.find(sub, local);
@@ -169,7 +196,7 @@ public class BedeworkConnector
   @Override
   public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final String resourceUri) throws SynchException {
+                                     final String[] resourceUri) throws SynchException {
     return null;
   }
 
@@ -181,7 +208,9 @@ public class BedeworkConnector
 
   @Override
   public void stop() throws SynchException {
-
+    if (pinger != null) {
+      pinger.interrupt();
+    }
   }
 
   /* ====================================================================

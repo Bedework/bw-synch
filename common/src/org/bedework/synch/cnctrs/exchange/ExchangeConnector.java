@@ -20,12 +20,14 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Connector;
 import org.bedework.synch.ConnectorInstanceMap;
+import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,9 +39,12 @@ import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPMessage;
 
+import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
+import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 
 /** Calls from exchange synch processor to the service.
  *
@@ -49,6 +54,40 @@ public class ExchangeConnector
       implements Connector<ExchangeConnectorInstance,
                            ExchangeNotification> {
   protected transient Logger log;
+
+  /* Information required from the user for an Exchange connection
+   *
+   * exchange-folder-id
+   * exchange-uri
+   * exchange-user
+   * exchange-pw
+   */
+
+  /** */
+  public static final String propnameFolderId = "exchange-folder-id";
+
+  /** */
+  public static final String propnameAccount = "account";
+
+  /** */
+  public static final String propnamePw = "password";
+
+  private static List<ConnectorPropertyInfo> propInfo =
+      new ArrayList<ConnectorPropertyInfo>();
+
+  static {
+    propInfo.add(new ConnectorPropertyInfo(propnameFolderId,
+                                           false,
+                                           ""));
+
+    propInfo.add(new ConnectorPropertyInfo(propnameAccount,
+                                           false,
+                                           ""));
+
+    propInfo.add(new ConnectorPropertyInfo(propnamePw,
+                                           true,
+                                           ""));
+  }
 
   private SynchEngine syncher;
 
@@ -93,6 +132,11 @@ public class ExchangeConnector
   }
 
   @Override
+  public List<ConnectorPropertyInfo> getPropertyInfo() {
+    return propInfo;
+  }
+
+  @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final boolean local) throws SynchException {
     ExchangeConnectorInstance inst = cinstMap.find(sub, local);
@@ -122,13 +166,13 @@ public class ExchangeConnector
   @Override
   public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final String resourceUri) throws SynchException {
-    String id = resourceUri;
-
-    if (id.endsWith("/")) {
-      // starts with "/"
-      id = id.substring(1, id.length() - 1);
+                                     final String[] resourceUri) throws SynchException {
+    if (resourceUri.length != 1) {
+      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return null;
     }
+
+    String id = resourceUri[0];
 
     boolean local;
 
@@ -139,6 +183,8 @@ public class ExchangeConnector
     } else {
       throw new SynchException("Id not starting with L or R");
     }
+
+    id = id.substring(1);
 
     Subscription sub = syncher.getSubscription(id);
 
@@ -171,6 +217,23 @@ public class ExchangeConnector
   public void respondCallback(final HttpServletResponse resp,
                               final NotificationBatch<ExchangeNotification> notifications)
                                                     throws SynchException {
+    try {
+      ObjectFactory of = new ObjectFactory();
+      SendNotificationResultType snr = of.createSendNotificationResultType();
+
+      if (ok) {
+        snr.setSubscriptionStatus(SubscriptionStatusType.OK);
+      } else {
+        snr.setSubscriptionStatus(SubscriptionStatusType.UNSUBSCRIBE);
+      }
+
+      marshalBody(resp,
+                  snr);
+    } catch (SynchException se) {
+      throw se;
+    } catch(Throwable t) {
+      throw new SynchException(t);
+    }
   }
 
   @Override

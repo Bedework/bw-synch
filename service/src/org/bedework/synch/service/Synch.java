@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.service;
 
+import org.bedework.synch.SynchConfig;
 import org.bedework.synch.SynchEngine;
 
 import org.apache.log4j.Logger;
@@ -495,10 +496,6 @@ public class Synch implements SynchMBean {
     info("************************************************************");
 
     running = false;
-
-    if (pinger != null) {
-      pinger.interrupt();
-    }
 
     processor.interrupt();
     try {

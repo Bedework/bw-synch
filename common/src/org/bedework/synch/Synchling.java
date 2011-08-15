@@ -31,6 +31,7 @@ import org.oasis_open.docs.ns.wscal.calws_soap.ComponentSelectionType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -112,12 +113,11 @@ public class Synchling {
    */
   public void handleNotification(final Notification<NotificationItem> note) throws SynchException {
     for (NotificationItem ni: note.getNotifications()) {
-      if (ni.getItemId() == null) {
-        // Folder changes as well as item.
-        continue;
-      }
 
       switch (ni.getAction()) {
+      case FullSynch:
+        reSynch(note, ni);
+        break;
       case CopiedEvent:
         break;
       case CreatedEvent:
@@ -154,7 +154,8 @@ public class Synchling {
       return;
     }
 
-    ConnectorInstance cinst = getCinst(note.getSub(), !note.getLocal());
+    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
+                                                           !note.getLocal());
 
     AddItemResponseType air = cinst.addItem(ical);
     if (debug) {
@@ -178,7 +179,7 @@ public class Synchling {
     ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
                                                            !note.getLocal());
 
-    FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
+    FetchItemResponseType fresp = cinst.fetchItem(ni.getHref());
     if (debug) {
       trace("Update: status=" + fresp.getStatus() +
             " msg=" + fresp.getMessage());
@@ -192,9 +193,15 @@ public class Synchling {
 
     XmlIcalCompare comp = new XmlIcalCompare();
 
-    ComponentSelectionType cst = comp.diff(icalOf, ical, targetIcal);
+    ComponentSelectionType cst = comp.diff(ical, targetIcal);
 
-    UpdateItemResponseType uir = cinst.updateItem(cst);
+    UpdateItemType ui = new UpdateItemType();
+
+    ui.setHref();
+    ui.setEtoken(fresp.getEtoken());
+    ui.getSelect().add(cst);
+
+    UpdateItemResponseType uir = cinst.updateItem(ui);
     if (debug) {
       trace("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
@@ -310,7 +317,8 @@ public class Synchling {
     }
   }
 
-  private StatusType getItems(final Subscription sub) throws SynchException {
+  private StatusType reSynch(final Notification note,
+                             final NotificationItem ni) throws SynchException {
     try {
       /* The action here depends on which way we are synching. Below we refer
        * to Exchange events. These are signified by particular X-properties we

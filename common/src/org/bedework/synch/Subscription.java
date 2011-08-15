@@ -18,6 +18,9 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.wsmessages.SynchDirectionType;
+import org.bedework.synch.wsmessages.SynchMasterType;
+
 import java.util.UUID;
 
 /** Represents a subscription for the synch engine.
@@ -56,45 +59,19 @@ import java.util.UUID;
  */
 @SuppressWarnings("rawtypes")
 public class Subscription implements Comparable<Subscription> {
-  /** Used to define which way we are synching
-   */
-  public enum DirectionType {
-    /** local is updated from remote */
-    REMOTE_TO_LOCAL,
-
-    /** remote is updated from local - i.e. export */
-    LOCAL_TO_REMOTE,
-
-    /** 2 way synch */
-    BOTH_WAYS
-  }
-
-  /** In a 2 way synch which end takes precedence when conficts arise.
-   */
-  public enum MasteryType {
-    /** No precedence - we try to figure it out */
-    NONE,
-
-    /** local over remote */
-    LOCAL,
-
-    /** remote over local */
-    REMOTE
-  }
-
   private long id;
 
   private int seq;
 
   private String subscriptionId;
 
-  private String localConnectorId;
+  private SubscriptionConnectorInfo localConnectorInfo;
 
-  private String remoteConnectorId;
+  private SubscriptionConnectorInfo remoteConnectorInfo;
 
-  private DirectionType direction;
+  private SynchDirectionType direction;
 
-  private MasteryType master;
+  private SynchMasterType master;
 
   /* Following not persisted */
 
@@ -182,41 +159,41 @@ public class Subscription implements Comparable<Subscription> {
     return subscriptionId;
   }
 
-  /** Id for the local connector.
+  /** Info for the local connector.
    *
-   * @param val String
+   * @param val SubscriptionConnectorInfo
    */
-  public void setLocalConnectorId(final String val) {
-	  localConnectorId = val;
+  public void setLocalConnectorInfo(final SubscriptionConnectorInfo val) {
+	  localConnectorInfo = val;
   }
 
   /**
-   * @return String
+   * @return SubscriptionConnectorInfo
    */
-  public String getLocalConnectorId() {
-    return localConnectorId;
+  public SubscriptionConnectorInfo getLocalConnectorInfo() {
+    return localConnectorInfo;
   }
 
-  /** Id for the remote connector.
+  /** Info for the remote connector.
    *
-   * @param val    String
+   * @param val    SubscriptionConnectorInfo
    */
-  public void setRemoteConnectorId(final String val) {
-	  remoteConnectorId = val;
+  public void setRemoteConnectorInfo(final SubscriptionConnectorInfo val) {
+	  remoteConnectorInfo = val;
   }
 
   /**
-   * @return String
+   * @return SubscriptionConnectorInfo
    */
-  public String getRemoteConnectorId() {
-    return remoteConnectorId;
+  public SubscriptionConnectorInfo getRemoteConnectorInfo() {
+    return remoteConnectorInfo;
   }
 
   /** Which way?
    *
    * @param val
    */
-  public void setDirection(final DirectionType val) {
+  public void setDirection(final SynchDirectionType val) {
     direction = val;
   }
 
@@ -224,7 +201,7 @@ public class Subscription implements Comparable<Subscription> {
    *
    * @return direction
    */
-  public DirectionType getDirection() {
+  public SynchDirectionType getDirection() {
     return direction;
   }
 
@@ -232,14 +209,14 @@ public class Subscription implements Comparable<Subscription> {
    *
    * @param val
    */
-  public void setMaster(final MasteryType val) {
+  public void setMaster(final SynchMasterType val) {
     master = val;
   }
 
   /**
    * @return who's master
    */
-  public MasteryType getMaster() {
+  public SynchMasterType getMaster() {
     return master;
   }
 
@@ -313,11 +290,11 @@ public class Subscription implements Comparable<Subscription> {
       return true;
     }
 
-    if (!getLocalConnectorId().equals(that.getLocalConnectorId())) {
+    if (!getLocalConnectorInfo().equals(that.getLocalConnectorInfo())) {
       return true;
     }
 
-    if (!getRemoteConnectorId().equals(that.getRemoteConnectorId())) {
+    if (!getRemoteConnectorInfo().equals(that.getRemoteConnectorInfo())) {
       return true;
     }
 
@@ -350,13 +327,13 @@ public class Subscription implements Comparable<Subscription> {
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("localConnectorId = ");
-    sb.append(getLocalConnectorId());
+    sb.append("localConnectorInfo = ");
+    sb.append(getLocalConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("remoteConnectorId = ");
-    sb.append(getRemoteConnectorId());
+    sb.append("remoteConnectorInfo = ");
+    sb.append(getRemoteConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);

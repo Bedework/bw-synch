@@ -32,6 +32,9 @@ import javax.servlet.http.HttpServletResponse;
  * ConncetorInstance objects per subscription.
  *
  * @author Mike Douglass
+ *
+ * @param <C>
+ * @param <N>
  */
 public interface Connector<C extends ConnectorInstance,
                            N extends Notification> {
@@ -59,6 +62,13 @@ public interface Connector<C extends ConnectorInstance,
    * @return id provided at start
    */
   String getId();
+
+  /** List the information about properties required for subscriptions via this
+   * connector.
+   *
+   * @return
+   */
+  List<ConnectorPropertyInfo> getPropertyInfo();
 
   /** Called to obtain a connector instance for a subscription.
    * A response of null means no synch available.
@@ -105,13 +115,13 @@ public interface Connector<C extends ConnectorInstance,
    *
    * @param req
    * @param resp
-   * @param resourceUri
+   * @param resourceUri - elements of the path with context and connector id removed
    * @return Notification with 1 or more Notification items or null for no action.
    * @throws SynchException
    */
   NotificationBatch<N> handleCallback(HttpServletRequest req,
                                       HttpServletResponse resp,
-                                      String resourceUri) throws SynchException;
+                                      String[] resourceUri) throws SynchException;
 
   /** Will respond to a notification.
    *

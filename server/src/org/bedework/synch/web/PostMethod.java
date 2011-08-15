@@ -18,10 +18,14 @@
 */
 package org.bedework.synch.web;
 
+import org.bedework.synch.Connector;
+import org.bedework.synch.Connector.NotificationBatch;
+import org.bedework.synch.SynchException;
+
+import java.util.Arrays;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.bedework.synch.SynchException;
 
 /** Handle POST for exchange synch servlet.
  */
@@ -34,20 +38,26 @@ public class PostMethod extends MethodBase {
   public void doMethod(final HttpServletRequest req,
                        final HttpServletResponse resp) throws SynchException {
     try {
-      String resourceUri = getResourceUri(req);
+      String[] resourceUri = getResourceUri(req);
 
-      SOAPHandler hdlr;
-
-      if (resourceUri.startsWith(getSyncher().getRemoteCallbackPathPrefix())) {
-        // From remote system
-        hdlr = new SynchwsSOAPHandler();
-      } else {
-        hdlr = new EwsSOAPHandler();
+      if ((resourceUri == null) || (resourceUri.length == 0)) {
+        throw new SynchException("Bad resource url - no connector specified");
       }
 
-      hdlr.init(syncher);
+      /* Find a connector to handle the incoming request.
+       */
+      Connector conn = syncher.getConnector(resourceUri[0]);
 
-      hdlr.doRequest(req, resp, resourceUri);
+      if (conn == null) {
+        throw new SynchException("Bad resource url - unknown connector specified");
+      }
+
+      NotificationBatch notes = conn.handleCallback(req, resp,
+                          Arrays.copyOfRange(resourceUri, 1, resourceUri.length - 1));
+
+      if (notes != null) {
+        conn.respondCallback(resp, notes);
+      }
     } catch (SynchException se) {
       throw se;
     } catch(Throwable t) {

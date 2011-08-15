@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.wsmessages.SubscribeRequestType;
+
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.ArrayList;
@@ -36,6 +38,13 @@ import java.util.List;
  * <p>Some systems will send multiple notifications for the same entity. Each
  * object of this class will contain a list of notification items. Presumably
  * these reflect activity since the last notification.
+ *
+ * <p>Each notification item defines an action along with a uid and a possible
+ * calendar entity. The uid is required as a key as it is the only value which
+ * is guaranteed to be available at both ends.
+ *
+ * <p>We assume that any change to any part of a recurring event master or
+ * overrides will result in synching the whole entity.
  *
  * @author douglm
  *
@@ -108,6 +117,8 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public enum ActionType {
       /** */
+      FullSynch,
+      /** */
       CopiedEvent,
       /** */
       CreatedEvent,
@@ -120,7 +131,13 @@ public class Notification<NI extends Notification.NotificationItem> {
       /** */
       NewMailEvent,
       /** */
-      StatusEvent
+      StatusEvent,
+
+      /** */
+      NewSubscription,
+
+      /** */
+      Unsubscribe,
     }
 
     private ActionType action;
@@ -129,28 +146,29 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private String uid;
 
-    /** Create a notification item for an action that has an associated entity,
-     * for example add or update.
-     *
-     * @param action
-     * @param ical
-     */
-    public NotificationItem(final ActionType action,
-                            final IcalendarType ical) {
-      this.action = action;
-      this.ical = ical;
-    }
+    private SubscribeRequestType subscribeRequest;
 
-    /** Create a notification item for an action that has no associated entity,
-     * for example delete or moved.
+    /** Create a notification item for an action.
      *
      * @param action
-     * @param uid
+     * @param ical - the entity if available
+     * @param uid - Uid for the entity
      */
     public NotificationItem(final ActionType action,
+                            final IcalendarType ical,
                             final String uid) {
       this.action = action;
+      this.ical = ical;
       this.uid = uid;
+    }
+
+    /** Create a notification item for a subscription.
+     *
+     * @param subscribeRequest
+     */
+    public NotificationItem(final SubscribeRequestType subscribeRequest) {
+      action = ActionType.NewSubscription;
+      this.subscribeRequest = subscribeRequest;
     }
 
     /**
@@ -163,15 +181,15 @@ public class Notification<NI extends Notification.NotificationItem> {
     /**
      * @return the icalendar entity we were notified about
      */
-    public String getUid() {
-      return uid;
+    public IcalendarType getIcal() {
+      return ical;
     }
 
     /**
      * @return the uid of the icalendar entity we were notified about
      */
-    public IcalendarType getIcal() {
-      return ical;
+    public String getUid() {
+      return uid;
     }
 
     protected void toStringSegment(final StringBuilder sb) {
