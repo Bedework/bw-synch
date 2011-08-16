@@ -22,6 +22,7 @@ import org.bedework.synch.Connector;
 import org.bedework.synch.ConnectorInstanceMap;
 import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
@@ -132,14 +133,19 @@ public class ExchangeConnector
   }
 
   @Override
+  public String getCallbackUri() {
+    return callbackUri;
+  }
+
+  @Override
   public List<ConnectorPropertyInfo> getPropertyInfo() {
     return propInfo;
   }
 
   @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final boolean local) throws SynchException {
-    ExchangeConnectorInstance inst = cinstMap.find(sub, local);
+                                                        final SynchEnd end) throws SynchException {
+    ExchangeConnectorInstance inst = cinstMap.find(sub, end);
 
     if (inst != null) {
       return inst;
@@ -148,14 +154,14 @@ public class ExchangeConnector
     //debug = getLogger().isDebugEnabled();
     ExchangeSubscriptionInfo info;
 
-    if (local) {
-      info = new ExchangeSubscriptionInfo(sub.getLocalConnectorInfo());
+    if (end == SynchEnd.endA) {
+      info = new ExchangeSubscriptionInfo(sub.getEndAConnectorInfo());
     } else {
-      info = new ExchangeSubscriptionInfo(sub.getRemoteConnectorInfo());
+      info = new ExchangeSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new ExchangeConnectorInstance(config, this, sub, local, info);
-    cinstMap.add(sub, local, inst);
+    inst = new ExchangeConnectorInstance(config, this, sub, end, info);
+    cinstMap.add(sub, end, inst);
 
     return inst;
   }
@@ -173,14 +179,12 @@ public class ExchangeConnector
     }
 
     String id = resourceUri[0];
+    SynchEnd end;
 
-    boolean local;
-
-    if (id.startsWith("L")) {
-      local = true;
-    } else if (id.startsWith("R")) {
-      local = false;
-    } else {
+    try {
+      String endFlag = id.substring(0, 1);
+      end = SynchEnd.valueOf(endFlag);
+    } catch (Throwable t) {
       throw new SynchException("Id not starting with L or R");
     }
 
@@ -202,7 +206,7 @@ public class ExchangeConnector
     for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
       ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
-      ExchangeNotification en = new ExchangeNotification(sub, local, note);
+      ExchangeNotification en = new ExchangeNotification(sub, end, note);
 
       // XXX fetch the event and put into notification.
 

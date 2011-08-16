@@ -20,6 +20,7 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchException;
 
 /** Notification from Exchange.
@@ -31,14 +32,14 @@ public class ExchangeNotification extends
 
   /**
    * @param sub
-   * @param local
+   * @param end
    * @param enm
    * @throws SynchException
    */
   public ExchangeNotification(final Subscription sub,
-                              final boolean local,
+                              final SynchEnd end,
                               final ExchangeNotificationMessage enm) throws SynchException {
-    super(sub, local);
+    super(sub, end);
 
     this.enm = enm;
 

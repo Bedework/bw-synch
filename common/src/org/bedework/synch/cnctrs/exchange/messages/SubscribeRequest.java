@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange.messages;
 
-import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs.SynchEnd;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
@@ -37,11 +37,13 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
   private DistinguishedFolderIdType fid;
 
   /**
-   * @param sub
+   * @param subId
+   * @param end
    * @param watermark
    * @param callBackUri
    */
-  public SubscribeRequest(final Subscription sub,
+  public SubscribeRequest(final String subId,
+                          final SynchEnd end,
                           final String watermark,
                           final String callBackUri) {
     super();
@@ -73,12 +75,16 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 
     psr.setWatermark(watermark);
 
-    String uri = callBackUri;
-    if (!uri.endsWith("/")) {
-      uri += "/";
+    StringBuilder uri = new StringBuilder(callBackUri);
+    if (!callBackUri.endsWith("/")) {
+      uri.append("/");
     }
 
-    psr.setURL(uri + sub.getSubscriptionId() + "/");
+    uri.append(end.name());
+    uri.append(subId);
+    uri.append("/");
+
+    psr.setURL(uri.toString());
   }
 
   /**

@@ -149,16 +149,41 @@ public class SynchDb implements Serializable {
 
       sb.append("from ");
       sb.append(Subscription.class.getName());
-      sb.append(" sub where sub.calPath=:calPath");
-      sb.append(" and where sub.exchangeCalendar=:exCal");
-      sb.append(" and where sub.exchangeId=:exId");
+      sb.append(" sub where sub.endAConnectorInfo.connectorId=:aconnid");
+      sb.append(" and sub.endAConnectorInfo.connectorProperties=:aconnprops");
+      sb.append(" and sub.endBConnectorInfo.connectorId=:bconnid");
+      sb.append(" and sub.endBConnectorInfo.connectorProperties=:bconnprops");
+      sb.append(" and sub.direction=:dir");
+      sb.append(" and sub.master=:mstr");
 
       sess.createQuery(sb.toString());
-      sess.setString("calPath", calPath);
-      sess.setString("exCal", exCal);
-      sess.setString("exId", exId);
+      sess.setString("aconnid",
+                     sub.getEndAConnectorInfo().getConnectorId());
+      sess.setString("aconnprops",
+                     sub.getEndAConnectorInfo().getConnectorProperties());
+      sess.setString("bconnid",
+                     sub.getEndBConnectorInfo().getConnectorId());
+      sess.setString("bconnprops",
+                     sub.getEndBConnectorInfo().getConnectorProperties());
+      sess.setString("dir",
+                     sub.getDirection().name());
+      sess.setString("mstr",
+                     sub.getMaster().name());
 
-      return sess.getList();
+      return (Subscription)sess.getUnique();
+    } catch (HibException he) {
+      throw new SynchException(he);
+    }
+  }
+
+  /** Add the subscription.
+   *
+   * @param sub
+   * @throws SynchException
+   */
+  public void add(final Subscription sub) throws SynchException {
+    try {
+      sess.save(sub);
     } catch (HibException he) {
       throw new SynchException(he);
     }
@@ -170,7 +195,11 @@ public class SynchDb implements Serializable {
    * @throws SynchException
    */
   public void update(final Subscription sub) throws SynchException {
-
+    try {
+      sess.update(sub);
+    } catch (HibException he) {
+      throw new SynchException(he);
+    }
   }
 
   /** Delete the subscription.

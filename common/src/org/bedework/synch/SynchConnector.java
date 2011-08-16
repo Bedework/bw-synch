@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
@@ -28,10 +29,10 @@ import org.bedework.synch.wsmessages.SynchPropertyType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
-import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.ErrorResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -41,6 +42,7 @@ import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,6 +82,9 @@ public class SynchConnector
 
   private ObjectFactory of = new ObjectFactory();
 
+  private static List<ConnectorPropertyInfo> propInfo =
+      new ArrayList<ConnectorPropertyInfo>();
+
   @Override
   public void start(final String connectorId,
                     final String callbackUri,
@@ -97,8 +102,18 @@ public class SynchConnector
   }
 
   @Override
+  public String getCallbackUri() {
+    return callbackUri;
+  }
+
+  @Override
+  public List<ConnectorPropertyInfo> getPropertyInfo() {
+    return propInfo;
+  }
+
+  @Override
   public SynchConnectorInstance getConnectorInstance(final Subscription sub,
-                                                     final boolean local) throws SynchException {
+                                                     final SynchEnd end) throws SynchException {
     return null;
   }
 
@@ -118,16 +133,16 @@ public class SynchConnector
       Object o = unmarshalBody(req);
 
       if (o instanceof SubscribeRequestType) {
-        subscribe(resp, (SubscribeRequestType)o);
-        return;
+        return new NotificationBatch(subscribe(resp, (SubscribeRequestType)o));
       }
 
       if (o instanceof UnsubscribeRequestType) {
-        unsubscribe(resp, (UnsubscribeRequestType)o);
-        return;
+//        unsubscribe(resp, (UnsubscribeRequestType)o);
+        return null;
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return null;
     } catch (SynchException se) {
       throw se;
     } catch(Throwable t) {
@@ -254,19 +269,14 @@ public class SynchConnector
    *                   Private methods
    * ==================================================================== */
 
-  /**
-   * @param resp
-   * @param sr
-   * @throws SynchException
-   */
-  public void subscribe(final HttpServletResponse resp,
-                        final SubscribeRequestType sr) throws SynchException {
+  private Notification subscribe(final HttpServletResponse resp,
+                                 final SubscribeRequestType sr) throws SynchException {
     Subscription sub = new Subscription(null, true);
 
     sub.setDirection(sr.getDirection());
     sub.setMaster(sr.getMaster());
-    sub.setLocalConnectorInfo(makeConnInfo(sr.getLocalConnector()));
-    sub.setRemoteConnectorInfo(makeConnInfo(sr.getRemoteConnector()));
+    sub.setEndAConnectorInfo(makeConnInfo(sr.getEndAConnector()));
+    sub.setEndBConnectorInfo(makeConnInfo(sr.getEndBConnector()));
 
     if (debug) {
       trace("Handle subscribe " +  sub);
@@ -275,19 +285,19 @@ public class SynchConnector
     /* Look for a subscription that matches the 2 end points */
 
     Subscription s = syncher.find(sub);
+    ObjectFactory of = new ObjectFactory();
+
     SubscribeResponseType sresp = of.createSubscribeResponseType();
 
     if (s != null) {
-      ObjectFactory of = new ObjectFactory();
-
       sresp.setStatus(StatusType.ERROR);
       sresp.setErrorResponse(new ErrorResponseType());
       sresp.getErrorResponse().setError(of.createAlreadySubscribed(new AlreadySubscribedType()));
     } else {
-      sresp.setStatus(syncher.subscribeRequest(sub));
+      sresp.setStatus(StatusType.OK);
     }
 
-    marshalBody(resp, sresp);
+    return new Notification(sub, sresp);
   }
 
   private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) {
@@ -316,7 +326,7 @@ public class SynchConnector
     if (debug) {
       trace("Handle unsubscribe " +  u.getSubscriptionId());
     }
-
+/*
     Subscription sub;
 
     sub = syncher.getSubscription(u.getSubscriptionId());
@@ -340,10 +350,21 @@ public class SynchConnector
     usr.setSubscribeStatus(syncher.unsubscribe(sub));
 
     marshalBody(resp, usr);
+    */
   }
 
   /* Null class to do nothing except fail. */
   static class SynchConnectorInstance implements ConnectorInstance {
+    @Override
+    public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
+      return val;
+    }
+
+    @Override
+    public BaseResponseType open() throws SynchException {
+      return null;
+    }
+
     @Override
     public List<ItemInfo> getItemsInfo() throws SynchException {
       throw new SynchException("Uncallable");

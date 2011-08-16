@@ -34,6 +34,7 @@ public class PostMethod extends MethodBase {
   public void init() throws SynchException {
   }
 
+  @SuppressWarnings({"unchecked"})
   @Override
   public void doMethod(final HttpServletRequest req,
                        final HttpServletResponse resp) throws SynchException {
@@ -56,6 +57,7 @@ public class PostMethod extends MethodBase {
                           Arrays.copyOfRange(resourceUri, 1, resourceUri.length - 1));
 
       if (notes != null) {
+        syncher.handleNotifications(notes);
         conn.respondCallback(resp, notes);
       }
     } catch (SynchException se) {

@@ -23,9 +23,8 @@ import org.bedework.synch.SynchException;
 
 /** Represents a subscription for the synch engine.
  *
- * <p>A subscription has 2 connectors for each end of the subscription. We will
- * refer to these as the local and remote ends even though the subscription can
- * be symmetric and either end can be nominated the 'master' calendar.
+ * <p>A subscription has 2 connectors for each end of the subscription, endA
+ * and endB.
  *
  * <p>Each connector has a kind which is a name used to retrieve a connector
  * from the connector manager. The retrieved connector implements the SynchIntf

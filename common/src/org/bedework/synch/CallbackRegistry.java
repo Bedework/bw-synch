@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.SynchDefs.SynchEnd;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,19 +48,19 @@ public class CallbackRegistry {
 
     private Subscription sub;
 
-    private boolean local;
+    private SynchEnd end;
 
     /**
      * @param connectorId
      * @param sub
-     * @param local
+     * @param end
      */
     public CallbackRegistryEntry(final String connectorId,
                                  final Subscription sub,
-                                 final boolean local) {
+                                 final SynchEnd end) {
       this.connectorId = connectorId;
       this.sub = sub;
-      this.local = local;
+      this.end = end;
     }
 
     /**
@@ -76,10 +78,10 @@ public class CallbackRegistry {
     }
 
     /**
-     * @return boolean local flag
+     * @return end designator
      */
-    public boolean getLocal() {
-      return local;
+    public SynchEnd getEnd() {
+      return end;
     }
 
     @Override
@@ -92,8 +94,8 @@ public class CallbackRegistry {
       sb.append("sub=");
       sb.append(getSub());
 
-      sb.append(", local=");
-      sb.append(getLocal());
+      sb.append(", end=");
+      sb.append(getEnd());
 
       sb.append("}");
 

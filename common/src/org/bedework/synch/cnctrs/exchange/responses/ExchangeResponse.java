@@ -21,6 +21,8 @@ package org.bedework.synch.cnctrs.exchange.responses;
 import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
+import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType.MessageXml;
@@ -29,12 +31,10 @@ import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
 /** Base Response from Exchange.
  *
  */
-public class ExchangeResponse {
+public class ExchangeResponse extends BaseResponseType {
   private Logger logger;
 
   protected boolean debug;
-
-  private String messageText;
 
   private String responseCode;
 
@@ -42,14 +42,10 @@ public class ExchangeResponse {
 
   private MessageXml messageXml;
 
-  private boolean valid;
-  private boolean warning;
-  private boolean error;
-
-  ExchangeResponse(final ResponseMessageType resp) throws SynchException {
+  public ExchangeResponse(final ResponseMessageType resp) throws SynchException {
     debug = getLogger().isDebugEnabled();
 
-    messageText = resp.getMessageText();
+    message = resp.getMessageText();
 
     responseCode = resp.getResponseCode();
 
@@ -59,23 +55,16 @@ public class ExchangeResponse {
 
     ResponseClassType rcl = resp.getResponseClass();
     if (rcl.equals(ResponseClassType.ERROR)) {
-      error = true;
+      status = StatusType.ERROR;
       return;
     }
 
     if (rcl.equals(ResponseClassType.WARNING)) {
-      warning = true;
+      status = StatusType.WARNING;
       return;
     }
 
-    valid = true;
-  }
-
-  /**
-   * @return - message text
-   */
-  public String getMessageText() {
-    return messageText;
+    status = StatusType.OK;
   }
 
   /**
@@ -100,44 +89,18 @@ public class ExchangeResponse {
   }
 
   /**
-   * @return - was the response valid?
-   */
-  public boolean getValid() {
-    return valid;
-  }
-
-  /**
-   * @return - was the response an error?
-   */
-  public boolean getError() {
-    return error;
-  }
-
-  /**
-   * @return - was the response a warning?
-   */
-  public boolean getWarning() {
-    return warning;
-  }
-
-  /**
    * @param sb
    */
   public void toStringSegment(final StringBuilder sb) {
-    if (getError()) {
-      sb.append("error");
-    } else if (getWarning()) {
-      sb.append("warning");
-    } else {
-      sb.append("success");
-    }
+    sb.append("status=");
+    sb.append(getStatus());
 
     sb.append(", responseCode=");
     sb.append(getResponseCode());
 
-    if (getMessageText() != null) {
+    if (getMessage() != null) {
       sb.append(",\n    message=");
-      sb.append(getMessageText());
+      sb.append(getMessage());
     }
 
     if (getDescriptiveLinkKey() != null) {

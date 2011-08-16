@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.SynchDefs.SynchEnd;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +65,11 @@ public interface Connector<C extends ConnectorInstance,
    */
   String getId();
 
+  /**
+   * @return callbackUri provided at start
+   */
+  String getCallbackUri();
+
   /** List the information about properties required for subscriptions via this
    * connector.
    *
@@ -74,12 +81,12 @@ public interface Connector<C extends ConnectorInstance,
    * A response of null means no synch available.
    *
    * @param sub - the subscription
-   * @param local - true if this is 'local' end of subscription
+   * @param end - which end
    * @return null for no synch else a connector instance.
    * @throws SynchException
    */
   C getConnectorInstance(Subscription sub,
-                         boolean local) throws SynchException;
+                         SynchEnd end) throws SynchException;
 
   /** Far end may send a batch of notifications. These should not be batched
    * arbitrarily. One batch per message and response.

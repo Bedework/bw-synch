@@ -21,8 +21,10 @@ package org.bedework.synch.cnctrs.bedework;
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.exchange.ExchangeConnectorConfig;
 import org.bedework.synch.wsmessages.GetSynchInfoType;
+import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
 import org.bedework.synch.wsmessages.SynchInfoResponseType;
 import org.bedework.synch.wsmessages.SynchInfoResponseType.SynchInfoResponses;
@@ -31,6 +33,7 @@ import org.bedework.synch.wsmessages.SynchInfoType;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemType;
+import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
@@ -65,20 +68,31 @@ public class BedeworkConnectorInstance
 
   private final Subscription sub;
 
-  private boolean local;
+  private SynchEnd end;
 
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
                             final Subscription sub,
-                            final boolean local,
+                            final SynchEnd end,
                             final BedeworkSubscriptionInfo info) {
     this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
-    this.local = local;
+    this.end = end;
     this.info = info;
 
     debug = getLogger().isDebugEnabled();
+  }
+
+  @Override
+  public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
+    return val;
+  }
+
+  @Override
+  public BaseResponseType open() throws SynchException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

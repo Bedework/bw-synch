@@ -18,7 +18,8 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.wsmessages.SubscribeRequestType;
+import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -53,31 +54,43 @@ import java.util.List;
 public class Notification<NI extends Notification.NotificationItem> {
   private Subscription sub;
 
-  private boolean local;
+  private SynchEnd end;
 
   private List<NI> notifications = new ArrayList<NI>();
 
   /** Create a notification for a subscription
    * @param sub
-   * @param local
+   * @param end
    */
   public Notification(final Subscription sub,
-                      final boolean local) {
+                      final SynchEnd end) {
     this.sub = sub;
-    this.local = local;
+    this.end = end;
   }
 
   /** Create object with a single notification.
    *
    * @param sub
-   * @param local
+   * @param end
    * @param notificationItem
    */
   public Notification(final Subscription sub,
-                      final boolean local,
+                      final SynchEnd end,
                       final NI notificationItem) {
-    this(sub, local);
+    this(sub, end);
     addNotificationItem(notificationItem);
+  }
+
+  /** Create a new subscription object
+   *
+   * @param sub
+   * @param response
+   */
+  @SuppressWarnings("unchecked")
+  public Notification(final Subscription sub,
+                      final SubscribeResponseType response) {
+    this(sub, SynchEnd.none);
+    addNotificationItem((NI)new NotificationItem(response));
   }
 
   /**
@@ -88,10 +101,10 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /**
-   * @return boolean local flag
+   * @return end designator
    */
-  public boolean getLocal() {
-    return local;
+  public SynchEnd getEnd() {
+    return end;
   }
 
   /**
@@ -146,7 +159,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private String uid;
 
-    private SubscribeRequestType subscribeRequest;
+    private SubscribeResponseType subResponse;
 
     /** Create a notification item for an action.
      *
@@ -162,13 +175,13 @@ public class Notification<NI extends Notification.NotificationItem> {
       this.uid = uid;
     }
 
-    /** Create a notification item for a subscription.
+    /** Create a notification item for a new subscription.
      *
-     * @param subscribeRequest
+     * @param subResponse
      */
-    public NotificationItem(final SubscribeRequestType subscribeRequest) {
+    public NotificationItem(final SubscribeResponseType subResponse) {
       action = ActionType.NewSubscription;
-      this.subscribeRequest = subscribeRequest;
+      this.subResponse = subResponse;
     }
 
     /**
@@ -190,6 +203,13 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public String getUid() {
       return uid;
+    }
+
+    /**
+     * @return response to a notification item
+     */
+    public SubscribeResponseType getSubResponse() {
+      return subResponse;
     }
 
     protected void toStringSegment(final StringBuilder sb) {
@@ -215,8 +235,8 @@ public class Notification<NI extends Notification.NotificationItem> {
     sb.append("sub=");
     sb.append(getSub());
 
-    sb.append(", local=");
-    sb.append(getLocal());
+    sb.append(", end=");
+    sb.append(getEnd());
 
     String delim = ",\n   notification items{\n      ";
     for (NI ni: getNotifications()) {

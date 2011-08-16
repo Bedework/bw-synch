@@ -19,7 +19,7 @@
 package org.bedework.synch;
 
 import org.bedework.synch.Connector.NotificationBatch;
-import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
+import org.bedework.synch.SynchDefs.SynchEnd;
 
 import edu.rpi.cmt.timezones.Timezones;
 
@@ -30,7 +30,6 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +93,7 @@ import java.util.Map;
  * requests. While starting up we need to queue these as they may be unsubscribes
  * for a subscribe in the startup list.
  *
- * <p>Shutdown ought to wait for the remote system to ping us for every outstanding
+ * <p>Shutdown ought to wait for the remote systems to ping us for every outstanding
  * subscription. That ought to be fairly quick.
  *
  * @author Mike Douglass
@@ -114,7 +113,7 @@ public class SynchEngine {
   private ApplicationContext appContext;
 
   /* Map of currently active subscriptions - that is - we have traffic between
-   * local and remote systems.
+   * systems.
    */
   private final Map<String, Subscription> subs =
     new HashMap<String, Subscription>();
@@ -136,15 +135,12 @@ public class SynchEngine {
 
   private Timezones timezones;
 
+  private SynchlingPool synchlingPool;
+
   /* Where we keep subscriptions that come in while we are starting */
   private List<Subscription> subsList;
 
   private SynchDb db;
-
-  /* Calls back from the remote system have resource uris tha are prefixed with
-   * this.
-   */
-  private final String remoteCallbackPathPrefix = "rmtcb/";
 
   private Map<String, Connector> connectorMap = new HashMap<String, Connector>();
 
@@ -166,6 +162,11 @@ public class SynchEngine {
         !config.getCallbackURI().endsWith("/")) {
       throw new SynchException("callbackURI MUST end with '/'");
     }
+
+    synchlingPool = new SynchlingPool();
+    synchlingPool.start(this,
+                        config.getSynchlingPoolSize(),
+                        config.getSynchlingPoolTimeout());
   }
 
   /**
@@ -173,7 +174,6 @@ public class SynchEngine {
    * @throws SynchException
    */
   public static SynchEngine getSyncher() throws SynchException {
-    // This needs to use config
     if (syncher != null) {
       return syncher;
     }
@@ -399,21 +399,21 @@ public class SynchEngine {
 
   /** Gets an instance and implants it in the subscription object.
    * @param sub
-   * @param local
+   * @param end
    * @return ConnectorInstance or throws Exception
    * @throws SynchException
    */
   public ConnectorInstance getConnectorInstance(final Subscription sub,
-                                                final boolean local) throws SynchException {
+                                                final SynchEnd end) throws SynchException {
     ConnectorInstance cinst;
     String connectorId;
 
-    if (local) {
-      cinst = sub.getLocalConn();
-      connectorId = sub.getLocalConnectorId();
+    if (end == SynchEnd.endA) {
+      cinst = sub.getEndAConn();
+      connectorId = sub.getEndAConnectorInfo().getConnectorId();
     } else {
-      cinst = sub.getRemoteConn();
-      connectorId = sub.getLocalConnectorId();
+      cinst = sub.getEndBConn();
+      connectorId = sub.getEndBConnectorInfo().getConnectorId();
     }
 
     if (cinst != null) {
@@ -423,75 +423,44 @@ public class SynchEngine {
 
     Connector conn = getConnector(connectorId);
     if (conn == null) {
-      throw new SynchException("No connector for " + sub + "(" + local + ")");
+      throw new SynchException("No connector for " + sub + "(" + end + ")");
     }
 
-    cinst = conn.getConnectorInstance(sub, local);
+    cinst = conn.getConnectorInstance(sub, end);
     if (cinst == null) {
       throw new SynchException("No connector instance for " + sub +
-                               "(" + local + ")");
+                               "(" + end + ")");
     }
 
-    if (local) {
-      sub.setLocalConn(cinst);
+    if (end == SynchEnd.endA) {
+      sub.setEndAConn(cinst);
     } else {
-      sub.setRemoteConn(cinst);
+      sub.setEndBConn(cinst);
     }
 
     return cinst;
-  }
-
-  /** Calls back from the remote system have resource uris that are prefixed with
-   * this.
-   *
-   * @return prefix
-   */
-  public String getRemoteCallbackPathPrefix() {
-    return remoteCallbackPathPrefix;
-  }
-
-  /** Update or add a subscription.
-   *
-   * @param sub
-   * @return status
-   * @throws SynchException
-   */
-  public StatusType subscribeRequest(final Subscription sub) throws SynchException {
-    if (debug) {
-      trace("new subscription " + sub);
-    }
-
-    synchronized (this) {
-      if (starting) {
-        if (subsList == null) {
-          subsList = new ArrayList<Subscription>();
-        }
-
-        subsList.add(sub);
-        return StatusType.OK;
-      }
-    }
-
-    if (!running) {
-      return StatusType.SERVICE_STOPPED;
-    }
-
-    return subscribe(sub);
   }
 
   /** Processes a batch of notifications. This must be done in a timely manner
    * as a request is usually hanging on this.
    *
    * @param notes
-   * @return batch with status set and possibly elemnts deleted
    * @throws SynchException
    */
-  public NotificationBatch<Notification> handleNotifications(
+  public void handleNotifications(
             final NotificationBatch<Notification> notes) throws SynchException {
     for (Notification note: notes.getNotifications()) {
+      db.open();
+      try {
+        Synchling sl = synchlingPool.get();
+
+        sl.handleNotification(note);
+      } finally {
+        db.close();
+      }
     }
 
-    return null;
+    return;
   }
 
   /* ====================================================================
@@ -510,6 +479,14 @@ public class SynchEngine {
     } finally {
       db.close();
     }
+  }
+
+  /**
+   * @param sub
+   * @throws SynchException
+   */
+  public void addSubscription(final Subscription sub) throws SynchException {
+    db.add(sub);
   }
 
   /**
@@ -566,78 +543,6 @@ public class SynchEngine {
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
-
-  private StatusType subscribe(final Subscription sub) throws SynchException {
-    if (debug) {
-      trace("Handle subscription " + sub);
-    }
-
-    if (!checkAccess(sub)) {
-      info("No access for subscription " + sub);
-      return StatusType.NO_ACCESS;
-    }
-
-    synchronized (subs) {
-      Subscription tsub = subs.get(sub.getCalPath());
-
-      boolean synchThis = sub.getExchangeWatermark() == null;
-
-      if (tsub != null) {
-        return StatusType.ALREADY_SUBSCRIBED;
-      }
-
-      ExsynchSubscribeResponse esr = doSubscription(sub);
-
-      if ((esr == null) | !esr.getValid()) {
-        return StatusType.ERROR;
-      }
-
-      subs.put(sub.getCalPath(), sub);
-
-      if (synchThis) {
-        // New subscription - sync
-        getItems(sub);
-      }
-    }
-
-    return StatusType.OK;
-  }
-
-  /**
-   * @param sub
-   * @return status
-   * @throws SynchException
-   */
-  public StatusType unsubscribe(final Subscription sub) throws SynchException {
-    if (!checkAccess(sub)) {
-      info("No access for subscription " + sub);
-      return StatusType.NO_ACCESS;
-    }
-
-    synchronized (subs) {
-      Subscription tsub = subs.get(sub.getCalPath());
-
-      if (tsub == null) {
-        // Nothing active
-        if (debug) {
-          trace("Nothing active for " + sub);
-        }
-      } else {
-        // Unsubscribe request - set subscribed off and next callback will unsubscribe
-        tsub.setOutstandingSubscription(null);
-        tsub.setSubscribe(false);
-      }
-
-      deleteSubscription(sub);
-    }
-
-    return StatusType.OK;
-  }
-
-  private boolean checkAccess(final Subscription sub) throws SynchException {
-    /* Does this principal have the rights to (un)subscribe? */
-    return true;
-  }
 
   private Logger getLogger() {
     if (log == null) {

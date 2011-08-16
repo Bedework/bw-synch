@@ -26,12 +26,7 @@ import java.util.UUID;
 /** Represents a subscription for the synch engine.
  *
  * <p>A subscription has 2 connections, one for each end of the subscription. We
- * will refer to these as the local and remote ends even though the subscription
- * can be symmetric and either end can physically local or remote.
- *
- * <p>By default the remote end is the 'source' of the information and the local
- * end will track the remote end. However, in a two way synch be either or
- * neither end can nominated the 'master' calendar
+ * will refer to these as endA and endB.
  *
  * <p>Each connection has a kind which is a name used to retrieve a connector
  * from the synch engine. The retrieved connector implements the Connector
@@ -63,11 +58,13 @@ public class Subscription implements Comparable<Subscription> {
 
   private int seq;
 
+  private String owner;
+
   private String subscriptionId;
 
-  private SubscriptionConnectorInfo localConnectorInfo;
+  private SubscriptionConnectorInfo endAConnectorInfo;
 
-  private SubscriptionConnectorInfo remoteConnectorInfo;
+  private SubscriptionConnectorInfo endBConnectorInfo;
 
   private SynchDirectionType direction;
 
@@ -81,9 +78,9 @@ public class Subscription implements Comparable<Subscription> {
   /* Process outstanding after this */
   private Subscription outstandingSubscription;
 
-  private ConnectorInstance localConn;
+  private ConnectorInstance endAConn;
 
-  private ConnectorInstance remoteConn;
+  private ConnectorInstance endBConn;
 
   /** null constructor for hibernate
    *
@@ -159,34 +156,56 @@ public class Subscription implements Comparable<Subscription> {
     return subscriptionId;
   }
 
-  /** Info for the local connector.
+  /** The owner. This is the (verified) account that set up the subscription.
+   * It is either the authenticated user or provided by a proxy that has
+   * verified the account. The owner is only needed for subcribing, unsubscribing
+   * and display of and updates to the subscription itself.
+   *
+   * <p>Interactions with the end points use information contained within the
+   * subscription.
+   *
+   * @param val    String
+   */
+  public void setOwner(final String val) {
+    owner = val;
+  }
+
+  /** Owner
+   *
+   * @return String
+   */
+  public String getOwner() {
+    return owner;
+  }
+
+  /** Info for the endA connector.
    *
    * @param val SubscriptionConnectorInfo
    */
-  public void setLocalConnectorInfo(final SubscriptionConnectorInfo val) {
-	  localConnectorInfo = val;
+  public void setEndAConnectorInfo(final SubscriptionConnectorInfo val) {
+	  endAConnectorInfo = val;
   }
 
   /**
    * @return SubscriptionConnectorInfo
    */
-  public SubscriptionConnectorInfo getLocalConnectorInfo() {
-    return localConnectorInfo;
+  public SubscriptionConnectorInfo getEndAConnectorInfo() {
+    return endAConnectorInfo;
   }
 
-  /** Info for the remote connector.
+  /** Info for the endB connector.
    *
    * @param val    SubscriptionConnectorInfo
    */
-  public void setRemoteConnectorInfo(final SubscriptionConnectorInfo val) {
-	  remoteConnectorInfo = val;
+  public void setEndBConnectorInfo(final SubscriptionConnectorInfo val) {
+	  endBConnectorInfo = val;
   }
 
   /**
    * @return SubscriptionConnectorInfo
    */
-  public SubscriptionConnectorInfo getRemoteConnectorInfo() {
-    return remoteConnectorInfo;
+  public SubscriptionConnectorInfo getEndBConnectorInfo() {
+    return endBConnectorInfo;
   }
 
   /** Which way?
@@ -255,29 +274,29 @@ public class Subscription implements Comparable<Subscription> {
   /**
    * @param val a connection instance
    */
-  public void setLocalConn(final ConnectorInstance val) {
-    localConn = val;
+  public void setEndAConn(final ConnectorInstance val) {
+    endAConn = val;
   }
 
   /**
    * @return a connection instance or null
    */
-  public ConnectorInstance getLocalConn() {
-    return localConn;
+  public ConnectorInstance getEndAConn() {
+    return endAConn;
   }
 
   /**
    * @param val a connection instance
    */
-  public void setRemoteConn(final ConnectorInstance val) {
-    remoteConn = val;
+  public void setEndBConn(final ConnectorInstance val) {
+    endBConn = val;
   }
 
   /**
    * @return a connection instance or null
    */
-  public ConnectorInstance getRemoteConn() {
-    return remoteConn;
+  public ConnectorInstance getEndBConn() {
+    return endBConn;
   }
 
   /** equality just checks the path. Look at the rest.
@@ -290,11 +309,11 @@ public class Subscription implements Comparable<Subscription> {
       return true;
     }
 
-    if (!getLocalConnectorInfo().equals(that.getLocalConnectorInfo())) {
+    if (!getEndAConnectorInfo().equals(that.getEndAConnectorInfo())) {
       return true;
     }
 
-    if (!getRemoteConnectorInfo().equals(that.getRemoteConnectorInfo())) {
+    if (!getEndBConnectorInfo().equals(that.getEndBConnectorInfo())) {
       return true;
     }
 
@@ -327,13 +346,13 @@ public class Subscription implements Comparable<Subscription> {
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("localConnectorInfo = ");
-    sb.append(getLocalConnectorInfo());
+    sb.append("endAConnectorInfo = ");
+    sb.append(getEndAConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);
-    sb.append("remoteConnectorInfo = ");
-    sb.append(getRemoteConnectorInfo());
+    sb.append("endBConnectorInfo = ");
+    sb.append(getEndBConnectorInfo());
 
     sb.append(",\n");
     sb.append(indent);

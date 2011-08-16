@@ -18,7 +18,10 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.wsmessages.SubscribeResponseType;
+
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
@@ -27,12 +30,37 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
-/** The interface implemented by connectors.
+/** The interface implemented by connectors. A connector instance is obtained
+ * from a connector to handle a specific end of a specific subscription - items of
+ * inforamtion handed to the getConnectorInstance method.
  *
  * @author Mike Douglass
  */
 public interface ConnectorInstance {
-  /** Information used to synch remote with Exchange
+  /** Do whatever is required to set up a subscription to the end point for this
+   * connector instance. This is a one time call when a new subscription is
+   * created and allows the connector instance to validate the information.
+   *
+   * <p>This method shoudl set the appropriate status if an error occurs.
+   *
+   * <p>the open method handles any dynamic creation of a connection to the
+   * subscribed-to service.
+   *
+   * @param sr
+   * @return sr
+   * @throws SynchException
+   */
+  SubscribeResponseType subscribe(SubscribeResponseType sr) throws SynchException;
+
+  /** Called when a subscription is activated on synch engine startup or after
+   * creation of a new subscription.
+   *
+   * @return status + messages
+   * @throws SynchException
+   */
+  BaseResponseType open() throws SynchException;
+
+  /** Information used to synch ends A and B
    * This information is only valid in the context of a given subscription.
    */
   public static class ItemInfo {

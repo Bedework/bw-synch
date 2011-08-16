@@ -62,14 +62,6 @@ public class FinditemsResponse extends ExchangeResponse {
     /** */
     public String lastMod;
 
-    /* Fields set during the actual synch process */
-
-    /** Exchange item needs to be added to remote */
-    public boolean addToRemote;
-
-    /** Exchange item needs to update remote */
-    public boolean updateRemote;
-
     /** Constructor
      *
      * @param itemId

@@ -23,6 +23,7 @@ import org.bedework.synch.ConnectorInstanceMap;
 import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
@@ -162,14 +163,19 @@ public class BedeworkConnector
   }
 
   @Override
+  public String getCallbackUri() {
+    return callbackUri;
+  }
+
+  @Override
   public List<ConnectorPropertyInfo> getPropertyInfo() {
     return propInfo;
   }
 
   @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final boolean local) throws SynchException {
-    BedeworkConnectorInstance inst = cinstMap.find(sub, local);
+                                                        final SynchEnd end) throws SynchException {
+    BedeworkConnectorInstance inst = cinstMap.find(sub, end);
 
     if (inst != null) {
       return inst;
@@ -178,14 +184,14 @@ public class BedeworkConnector
     //debug = getLogger().isDebugEnabled();
     BedeworkSubscriptionInfo info;
 
-    if (local) {
-      info = new BedeworkSubscriptionInfo(sub.getLocalConnectorInfo());
+    if (end == SynchEnd.endA) {
+      info = new BedeworkSubscriptionInfo(sub.getEndAConnectorInfo());
     } else {
-      info = new BedeworkSubscriptionInfo(sub.getRemoteConnectorInfo());
+      info = new BedeworkSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new BedeworkConnectorInstance(config, this, sub, local, info);
-    cinstMap.add(sub, local, inst);
+    inst = new BedeworkConnectorInstance(config, this, sub, end, info);
+    cinstMap.add(sub, end, inst);
 
     return inst;
   }

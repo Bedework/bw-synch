@@ -20,8 +20,9 @@ package org.bedework.synch;
 
 import org.bedework.synch.ConnectorInstance.ItemInfo;
 import org.bedework.synch.Notification.NotificationItem;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
-import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
+import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 
@@ -54,9 +55,9 @@ public class Synchling {
 
   protected transient Logger log;
 
-  private ConnectorInstance localCnctr;
+  private ConnectorInstance endACnctr;
 
-  private ConnectorInstance remoteCnctr;
+  private ConnectorInstance endBCnctr;
 
   private SynchEngine syncher;
 
@@ -75,35 +76,6 @@ public class Synchling {
     debug = getLogger().isDebugEnabled();
 
     this.syncher = syncher;
-  }
-
-  /** Update or add a subscription.
-   *
-   * @param sub
-   * @return status
-   * @throws SynchException
-   */
-  public StatusType subscribeRequest(final Subscription sub) throws SynchException {
-    if (debug) {
-      trace("new subscription " + sub);
-    }
-
-    synchronized (this) {
-      if (starting) {
-        if (subsList == null) {
-          subsList = new ArrayList<Subscription>();
-        }
-
-        subsList.add(sub);
-        return StatusType.OK;
-      }
-    }
-
-    if (!running) {
-      return StatusType.SERVICE_STOPPED;
-    }
-
-    return subscribe(sub);
   }
 
   /**
@@ -134,6 +106,13 @@ public class Synchling {
         break;
       case StatusEvent:
         break;
+
+      case NewSubscription:
+        subscribe(note, ni);
+        break;
+
+      case Unsubscribe:
+        break;
       }
     }
   }
@@ -141,6 +120,34 @@ public class Synchling {
   /* ====================================================================
    *                        Notification methods
    * ==================================================================== */
+
+
+  private void subscribe(final Notification note,
+                         final NotificationItem ni) throws SynchException {
+    if (debug) {
+      trace("new subscription " + note.getSub());
+    }
+
+    /* Try to subscribe to both ends */
+    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
+                                                           SynchEnd.endA);
+
+    SubscribeResponseType sr = cinst.subscribe(ni.getSubResponse());
+
+    if (sr.getStatus() != StatusType.OK) {
+      return;
+    }
+
+    cinst = syncher.getConnectorInstance(note.getSub(),
+                                         SynchEnd.endB);
+    sr = cinst.subscribe(ni.getSubResponse());
+
+    if (sr.getStatus() != StatusType.OK) {
+      return;
+    }
+
+    syncher.addSubscription(note.getSub());
+  }
 
   private void addItem(final Notification note,
                        final NotificationItem ni) throws SynchException {
@@ -154,10 +161,7 @@ public class Synchling {
       return;
     }
 
-    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
-                                                           !note.getLocal());
-
-    AddItemResponseType air = cinst.addItem(ical);
+    AddItemResponseType air = getOtherCinst(note).addItem(ical);
     if (debug) {
       trace("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
@@ -176,10 +180,9 @@ public class Synchling {
       return;
     }
 
-    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
-                                                           !note.getLocal());
+    ConnectorInstance cinst = getOtherCinst(note);
 
-    FetchItemResponseType fresp = cinst.fetchItem(ni.getHref());
+    FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
     if (debug) {
       trace("Update: status=" + fresp.getStatus() +
             " msg=" + fresp.getMessage());
@@ -197,7 +200,7 @@ public class Synchling {
 
     UpdateItemType ui = new UpdateItemType();
 
-    ui.setHref();
+    ui.setHref(fresp.getHref());
     ui.setEtoken(fresp.getEtoken());
     ui.getSelect().add(cst);
 
@@ -208,45 +211,21 @@ public class Synchling {
     }
   }
 
+  private ConnectorInstance getOtherCinst(final Notification note) throws SynchException {
+    SynchEnd otherEnd;
+    if (note.getEnd() == SynchEnd.endA) {
+      otherEnd = SynchEnd.endB;
+    } else {
+      otherEnd = SynchEnd.endA;
+    }
+
+    return syncher.getConnectorInstance(note.getSub(),
+                                        otherEnd);
+  }
+
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
-
-  private StatusType subscribe(final Subscription sub) throws SynchException {
-    if (debug) {
-      trace("Handle subscription " + sub);
-    }
-
-    if (!checkAccess(sub)) {
-      info("No access for subscription " + sub);
-      return StatusType.NO_ACCESS;
-    }
-
-    synchronized (subs) {
-      Subscription tsub = subs.get(sub.getCalPath());
-
-      boolean synchThis = sub.getExchangeWatermark() == null;
-
-      if (tsub != null) {
-        return StatusType.ALREADY_SUBSCRIBED;
-      }
-
-      ExsynchSubscribeResponse esr = doSubscription(sub);
-
-      if ((esr == null) | !esr.getValid()) {
-        return StatusType.ERROR;
-      }
-
-      subs.put(sub.getCalPath(), sub);
-
-      if (synchThis) {
-        // New subscription - sync
-        getItems(sub);
-      }
-    }
-
-    return StatusType.OK;
-  }
 
   /**
    * @param sub
@@ -285,17 +264,11 @@ public class Synchling {
 
     /* Fields set during the actual synch process */
 
-    /** item needs to be added to remote */
-    public boolean addToRemote;
+    /** add to none, A or B */
+    public SynchEnd addTo;
 
-    /** item needs to update remote */
-    public boolean updateRemote;
-
-    /** item needs to be added to local */
-    public boolean addToLocal;
-
-    /** item needs to update local */
-    public boolean updateLocal;
+    /** Update none, A or B */
+    public SynchEnd updateEnd;
 
     /** Constructor
      *
@@ -320,52 +293,57 @@ public class Synchling {
   private StatusType reSynch(final Notification note,
                              final NotificationItem ni) throws SynchException {
     try {
-      /* The action here depends on which way we are synching. Below we refer
-       * to Exchange events. These are signified by particular X-properties we
-       * added to the event.
+      /* The action here depends on which way we are synching.
        *
-       * For Exchange to Remote
-       * If the item does not exist on the remote system then add it.
-       * If the lastmod on the remote is prior to the exchange one - update.
+       * For A to B
+       * If the item does not exist on the B system then add it to B.
+       * If the lastmod on B is prior to the A one - update.
        * Otherwise ignore.
-       * We should remove all exchange created remote events that have no
-       * counterpart on Exchange.
+       * We should remove all B events that have no counterpart on A. (though
+       * this may be a parameter)
        *
-       * For Remote to Exchange
+       * For B to A
        * Just the reverse of the above.
        *
        * For both ways:
-       * One end may the master.
-       * A non-exchange event on the remote is copied into exchange (at which
-       * point it might become an exchange event)
-       * An exchange event not on the remote is copied on to the remote.
-       * One on both which differs is copied from the master end if one is
-       * nominated, or we try to take the latest.
+       * This is essentially do both the above. The intent is to ensure that
+       * we add appropriate events to either end and possibly remove from either
+       * end till we are left with the full overlapping set. That's the easy bit.
+       *
+       * Updates are easy as long as the set of updated events from both ends
+       * does not overlap. For the non-overlapping event just update the older
+       * event from the newer event.
+       *
+       * For the rest, if one end is designated master, then  update the non-master
+       * from the master. Otherwise we probably need to flag the event.
+       *
+       * Note that we need to have a last-synched stamp in each event to
+       * determine if the event has changed since last synched. For conflict
+       * detection we also need a reliable lastmod which we store in the
+       * last synched.
        */
 
-      // XXX just do Exchange to remote for the moment
-
+      // XXX 2 way not fully done
       /* ===================================================================
-       * Get the list of items that already exist in the local and remote
-       * calendar collections
+       * Get the list of items that already exist in the calendar collections
        * =================================================================== */
-      List<ItemInfo> liis = localCnctr.getItemsInfo();
-      if (liis == null) {
-        throw new SynchException("Unable to fetch local items info");
+      List<ItemInfo> aiis = endACnctr.getItemsInfo();
+      if (aiis == null) {
+        throw new SynchException("Unable to fetch endA items info");
       }
 
-      List<ItemInfo> riis = remoteCnctr.getItemsInfo();
-      if (riis == null) {
-        throw new SynchException("Unable to fetch remote items info");
+      List<ItemInfo> biis = endBCnctr.getItemsInfo();
+      if (biis == null) {
+        throw new SynchException("Unable to fetch endB items info");
       }
 
-      /* Items is a table built from the remote calendar */
+      /* Items is a table built from the endB calendar */
       Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
 
       /* sinfos provides state information about each item */
       Map<String, SynchInfo> sinfos = new HashMap<String, SynchInfo>();
 
-      for (ItemInfo ii: riis) {
+      for (ItemInfo ii: biis) {
         if (debug) {
           trace(ii.toString());
         }
@@ -375,34 +353,34 @@ public class Synchling {
 
       List<SynchInfo> toFetch = new ArrayList<SynchInfo>();
 
-      for (ItemInfo lii: liis) {
-        ItemInfo rii = items.get(lii.uid);
+      for (ItemInfo aii: aiis) {
+        ItemInfo bii = items.get(aii.uid);
 
-        if (rii == null) {
+        if (bii == null) {
           if (debug) {
-            trace("Need to add to remote: uid:" + lii.uid);
+            trace("Need to add to end B: uid:" + aii.uid);
           }
 
-          SynchInfo si = new SynchInfo(lii);
-          si.addToRemote = true;
+          SynchInfo si = new SynchInfo(aii);
+          si.addTo = SynchEnd.endB;
           toFetch.add(si);
         } else {
-          rii.seen = true;
+          bii.seen = true;
 
-          int cmp = cmpLastMods(rii.lastMod, lii.lastMod);
+          int cmp = cmpLastMods(bii.lastMod, aii.lastMod);
           if (cmp != 0) {
-            SynchInfo si = new SynchInfo(lii);
+            SynchInfo si = new SynchInfo(aii);
 
             if (cmp < 0) {
               if (debug) {
-                trace("Need to update remote: uid:" + lii.uid);
+                trace("Need to update end B: uid:" + aii.uid);
               }
-              si.updateRemote = true;
+              si.updateEnd = SynchEnd.endB;
             } else {
               if (debug) {
-                trace("Need to update local: uid:" + lii.uid);
+                trace("Need to update end A: uid:" + aii.uid);
               }
-              si.updateLocal = true;
+              si.updateEnd = SynchEnd.endA;
             }
 
             toFetch.add(si);
@@ -410,26 +388,26 @@ public class Synchling {
         }
       }
 
-      /* Now go over the remote info and see if we need to fetch any from that
+      /* Now go over the end B info and see if we need to fetch any from that
        * end or simply delete them.
        */
-      for (ItemInfo ii: riis) {
+      for (ItemInfo ii: biis) {
         if (ii.seen) {
           continue;
         }
 
         SynchInfo si = new SynchInfo(ii);
         /* If the lastmod is later than the last synch and this is 2 way then
-         * this one got added after we synched. Add it to the remote end.
+         * this one got added after we synched. Add it to end B.
          *
          * If the lastmod is previous to our last synch then this one needs to
          * be deleted.
          */
-        si.addToLocal = true;
+        si.addTo = SynchEnd.endA;
         toFetch.add(si);
       }
 
-      /* Now update the remote end from the local end.
+      /* Now update end B from end A.
        */
       if (toFetch.size() > getItemsBatchSize) {
         // Fetch this batch of items and process them.
@@ -459,8 +437,18 @@ public class Synchling {
         continue;
       }
 
-      if (si.addToRemote) {
-        AddItemResponseType air = localCnctr.addItem(ci.getUID(), cnv.toXml(ci));
+      if (si.addTo == SynchEnd.endA) {
+        AddItemResponseType air = endACnctr.addItem(cnv.toXml(ci));
+        if (debug) {
+          trace("Add: status=" + air.getStatus() +
+                " msg=" + air.getMessage());
+        }
+
+        continue;
+      }
+
+      if (si.addTo == SynchEnd.endB) {
+        AddItemResponseType air = endBCnctr.addItem(cnv.toXml(ci));
         if (debug) {
           trace("Add: status=" + air.getStatus() +
                 " msg=" + air.getMessage());
@@ -472,6 +460,11 @@ public class Synchling {
       // Update the far end.
       updateItem(sub, ci);
     }
+  }
+
+  private List<CalendarItem> fetchItems(final Subscription sub,
+                                        final List<SynchInfo> toFetch) throws SynchException {
+    return null;
   }
 
   private int cmpLastMods(final String calLmod, final String exLmod) {

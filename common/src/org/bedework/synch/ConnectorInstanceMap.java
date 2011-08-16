@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.SynchDefs.SynchEnd;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,29 +34,24 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
   static class Key {
     Subscription sub;
 
-    boolean local;
+    SynchEnd end;
 
     Key(final Subscription sub,
-        final boolean local) {
+        final SynchEnd end) {
       this.sub = sub;
-      this.local = local;
+      this.end = end;
     }
 
     @Override
     public int hashCode() {
-      int res = sub.hashCode();
-      if (local) {
-        res += 13;
-      }
-
-      return res;
+      return sub.hashCode() * end.hashCode();
     }
 
     @Override
     public boolean equals(final Object o) {
       Key that = (Key)o;
 
-      if (that.local != local) {
+      if (that.end != end) {
         return false;
       }
 
@@ -65,11 +62,11 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
     public String toString() {
       StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
-      sb.append("sub = ");
+      sb.append("sub=");
       sb.append(sub);
 
-      sb.append(", local = ");
-      sb.append(local);
+      sb.append(", end=");
+      sb.append(end);
 
       sb.append("}");
       return sb.toString();
@@ -81,14 +78,14 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
   /** Add a connector
    *
      * @param sub
-     * @param local
+     * @param end
      * @param cinst
    * @throws SynchException
    */
   public synchronized void add(final Subscription sub,
-                               final boolean local,
+                               final SynchEnd end,
                                final CI cinst) throws SynchException {
-    Key key = new Key(sub, local);
+    Key key = new Key(sub, end);
 
     if (theMap.containsKey(key)) {
       throw new SynchException("instance already in map for " + key);
@@ -100,24 +97,24 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
   /** Find a connector
    *
    * @param sub
-   * @param local
+   * @param end
    * @return CI or null
    * @throws SynchException
    */
   public synchronized CI find(final Subscription sub,
-                              final boolean local) throws SynchException {
-    return theMap.get(new Key(sub, local));
+                              final SynchEnd end) throws SynchException {
+    return theMap.get(new Key(sub, end));
   }
 
 
   /** Remove a connector
    *
    * @param sub
-   * @param local
+   * @param end
    * @throws SynchException
    */
   public synchronized void remove(final Subscription sub,
-                                  final boolean local) throws SynchException {
-    theMap.remove(new Key(sub, local));
+                                  final SynchEnd end) throws SynchException {
+    theMap.remove(new Key(sub, end));
   }
 }

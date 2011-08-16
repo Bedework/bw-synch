@@ -20,12 +20,19 @@ package org.bedework.synch;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
 public class SynchConfig implements Serializable {
+  /* Size of synchling pool */
+  private int synchlingPoolSize;
+
+  /* millisecs */
+  private long synchlingPoolTimeout;
+
   /* web service push callback uri - null for no service */
   private String callbackURI;
 
@@ -33,6 +40,34 @@ public class SynchConfig implements Serializable {
   private String keystore;
 
   private Map<String, String> connectors;
+
+  /**
+   * @param val current size of synchling pool
+   */
+  public void setSynchlingPoolSize(final int val) {
+    synchlingPoolSize = val;
+  }
+
+  /**
+   * @return current size of synchling pool
+   */
+  public int getSynchlingPoolSize() {
+    return synchlingPoolSize;
+  }
+
+  /**
+   * @param val timeout in millisecs
+   */
+  public void setSynchlingPoolTimeout(final long val) {
+    synchlingPoolTimeout = val;
+  }
+
+  /**
+   * @return timeout in millisecs
+   */
+  public long getSynchlingPoolTimeout() {
+    return synchlingPoolTimeout;
+  }
 
   /** web service push callback uri - null for no service
    *

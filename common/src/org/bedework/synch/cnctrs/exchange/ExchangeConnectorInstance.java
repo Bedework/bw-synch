@@ -20,16 +20,18 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.GetItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
-import org.bedework.synch.cnctrs.exchange.responses.ExsynchSubscribeResponse;
+import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
@@ -83,22 +85,128 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
 
   private Subscription sub;
 
-  private boolean local;
+  private SynchEnd end;
 
   private final XmlIcalConvert icalConverter = new XmlIcalConvert();
 
   ExchangeConnectorInstance(final ExchangeConnectorConfig config,
                             final ExchangeConnector cnctr,
                             final Subscription sub,
-                            final boolean local,
+                            final SynchEnd end,
                             final ExchangeSubscriptionInfo info) {
     this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
-    this.local = local;
+    this.end = end;
     this.info = info;
 
     debug = getLogger().isDebugEnabled();
+  }
+
+  @Override
+  public org.bedework.synch.wsmessages.SubscribeResponseType subscribe(final org.bedework.synch.wsmessages.SubscribeResponseType sr)
+                                                                                                                              throws SynchException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public BaseResponseType open() throws SynchException {
+    try {
+      /* Send a request for a new subscription to exchange */
+      SubscribeRequest s = new SubscribeRequest(sub.getSubscriptionId(),
+                                                end,
+                                                info.getExchangeWatermark(),
+                                                cnctr.getCallbackUri());
+
+      s.setFolderId(info.getExchangeCalendar());
+
+      Holder<SubscribeResponseType> subscribeResult = new Holder<SubscribeResponseType>();
+
+      getPort(info).subscribe(s.getRequest(),
+                              // null, // impersonation,
+                              getMailboxCulture(),
+                              getRequestServerVersion(),
+                              subscribeResult,
+                              getServerVersionInfoHolder());
+
+      if (debug) {
+        trace(subscribeResult.toString());
+      }
+
+      List<JAXBElement<? extends ResponseMessageType>> rms =
+          subscribeResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
+
+      if (rms.size() != 1) {
+        //
+        return null;
+      }
+
+      /* Successful looks something like
+       * <?xml version="1.0" encoding="utf-8"?>
+       * <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+       *   <s:Header>
+       *     <h:ServerVersionInfo MajorVersion="14" MinorVersion="0"
+       *                          MajorBuildNumber="639" MinorBuildNumber="21"
+       *                          Version="Exchange2010"
+       *          xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types"
+       *          xmlns="http://schemas.microsoft.com/exchange/services/2006/types"
+       *          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       *          xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+       *   </s:Header>
+       *   <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       *           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+       *     <m:SubscribeResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+       *                          xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+       *       <m:ResponseMessages>
+       *         <m:SubscribeResponseMessage ResponseClass="Success">
+       *           <m:ResponseCode>NoError</m:ResponseCode>
+       *           <m:SubscriptionId>HQB0b290bGVzLWZlMS5uZXZlcmxhbmQucnBpLmVkdRAAAAB6doL7rLBaRJpD6SPqdeo6E2rIWt0xzQg=</m:SubscriptionId>
+       *           <m:Watermark>AQAAAA9RN9h99EZMiSH6g0jBK/hThQAAAAAAAAA=</m:Watermark>
+       *         </m:SubscribeResponseMessage>
+       *       </m:ResponseMessages>
+       *     </m:SubscribeResponse>
+       *   </s:Body>
+       * </s:Envelope>
+       * ----------------------------------------------------------------------
+       * Failure:
+       * <?xml version="1.0" encoding="utf-8"?>
+       * <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+       *   <s:Header>
+       *     <h:ServerVersionInfo MajorVersion="14" MinorVersion="0" MajorBuildNumber="639" MinorBuildNumber="21" Version="Exchange2010"
+       *                          xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types"
+       *                          xmlns="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       *                          xmlns:xsd="http://www.w3.org/2001/XMLSchema"/>
+       *   </s:Header>
+       *   <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+       *     <m:SubscribeResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+       *                          xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+       *       <m:ResponseMessages>
+       *         <m:SubscribeResponseMessage ResponseClass="Error">
+       *           <m:MessageText>Id is malformed.</m:MessageText>
+       *           <m:ResponseCode>ErrorInvalidIdMalformed</m:ResponseCode>
+       *           <m:DescriptiveLinkKey>0</m:DescriptiveLinkKey>
+       *         </m:SubscribeResponseMessage>
+       *       </m:ResponseMessages>
+       *     </m:SubscribeResponse>
+       *   </s:Body>
+       * </s:Envelope>
+       */
+
+      SubscribeResponseMessageType srm = (SubscribeResponseMessageType)rms.iterator().next().getValue();
+
+      BaseResponseType br = new ExchangeResponse(srm);
+
+      if (debug) {
+        trace(br.toString());
+      }
+
+      return br;
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
   }
 
   /** This class is passed back and contans the publicly visible uid and lastmod
@@ -239,19 +347,14 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
 
   @Override
   public int hashCode() {
-    int res = sub.hashCode();
-    if (local) {
-      res += 13;
-    }
-
-    return res;
+    return sub.hashCode() * end.hashCode();
   }
 
   @Override
   public boolean equals(final Object o) {
     ExchangeConnectorInstance that = (ExchangeConnectorInstance)o;
 
-    if (that.local != local) {
+    if (that.end != end) {
       return false;
     }
 
@@ -317,50 +420,6 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     }
 
     return items.get(0);
-  }
-
-  private ExsynchSubscribeResponse doSubscription() throws SynchException {
-    try {
-      /* Send a request for a new subscription to exchange */
-      SubscribeRequest s = new SubscribeRequest(sub,
-                                                config);
-
-      s.setFolderId(info.getExchangeCalendar());
-
-      Holder<SubscribeResponseType> subscribeResult = new Holder<SubscribeResponseType>();
-
-      getPort(info).subscribe(s.getRequest(),
-                              // null, // impersonation,
-                              getMailboxCulture(),
-                              getRequestServerVersion(),
-                              subscribeResult,
-                              getServerVersionInfoHolder());
-
-      if (debug) {
-        trace(subscribeResult.toString());
-      }
-
-      List<JAXBElement<? extends ResponseMessageType>> rms =
-        subscribeResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
-
-      if (rms.size() != 1) {
-        //
-        return null;
-      }
-
-      SubscribeResponseMessageType srm = (SubscribeResponseMessageType)rms.iterator().next().getValue();
-      ExsynchSubscribeResponse esr = new ExsynchSubscribeResponse(srm);
-
-      if (debug) {
-        trace(esr.toString());
-      }
-
-      return esr;
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
   }
 
   private List<IcalendarType> fetchItems(final List<BaseItemIdType> toFetch) throws SynchException {
