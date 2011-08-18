@@ -126,9 +126,11 @@ public interface ConnectorInstance {
 
   /** Update a calendar component
    *
+   * @param fir - the currrent state of the entity we are updating.
    * @param updates
    * @return response
    * @throws SynchException
    */
-  UpdateItemResponseType updateItem(UpdateItemType updates) throws SynchException;
+  UpdateItemResponseType updateItem(FetchItemResponseType fir,
+                                    UpdateItemType updates) throws SynchException;
 }

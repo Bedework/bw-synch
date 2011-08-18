@@ -23,6 +23,8 @@ import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchException;
 
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+
 /** Notification from Exchange.
  *
  */
@@ -42,10 +44,6 @@ public class ExchangeNotification extends
     super(sub, end);
 
     this.enm = enm;
-
-    for (ExchangeNotificationMessage.NotificationItem ni: enm.getNotifications()) {
-      this.addNotificationItem(new NotificationItem(ni));
-    }
   }
 
   /**
@@ -61,8 +59,9 @@ public class ExchangeNotification extends
   public static class NotificationItem extends Notification.NotificationItem {
     private ExchangeNotificationMessage.NotificationItem ni;
 
-    private NotificationItem(final ExchangeNotificationMessage.NotificationItem ni) {
-      super(ni.getAction());
+    NotificationItem(final ExchangeNotificationMessage.NotificationItem ni,
+                     final IcalendarType ical) {
+      super(ni.getAction(), ical, null);
       this.ni = ni;
     }
 
@@ -76,7 +75,7 @@ public class ExchangeNotification extends
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("ExchangeNotification.NotificationItem{");
+      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
       toStringSegment(sb);
 

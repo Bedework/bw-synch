@@ -228,32 +228,26 @@ public class Synchling {
    * ==================================================================== */
 
   /**
-   * @param sub
+   * @param note
    * @return status
    * @throws SynchException
    */
-  public StatusType unsubscribe(final Subscription sub) throws SynchException {
+  public StatusType unsubscribe(final Notification note) throws SynchException {
+    Subscription sub = syncher.getSubscription(note.getSubscriptionId());
+    if (sub == null){
+      return StatusType.ERROR;
+    }
+
     if (!checkAccess(sub)) {
       info("No access for subscription " + sub);
       return StatusType.NO_ACCESS;
     }
 
-    synchronized (subs) {
-      Subscription tsub = subs.get(sub.getCalPath());
+    // Unsubscribe request - set subscribed off and next callback will unsubscribe
+    sub.setOutstandingSubscription(null);
+    sub.setSubscribe(false);
 
-      if (tsub == null) {
-        // Nothing active
-        if (debug) {
-          trace("Nothing active for " + sub);
-        }
-      } else {
-        // Unsubscribe request - set subscribed off and next callback will unsubscribe
-        tsub.setOutstandingSubscription(null);
-        tsub.setSubscribe(false);
-      }
-
-      deleteSubscription(sub);
-    }
+    syncher.deleteSubscription(sub);
 
     return StatusType.OK;
   }

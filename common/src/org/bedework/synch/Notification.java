@@ -54,17 +54,34 @@ import java.util.List;
 public class Notification<NI extends Notification.NotificationItem> {
   private Subscription sub;
 
+  private String subscriptionId;
+
   private SynchEnd end;
 
   private List<NI> notifications = new ArrayList<NI>();
 
   /** Create a notification for a subscription
    * @param sub
+   */
+  public Notification(final Subscription sub) {
+    this.sub = sub;
+  }
+
+  /** Create a notification for an unsubscribe
+   * @param subscriptionId
+   */
+  public Notification(final String subscriptionId) {
+    this.subscriptionId = subscriptionId;
+  }
+
+  /** Create object with a single notification.
+   *
+   * @param sub
    * @param end
    */
   public Notification(final Subscription sub,
                       final SynchEnd end) {
-    this.sub = sub;
+    this(sub);
     this.end = end;
   }
 
@@ -98,6 +115,14 @@ public class Notification<NI extends Notification.NotificationItem> {
    */
   public Subscription getSub() {
     return sub;
+  }
+
+  /** Our generated subscriptionId.
+   *
+   * @return String
+   */
+  public String getSubscriptionId() {
+    return subscriptionId;
   }
 
   /**
@@ -165,7 +190,7 @@ public class Notification<NI extends Notification.NotificationItem> {
      *
      * @param action
      * @param ical - the entity if available
-     * @param uid - Uid for the entity
+     * @param uid - Uid for the entity if entity not available
      */
     public NotificationItem(final ActionType action,
                             final IcalendarType ical,

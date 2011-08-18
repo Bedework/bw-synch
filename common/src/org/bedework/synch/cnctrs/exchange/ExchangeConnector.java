@@ -27,6 +27,9 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,9 +176,11 @@ public class ExchangeConnector
   public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
                                      final String[] resourceUri) throws SynchException {
+    ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
+
     if (resourceUri.length != 1) {
-      resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return null;
+      enb.setStatus(StatusType.ERROR);
+      return enb;
     }
 
     String id = resourceUri[0];
@@ -185,7 +190,9 @@ public class ExchangeConnector
       String endFlag = id.substring(0, 1);
       end = SynchEnd.valueOf(endFlag);
     } catch (Throwable t) {
-      throw new SynchException("Id not starting with L or R");
+      enb.setStatus(StatusType.ERROR);
+      enb.setMessage("Id not starting with end flag");
+      return enb;
     }
 
     id = id.substring(1);
@@ -195,25 +202,35 @@ public class ExchangeConnector
     /* WRONG - we should register our callback uri along with a connector id.
      *
      */
+    ExchangeConnectorInstance cinst = getConnectorInstance(sub, end);
+    if (cinst == null) {
+      enb.setStatus(StatusType.ERROR);
+      enb.setMessage("Unable to get instance for " + sub +
+                     " and " + end);
+      return enb;
+    }
 
     SendNotificationResponseType snr = (SendNotificationResponseType)unmarshalBody(req);
-
-    ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
 
     List<JAXBElement<? extends ResponseMessageType>> responseMessages =
       snr.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
     for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
-      ExchangeNotificationMessage note = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
+      ExchangeNotificationMessage enm = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
-      ExchangeNotification en = new ExchangeNotification(sub, end, note);
+      ExchangeNotification en = new ExchangeNotification(sub, end, enm);
 
-      // XXX fetch the event and put into notification.
+      for (ExchangeNotificationMessage.NotificationItem ni: enm.getNotifications()) {
+        IcalendarType ical = cinst.fetchItem(ni.getItemId());
+
+        en.addNotificationItem(new ExchangeNotification.NotificationItem(ni,
+                                                                         ical));
+      }
 
       enb.addNotification(en);
-      syncher.handleNotification(sub, note);
     }
 
+    enb.setStatus(StatusType.OK);
     return enb;
   }
 
@@ -225,16 +242,16 @@ public class ExchangeConnector
       ObjectFactory of = new ObjectFactory();
       SendNotificationResultType snr = of.createSendNotificationResultType();
 
-      if (ok) {
+      if (notifications.getStatus() == StatusType.OK) {
         snr.setSubscriptionStatus(SubscriptionStatusType.OK);
       } else {
         snr.setSubscriptionStatus(SubscriptionStatusType.UNSUBSCRIBE);
       }
 
-      marshalBody(resp,
-                  snr);
-    } catch (SynchException se) {
-      throw se;
+//      marshalBody(resp,
+  //                snr);
+ //   } catch (SynchException se) {
+   //   throw se;
     } catch(Throwable t) {
       throw new SynchException(t);
     }

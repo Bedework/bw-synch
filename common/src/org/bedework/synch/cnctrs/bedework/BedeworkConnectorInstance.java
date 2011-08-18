@@ -20,9 +20,8 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchException;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.cnctrs.exchange.ExchangeConnectorConfig;
+import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.GetSynchInfoType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -33,29 +32,32 @@ import org.bedework.synch.wsmessages.SynchInfoType;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemType;
+import org.oasis_open.docs.ns.wscal.calws_soap.AllpropType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.CalendarDataResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.CalendarQueryResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.CalendarQueryType;
+import org.oasis_open.docs.ns.wscal.calws_soap.CompFilterType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemType;
+import org.oasis_open.docs.ns.wscal.calws_soap.FilterType;
+import org.oasis_open.docs.ns.wscal.calws_soap.MultistatResponseElementType;
+import org.oasis_open.docs.ns.wscal.calws_soap.PropFilterType;
+import org.oasis_open.docs.ns.wscal.calws_soap.PropstatType;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ns.wscal.calws_soap.TextMatchType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
-import ietf.params.xml.ns.icalendar_2.BaseComponentType;
-import ietf.params.xml.ns.icalendar_2.BaseParameterType;
-import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-
 /** Calls from exchange synch processor to the service.
  *
  * @author Mike Douglass
  */
-public class BedeworkConnectorInstance
-      implements ConnectorInstance {
+public class BedeworkConnectorInstance implements ConnectorInstance {
   private transient Logger log;
 
   private final boolean debug;
@@ -103,7 +105,8 @@ public class BedeworkConnectorInstance
 
     gsi.setCalendarHref(info.getCalPath());
 
-    SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(), gsi);
+    SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(),
+                                                             gsi);
 
     if (!sir.getCalendarHref().equals(info.getCalPath())) {
       warn("Mismatched calpath in response to GetSycnchInfo: expected '" +
@@ -143,20 +146,116 @@ public class BedeworkConnectorInstance
    */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
-    FetchItemType fi = new FetchItemType();
+    CalendarQueryType cq = new CalendarQueryType();
 
-    fi.setHref(info.getCalPath());
-    fi.setUid(uid);
+    cq.setHref(info.getCalPath());
+    cq.setAllprop(new AllpropType());
 
-    return cnctr.getPort().fetchItem(getIdToken(), fi);
+
+    FilterType fltr = new FilterType();
+    cq.setFilter(fltr);
+
+    CompFilterType cf = new CompFilterType();
+    cf.setName("vcalendar");
+
+    fltr.setCompFilter(cf);
+
+    /* XXX This will not work in general - this query will only allow events to work.
+     * We need better expressions.
+     */
+
+    CompFilterType cfev = new CompFilterType();
+    cf.getCompFilter().add(cfev);
+    cfev.setName("vevent");
+
+    /* XXX We need to limit the time range we are synching
+    if (start != null) {
+      UTCTimeRangeType tr = new UTCTimeRangeType();
+
+      tr.setStart(XcalUtil.getXMlUTCCal(start));
+      tr.setEnd(XcalUtil.getXMlUTCCal(end));
+
+      cfev.setTimeRange(tr);
+    }*/
+
+    PropFilterType pr = new PropFilterType();
+    pr.setName("uid");
+    TextMatchType tm = new TextMatchType();
+    tm.setValue(uid);
+
+    pr.setTextMatch(tm);
+
+    cfev.getPropFilter().add(pr);
+
+    CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(), cq);
+
+    FetchItemResponseType fir = new FetchItemResponseType();
+
+    fir.setStatus(cqr.getStatus());
+
+    if (fir.getStatus() != StatusType.OK) {
+      fir.setErrorResponse(cqr.getErrorResponse());
+      fir.setMessage(cqr.getMessage());
+      return fir;
+    }
+
+    List<MultistatResponseElementType> mres = cqr.getResponse();
+    if (mres.size() == 0) {
+      fir.setStatus(StatusType.NOT_FOUND);
+      return fir;
+    }
+
+    if (mres.size() > 0) {
+      fir.setStatus(StatusType.ERROR);
+      fir.setMessage("More than one response");
+      return fir;
+    }
+
+    MultistatResponseElementType mre = mres.get(0);
+    fir.setHref(mre.getHref());
+    fir.setEtoken(mre.getEtoken());
+
+    /* Expect a single propstat element */
+
+    if (mre.getPropstat().size() != 1) {
+      fir.setStatus(StatusType.ERROR);
+      fir.setMessage("More than one propstat in response");
+      return fir;
+    }
+
+    PropstatType pstat = mre.getPropstat().get(0);
+    if (pstat.getStatus() != StatusType.OK) {
+      fir.setStatus(pstat.getStatus());
+      fir.setErrorResponse(pstat.getErrorResponse());
+      fir.setMessage(pstat.getMessage());
+      return fir;
+    }
+
+    if (pstat.getProp().size() != 1) {
+      fir.setStatus(StatusType.ERROR);
+      fir.setMessage("More than one prop in propstat");
+      return fir;
+    }
+
+    CalendarDataResponseType cdr = pstat.getProp().get(0).getCalendarData();
+
+    if ((cdr == null) || (cdr.getIcalendar() == null)) {
+      fir.setStatus(StatusType.NOT_FOUND);
+      return fir;
+    }
+
+    fir.setIcalendar(cdr.getIcalendar());
+
+    return fir;
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final FetchItemResponseType fir,
+                                           final UpdateItemType updates) throws SynchException {
     UpdateItemType upd = new UpdateItemType();
 
     upd.setHref(info.getCalPath());
-    upd.setEtoken(???);
+    upd.setEtoken(fir.getEtoken());
 
     return cnctr.getPort().updateItem(getIdToken(), upd);
   }
@@ -199,12 +298,7 @@ public class BedeworkConnectorInstance
    *                   Private methods
    * ==================================================================== */
 
-  private SynchIdTokenType getIdToken() {
-    SynchIdTokenType idToken = new SynchIdTokenType();
-
-    idToken.setPrincipalHref(info.getPrincipalHref());
-    idToken.setSynchToken(curToken);
-
-    return idToken;
+  SynchIdTokenType getIdToken() {
+    return cnctr.getIdToken(info.getPrincipalHref());
   }
 }

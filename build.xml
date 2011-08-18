@@ -104,6 +104,7 @@
     <property name="org.bedework.getjar.property.prefix"
               value="org.bedework.appjar" />
     
+    <getJar name="commons-codec" version="1.5" />
     <getJar name="log4j" version="1.2.8" />
     <getJar name="servletapi" version="2.4" />
     <getJar name="ical4j" version="1.0-rc3-SNAPSHOT" />

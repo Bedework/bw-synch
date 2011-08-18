@@ -20,6 +20,8 @@ package org.bedework.synch;
 
 import org.bedework.synch.SynchDefs.SynchEnd;
 
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +98,9 @@ public interface Connector<C extends ConnectorInstance,
   static class NotificationBatch<N extends Notification> {
     private List<N> notifications = new ArrayList<N>();
 
+    private StatusType status;
+    private String message;
+
     public NotificationBatch() {
     }
 
@@ -109,6 +114,22 @@ public interface Connector<C extends ConnectorInstance,
 
     public void addNotification(final N notification) {
       notifications.add(notification);
+    }
+
+    public void setStatus(final StatusType val) {
+      status = val;
+    }
+
+    public StatusType getStatus() {
+      return status;
+    }
+
+    public void setMessage(final String val) {
+      message = val;
+    }
+
+    public String getMessage() {
+      return message;
     }
   }
 

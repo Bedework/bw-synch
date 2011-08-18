@@ -18,5 +18,6 @@
 	<classpathentry kind="lib" path="lib/spring-beans-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/bedework/projects/rpiutil/dist/rpiutil-3.7.jar" sourcepath="/bedework/projects/rpiutil/src"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

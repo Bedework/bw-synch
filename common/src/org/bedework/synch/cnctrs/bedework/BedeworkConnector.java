@@ -28,6 +28,7 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
+import org.bedework.synch.wsmessages.SynchIdTokenType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 
@@ -273,6 +274,15 @@ public class BedeworkConnector
     }
   }
 
+  SynchIdTokenType getIdToken(final String principal) {
+    SynchIdTokenType idToken = new SynchIdTokenType();
+
+    idToken.setPrincipalHref(principal);
+    idToken.setSynchToken(remoteToken);
+
+    return idToken;
+  }
+
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
@@ -281,17 +291,16 @@ public class BedeworkConnector
    * @throws SynchException
    */
   public void ping() throws SynchException {
-    String token = initConnection(remoteToken);
-    if (token == null) {
+    remoteToken = initConnection(remoteToken);
+    if (remoteToken == null) {
       warn("System interface returned null from init. Stopping");
-      starting = false;
       running = false;
       stop();
     }
   }
 
-  private String initConnection(final String token) {
-    String curToken;
+  private String initConnection(final String token) throws SynchException {
+    String theToken;
 
     if (sysInfo == null) {
       // Try to get info first
@@ -318,27 +327,28 @@ public class BedeworkConnector
     ssn.setSubscribeUrl(uri + "subscribe/");
 
     if (token != null) {
-      curToken = token;
+      theToken = token;
     } else {
-      curToken = UUID.randomUUID().toString();
+      theToken = UUID.randomUUID().toString();
     }
 
-    ssn.setToken(curToken);
+    ssn.setToken(theToken);
 
-    StartServiceResponseType ssr = getPort().notifyRemoteService(ssn);
+    StartServiceResponseType ssr = getPort().notifyRemoteService(getIdToken(null),
+                                                                 ssn);
 
     if (ssr.getStatus() != StatusType.OK) {
       warn("Received status " + ssr.getStatus() + " to start notification");
-      curToken = null;
+      theToken = null;
       return null;
     }
 
-    if (!curToken.equals(ssr.getToken())) {
+    if (!theToken.equals(ssr.getToken())) {
       warn("Mismatched tokens in response to start notification");
-      curToken = null;
+      theToken = null;
       return null;
     }
 
-    return curToken;
+    return theToken;
   }
 }

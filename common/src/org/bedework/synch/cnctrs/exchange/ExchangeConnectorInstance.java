@@ -284,7 +284,8 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final FetchItemResponseType fir,
+                                           final UpdateItemType updates) throws SynchException {
     return null;
   }
 
@@ -408,7 +409,7 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     }
   }
 
-  private IcalendarType fetchItem(final BaseItemIdType id) throws SynchException {
+  IcalendarType fetchItem(final BaseItemIdType id) throws SynchException {
     List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
 
     toFetch.add(id);
