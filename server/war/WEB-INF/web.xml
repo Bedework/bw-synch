@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
          http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
-  <display-name>Bedework Exchange synch callback server</display-name>
+  <display-name>Bedework synch callback server</display-name>
 
   <context-param>
     <param-name>bwappname</param-name>
@@ -18,13 +18,13 @@
 
   <!-- Need this to flush a static table maintained by the servlet -->
   <listener>
-    <listener-class>org.bedework.exchgsynch.web.ExsynchServlet</listener-class>
+    <listener-class>org.bedework.synch.web.SynchServlet</listener-class>
   </listener>
 
   <servlet>
     <servlet-name>action</servlet-name>
     <servlet-class>
-      org.bedework.exchgsynch.web.ExsynchServlet
+      org.bedework.synch.web.SynchServlet
     </servlet-class>
     <init-param>
       <param-name>application</param-name>

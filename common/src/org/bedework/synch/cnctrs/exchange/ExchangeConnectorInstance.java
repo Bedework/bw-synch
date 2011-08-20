@@ -209,6 +209,14 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#changed()
+   */
+  @Override
+  public boolean changed() throws SynchException {
+    return false;
+  }
+
   /** This class is passed back and contans the publicly visible uid and lastmod
    * but also a private BaseItemIdType used to retrieve the item from Exchange.
    *
@@ -284,8 +292,12 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final FetchItemResponseType fir,
-                                           final UpdateItemType updates) throws SynchException {
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+    return null;
+  }
+
+  @Override
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
     return null;
   }
 
@@ -414,7 +426,7 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
 
     toFetch.add(id);
 
-    List<IcalendarType> items = fetchItems(toFetch);
+    List<IcalendarType> items = fetchExItems(toFetch);
 
     if (items.size() != 1) {
       return null;
@@ -423,7 +435,7 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     return items.get(0);
   }
 
-  private List<IcalendarType> fetchItems(final List<BaseItemIdType> toFetch) throws SynchException {
+  private List<IcalendarType> fetchExItems(final List<BaseItemIdType> toFetch) throws SynchException {
     GetItemsRequest gir = new GetItemsRequest(toFetch);
 
     Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();

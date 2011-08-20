@@ -18,10 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.CalendarItem;
 import org.bedework.synch.SynchException;
-
-import net.fortuna.ical4j.model.component.CalendarComponent;
 
 import java.util.List;
 
@@ -64,17 +61,6 @@ public class SyncFolderitemsResponse extends ExchangeResponse {
 
       if (debug) {
         debugMsg("chgType =" + chgType);
-      }
-
-      if (s.getCalendarItem() == null) {
-        continue;
-      }
-
-      CalendarItem c = new CalendarItem(s.getCalendarItem());
-      CalendarComponent comp = c.toComp();
-
-      if (debug) {
-        debugMsg(comp.toString());
       }
     }
   }

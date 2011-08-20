@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 
-<!-- This is the main build file for the exchange synch processor.
+<!-- This is the main build file for the synch processor.
 
      Authors: Mike Douglass   douglm  rpi.edu
 -->
 
-<project name="exsynch" default="deploy">
+<project name="synch" default="deploy">
   <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
 	
   <property environment="env"/>
   <dirname property="project.home" file="${ant.file}"/>
   
-  <property name="org.bedework.project.exsynch"
+  <property name="org.bedework.project.synch"
             location="${project.home}" />
 
   <property file="${project.home}/build.properties" />
@@ -26,8 +26,8 @@
   <deftasks/>
 
   <projectDefs name="${org.bedework.package.name}"
-               version="${org.bedework.exsynch.version}" 
-               deployment-name="exsynch"
+               version="${org.bedework.synch.version}" 
+               deployment-name="synch"
   />
 
   <import file="${build.dir}/loadDeployConfig.xml"/>
@@ -39,7 +39,7 @@
             location="${project.home}/resources/hibernate" />
 
   <property name="org.bedework.jboss.datasource.jndiname"
-            value="${org.bedework.global.jboss.exsynch.datasource.jndiname}" />
+            value="${org.bedework.global.jboss.synch.datasource.jndiname}" />
   
   <property name="ear.meta.dir" location="${project.home}/ear.meta"/>
 
@@ -69,12 +69,6 @@
       </then>
     </if>
 
-    <property name="org.bedework.exsynch.gensrc.base"
-              location="${project.home}/gensrc" />
-
-    <property name="org.bedework.exsynch.genwssrc.base"
-              location="${project.home}/genwssrc" />
-
     <property name="org.bedework.module.common.base"
               location="${project.home}/common" />
 
@@ -83,9 +77,6 @@
 
     <property name="org.bedework.module.service.base"
               location="${project.home}/service" />
-  	
-  	<property name="org.bedework.exsynch.wsdl.dir" 
-  	          location="${bedework.home}/resources/exsynchwsdefs" />
 
     <property name="common.jar"
               location="${dist.home}/${org.bedework.module.common.jar}-${project.version}.jar" />
@@ -135,6 +126,9 @@
   
   <target name="deploy-init" depends="init">
     <deployInit ear-name="bw-${ant.project.name}" />
+    <property name="org.bedework.extra.properties"
+              value="synch-config.xml" />
+    
   </target>
 
   <!-- ===================== build-source Target ===============================
@@ -142,16 +136,6 @@
      =================================================================== -->
 
   <target name="build-source" depends="build-init" >
-    <!--
-    <build-jar module-base="${org.bedework.exsynch.gensrc.base}" 
-               jar-file="${gensrc.jar}" />
-    <wsimport wsdl="${org.bedework.exsynch.wsdl.dir}/wssvc.wsdl"
-              module-base="${org.bedework.exsynch.genwssrc.base}"
-              jar-file="${genwssrc.jar}"
-              bindingsdir="${org.bedework.exsynch.wsdl.dir}/wsdlbindings"
-    />
--->
-
     <build-jar module-base="${org.bedework.module.common.base}" 
                jar-file="${common.jar}" />
                
@@ -176,7 +160,7 @@
          Build the callback web service war
          =============================================================== -->
     
-    <forApp name="exsynchwcb"
+    <forApp name="synchwcb"
             prefix="org.bedework.deploy"
             appPrefix="org.bedework.app"
             projectPrefix="org.bedework.project">

@@ -23,7 +23,7 @@
     special, consequential, or incidental damages related to the software,
     to the maximum extent the law permits.
 */
-package org.bedework.synch.service;
+package org.bedework.synch;
 
 import java.io.Serializable;
 
@@ -43,6 +43,16 @@ public class Stat implements Serializable {
                      final String value) {
     this.name = name;
     this.value = value;
+  }
+
+  /**
+   * @param name
+   * @param value
+   */
+  public Stat(final String name,
+                     final long value) {
+    this.name = name;
+    this.value = String.valueOf(value);
   }
 
   /**

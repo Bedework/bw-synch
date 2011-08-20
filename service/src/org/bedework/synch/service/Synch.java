@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.service;
 
-import org.bedework.synch.SynchConfig;
+import org.bedework.synch.Stat;
 import org.bedework.synch.SynchEngine;
 
 import org.apache.log4j.Logger;
@@ -39,8 +39,6 @@ public class Synch implements SynchMBean {
 
   private SynchEngine syncher;
 
-  private SynchConfig conf;
-
   private class ProcessorThread extends Thread {
     boolean showedTrace;
 
@@ -60,8 +58,6 @@ public class Synch implements SynchMBean {
 
             syncher = SynchEngine.getSyncher();
             syncher.start();
-
-            conf = syncher.getConfig();
           }
         } catch (Throwable t) {
           if (!showedTrace) {
@@ -434,9 +430,11 @@ public class Synch implements SynchMBean {
 
   @Override
   public List<Stat> getStats() {
-    List<Stat> stats = new ArrayList<Stat>();
+    if (syncher == null) {
+      return new ArrayList<Stat>();
+    }
 
-    return stats;
+    return syncher.getStats();
   }
 
   /* an example say's we need this  - we should probably implement some system

@@ -18,6 +18,9 @@
 */
 package org.bedework.synch;
 
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -150,15 +153,37 @@ public class SynchlingPool {
    * @throws SynchException if none available
    */
   public Synchling get() throws SynchException {
+    return get(true);
+  }
+
+  /** Get a synchling from the pool if possible. Return null if timed out
+   *
+   * @return a sychling or null
+   * @throws SynchException on error
+   */
+  public Synchling getNoException() throws SynchException {
+    return get(false);
+  }
+
+  private Synchling get(final boolean throwOnFailure) throws SynchException {
     Synchling s = null;
+    gets++;
+    long st = System.currentTimeMillis();
+
     try {
       s = getPool().poll(getTimeout(), TimeUnit.MILLISECONDS);
     } catch (Throwable t) {
       throw new SynchException(t);
     }
 
+    waitTimes += System.currentTimeMillis() - st;
+
     if (s == null) {
-      throw new SynchTimeout("Synchling pool wait");
+      getSynchlingFailures++;
+
+      if (throwOnFailure) {
+        throw new SynchTimeout("Synchling pool wait");
+      }
     }
 
     return s;
@@ -166,5 +191,49 @@ public class SynchlingPool {
 
   private synchronized ArrayBlockingQueue<Synchling> getPool() {
     return pool;
+  }
+
+  /** Get the current stats
+   *
+   * @return List of Stat
+   */
+  public List<Stat> getStats() {
+    List<Stat> stats = new ArrayList<Stat>();
+
+    stats.add(new Stat("timeout", getTimeout()));
+    stats.add(new Stat("gets", getGets()));
+    stats.add(new Stat("waitTimes", getWaitTimes()));
+    stats.add(new Stat("getSynchlingFailures", getGetSynchlingFailures()));
+    stats.add(new Stat("currentMaxSize", getCurrentMaxSize()));
+    stats.add(new Stat("currentAvailable", getCurrentAvailable()));
+
+    return stats;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+
+    sb.append("timeout=");
+    sb.append(getTimeout());
+
+    sb.append(", gets=");
+    sb.append(getGets());
+
+    sb.append("\n,     waitTimes=");
+    sb.append(getWaitTimes());
+
+    sb.append(", getSynchlingFailures=");
+    sb.append(getGetSynchlingFailures());
+
+    sb.append("\n,     currentMaxSize=");
+    sb.append(getCurrentMaxSize());
+
+    sb.append(", currentAvailable=");
+    sb.append(getCurrentAvailable());
+
+    sb.append("}");
+
+    return sb.toString();
   }
 }

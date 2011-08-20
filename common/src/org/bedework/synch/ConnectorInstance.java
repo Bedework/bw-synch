@@ -41,7 +41,7 @@ public interface ConnectorInstance {
    * connector instance. This is a one time call when a new subscription is
    * created and allows the connector instance to validate the information.
    *
-   * <p>This method shoudl set the appropriate status if an error occurs.
+   * <p>This method should set the appropriate status if an error occurs.
    *
    * <p>the open method handles any dynamic creation of a connection to the
    * subscribed-to service.
@@ -59,6 +59,17 @@ public interface ConnectorInstance {
    * @throws SynchException
    */
   BaseResponseType open() throws SynchException;
+
+  /** Called before a resynch takes place to determine if the end point has
+   * changed and needs resynch. Only the source end of a subscription will be
+   * checked. Note that false positives may occur if changes happen outside of
+   * the synch time boundaries. For notification driven endpoints this can
+   * probably always return false.
+   *
+   * @return true if a change occurred
+   * @throws SynchException
+   */
+  boolean changed() throws SynchException;
 
   /** Information used to synch ends A and B
    * This information is only valid in the context of a given subscription.
@@ -124,13 +135,22 @@ public interface ConnectorInstance {
    */
   FetchItemResponseType fetchItem(String uid) throws SynchException;
 
-  /** Update a calendar component
+  /** Fetch a batch of calendar components. The number and order of the result
+   * set must match that of the parameter uids.
+   *
+   * @param uids of items
+   * @return responses
+   * @throws SynchException
+   */
+  List<FetchItemResponseType> fetchItems(List<String> uids) throws SynchException;
+
+  /** Update a calendar component. The updates component has the change token
+   * href, and the component selection fields set.
    *
    * @param fir - the currrent state of the entity we are updating.
    * @param updates
    * @return response
    * @throws SynchException
    */
-  UpdateItemResponseType updateItem(FetchItemResponseType fir,
-                                    UpdateItemType updates) throws SynchException;
+  UpdateItemResponseType updateItem(UpdateItemType updates) throws SynchException;
 }

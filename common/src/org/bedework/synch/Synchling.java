@@ -21,7 +21,6 @@ package org.bedework.synch;
 import org.bedework.synch.ConnectorInstance.ItemInfo;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
@@ -38,8 +37,11 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.ws.Holder;
 
 /** The synchling handles the processing of a single subscription when there is
  * some activity.
@@ -61,11 +63,10 @@ public class Synchling {
 
   private SynchEngine syncher;
 
+  private XmlIcalCompare differ = new XmlIcalCompare();
+
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;
-
-  /* Where we keep subscriptions that come in while we are starting */
-  private List<Subscription> subsList;
 
   /** Constructor
    *
@@ -88,7 +89,7 @@ public class Synchling {
 
       switch (ni.getAction()) {
       case FullSynch:
-        reSynch(note, ni);
+        reSynch(note);
         break;
       case CopiedEvent:
         break;
@@ -259,10 +260,10 @@ public class Synchling {
     /* Fields set during the actual synch process */
 
     /** add to none, A or B */
-    public SynchEnd addTo;
+    public SynchEnd addTo = SynchEnd.none;
 
     /** Update none, A or B */
-    public SynchEnd updateEnd;
+    public SynchEnd updateEnd = SynchEnd.none;
 
     /** Constructor
      *
@@ -284,8 +285,7 @@ public class Synchling {
     }
   }
 
-  private StatusType reSynch(final Notification note,
-                             final NotificationItem ni) throws SynchException {
+  private StatusType reSynch(final Notification note) throws SynchException {
     try {
       /* The action here depends on which way we are synching.
        *
@@ -317,6 +317,9 @@ public class Synchling {
        * last synched.
        */
 
+      endACnctr = syncher.getConnectorInstance(note.getSub(), SynchEnd.endA);
+      endBCnctr = syncher.getConnectorInstance(note.getSub(), SynchEnd.endB);
+
       // XXX 2 way not fully done
       /* ===================================================================
        * Get the list of items that already exist in the calendar collections
@@ -326,31 +329,18 @@ public class Synchling {
         throw new SynchException("Unable to fetch endA items info");
       }
 
-      List<ItemInfo> biis = endBCnctr.getItemsInfo();
-      if (biis == null) {
-        throw new SynchException("Unable to fetch endB items info");
-      }
+      Map<String, ItemInfo> bitems = getItemsMap(endBCnctr);
 
-      /* Items is a table built from the endB calendar */
-      Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
-
-      /* sinfos provides state information about each item */
-      Map<String, SynchInfo> sinfos = new HashMap<String, SynchInfo>();
-
-      for (ItemInfo ii: biis) {
-        if (debug) {
-          trace(ii.toString());
-        }
-        ii.seen = false;
-        items.put(ii.uid, ii);
-      }
-
+      /* toFetch is a list of those items we have to fetch from end A to
+       * resynch that item
+       */
       List<SynchInfo> toFetch = new ArrayList<SynchInfo>();
 
       for (ItemInfo aii: aiis) {
-        ItemInfo bii = items.get(aii.uid);
+        ItemInfo bii = bitems.get(aii.uid);
 
         if (bii == null) {
+          /* It's not in the B list - add to list to fetch from A */
           if (debug) {
             trace("Need to add to end B: uid:" + aii.uid);
           }
@@ -358,34 +348,42 @@ public class Synchling {
           SynchInfo si = new SynchInfo(aii);
           si.addTo = SynchEnd.endB;
           toFetch.add(si);
-        } else {
-          bii.seen = true;
-
-          int cmp = cmpLastMods(bii.lastMod, aii.lastMod);
-          if (cmp != 0) {
-            SynchInfo si = new SynchInfo(aii);
-
-            if (cmp < 0) {
-              if (debug) {
-                trace("Need to update end B: uid:" + aii.uid);
-              }
-              si.updateEnd = SynchEnd.endB;
-            } else {
-              if (debug) {
-                trace("Need to update end A: uid:" + aii.uid);
-              }
-              si.updateEnd = SynchEnd.endA;
-            }
-
-            toFetch.add(si);
-          }
+          continue;
         }
+
+        /* It is at the A end - mark as seen then compare to see if
+         * we need to update
+         */
+        bii.seen = true;
+
+        int cmp = cmpLastMods(bii.lastMod, aii.lastMod);
+        if (cmp == 0) {
+          /* No update needed */
+          continue;
+        }
+
+        /* We need to update one end from the other */
+        SynchInfo si = new SynchInfo(aii);
+
+        if (cmp < 0) {
+          if (debug) {
+            trace("Need to update end B: uid:" + aii.uid);
+          }
+          si.updateEnd = SynchEnd.endB;
+        } else {
+          if (debug) {
+            trace("Need to update end A: uid:" + aii.uid);
+          }
+          si.updateEnd = SynchEnd.endA;
+        }
+
+        toFetch.add(si);
       }
 
       /* Now go over the end B info and see if we need to fetch any from that
        * end or simply delete them.
        */
-      for (ItemInfo ii: biis) {
+      for (ItemInfo ii: bitems.values()) {
         if (ii.seen) {
           continue;
         }
@@ -401,14 +399,20 @@ public class Synchling {
         toFetch.add(si);
       }
 
+      Holder<List<SynchInfo>> unprocessedRes = new Holder<List<SynchInfo>>();
+
+      /* Now update end A from end B.
+       */
+      while ((toFetch.size() > 0) &&
+             processFetchList(note, toFetch, unprocessedRes, SynchEnd.endA)) {
+        toFetch = unprocessedRes.value;
+      }
+
       /* Now update end B from end A.
        */
-      if (toFetch.size() > getItemsBatchSize) {
-        // Fetch this batch of items and process them.
-        updateRemote(sub,
-                     fetchItems(toFetch),
-                     sinfos);
-        toFetch.clear();
+      while ((toFetch.size() > 0) &&
+             processFetchList(note, toFetch, unprocessedRes, SynchEnd.endB)) {
+        toFetch = unprocessedRes.value;
       }
 
       return StatusType.OK;
@@ -419,46 +423,121 @@ public class Synchling {
     }
   }
 
-  private void updateRemote(final Subscription sub,
-                            final List<CalendarItem> cis,
-                            final Map<String, SynchInfo> sinfos) throws SynchException {
-    XmlIcalConvert cnv = new XmlIcalConvert();
+  private Map<String, ItemInfo> getItemsMap(final ConnectorInstance cinst) throws SynchException {
+    /* Items is a table built from the endB calendar */
+    Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
 
-    for (CalendarItem ci: cis) {
-      SynchInfo si = sinfos.get(ci.getUID());
-
-      if (si == null) {
-        continue;
-      }
-
-      if (si.addTo == SynchEnd.endA) {
-        AddItemResponseType air = endACnctr.addItem(cnv.toXml(ci));
-        if (debug) {
-          trace("Add: status=" + air.getStatus() +
-                " msg=" + air.getMessage());
-        }
-
-        continue;
-      }
-
-      if (si.addTo == SynchEnd.endB) {
-        AddItemResponseType air = endBCnctr.addItem(cnv.toXml(ci));
-        if (debug) {
-          trace("Add: status=" + air.getStatus() +
-                " msg=" + air.getMessage());
-        }
-
-        continue;
-      }
-
-      // Update the far end.
-      updateItem(sub, ci);
+    List<ItemInfo> iis = cinst.getItemsInfo();
+    if (iis == null) {
+      throw new SynchException("Unable to fetch items info");
     }
+
+    for (ItemInfo ii: iis) {
+      if (debug) {
+        trace(ii.toString());
+      }
+      ii.seen = false;
+      items.put(ii.uid, ii);
+    }
+
+    return items;
   }
 
-  private List<CalendarItem> fetchItems(final Subscription sub,
-                                        final List<SynchInfo> toFetch) throws SynchException {
-    return null;
+  /**
+   * @param note
+   * @param toFetch
+   * @param unprocessedRes
+   * @param from
+   * @return true if there are unprocessed entries for this end
+   * @throws SynchException
+   */
+  private boolean processFetchList(final Notification note,
+                                   final List<SynchInfo> toFetch,
+                                   final Holder<List<SynchInfo>> unprocessedRes,
+                                   final SynchEnd dest) throws SynchException {
+    boolean callAgain = true;
+    List<SynchInfo> unProcessed = new ArrayList<SynchInfo>();
+    unprocessedRes.value = unProcessed;
+
+    List<String> uids = new ArrayList<String>();
+    List<SynchInfo> sis = new ArrayList<SynchInfo>();
+
+    /* First fetch a batch of items */
+    int i = 0;
+    while ((uids.size() < getItemsBatchSize) && (i < toFetch.size())) {
+      SynchInfo si = toFetch.get(i);
+
+      if ((si.addTo != dest) && (si.updateEnd != dest)) {
+        unProcessed.add(si);
+        continue;
+      }
+
+      uids.add(si.itemInfo.uid);
+      sis.add(si);
+    }
+
+    if (uids.size() == 0) {
+      return false;
+    }
+
+    ConnectorInstance fromInst;
+    ConnectorInstance toInst;
+
+    if (dest == SynchEnd.endA) {
+      toInst = endACnctr;
+      fromInst = endBCnctr;
+    } else {
+      toInst = endBCnctr;
+      fromInst = endACnctr;
+    }
+
+    List<FetchItemResponseType> firs = fromInst.fetchItems(uids);
+
+    Iterator<SynchInfo> siit = sis.iterator();
+    for (FetchItemResponseType fir: firs) {
+      SynchInfo si = siit.next();
+
+      if (si.addTo == dest) {
+        AddItemResponseType air = toInst.addItem(fir.getIcalendar());
+        if (debug) {
+          trace("Add: status=" + air.getStatus() +
+                " msg=" + air.getMessage());
+        }
+
+        continue;
+      }
+
+      if (si.updateEnd == dest) {
+        // Update the instance
+        FetchItemResponseType toFir = toInst.fetchItem(si.itemInfo.uid);
+
+        if (toFir.getStatus() != StatusType.OK) {
+          warn("Unable to fetch destination entity for update");
+          continue;
+        }
+
+        ComponentSelectionType cst = differ.diff(fir.getIcalendar(),
+                                                 toFir.getIcalendar());
+
+        UpdateItemType ui = new UpdateItemType();
+
+        ui.setHref(toFir.getHref());
+        ui.setEtoken(toFir.getEtoken());
+        ui.getSelect().add(cst);
+
+        UpdateItemResponseType uir = toInst.updateItem(ui);
+
+        if (uir.getStatus() != StatusType.OK) {
+          warn("Unable to update destination entity");
+        }
+
+        continue;
+      }
+
+      warn("Should not get here");
+    }
+
+    return callAgain;
   }
 
   private int cmpLastMods(final String calLmod, final String exLmod) {

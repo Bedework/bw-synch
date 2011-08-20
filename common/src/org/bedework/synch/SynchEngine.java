@@ -19,6 +19,8 @@
 package org.bedework.synch;
 
 import org.bedework.synch.Connector.NotificationBatch;
+import org.bedework.synch.Notification.NotificationItem;
+import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 
 import edu.rpi.cmt.timezones.Timezones;
@@ -26,10 +28,10 @@ import edu.rpi.cmt.timezones.Timezones;
 import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -278,14 +280,26 @@ public class SynchEngine {
             trace("startList has " + startList.size() + " subscriptions");
           }
 
-          for (Subscription es: startList) {
-            if (stopping) {
-              break startup;
+          for (Subscription sub: startList) {
+            Synchling sl;
+
+            while (true) {
+              if (stopping) {
+                break startup;
+              }
+
+              sl = synchlingPool.getNoException();
+              if (sl != null) {
+                break;
+              }
             }
-            if (subscribe(es) != StatusType.OK) {
-              // XXX We need to save this subscription somewhere and retry later.
-              // Alternatively set its state and retrieve all unstarted for retry.
-            }
+
+            NotificationItem ni = new NotificationItem(ActionType.FullSynch,
+                                                       null, null);
+            Notification<NotificationItem> note = new Notification<NotificationItem>(
+                sub, SynchEnd.none, ni);
+
+            sl.handleNotification(note);
           }
 
           synchronized (this) {
@@ -337,6 +351,17 @@ public class SynchEngine {
    */
   public ApplicationContext getAppContext() {
     return appContext;
+  }
+
+  /**
+   * @return stats for synch service bean
+   */
+  public List<Stat> getStats() {
+    List<Stat> stats = new ArrayList<Stat>();
+
+    stats.addAll(synchlingPool.getStats());
+
+    return stats;
   }
 
   /** Stop synch process.
@@ -582,7 +607,7 @@ public class SynchEngine {
       }
 
       Connector c = (Connector)cl.newInstance();
-      connectorMap.put(className, c);
+      connectorMap.put(id, c);
     } catch (Throwable t) {
       throw new SynchException(t);
     }

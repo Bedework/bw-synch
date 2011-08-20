@@ -20,7 +20,6 @@ package org.bedework.synch;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /** This class defines the various properties we need for the synch engine
  *

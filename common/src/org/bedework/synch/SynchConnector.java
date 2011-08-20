@@ -80,8 +80,6 @@ public class SynchConnector
   private MessageFactory soapMsgFactory;
   private JAXBContext jc;
 
-  private ObjectFactory of = new ObjectFactory();
-
   private static List<ConnectorPropertyInfo> propInfo =
       new ArrayList<ConnectorPropertyInfo>();
 
@@ -366,6 +364,11 @@ public class SynchConnector
     }
 
     @Override
+    public boolean changed() throws SynchException {
+      return false;
+    }
+
+    @Override
     public List<ItemInfo> getItemsInfo() throws SynchException {
       throw new SynchException("Uncallable");
     }
@@ -378,6 +381,11 @@ public class SynchConnector
     @Override
     public FetchItemResponseType fetchItem(final String uid) throws SynchException {
       throw new SynchException("Uncallable");
+    }
+
+    @Override
+    public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+      return null;
     }
 
     @Override

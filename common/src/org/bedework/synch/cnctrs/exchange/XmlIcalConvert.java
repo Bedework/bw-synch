@@ -709,22 +709,6 @@ public class XmlIcalConvert implements Defs {
         return null;
       }
 
-      String dtval = dt.toXMLFormat();
-
-      StringBuilder sb = new StringBuilder();
-
-      sb.append(dtval.substring(0, 4)); // yyyy
-      sb.append(dtval.substring(5, 7)); // mm
-      sb.append(dtval.substring(8, 10)); // dd
-
-      if (!allDay) {
-        sb.append("T");
-        sb.append(dtval.substring(11, 13)); // hh
-        sb.append(dtval.substring(14, 16)); // mm
-        sb.append(dtval.substring(17, 19)); // ss
-        sb.append("Z");
-      }
-
       DateDatetimePropertyType prop;
       JAXBElement<? extends BasePropertyType> jaxbProp;
 
@@ -740,9 +724,9 @@ public class XmlIcalConvert implements Defs {
       }
 
       if (allDay) {
-        prop.setDate(sb.toString());
+        prop.setDate(dt);
       } else {
-        prop.setDateTime(sb.toString());
+        prop.setDateTime(dt);
       }
 
       if (!allDay && (tz != null)) {

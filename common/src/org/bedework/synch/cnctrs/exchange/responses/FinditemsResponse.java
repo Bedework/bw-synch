@@ -18,10 +18,10 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.CalendarItem;
 import org.bedework.synch.SynchException;
+import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
 
-import net.fortuna.ical4j.model.component.CalendarComponent;
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class FinditemsResponse extends ExchangeResponse {
   private final Boolean includesLastItemInRange;
 
   /* If we're fetching all the info */
-  private List<CalendarComponent> comps;
+  private List<IcalendarType> icals;
 
   /* If we're only fetching enough to synch */
   /**
@@ -149,6 +149,8 @@ public class FinditemsResponse extends ExchangeResponse {
 
     includesLastItemInRange = rf.isIncludesLastItemInRange();
 
+    XmlIcalConvert cnv = new XmlIcalConvert();
+
     for (ItemType item: rf.getItems().getItemOrMessageOrCalendarItem()) {
       if (!(item instanceof CalendarItemType)) {
         continue;
@@ -157,14 +159,13 @@ public class FinditemsResponse extends ExchangeResponse {
       CalendarItemType ci = (CalendarItemType)item;
 
       if (!synchInfoOnly) {
-        CalendarItem c = new CalendarItem(ci);
-        CalendarComponent comp = c.toComp();
+        IcalendarType ical = cnv.toXml(ci);
 
-        if (comps == null) {
-          comps = new ArrayList<CalendarComponent>();
+        if (icals == null) {
+          icals = new ArrayList<IcalendarType>();
         }
 
-        comps.add(comp);
+        icals.add(ical);
         continue;
       }
 
@@ -195,8 +196,8 @@ public class FinditemsResponse extends ExchangeResponse {
   /**
    * @return components or null
    */
-  public List<CalendarComponent> getComps() {
-    return comps;
+  public List<IcalendarType> getIcals() {
+    return icals;
   }
 
   /**
@@ -215,12 +216,11 @@ public class FinditemsResponse extends ExchangeResponse {
     sb.append(",\n   includesLastItemInRange=");
     sb.append(getIncludesLastItemInRange());
 
-    if (comps != null) {
-      for (CalendarComponent c: comps) {
-        sb.append(",\n     ");
-        sb.append(c.toString());
-      }
-    }
+//    if (icals != null) {
+//      for (IcalendarType ical: icals) {
+//        sb.append(",\n     ");
+//      }
+//    }
 
     if (synchInfo != null) {
       for (SynchInfo si: synchInfo) {

@@ -25,6 +25,8 @@
 */
 package org.bedework.synch.service;
 
+import org.bedework.synch.Stat;
+
 import java.util.List;
 
 /** Run the Exchange synch service

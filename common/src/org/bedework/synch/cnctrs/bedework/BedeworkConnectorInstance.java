@@ -86,17 +86,37 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
     debug = getLogger().isDebugEnabled();
   }
 
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
+   */
   @Override
   public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
     return val;
   }
 
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#open()
+   */
   @Override
   public BaseResponseType open() throws SynchException {
     // TODO Auto-generated method stub
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#changed()
+   */
+  @Override
+  public boolean changed() throws SynchException {
+    /* This implementation needs to at least check the change token for the
+     * collection and match it against the stored token.
+     */
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#getItemsInfo()
+   */
   @Override
   public List<ItemInfo> getItemsInfo() throws SynchException {
     List<ItemInfo> items = new ArrayList<ItemInfo>();
@@ -250,14 +270,21 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final FetchItemResponseType fir,
-                                           final UpdateItemType updates) throws SynchException {
-    UpdateItemType upd = new UpdateItemType();
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+    // XXX this should be a search for multiple uids - need to reimplement caldav search
 
-    upd.setHref(info.getCalPath());
-    upd.setEtoken(fir.getEtoken());
+    List<FetchItemResponseType> firs = new ArrayList<FetchItemResponseType>();
 
-    return cnctr.getPort().updateItem(getIdToken(), upd);
+    for (String uid: uids) {
+      firs.add(fetchItem(uid));
+    }
+
+    return firs;
+  }
+
+  @Override
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+    return cnctr.getPort().updateItem(getIdToken(), updates);
   }
 
   /* ====================================================================
