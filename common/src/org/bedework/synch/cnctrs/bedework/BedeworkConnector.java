@@ -23,6 +23,7 @@ import org.bedework.synch.ConnectorInstanceMap;
 import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchException;
@@ -264,7 +265,7 @@ public class BedeworkConnector
 
       SynchRemoteService ers =
         new SynchRemoteService(wsURL,
-                               new QName("http://www.bedework.org/exsynch/wsmessages",
+                               new QName(SynchDefs.synchNamespace,
                                          "SynchRemoteService"));
       SynchRemoteServicePortType port = ers.getSynchRSPort();
 

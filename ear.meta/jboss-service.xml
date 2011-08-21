@@ -2,7 +2,7 @@
 <server>
   <!--  guarantee separate classloader -->
   <loader-repository> 
-    org.bedework:archive=exsynch-service 
+    org.bedework:archive=synch-service 
   </loader-repository> 
   
   <mbean code="org.bedework.synch.service.Synch"

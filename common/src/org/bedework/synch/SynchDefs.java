@@ -18,8 +18,6 @@
 */
 package org.bedework.synch;
 
-
-
 /** Some definitions for the synch service
  *
  *   @author Mike Douglass   douglm@rpi.edu
@@ -36,4 +34,6 @@ public interface SynchDefs {
     /** */
     endB
   }
+
+  static final String synchNamespace = "http://www.bedework.org/synch/wsmessages";
 }

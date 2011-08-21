@@ -9,7 +9,7 @@
 
 <hibernate-mapping>
   <class name="org.bedework.synch.Subscription"
-         table="bwexsynch_subs" >
+         table="bwsynch_subs" >
     <cache usage="read-write"/>
     <id name="id" type="long" column="bwex_id">
       <generator class="native"/>

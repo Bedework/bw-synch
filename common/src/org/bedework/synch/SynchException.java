@@ -32,10 +32,7 @@ public class SynchException extends Throwable {
   QName errorTag;
 
   /** */
-  public static String namespace = "http://bedework.org/exsynch/errors";
-
-  /** */
-  public static QName unknownCalendarItemType = new QName(namespace,
+  public static QName unknownCalendarItemType = new QName(SynchDefs.synchNamespace,
                                             "unknown-calendar-item-type");
 
   /** Constructor

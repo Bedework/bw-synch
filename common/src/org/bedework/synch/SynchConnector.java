@@ -203,7 +203,7 @@ public class SynchConnector
 
       SynchRemoteService ers =
         new SynchRemoteService(wsURL,
-                               new QName("http://www.bedework.org/exsynch/wsmessages",
+                               new QName(SynchDefs.synchNamespace,
                                          "SynchRemoteService"));
       SynchRemoteServicePortType port = ers.getSynchRSPort();
 
@@ -253,7 +253,7 @@ public class SynchConnector
   JAXBContext getSynchJAXBContext() throws SynchException {
     try {
       if (jc == null) {
-        jc = JAXBContext.newInstance("org.bedework.exsynch.wsmessages:" +
+        jc = JAXBContext.newInstance("org.bedework.synch.wsmessages:" +
                                      "ietf.params.xml.ns.icalendar_2");
       }
 
