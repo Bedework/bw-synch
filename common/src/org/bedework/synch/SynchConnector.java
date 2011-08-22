@@ -19,7 +19,11 @@
 package org.bedework.synch;
 
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.ObjectFactory;

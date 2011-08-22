@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.exception.SynchException;
+
 import edu.rpi.sss.util.Util;
 
 import java.io.StringReader;

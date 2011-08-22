@@ -18,10 +18,13 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.Connector.NotificationBatch;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.Connector.NotificationBatch;
+import org.bedework.synch.exception.SynchException;
 
 import edu.rpi.cmt.timezones.Timezones;
 

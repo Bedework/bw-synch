@@ -16,8 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;

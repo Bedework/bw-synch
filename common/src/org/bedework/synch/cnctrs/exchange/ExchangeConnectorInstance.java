@@ -18,16 +18,16 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.ConnectorInstance;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.GetItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
+import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;

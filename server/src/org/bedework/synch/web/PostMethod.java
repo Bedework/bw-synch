@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.Connector;
-import org.bedework.synch.Connector.NotificationBatch;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.Connector.NotificationBatch;
+import org.bedework.synch.exception.SynchException;
 
 import java.util.Arrays;
 

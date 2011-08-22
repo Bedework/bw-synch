@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 
 import java.util.List;
 

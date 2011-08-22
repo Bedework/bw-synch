@@ -19,6 +19,9 @@
 package org.bedework.synch;
 
 
+import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.exception.SynchTimeout;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;

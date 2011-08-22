@@ -19,7 +19,7 @@
 package org.bedework.synch.web;
 
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;

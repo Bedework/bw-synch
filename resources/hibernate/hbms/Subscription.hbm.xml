@@ -11,6 +11,26 @@
   <class name="org.bedework.synch.Subscription"
          table="bwsynch_subs" >
     <cache usage="read-write"/>
+    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+             name="kind">
+      <param name="enumClassname">org.bedework.synch.SynchKind</param>
+    </typedef>
+    
+    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+             name="kind">
+      <param name="enumClassname">org.bedework.synch.SynchKind</param>
+    </typedef>
+    
+    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+             name="direction">
+      <param name="enumClassname">org.bedework.synch.SynchDirectionType</param>
+    </typedef>
+    
+    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+             name="master">
+      <param name="enumClassname">org.bedework.synch.SynchMasterType</param>
+    </typedef>
+    
     <id name="id" type="long" column="bwex_id">
       <generator class="native"/>
     </id>
@@ -28,10 +48,13 @@
 
     <property name="endBConnectorInfo" column="bwsyn_endB" type="text" />
 
-    <property name="direction" column="bwsyn_dir" type="string" length="250"
+    <property name="kind" column="bwsyn_kind" type="kind" length="25"
               not-null="true" />
 
-    <property name="master" column="bwsyn_mstr" type="string"  length="250"
+    <property name="direction" column="bwsyn_dir" type="direction" length="25"
+              not-null="true" />
+
+    <property name="master" column="bwsyn_mstr" type="master"  length="25"
               not-null="true" />
   </class>
 </hibernate-mapping>

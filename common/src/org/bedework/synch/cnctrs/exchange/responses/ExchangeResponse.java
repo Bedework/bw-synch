@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;

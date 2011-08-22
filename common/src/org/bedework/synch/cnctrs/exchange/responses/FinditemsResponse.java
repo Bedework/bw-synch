@@ -18,8 +18,8 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.SynchException;
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
+import org.bedework.synch.exception.SynchException;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 

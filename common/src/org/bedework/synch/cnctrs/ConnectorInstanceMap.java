@@ -16,9 +16,12 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.exception.SynchException;
 
 import java.util.HashMap;
 import java.util.Map;

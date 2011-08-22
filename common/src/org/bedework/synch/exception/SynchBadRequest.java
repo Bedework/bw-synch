@@ -16,36 +16,37 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.exception;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 
-/** Forbidden exception thrown by synch classes
+/** Base exception thrown by synch classes
  *
- *   @author Mike Douglass   douglm@rpi.edu
+ *   @author Mike Douglass   douglm rpi.edu
  */
-public class SynchTimeout extends SynchException {
+public class SynchBadRequest extends SynchException {
   /** Constructor
    */
-  public SynchTimeout() {
-    super(HttpServletResponse.SC_GATEWAY_TIMEOUT);
+  public SynchBadRequest() {
+    super(HttpServletResponse.SC_BAD_REQUEST);
   }
 
   /** Constructor
+   *
    * @param msg
    */
-  public SynchTimeout(final String msg) {
-    super(HttpServletResponse.SC_GATEWAY_TIMEOUT, msg);
+  public SynchBadRequest(final String msg) {
+    super(HttpServletResponse.SC_BAD_REQUEST, msg);
   }
 
   /** Constructor
    *
    * @param errorTag
    */
-  public SynchTimeout(final QName errorTag) {
-    super(HttpServletResponse.SC_GATEWAY_TIMEOUT, errorTag);
+  public SynchBadRequest(final QName errorTag) {
+    super(HttpServletResponse.SC_BAD_REQUEST, errorTag);
   }
 
   /** Constructor
@@ -53,7 +54,7 @@ public class SynchTimeout extends SynchException {
    * @param errorTag
    * @param msg
    */
-  public SynchTimeout(final QName errorTag, final String msg) {
-    super(HttpServletResponse.SC_GATEWAY_TIMEOUT, errorTag, msg);
+  public SynchBadRequest(final QName errorTag, final String msg) {
+    super(HttpServletResponse.SC_BAD_REQUEST, errorTag, msg);
   }
 }

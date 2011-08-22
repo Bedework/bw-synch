@@ -19,7 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.SubscriptionConnectorInfo;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 
 
 /** The deserialized information for an Exchange connection.

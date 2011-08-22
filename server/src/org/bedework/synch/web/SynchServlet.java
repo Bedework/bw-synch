@@ -19,7 +19,7 @@
 package org.bedework.synch.web;
 
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;

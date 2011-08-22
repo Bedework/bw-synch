@@ -19,6 +19,7 @@
 package org.bedework.synch;
 
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.exception.SynchException;
 
 import java.util.HashMap;
 import java.util.Map;

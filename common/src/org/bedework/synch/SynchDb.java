@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.exception.SynchException;
+
 import edu.rpi.cmt.db.hibernate.HibException;
 import edu.rpi.cmt.db.hibernate.HibSession;
 import edu.rpi.cmt.db.hibernate.HibSessionFactory;

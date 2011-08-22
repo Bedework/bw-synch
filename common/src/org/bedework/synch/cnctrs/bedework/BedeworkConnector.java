@@ -18,15 +18,15 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.Connector;
-import org.bedework.synch.ConnectorInstanceMap;
-import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.ConnectorInstanceMap;
+import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -48,7 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
-/** Calls from exchange synch processor to the service.
+/** The synch processor connector for connections to bedework.
  *
  * @author Mike Douglass
  */

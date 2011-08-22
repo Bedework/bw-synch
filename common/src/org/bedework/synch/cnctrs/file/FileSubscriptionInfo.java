@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.cnctrs.bedework;
+package org.bedework.synch.cnctrs.file;
 
 import org.bedework.synch.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
@@ -36,7 +36,7 @@ import org.bedework.synch.exception.SynchException;
  *
  * @author Mike Douglass
  */
-public class BedeworkSubscriptionInfo {
+public class FileSubscriptionInfo {
   private SubscriptionConnectorInfo info;
 
   private String calPath;
@@ -47,7 +47,7 @@ public class BedeworkSubscriptionInfo {
    * @param info
    * @throws SynchException
    */
-  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+  public FileSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
     this.info = info;
     info.loadProperties();
   }
@@ -59,7 +59,7 @@ public class BedeworkSubscriptionInfo {
    * @param calPath
    * @param principalHref
    */
-  public BedeworkSubscriptionInfo(final String subscriptionId,
+  public FileSubscriptionInfo(final String subscriptionId,
                               final boolean subscribe,
                               final String calPath,
                               final String principalHref) {

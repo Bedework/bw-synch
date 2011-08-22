@@ -16,35 +16,46 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs.file;
 
-/** Some definitions for the synch service
+/** File synch connector config
  *
- *   @author Mike Douglass   douglm@rpi.edu
+ * @author douglm
  */
-public interface SynchDefs {
-  /** To which end are we referring?
+public class FileConnectorConfig {
+  private boolean readOnly;
+
+  private int minPoll;
+
+  /** Read only file?
+   *
+   * @param val    int seconds
    */
-  public enum SynchEnd {
-    /** */
-    none,
-    /** */
-    endA,
-    /** */
-    endB
+  public void setReadOnly(final boolean val) {
+    readOnly = val;
   }
 
-  /** and does it tell us when something changes or do we have to ask?
+  /** Read only file?
+   *
+   * @return int seconds
    */
-  public enum SynchKind {
-    /** we have to ask */
-    poll,
-
-    /** the other end will tell us via a callback */
-    notify
+  public boolean getReadOnly() {
+    return readOnly;
   }
 
-  /** Namespace of the synch SOAP service
+  /** Min poll - seconds
+   *
+   * @param val    int seconds
    */
-  static final String synchNamespace = "http://www.bedework.org/synch/wsmessages";
+  public void setMinPoll(final int val) {
+    minPoll = val;
+  }
+
+  /** KeepAliveInterval - seconds
+   *
+   * @return int seconds
+   */
+  public int getMinPoll() {
+    return minPoll;
+  }
 }

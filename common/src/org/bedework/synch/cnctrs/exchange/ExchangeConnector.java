@@ -18,13 +18,13 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.Connector;
-import org.bedework.synch.ConnectorInstanceMap;
-import org.bedework.synch.ConnectorPropertyInfo;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.ConnectorInstanceMap;
+import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -50,7 +50,7 @@ import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationRe
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
 import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 
-/** Calls from exchange synch processor to the service.
+/** The synch processor connector for connections to Exchange.
  *
  * @author Mike Douglass
  */

@@ -16,9 +16,14 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.Notification;
+import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchDefs;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.exception.SynchException;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 

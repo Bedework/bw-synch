@@ -19,7 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchException;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.intf.Defs;
 
 import org.apache.log4j.Logger;

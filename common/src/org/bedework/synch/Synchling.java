@@ -18,9 +18,11 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.ConnectorInstance.ItemInfo;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
