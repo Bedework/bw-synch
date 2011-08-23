@@ -18,12 +18,19 @@
 */
 package org.bedework.synch.cnctrs.file;
 
+import org.bedework.http.client.dav.DavClient;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
+import edu.rpi.cmt.calendar.IcalToXcal;
+
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.model.Calendar;
+
+import org.apache.commons.httpclient.Header;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
@@ -33,8 +40,11 @@ import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 /** Calls from exchange synch processor to the service.
  *
@@ -54,6 +64,9 @@ public class FileConnectorInstance implements ConnectorInstance {
   private final Subscription sub;
 
   private SynchEnd end;
+
+  /* Only non-null if we actually fetched the data */
+  private IcalendarType fetchedIcal;
 
   FileConnectorInstance(final FileConnectorConfig config,
                             final FileConnector cnctr,
@@ -186,4 +199,79 @@ public class FileConnectorInstance implements ConnectorInstance {
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
+
+  /* Fetch the iCalendar for the subscription. If it fails set the status and
+   * return null. Unchanged data will return null with no status change.
+   */
+  private void getIcal() throws SynchException {
+    DavClient cl = null;
+
+    try {
+      cl = new DavClient(info.getUri(),
+                         15 * 1000);   // 15 seconds timeout
+
+      if (info.getPrincipalHref() != null) {
+        cl.setCredentials(info.getPrincipalHref(),
+                          cnctr.getSyncher().decrypt(info.getPassword()));
+      }
+
+      Header[] hdrs = null;
+
+      if (info.getEtag() != null) {
+        hdrs = new Header[] {
+          new Header("If-None-Match", info.getEtag())
+        };
+      }
+
+      int rc = cl.sendRequest("GET", info.getUri(), hdrs);
+      info.setLastRefreshStatus(String.valueOf(rc));
+
+      if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
+        // Data unchanged.
+        if (debug) {
+          trace("data unchanged");
+        }
+        return;
+      }
+
+      if (rc != HttpServletResponse.SC_OK) {
+        info.setLastRefreshStatus(String.valueOf(rc));
+        if (debug) {
+          trace("Unsuccessful response from server was " + rc);
+        }
+        info.setEtag(null);  // Force refresh next time
+        return;
+      }
+
+      CalendarBuilder builder = new CalendarBuilder();
+
+      InputStream is = cl.getResponse().getContentStream();
+
+      Calendar ical = builder.build(is);
+
+      /* Convert each entity to XML */
+
+      fetchedIcal = IcalToXcal.fromIcal(ical, null);
+
+      /* Looks like we translated ok. Save any etag and delete everything in the
+       * calendar.
+       */
+
+      Header etag = cl.getResponse().getResponseHeader("Etag");
+      if (etag != null) {
+        info.setEtag(etag.getValue());
+      }
+
+//      fetchedIcal = ic;
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    } finally {
+      try {
+        cl.release();
+      } catch (Throwable t) {
+      }
+    }
+  }
 }

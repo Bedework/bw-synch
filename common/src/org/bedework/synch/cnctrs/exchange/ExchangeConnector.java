@@ -20,11 +20,11 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.SynchEngine;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -138,6 +138,11 @@ public class ExchangeConnector
   @Override
   public String getCallbackUri() {
     return callbackUri;
+  }
+
+  @Override
+  public SynchEngine getSyncher() {
+    return syncher;
   }
 
   @Override
@@ -328,10 +333,12 @@ public class ExchangeConnector
     return log;
   }
 
+  @SuppressWarnings("unused")
   private void trace(final String msg) {
     getLogger().debug(msg);
   }
 
+  @SuppressWarnings("unused")
   private void warn(final String msg) {
     getLogger().warn(msg);
   }

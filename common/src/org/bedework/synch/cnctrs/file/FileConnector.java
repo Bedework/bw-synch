@@ -21,11 +21,11 @@ package org.bedework.synch.cnctrs.file;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.SynchEngine;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +45,10 @@ public class FileConnector
   private transient Logger log;
 
   /** */
-  public static final String propnameCalendarHref = "calendar-href";
+  public static final String propnameUri = "uri";
+
+  /** lastmod in the file is accurate */
+  public static final String propnameUseLastmod = "use-lastmod";
 
   /** */
   public static final String propnamePrincipal = "principal";
@@ -57,7 +60,7 @@ public class FileConnector
       new ArrayList<ConnectorPropertyInfo>();
 
   static {
-    propInfo.add(new ConnectorPropertyInfo(propnameCalendarHref,
+    propInfo.add(new ConnectorPropertyInfo(propnameUri,
                                            false,
                                            ""));
 
@@ -105,6 +108,11 @@ public class FileConnector
   @Override
   public String getCallbackUri() {
     return callbackUri;
+  }
+
+  @Override
+  public SynchEngine getSyncher() {
+    return syncher;
   }
 
   @Override

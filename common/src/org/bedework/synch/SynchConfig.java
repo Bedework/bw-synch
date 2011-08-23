@@ -38,6 +38,11 @@ public class SynchConfig implements Serializable {
   /* Path to keystore - null for use default */
   private String keystore;
 
+  /* Path to keystores  */
+  private String privKeys;
+  /* Path to keystores  */
+  private String pubKeys;
+
   private Map<String, String> connectors;
 
   /**
@@ -98,6 +103,38 @@ public class SynchConfig implements Serializable {
    */
   public String getKeystore() {
     return keystore;
+  }
+
+  /**
+   *
+   * @param val    String
+   */
+  public void setPrivKeys(final String val) {
+    privKeys = val;
+  }
+
+  /**
+   *
+   * @return String
+   */
+  public String getPrivKeys() {
+    return privKeys;
+  }
+
+  /**
+   *
+   * @param val    String
+   */
+  public void setPubKeys(final String val) {
+    pubKeys = val;
+  }
+
+  /**
+   *
+   * @return String
+   */
+  public String getPubKeys() {
+    return pubKeys;
   }
 
   /** Map of (name, className)

@@ -23,6 +23,8 @@ import org.bedework.synch.exception.SynchException;
 import edu.rpi.sss.util.Util;
 
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Properties;
 
 /** Serializable form of information for a connection to a system via a
@@ -37,6 +39,9 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
 
   /* Loaded from the serialized form */
   private Properties properties;
+
+  private boolean changed;
+
   /**
    * @param val id
    */
@@ -60,8 +65,19 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
 
   /**
    * @return serialized properties
+   * @throws SynchException
    */
-  public String getConnectorProperties() {
+  public String getConnectorProperties() throws SynchException {
+    if (changed) {
+      try {
+        Writer wtr = new StringWriter();
+
+        properties.store(wtr, null);
+        connectorProperties = wtr.toString();
+      } catch (Throwable t) {
+        throw new SynchException(t);
+      }
+    }
     return connectorProperties;
   }
 
@@ -87,16 +103,40 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
     }
   }
 
-  /** Add a property to the internal properties
+  /** Set a property in the internal properties - loading them from the
+   * external value first if necessary.
+   *
    * @param name
    * @param val
+   * @throws SynchException
    */
-  public void addProperty(final String name, final String val) {
+  public void setProperty(final String name,
+                          final String val) throws SynchException {
     if (properties == null) {
-      properties = new Properties();
+      loadProperties();
     }
 
-    properties.setProperty(name, val);
+    if (val == null) {
+      properties.remove(name);
+    } else {
+      properties.setProperty(name, val);
+    }
+    changed = true;
+  }
+
+  /** Get a property from the internal properties - loading them from the
+   * external value first if necessary.
+   *
+   * @param name
+   * @return val
+   * @throws SynchException
+   */
+  public String getProperty(final String name) throws SynchException {
+    if (properties == null) {
+      loadProperties();
+    }
+
+    return properties.getProperty(name);
   }
 
   /* ====================================================================
@@ -105,27 +145,36 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
 
   @Override
   public int hashCode() {
-    int res = getConnectorId().hashCode();
+    try {
+      int res = getConnectorId().hashCode();
 
-    if (getConnectorProperties() != null) {
-      res *= getConnectorProperties().hashCode();
+      if (getConnectorProperties() != null) {
+        res *= getConnectorProperties().hashCode();
+      }
+
+      return res;
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
     }
-
-    return res;
   }
+
   @Override
   public int compareTo(final SubscriptionConnectorInfo that) {
     if (this == that) {
       return 0;
     }
 
-    int res = getConnectorId().compareTo(that.getConnectorId());
-    if (res != 0) {
-      return res;
-    }
+    try {
+      int res = getConnectorId().compareTo(that.getConnectorId());
+      if (res != 0) {
+        return res;
+      }
 
-    return Util.compareStrings(getConnectorProperties(),
-                               that.getConnectorProperties());
+      return Util.compareStrings(getConnectorProperties(),
+                                 that.getConnectorProperties());
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
   }
 
   @Override
@@ -135,18 +184,22 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    try {
+      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
-    sb.append("connectorId= ");
-    sb.append(getConnectorId());
+      sb.append("connectorId= ");
+      sb.append(getConnectorId());
 
-    if (getConnectorProperties() != null) {
-      sb.append(", onnectorProperties = ");
-      sb.append(getConnectorProperties());
+      if (getConnectorProperties() != null) {
+        sb.append(", onnectorProperties = ");
+        sb.append(getConnectorProperties());
+      }
+
+      sb.append("}");
+      return sb.toString();
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
     }
-
-    sb.append("}");
-    return sb.toString();
   }
 
 }

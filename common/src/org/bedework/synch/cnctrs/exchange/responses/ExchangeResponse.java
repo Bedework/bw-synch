@@ -42,6 +42,10 @@ public class ExchangeResponse extends BaseResponseType {
 
   private MessageXml messageXml;
 
+  /**
+   * @param resp
+   * @throws SynchException
+   */
   public ExchangeResponse(final ResponseMessageType resp) throws SynchException {
     debug = getLogger().isDebugEnabled();
 

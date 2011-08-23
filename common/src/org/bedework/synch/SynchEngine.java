@@ -22,11 +22,13 @@ import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
+import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 
+import edu.rpi.cmt.security.PwEncryptionIntf;
 import edu.rpi.cmt.timezones.Timezones;
+import edu.rpi.sss.util.Util;
 
 import net.fortuna.ical4j.model.TimeZone;
 
@@ -117,6 +119,8 @@ public class SynchEngine {
 
   private ApplicationContext appContext;
 
+  private transient PwEncryptionIntf pwEncrypt;
+
   /* Map of currently active subscriptions - that is - we have traffic between
    * systems.
    */
@@ -130,9 +134,6 @@ public class SynchEngine {
   private boolean stopping;
 
   private SynchConfig config;
-
-  /* Max number of items we fetch at a time */
-  private final int getItemsBatchSize = 20;
 
   private static Object getSyncherLock = new Object();
 
@@ -425,6 +426,46 @@ public class SynchEngine {
     return config;
   }
 
+  /**
+   * @param val
+   * @return decrypted string
+   * @throws SynchException
+   */
+  public String decrypt(final String val) throws SynchException {
+    try {
+      return getEncrypter().decrypt(val);
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  /**
+   * @return en/decryptor
+   * @throws SynchException
+   */
+  public PwEncryptionIntf getEncrypter() throws SynchException {
+    if (pwEncrypt != null) {
+      return pwEncrypt;
+    }
+
+    try {
+      String pwEncryptClass = "edu.rpi.cmt.security.PwEncryptionDefault";
+      //String pwEncryptClass = getSysparsHandler().get().getPwEncryptClass();
+
+      pwEncrypt = (PwEncryptionIntf)Util.getObject(pwEncryptClass,
+                                                   PwEncryptionIntf.class);
+
+      pwEncrypt.init(config.getPrivKeys(), config.getPubKeys());
+
+      return pwEncrypt;
+    } catch (Throwable t) {
+      t.printStackTrace();
+      throw new SynchException(t);
+    }
+  }
+
   /** Gets an instance and implants it in the subscription object.
    * @param sub
    * @param end
@@ -475,6 +516,7 @@ public class SynchEngine {
    * @param notes
    * @throws SynchException
    */
+  @SuppressWarnings("unchecked")
   public void handleNotifications(
             final NotificationBatch<Notification> notes) throws SynchException {
     for (Notification note: notes.getNotifications()) {

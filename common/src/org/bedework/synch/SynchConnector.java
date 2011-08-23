@@ -109,6 +109,11 @@ public class SynchConnector
   }
 
   @Override
+  public SynchEngine getSyncher() {
+    return syncher;
+  }
+
+  @Override
   public List<ConnectorPropertyInfo> getPropertyInfo() {
     return propInfo;
   }
@@ -302,7 +307,7 @@ public class SynchConnector
     return new Notification(sub, sresp);
   }
 
-  private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) {
+  private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
     SubscriptionConnectorInfo subCinfo = new SubscriptionConnectorInfo();
 
     subCinfo.setConnectorId(cinfo.getConnectorId());
@@ -312,7 +317,7 @@ public class SynchConnector
     }
 
     for (SynchPropertyType sp: cinfo.getProperties().getProperty()) {
-      subCinfo.addProperty(sp.getName(), sp.getValue());
+      subCinfo.setProperty(sp.getName(), sp.getValue());
     }
 
     return subCinfo;
@@ -323,8 +328,8 @@ public class SynchConnector
    * @param u
    * @throws SynchException
    */
-  public void unsubscribe(final HttpServletResponse resp,
-                          final UnsubscribeRequestType u) throws SynchException {
+  private void unsubscribe(final HttpServletResponse resp,
+                           final UnsubscribeRequestType u) throws SynchException {
     if (debug) {
       trace("Handle unsubscribe " +  u.getSubscriptionId());
     }

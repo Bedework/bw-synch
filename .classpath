@@ -19,5 +19,7 @@
 	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/bedework/projects/rpiutil/dist/rpiutil-3.7.jar" sourcepath="/bedework/projects/rpiutil/src"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/bw-davio-3.7.jar"/>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.0.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

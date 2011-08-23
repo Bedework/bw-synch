@@ -96,6 +96,7 @@
               value="org.bedework.appjar" />
     
     <getJar name="commons-codec" version="1.5" />
+    <getJar name="commons-httpclient" version="3.0" />
     <getJar name="log4j" version="1.2.8" />
     <getJar name="servletapi" version="2.4" />
     <getJar name="ical4j" version="1.0-rc3-SNAPSHOT" />
@@ -114,6 +115,10 @@
     <getJar name="bw-synchwsschema" version="${org.bedework.bwxml.version}"
             project="bwxml"
             projecthome="${project.home}/../bwxml" />
+    
+    <getJar name="bw-davio" version="${org.bedework.davutil.version}" 
+            project="davutil"
+            projecthome="${project.home}/../bedework/projects/davutil" />
     
     <getJar name="rpiutil" version="${org.bedework.rpiutil.version}" 
             project="rpiutil"

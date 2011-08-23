@@ -19,7 +19,6 @@
 package org.bedework.synch;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.ObjectFactory;
 import org.w3c.dom.Document;
 
 import java.io.ByteArrayInputStream;
@@ -45,8 +44,6 @@ import javax.xml.transform.stream.StreamSource;
  */
 public class CalWsHelper {
   protected transient Logger log;
-
-  private ObjectFactory calwsOf = new ObjectFactory();
 
   private MessageFactory soapMsgFactory;
 
@@ -82,6 +79,12 @@ public class CalWsHelper {
     trace(wtr.toString());
   }
 
+  /**
+   * @param o
+   * @param jaxbContextPath
+   * @return SOAPMessage
+   * @throws Throwable
+   */
   public SOAPMessage marshal(final Object o,
                                 final String jaxbContextPath) throws Throwable {
     if (soapMsgFactory == null) {

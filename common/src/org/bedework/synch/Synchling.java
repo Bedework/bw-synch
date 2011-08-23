@@ -593,6 +593,7 @@ public class Synchling {
     getLogger().warn(msg);
   }
 
+  @SuppressWarnings("unused")
   private void error(final Throwable t) {
     getLogger().error(this, t);
   }

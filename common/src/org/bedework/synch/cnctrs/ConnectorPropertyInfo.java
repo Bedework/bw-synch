@@ -18,8 +18,6 @@
 */
 package org.bedework.synch.cnctrs;
 
-
-
 /** Information about a single connector property. This information will be
  * published by the system allowing clients to determine what properties are
  * needed.

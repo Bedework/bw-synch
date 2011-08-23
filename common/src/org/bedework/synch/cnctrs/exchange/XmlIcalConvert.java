@@ -115,6 +115,7 @@ public class XmlIcalConvert implements Defs {
    * @return Icalendar
    * @throws SynchException
    */
+  @SuppressWarnings("unchecked")
   public IcalendarType toXml(final CalendarItemType cal) throws SynchException {
     /* TODO
      * Transparency - derived from what?
@@ -550,8 +551,6 @@ public class XmlIcalConvert implements Defs {
   }
 
   private ItemType makeItemType(final String val) throws SynchException {
-    ItemType iytemType;
-
     String uval = val.toUpperCase();
 
     if (uval.equals("IPM.NOTE")) {

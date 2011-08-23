@@ -325,7 +325,7 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
    *                   Private methods
    * ==================================================================== */
 
-  SynchIdTokenType getIdToken() {
+  SynchIdTokenType getIdToken() throws SynchException {
     return cnctr.getIdToken(info.getPrincipalHref());
   }
 }

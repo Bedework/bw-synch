@@ -22,11 +22,11 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.SynchEngine;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -167,6 +167,11 @@ public class BedeworkConnector
   @Override
   public String getCallbackUri() {
     return callbackUri;
+  }
+
+  @Override
+  public SynchEngine getSyncher() {
+    return syncher;
   }
 
   @Override

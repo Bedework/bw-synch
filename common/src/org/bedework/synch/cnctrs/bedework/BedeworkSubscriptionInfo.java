@@ -21,27 +21,13 @@ package org.bedework.synch.cnctrs.bedework;
 import org.bedework.synch.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
 
-/** Represents a subscription for the synch engine.
+/** Stores information about one end of a subscription for connector.
  *
- * <p>A subscription has 2 connectors for each end of the subscription, endA
- * and endB.
- *
- * <p>Each connector has a kind which is a name used to retrieve a connector
- * from the connector manager. The retrieved connector implements the SynchIntf
- * interface and provides a serializable object to store connection specific
- * properties such as id and password.
- *
- * <p>These properties are obtained by presenting the user with a list of
- * required properties and then encrypting and storing the response.
  *
  * @author Mike Douglass
  */
 public class BedeworkSubscriptionInfo {
   private SubscriptionConnectorInfo info;
-
-  private String calPath;
-
-  private String principalHref;
 
   /**
    * @param info
@@ -58,11 +44,12 @@ public class BedeworkSubscriptionInfo {
    * @param subscribe
    * @param calPath
    * @param principalHref
+   * @throws SynchException
    */
   public BedeworkSubscriptionInfo(final String subscriptionId,
                               final boolean subscribe,
                               final String calPath,
-                              final String principalHref) {
+                              final String principalHref) throws SynchException {
     info = new SubscriptionConnectorInfo();
 
     setPrincipalHref(principalHref);
@@ -72,34 +59,38 @@ public class BedeworkSubscriptionInfo {
   /** Path to this systems calendar collection.
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setCalPath(final String val) {
-    calPath = val;
+  public void setCalPath(final String val) throws SynchException {
+    info.setProperty(BedeworkConnector.propnameCalendarHref, val);
   }
 
   /** Path to this systems calendar collection
    *
    * @return String
+   * @throws SynchException
    */
-  public String getCalPath() {
-    return calPath;
+  public String getCalPath() throws SynchException {
+    return info.getProperty(BedeworkConnector.propnameCalendarHref);
   }
 
 
   /** Principal requesting synch service
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setPrincipalHref(final String val) {
-    principalHref = val;
+  public void setPrincipalHref(final String val) throws SynchException {
+    info.setProperty(BedeworkConnector.propnamePrincipal, val);
   }
 
   /** Principal requesting synch service
    *
    * @return String
+   * @throws SynchException
    */
-  public String getPrincipalHref() {
-    return principalHref;
+  public String getPrincipalHref() throws SynchException {
+    return info.getProperty(BedeworkConnector.propnamePrincipal);
   }
 
   /* ====================================================================
@@ -108,12 +99,16 @@ public class BedeworkSubscriptionInfo {
 
   protected void toStringSegment(final StringBuilder sb,
                               final String indent) {
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("calPath = ");
-    sb.append(getCalPath());
-    sb.append("principalHref = ");
-    sb.append(getPrincipalHref());
+    try {
+      sb.append(",\n");
+      sb.append(indent);
+      sb.append("calPath = ");
+      sb.append(getCalPath());
+      sb.append("principalHref = ");
+      sb.append(getPrincipalHref());
+    } catch (Throwable t) {
+      sb.append(t.getMessage());
+    }
   }
 
   /* ====================================================================
@@ -122,7 +117,7 @@ public class BedeworkSubscriptionInfo {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("BedeworkSubscriptionInfo{");
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
     toStringSegment(sb, "  ");
 

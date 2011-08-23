@@ -39,9 +39,13 @@ import org.bedework.synch.exception.SynchException;
 public class FileSubscriptionInfo {
   private SubscriptionConnectorInfo info;
 
-  private String calPath;
+  /* properties saved by connector instance */
 
-  private String principalHref;
+  /** */
+  public static final String propnameEtag = "etag";
+
+  /** */
+  public static final String propnameLastRefreshStatus = "last-refresh-status";
 
   /**
    * @param info
@@ -56,50 +60,109 @@ public class FileSubscriptionInfo {
    *
    * @param subscriptionId - null means generate one
    * @param subscribe
-   * @param calPath
+   * @param uri
    * @param principalHref
+   * @param password
+   * @throws SynchException
    */
   public FileSubscriptionInfo(final String subscriptionId,
                               final boolean subscribe,
-                              final String calPath,
-                              final String principalHref) {
+                              final String uri,
+                              final String principalHref,
+                              final String password) throws SynchException {
     info = new SubscriptionConnectorInfo();
 
+    setUri(uri);
     setPrincipalHref(principalHref);
-    setCalPath(calPath);
+    setPassword(password);
   }
 
-  /** Path to this systems calendar collection.
+  /** Path to the calendar collection.
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setCalPath(final String val) {
-    calPath = val;
+  public void setUri(final String val) throws SynchException {
+    info.setProperty(FileConnector.propnameUri, val);
   }
 
-  /** Path to this systems calendar collection
+  /** Path to the calendar collection
    *
    * @return String
+   * @throws SynchException
    */
-  public String getCalPath() {
-    return calPath;
+  public String getUri() throws SynchException {
+    return info.getProperty(FileConnector.propnameUri);
   }
-
 
   /** Principal requesting synch service
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setPrincipalHref(final String val) {
-    principalHref = val;
+  public void setPrincipalHref(final String val) throws SynchException {
+    info.setProperty(FileConnector.propnamePrincipal, val);
   }
 
   /** Principal requesting synch service
    *
    * @return String
+   * @throws SynchException
    */
-  public String getPrincipalHref() {
-    return principalHref;
+  public String getPrincipalHref() throws SynchException {
+    return info.getProperty(FileConnector.propnamePrincipal);
+  }
+
+  /** Principals password
+   *
+   * @param val    String
+   * @throws SynchException
+   */
+  public void setPassword(final String val) throws SynchException {
+    info.setProperty(FileConnector.propnamePassword, val);
+  }
+
+  /** Principal password
+   *
+   * @return String
+   * @throws SynchException
+   */
+  public String getPassword() throws SynchException {
+    return info.getProperty(FileConnector.propnamePassword);
+  }
+
+  /** etag
+   *
+   * @param val    String
+   * @throws SynchException
+   */
+  public void setEtag(final String val) throws SynchException {
+    info.setProperty(propnameEtag, val);
+  }
+
+  /** Etag
+   *
+   * @return String
+   * @throws SynchException
+   */
+  public String getEtag() throws SynchException {
+    return info.getProperty(propnameEtag);
+  }
+
+  /** HTTP status or other appropriate value
+   * @param val
+   * @throws SynchException
+   */
+  public void setLastRefreshStatus(final String val) throws SynchException {
+    info.setProperty(propnameLastRefreshStatus, val);
+  }
+
+  /**
+   * @return String lastRefreshStatus
+   * @throws SynchException
+   */
+  public String getLastRefreshStatus() throws SynchException {
+    return info.getProperty(propnameLastRefreshStatus);
   }
 
   /* ====================================================================
@@ -108,12 +171,22 @@ public class FileSubscriptionInfo {
 
   protected void toStringSegment(final StringBuilder sb,
                               final String indent) {
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("calPath = ");
-    sb.append(getCalPath());
-    sb.append("principalHref = ");
-    sb.append(getPrincipalHref());
+    try {
+      sb.append(",\n");
+      sb.append(indent);
+      sb.append("uri = ");
+      sb.append(getUri());
+      sb.append("principalHref = ");
+      sb.append(getPrincipalHref());
+      sb.append("password = ");
+      sb.append(getPassword());
+      sb.append("etag = ");
+      sb.append(getEtag());
+      sb.append("lastRefreshStatus = ");
+      sb.append(getLastRefreshStatus());
+    } catch (Throwable t) {
+      sb.append(t.getMessage());
+    }
   }
 
   /* ====================================================================
@@ -122,7 +195,7 @@ public class FileSubscriptionInfo {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("BedeworkSubscriptionInfo{");
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
 
     toStringSegment(sb, "  ");
 

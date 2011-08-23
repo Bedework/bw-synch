@@ -19,7 +19,6 @@
 package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
 
