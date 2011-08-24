@@ -505,6 +505,7 @@ public class Synch implements SynchMBean {
     }
 
     processor = null;
+    syncher = null;
 
     info("************************************************************");
     info(" * Syncher terminated");

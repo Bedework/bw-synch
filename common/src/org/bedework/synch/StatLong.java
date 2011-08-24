@@ -18,59 +18,38 @@
 */
 package org.bedework.synch;
 
-import java.io.Serializable;
 
 /** Provide a way to get named values.
  *
  * @author douglm
  */
-public class Stat implements Serializable {
-  private String name;
-  private String value;
+public class StatLong extends Stat {
+  private long longValue;
 
   /**
    * @param name
-   * @param value
    */
-  public Stat(final String name,
-                     final String value) {
-    this.name = name;
-    this.value = value;
+  public StatLong(final String name) {
+    super(name, 0);
   }
 
   /**
-   * @param name
-   * @param value
+   * @param val
    */
-  public Stat(final String name,
-                     final long value) {
-    this.name = name;
-    this.value = String.valueOf(value);
+  public void setLongValue(final long val) {
+    longValue = val;
   }
 
   /**
-   * @return name
+   * @return long
    */
-  public String getName() {
-    return name;
+  public long getLongValue() {
+    return longValue;
   }
 
   /**
-   * @return value
    */
-  public String getValue() {
-    return value;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getName());
-    sb.append(" = ");
-    sb.append(getValue());
-    sb.append("\n");
-
-    return sb.toString();
+  public void inc() {
+    setLongValue(getLongValue() + 1);
   }
 }

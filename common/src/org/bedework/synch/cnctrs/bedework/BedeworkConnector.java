@@ -27,6 +27,8 @@ import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.KeepAliveNotificationType;
+import org.bedework.synch.wsmessages.KeepAliveResponseType;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -42,7 +44,6 @@ import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,6 +56,8 @@ import javax.xml.namespace.QName;
 public class BedeworkConnector
       implements Connector<BedeworkConnectorInstance,
                            Notification> {
+  private boolean debug;
+
   private transient Logger log;
 
   /** */
@@ -86,8 +89,6 @@ public class BedeworkConnector
 
   private static boolean running;
 
-  private long keepAliveInterval = 10 * 1000;
-
   /* If non-null this is the token we currently have for bedework */
   private String remoteToken;
 
@@ -113,20 +114,21 @@ public class BedeworkConnector
 
     @Override
     public void run() {
-      while (running) {
-        // Wait a bit before pinging
-
-        try {
-          Object o = new Object();
-          synchronized (o) {
-            o.wait(keepAliveInterval);
-          }
-        } catch (Throwable t) {
-          error(t.getMessage());
+      while (true) {
+        if (debug) {
+          trace("About to call service - token = " + remoteToken);
         }
+        /* First see if we need to reinitialize or ping */
 
         try {
-          ping();
+          if (remoteToken == null) {
+            initConnection();
+            if (remoteToken != null) {
+              running = true;
+            }
+          } else {
+            ping();
+          }
         } catch (Throwable t) {
           if (!showedTrace) {
             error(t);
@@ -134,6 +136,29 @@ public class BedeworkConnector
           } else {
             error(t.getMessage());
           }
+        }
+
+        // Wait a bit before trying again
+
+        if (debug) {
+          trace("About to pause - token = " + remoteToken);
+        }
+
+        try {
+          Object o = new Object();
+          long waitTime;
+
+          if (remoteToken == null) {
+            waitTime = config.getRetryInterval() * 1000;
+          } else {
+            waitTime = config.getKeepAliveInterval() * 1000;
+          }
+
+          synchronized (o) {
+            o.wait(waitTime);
+          }
+        } catch (Throwable t) {
+          error(t.getMessage());
         }
       }
     }
@@ -148,6 +173,8 @@ public class BedeworkConnector
     this.connectorId = connectorId;
     this.syncher = syncher;
     this.callbackUri = callbackUri;
+
+    debug = getLogger().isDebugEnabled();
 
     config = (BedeworkConnectorConfig)syncher.getAppContext().getBean(connectorId + "BedeworkConfig");
 
@@ -182,6 +209,10 @@ public class BedeworkConnector
   @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final SynchEnd end) throws SynchException {
+    if (!running) {
+      return null;
+    }
+
     BedeworkConnectorInstance inst = cinstMap.find(sub, end);
 
     if (inst != null) {
@@ -284,6 +315,7 @@ public class BedeworkConnector
     SynchIdTokenType idToken = new SynchIdTokenType();
 
     idToken.setPrincipalHref(principal);
+    idToken.setSubscribeUrl(callbackUri);
     idToken.setSynchToken(remoteToken);
 
     return idToken;
@@ -297,64 +329,50 @@ public class BedeworkConnector
    * @throws SynchException
    */
   public void ping() throws SynchException {
-    remoteToken = initConnection(remoteToken);
-    if (remoteToken == null) {
-      warn("System interface returned null from init. Stopping");
+    KeepAliveNotificationType kan = new KeepAliveNotificationType();
+
+    kan.setSubscribeUrl(callbackUri);
+    kan.setToken(remoteToken);
+
+    KeepAliveResponseType kar = getPort().pingService(kan);
+
+
+    if (kar.getStatus() != StatusType.OK) {
+      warn("Received status " + kar.getStatus() + " for ping");
+      remoteToken = null; // Force reinit after wait
+
       running = false;
-      stop();
+
+      return;
     }
   }
 
-  private String initConnection(final String token) throws SynchException {
-    String theToken;
+  private void initConnection() throws SynchException {
+    StartServiceNotificationType ssn = new StartServiceNotificationType();
+
+    ssn.setSubscribeUrl(callbackUri);
+
+    StartServiceResponseType ssr = getPort().startService(ssn);
+
+    if (ssr.getStatus() != StatusType.OK) {
+      warn("Received status " + ssr.getStatus() + " to start notification");
+      return;
+    }
+
+    remoteToken = ssr.getToken();
 
     if (sysInfo == null) {
-      // Try to get info first
+      // Try to get info
       GetPropertiesType gp = new GetPropertiesType();
 
       gp.setHref("/");
 
-      GetPropertiesResponseType gpr = getPort().getProperties(gp);
+      GetPropertiesResponseType gpr = getPort().getProperties(getIdToken(null),
+                                                              gp);
 
       if (gpr != null) {
         sysInfo = gpr.getXRD();
       }
     }
-
-    StartServiceNotificationType ssn = new StartServiceNotificationType();
-
-    /* Set up the call back URL for incoming subscriptions */
-
-    String uri = callbackUri;
-    if (!uri.endsWith("/")) {
-      uri += "/";
-    }
-
-    ssn.setSubscribeUrl(uri + "subscribe/");
-
-    if (token != null) {
-      theToken = token;
-    } else {
-      theToken = UUID.randomUUID().toString();
-    }
-
-    ssn.setToken(theToken);
-
-    StartServiceResponseType ssr = getPort().notifyRemoteService(getIdToken(null),
-                                                                 ssn);
-
-    if (ssr.getStatus() != StatusType.OK) {
-      warn("Received status " + ssr.getStatus() + " to start notification");
-      theToken = null;
-      return null;
-    }
-
-    if (!theToken.equals(ssr.getToken())) {
-      warn("Mismatched tokens in response to start notification");
-      theToken = null;
-      return null;
-    }
-
-    return theToken;
   }
 }

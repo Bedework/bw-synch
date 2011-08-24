@@ -8,28 +8,24 @@
      =================================================================== -->
 
 <hibernate-mapping>
+  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+           name="kind">
+    <param name="enumClassname">org.bedework.synch.SynchDefs$SynchKind</param>
+  </typedef>
+  
+  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+           name="direction">
+    <param name="enumClassname">org.bedework.synch.wsmessages.SynchDirectionType</param>
+  </typedef>
+  
+  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
+           name="master">
+    <param name="enumClassname">org.bedework.synch.wsmessages.SynchMasterType</param>
+  </typedef>
+  
   <class name="org.bedework.synch.Subscription"
          table="bwsynch_subs" >
     <cache usage="read-write"/>
-    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-             name="kind">
-      <param name="enumClassname">org.bedework.synch.SynchKind</param>
-    </typedef>
-    
-    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-             name="kind">
-      <param name="enumClassname">org.bedework.synch.SynchKind</param>
-    </typedef>
-    
-    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-             name="direction">
-      <param name="enumClassname">org.bedework.synch.SynchDirectionType</param>
-    </typedef>
-    
-    <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-             name="master">
-      <param name="enumClassname">org.bedework.synch.SynchMasterType</param>
-    </typedef>
     
     <id name="id" type="long" column="bwex_id">
       <generator class="native"/>

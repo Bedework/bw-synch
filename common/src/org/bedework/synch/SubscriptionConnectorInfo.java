@@ -81,6 +81,33 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
     return connectorProperties;
   }
 
+  /** Set the changed flag
+   *
+   * @param val
+   */
+  public void setChanged(final boolean val) {
+    changed = val;
+  }
+
+  /**
+   * @return changed flag.
+   */
+  public boolean getChanged() {
+    return changed;
+  }
+
+  /**
+   * reset the changed flag.
+   */
+  public void resetChanged() {
+    if (!changed) {
+      return;
+    }
+
+    properties = null;
+    changed = false;
+  }
+
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
@@ -89,7 +116,7 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
    *
    * @throws SynchException
    */
-  public void loadProperties() throws SynchException {
+  public synchronized void loadProperties() throws SynchException {
     try {
       if (properties == null) {
         properties = new Properties();
@@ -131,7 +158,7 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
    * @return val
    * @throws SynchException
    */
-  public String getProperty(final String name) throws SynchException {
+  public synchronized String getProperty(final String name) throws SynchException {
     if (properties == null) {
       loadProperties();
     }

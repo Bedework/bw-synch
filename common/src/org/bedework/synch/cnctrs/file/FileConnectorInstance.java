@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.cnctrs.file;
 
+import org.bedework.http.client.DavioException;
 import org.bedework.http.client.dav.DavClient;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
@@ -26,6 +27,8 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import edu.rpi.cmt.calendar.IcalToXcal;
+import edu.rpi.cmt.calendar.XcalUtil;
+import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
@@ -35,16 +38,30 @@ import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
+import ietf.params.xml.ns.icalendar_2.ArrayOfVcalendarContainedComponents;
+import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
+import ietf.params.xml.ns.icalendar_2.ObjectFactory;
+import ietf.params.xml.ns.icalendar_2.ProdidPropType;
+import ietf.params.xml.ns.icalendar_2.UidPropType;
+import ietf.params.xml.ns.icalendar_2.VcalendarContainedComponentType;
+import ietf.params.xml.ns.icalendar_2.VcalendarType;
+import ietf.params.xml.ns.icalendar_2.VersionPropType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBElement;
 
 /** Calls from exchange synch processor to the service.
  *
@@ -65,8 +82,17 @@ public class FileConnectorInstance implements ConnectorInstance {
 
   private SynchEnd end;
 
+  private DavClient client;
+
   /* Only non-null if we actually fetched the data */
   private IcalendarType fetchedIcal;
+  private String prodid;
+  private String version;
+
+  private Map<String, JAXBElement<? extends VcalendarContainedComponentType>> uidMap;
+  private List<JAXBElement<? extends VcalendarContainedComponentType>> comps;
+
+  private ObjectFactory of = new ObjectFactory();
 
   FileConnectorInstance(final FileConnectorConfig config,
                             final FileConnector cnctr,
@@ -106,6 +132,41 @@ public class FileConnectorInstance implements ConnectorInstance {
     /* This implementation needs to at least check the change token for the
      * collection and match it against the stored token.
      */
+
+    if (info.getEtag() == null) {
+      return true;
+    }
+
+    DavClient cl = getClient();
+
+    try {
+      int rc = cl.sendRequest("HEAD", info.getUri(), null);
+
+      if (rc != HttpServletResponse.SC_OK) {
+        info.setLastRefreshStatus(String.valueOf(rc));
+        if (debug) {
+          trace("Unsuccessful response from server was " + rc);
+        }
+        info.setEtag(null);  // Force refresh next time
+        return true;
+      }
+
+      Header etag = cl.getResponse().getResponseHeader("Etag");
+      if (etag != null) {
+        return !info.getEtag().equals(etag.getValue());
+      }
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    } finally {
+      try {
+        client.release();
+      } catch (Throwable t) {
+      }
+    }
+
+
     return false;
   }
 
@@ -115,6 +176,34 @@ public class FileConnectorInstance implements ConnectorInstance {
   @Override
   public List<ItemInfo> getItemsInfo() throws SynchException {
     List<ItemInfo> items = new ArrayList<ItemInfo>();
+
+    getIcal();
+
+    if (sub.changed()) {
+      cnctr.getSyncher().updateSubscription(sub);
+    }
+
+    for (JAXBElement<? extends VcalendarContainedComponentType> comp: comps) {
+      UidPropType uidProp = (UidPropType)XcalUtil.findProperty(comp.getValue(),
+                                                               XcalTags.uid);
+
+      if (uidProp == null) {
+        // Should flag as an error
+        continue;
+      }
+
+      String uid = uidProp.getText();
+
+      LastModifiedPropType lm = (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
+                                                              XcalTags.lastModified);
+
+      String lastmod= null;
+      if (lm != null) {
+        lastmod = lm.getUtcDateTime().toXMLFormat();
+      }
+
+      items.add(new ItemInfo(uid, lastmod));
+    }
 
     return items;
   }
@@ -137,6 +226,46 @@ public class FileConnectorInstance implements ConnectorInstance {
    */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
+    getIcal();
+
+    if (sub.changed()) {
+      cnctr.getSyncher().updateSubscription(sub);
+    }
+
+    JAXBElement<? extends VcalendarContainedComponentType> comp = uidMap.get(uid);
+
+    FetchItemResponseType fir = new FetchItemResponseType();
+
+    if (comp == null) {
+      fir.setStatus(StatusType.NOT_FOUND);
+      return fir;
+    }
+
+    fir.setHref(info.getUri() + "#" + uid);
+    fir.setEtoken(info.getEtag());
+
+    IcalendarType ical = new IcalendarType();
+    VcalendarType vcal = new VcalendarType();
+
+    ical.getVcalendar().add(vcal);
+
+    vcal.setProperties(new ArrayOfProperties());
+    List<JAXBElement<? extends BasePropertyType>> pl = vcal.getProperties().getBasePropertyOrTzid();
+
+    ProdidPropType prod = new ProdidPropType();
+    prod.setText(prodid);
+    pl.add(of.createProdid(prod));
+
+    VersionPropType vers = new VersionPropType();
+    vers.setText("2.0");
+    pl.add(of.createVersion(vers));
+
+    ArrayOfVcalendarContainedComponents aoc = new ArrayOfVcalendarContainedComponents();
+    vcal.setComponents(aoc);
+
+    aoc.getVcalendarContainedComponent().add(comp);
+    fir.setIcalendar(ical);
+
     return null;
   }
 
@@ -200,20 +329,40 @@ public class FileConnectorInstance implements ConnectorInstance {
    *                   Private methods
    * ==================================================================== */
 
-  /* Fetch the iCalendar for the subscription. If it fails set the status and
-   * return null. Unchanged data will return null with no status change.
-   */
-  private void getIcal() throws SynchException {
+  private DavClient getClient() throws SynchException {
+    if (client != null) {
+      return client;
+    }
+
     DavClient cl = null;
 
     try {
       cl = new DavClient(info.getUri(),
-                         15 * 1000);   // 15 seconds timeout
+                         15 * 1000);
 
       if (info.getPrincipalHref() != null) {
         cl.setCredentials(info.getPrincipalHref(),
                           cnctr.getSyncher().decrypt(info.getPassword()));
       }
+
+      client = cl;
+
+      return cl;
+    } catch (DavioException de) {
+      throw new SynchException(de);
+    }
+  }
+
+  /* Fetch the iCalendar for the subscription. If it fails set the status and
+   * return null. Unchanged data will return null with no status change.
+   */
+  private void getIcal() throws SynchException {
+    if (fetchedIcal != null) {
+      return;
+    }
+
+    try {
+      DavClient cl = getClient();
 
       Header[] hdrs = null;
 
@@ -253,6 +402,38 @@ public class FileConnectorInstance implements ConnectorInstance {
 
       fetchedIcal = IcalToXcal.fromIcal(ical, null);
 
+      uidMap = new HashMap<String,
+                           JAXBElement<? extends VcalendarContainedComponentType>>();
+      comps = new ArrayList<JAXBElement<? extends VcalendarContainedComponentType>>();
+      prodid = null;
+
+      for (VcalendarType vcal: fetchedIcal.getVcalendar()) {
+        if ((prodid == null) &&
+            (vcal.getProperties() != null)) {
+          for (JAXBElement<? extends BasePropertyType> pel:
+            vcal.getProperties().getBasePropertyOrTzid()) {
+            if (pel.getValue() instanceof ProdidPropType) {
+              prodid = ((ProdidPropType)pel.getValue()).getText();
+              break;
+            }
+          }
+        }
+
+        for (JAXBElement<? extends VcalendarContainedComponentType> comp:
+             vcal.getComponents().getVcalendarContainedComponent()) {
+          UidPropType uidProp = (UidPropType)XcalUtil.findProperty(comp.getValue(),
+                                                                   XcalTags.uid);
+
+          if (uidProp == null) {
+            // Should flag as an error
+            continue;
+          }
+
+          uidMap.put(uidProp.getText(), comp);
+          comps.add(comp);
+        }
+      }
+
       /* Looks like we translated ok. Save any etag and delete everything in the
        * calendar.
        */
@@ -261,15 +442,13 @@ public class FileConnectorInstance implements ConnectorInstance {
       if (etag != null) {
         info.setEtag(etag.getValue());
       }
-
-//      fetchedIcal = ic;
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
       throw new SynchException(t);
     } finally {
       try {
-        cl.release();
+        client.release();
       } catch (Throwable t) {
       }
     }

@@ -59,6 +59,12 @@ public class Synchling {
 
   protected transient Logger log;
 
+  private static volatile Object synchlingIdLock = new Object();
+
+  private static long lastSynchlingId;
+
+  private long synchlingId;
+
   private ConnectorInstance endACnctr;
 
   private ConnectorInstance endBCnctr;
@@ -79,30 +85,56 @@ public class Synchling {
     debug = getLogger().isDebugEnabled();
 
     this.syncher = syncher;
+
+    synchronized (synchlingIdLock) {
+      lastSynchlingId++;
+      synchlingId = lastSynchlingId;
+    }
   }
 
   /**
-   * @param sub
+   * @return unique id
+   */
+  public long getSynchlingId() {
+    return synchlingId;
+  }
+
+  /**
    * @param note
+   * @return OK for all handled fine. ERROR - discard. WARN - retry.
    * @throws SynchException
    */
-  public void handleNotification(final Notification<NotificationItem> note) throws SynchException {
+  public StatusType handleNotification(final Notification<NotificationItem> note) throws SynchException {
+    StatusType st;
+
     for (NotificationItem ni: note.getNotifications()) {
 
       switch (ni.getAction()) {
       case FullSynch:
-        reSynch(note);
-        break;
+        st = reSynch(note);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
+
       case CopiedEvent:
         break;
       case CreatedEvent:
-        addItem(note, ni);
-        break;
+        st = addItem(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
+
       case DeletedEvent:
         break;
       case ModifiedEvent:
-        updateItem(note, ni);
-        break;
+        st = updateItem(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
+
       case MovedEvent:
         break;
       case NewMailEvent:
@@ -111,13 +143,20 @@ public class Synchling {
         break;
 
       case NewSubscription:
-        subscribe(note, ni);
-        break;
+        st = subscribe(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
 
       case Unsubscribe:
         break;
       }
+
+      return StatusType.ERROR;
     }
+
+    return StatusType.OK;
   }
 
   /* ====================================================================
@@ -125,7 +164,7 @@ public class Synchling {
    * ==================================================================== */
 
 
-  private void subscribe(final Notification note,
+  private StatusType subscribe(final Notification note,
                          final NotificationItem ni) throws SynchException {
     if (debug) {
       trace("new subscription " + note.getSub());
@@ -138,7 +177,7 @@ public class Synchling {
     SubscribeResponseType sr = cinst.subscribe(ni.getSubResponse());
 
     if (sr.getStatus() != StatusType.OK) {
-      return;
+      return sr.getStatus();
     }
 
     cinst = syncher.getConnectorInstance(note.getSub(),
@@ -146,14 +185,15 @@ public class Synchling {
     sr = cinst.subscribe(ni.getSubResponse());
 
     if (sr.getStatus() != StatusType.OK) {
-      return;
+      return sr.getStatus();
     }
 
     syncher.addSubscription(note.getSub());
+    return StatusType.OK;
   }
 
-  private void addItem(final Notification note,
-                       final NotificationItem ni) throws SynchException {
+  private StatusType addItem(final Notification note,
+                             final NotificationItem ni) throws SynchException {
     IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
@@ -161,7 +201,7 @@ public class Synchling {
         trace("No item found");
       }
 
-      return;
+      return StatusType.ERROR;
     }
 
     AddItemResponseType air = getOtherCinst(note).addItem(ical);
@@ -169,10 +209,12 @@ public class Synchling {
       trace("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
     }
+
+    return air.getStatus();
   }
 
-  private void updateItem(final Notification note,
-                          final NotificationItem ni) throws SynchException {
+  private StatusType updateItem(final Notification note,
+                                final NotificationItem ni) throws SynchException {
     IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
@@ -180,7 +222,7 @@ public class Synchling {
         trace("No item found");
       }
 
-      return;
+      return StatusType.ERROR;
     }
 
     ConnectorInstance cinst = getOtherCinst(note);
@@ -192,7 +234,7 @@ public class Synchling {
     }
 
     if (fresp.getStatus() != StatusType.OK) {
-      return;
+      return fresp.getStatus();
     }
 
     IcalendarType targetIcal = fresp.getIcalendar();
@@ -212,6 +254,7 @@ public class Synchling {
       trace("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
     }
+    return uir.getStatus();
   }
 
   private ConnectorInstance getOtherCinst(final Notification note) throws SynchException {

@@ -33,6 +33,7 @@ import edu.rpi.sss.util.Util;
 import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -41,6 +42,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /** Synch processor.
  * <p>The synch processor manages subscriptions made by a subscriber to a target.
@@ -124,8 +127,8 @@ public class SynchEngine {
   /* Map of currently active subscriptions - that is - we have traffic between
    * systems.
    */
-  private final Map<String, Subscription> subs =
-    new HashMap<String, Subscription>();
+//  private final Map<String, Subscription> subs =
+  //  new HashMap<String, Subscription>();
 
   private boolean starting;
 
@@ -143,12 +146,88 @@ public class SynchEngine {
 
   private SynchlingPool synchlingPool;
 
+  private BlockingQueue<Notification> notificationInQueue;
+
   /* Where we keep subscriptions that come in while we are starting */
   private List<Subscription> subsList;
 
   private SynchDb db;
 
   private Map<String, Connector> connectorMap = new HashMap<String, Connector>();
+
+  /* Some counts */
+
+  private StatLong notificationsCt = new StatLong("notifications");
+
+  private StatLong notificationsAddWt = new StatLong("notifications add wait");
+
+  /** This process handles startup notifications and (un)subscriptions.
+   *
+   */
+  private class NotificationInThread extends Thread {
+    boolean showedTrace;
+
+    /**
+     */
+    public NotificationInThread() {
+      super("NotifyIn");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void run() {
+      while (true) {
+        if (debug) {
+          trace("About to wait for notification");
+        }
+
+        try {
+          Notification note = notificationInQueue.take();
+          if (note == null) {
+            continue;
+          }
+
+          notificationsCt.inc();
+          Synchling sl;
+
+          /* Get a synchling from the pool */
+          while (true) {
+            if (stopping) {
+              return;
+            }
+
+            sl = synchlingPool.getNoException();
+            if (sl != null) {
+              break;
+            }
+          }
+
+          /* The synchling needs to be running it's own thread. */
+          StatusType st = sl.handleNotification(note);
+
+          if (st == StatusType.WARNING) {
+            /* Back on the queue - these need to be flagged so we don't get an
+             * endless loop - perhaps we need a delay queue
+             */
+
+            notificationInQueue.put(note);
+          }
+        } catch (InterruptedException ie) {
+          warn("Notification handler shutting down");
+          break;
+        } catch (Throwable t) {
+          if (!showedTrace) {
+            error(t);
+            showedTrace = true;
+          } else {
+            error(t.getMessage());
+          }
+        }
+      }
+    }
+  }
+
+  private static NotificationInThread notifyInHandler;
 
   /** Constructor
    *
@@ -242,6 +321,8 @@ public class SynchEngine {
         starting = true;
       }
 
+      notificationInQueue = new ArrayBlockingQueue<Notification>(100);
+
       info("**************************************************");
       info("Starting synch");
       info("      callback URI: " + config.getCallbackURI());
@@ -270,6 +351,9 @@ public class SynchEngine {
       /* Get the list of subscriptions from our database and process them.
        * While starting, new subscribe requests get added to the list.
        */
+
+      notifyInHandler = new NotificationInThread();
+      notifyInHandler.start();
 
       db = new SynchDb();
 
@@ -303,7 +387,7 @@ public class SynchEngine {
             Notification<NotificationItem> note = new Notification<NotificationItem>(
                 sub, SynchEnd.none, ni);
 
-            sl.handleNotification(note);
+            notificationInQueue.put(note);
           }
 
           synchronized (this) {
@@ -364,6 +448,8 @@ public class SynchEngine {
     List<Stat> stats = new ArrayList<Stat>();
 
     stats.addAll(synchlingPool.getStats());
+    stats.add(notificationsCt);
+    stats.add(notificationsAddWt);
 
     return stats;
   }
@@ -392,11 +478,11 @@ public class SynchEngine {
     long startTime = System.currentTimeMillis();
     long delay = 1000 * 5; // 5 sec delay
 
-    while (subs.size() > 0) {
+    while (synchlingPool.getActiveCt() > 0) {
       if ((System.currentTimeMillis() - startTime) > maxWait) {
         warn("**************************************************");
         warn("Synch shutdown completed with " +
-             subs.size() + " outstanding subscriptions");
+            synchlingPool.getActiveCt() + " active synchlings");
         warn("**************************************************");
 
         break;
@@ -404,7 +490,7 @@ public class SynchEngine {
 
       info("**************************************************");
       info("Synch shutdown - " +
-           subs.size() + " remaining subscriptions");
+           synchlingPool.getActiveCt() + " active synchlings");
       info("**************************************************");
 
       try {
@@ -510,6 +596,35 @@ public class SynchEngine {
     return cinst;
   }
 
+  private Collection<Connector> getConnectors() {
+    return connectorMap.values();
+  }
+
+  /** Return a registered connector with the given id.
+   *
+   * @param id
+   * @return connector or null.
+   */
+  public Connector getConnector(final String id) {
+    return connectorMap.get(id);
+  }
+
+  private void registerConnector(final String id,
+                                 final String className) throws SynchException {
+    try {
+      Class cl = Class.forName(className);
+
+      if (connectorMap.containsKey(id)) {
+        throw new SynchException("Connector " + id + " already registered");
+      }
+
+      Connector c = (Connector)cl.newInstance();
+      connectorMap.put(id, c);
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
   /** Processes a batch of notifications. This must be done in a timely manner
    * as a request is usually hanging on this.
    *
@@ -557,6 +672,7 @@ public class SynchEngine {
    */
   public void addSubscription(final Subscription sub) throws SynchException {
     db.add(sub);
+    sub.resetChanged();
   }
 
   /**
@@ -567,6 +683,7 @@ public class SynchEngine {
     db.open();
     try {
       db.update(sub);
+      sub.resetChanged();
     } finally {
       db.close();
     }
@@ -601,15 +718,6 @@ public class SynchEngine {
     }
   }
 
-  /** Return a registered connector witht he given id.
-   *
-   * @param id
-   * @return connector or null.
-   */
-  public Connector getConnector(final String id) {
-    return connectorMap.get(id);
-  }
-
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
@@ -630,31 +738,15 @@ public class SynchEngine {
     getLogger().warn(msg);
   }
 
+  private void error(final String msg) {
+    getLogger().error(msg);
+  }
+
   private void error(final Throwable t) {
     getLogger().error(this, t);
   }
 
   private void info(final String msg) {
     getLogger().info(msg);
-  }
-
-  private Collection<Connector> getConnectors() {
-    return connectorMap.values();
-  }
-
-  private void registerConnector(final String id,
-                                 final String className) throws SynchException {
-    try {
-      Class cl = Class.forName(className);
-
-      if (connectorMap.containsKey(id)) {
-        throw new SynchException("Connector " + id + " already registered");
-      }
-
-      Connector c = (Connector)cl.newInstance();
-      connectorMap.put(id, c);
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
   }
 }

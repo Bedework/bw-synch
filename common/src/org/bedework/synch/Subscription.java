@@ -319,29 +319,24 @@ public class Subscription implements Comparable<Subscription> {
     return endBConn;
   }
 
-  /** equality just checks the path. Look at the rest.
-   *
-   * @param that
-   * @return true if anything changed
+  /**
+   * @return true if any connector info changed
    */
-  public boolean changed(final Subscription that) {
-    if (!equals(that)) {
-      return true;
+  public boolean changed() {
+    return getEndAConnectorInfo().getChanged() ||
+           getEndBConnectorInfo().getChanged();
+  }
+
+  /**
+   * reset the changed flag.
+   */
+  public synchronized void resetChanged() {
+    if (!changed()) {
+      return;
     }
 
-    if (!getEndAConnectorInfo().equals(that.getEndAConnectorInfo())) {
-      return true;
-    }
-
-    if (!getEndBConnectorInfo().equals(that.getEndBConnectorInfo())) {
-      return true;
-    }
-
-    if (getSubscribe() != that.getSubscribe()) {
-      return true;
-    }
-
-    return false;
+    getEndAConnectorInfo().resetChanged();
+    getEndBConnectorInfo().resetChanged();
   }
 
   /* ====================================================================

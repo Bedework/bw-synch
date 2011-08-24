@@ -23,7 +23,9 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.exception.SynchTimeout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +38,8 @@ public class SynchlingPool {
   private SynchEngine syncher;
 
   private ArrayBlockingQueue<Synchling> pool;
+
+  private Map<Long, Synchling> active = new HashMap<Long, Synchling>();
 
   private long timeout; // millisecs
 
@@ -96,6 +100,13 @@ public class SynchlingPool {
   }
 
   /**
+   * @return number active
+   */
+  public long getActiveCt() {
+    return active.size();
+  }
+
+  /**
    * @return total waitTimes in millisecs
    */
   public long getWaitTimes() {
@@ -148,6 +159,9 @@ public class SynchlingPool {
    */
   public void add(final Synchling s) throws SynchException {
     getPool().offer(s);
+    synchronized (active) {
+      active.remove(s.getSynchlingId());
+    }
   }
 
   /** Get a synchling from the pool if possible
@@ -156,7 +170,16 @@ public class SynchlingPool {
    * @throws SynchException if none available
    */
   public Synchling get() throws SynchException {
-    return get(true);
+    Synchling s = get(true);
+    if (s == null) {
+      return null;
+    }
+
+    synchronized (active) {
+      active.put(s.getSynchlingId(), s);
+    }
+
+    return s;
   }
 
   /** Get a synchling from the pool if possible. Return null if timed out
@@ -204,6 +227,7 @@ public class SynchlingPool {
     List<Stat> stats = new ArrayList<Stat>();
 
     stats.add(new Stat("timeout", getTimeout()));
+    stats.add(new Stat("active", getActiveCt()));
     stats.add(new Stat("gets", getGets()));
     stats.add(new Stat("waitTimes", getWaitTimes()));
     stats.add(new Stat("getSynchlingFailures", getGetSynchlingFailures()));
