@@ -88,6 +88,7 @@ public class BedeworkConnector
   private String connectorId;
 
   private static boolean running;
+  private static boolean stopped;
 
   /* If non-null this is the token we currently have for bedework */
   private String remoteToken;
@@ -114,7 +115,7 @@ public class BedeworkConnector
 
     @Override
     public void run() {
-      while (true) {
+      while (!stopped) {
         if (debug) {
           trace("About to call service - token = " + remoteToken);
         }
@@ -157,6 +158,8 @@ public class BedeworkConnector
           synchronized (o) {
             o.wait(waitTime);
           }
+        } catch (InterruptedException ie) {
+          break;
         } catch (Throwable t) {
           error(t.getMessage());
         }
@@ -173,6 +176,8 @@ public class BedeworkConnector
     this.connectorId = connectorId;
     this.syncher = syncher;
     this.callbackUri = callbackUri;
+
+    stopped = false;
 
     debug = getLogger().isDebugEnabled();
 
@@ -252,6 +257,7 @@ public class BedeworkConnector
 
   @Override
   public void stop() throws SynchException {
+    stopped = true;
     if (pinger != null) {
       pinger.interrupt();
     }
@@ -336,14 +342,11 @@ public class BedeworkConnector
 
     KeepAliveResponseType kar = getPort().pingService(kan);
 
-
     if (kar.getStatus() != StatusType.OK) {
       warn("Received status " + kar.getStatus() + " for ping");
       remoteToken = null; // Force reinit after wait
 
       running = false;
-
-      return;
     }
   }
 
