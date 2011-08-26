@@ -28,6 +28,7 @@ import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -142,10 +143,10 @@ public abstract class MethodBase {
    * decode the path. getRequestUrl() does neither.
    *
    * @param req      Servlet request object
-   * @return String  fixed up uri
+   * @return List    Path elements of fixed up uri
    * @throws SynchException
    */
-  public String[] getResourceUri(final HttpServletRequest req)
+  public List<String> getResourceUri(final HttpServletRequest req)
       throws SynchException {
     String uri = req.getServletPath();
 
@@ -166,7 +167,7 @@ public abstract class MethodBase {
    * @return String[]   fixed path broken into elements
    * @throws SynchException
    */
-  public static String[] fixPath(final String path) throws SynchException {
+  public static List<String> fixPath(final String path) throws SynchException {
     if (path == null) {
       return null;
     }
@@ -224,7 +225,7 @@ public abstract class MethodBase {
       }
     }
 
-    return (String[])al.toArray();
+    return al;
   }
 
   /*

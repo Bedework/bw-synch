@@ -22,7 +22,9 @@ import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.exception.SynchException;
 
-import java.util.Arrays;
+import edu.rpi.sss.util.Util;
+
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,22 +41,22 @@ public class PostMethod extends MethodBase {
   public void doMethod(final HttpServletRequest req,
                        final HttpServletResponse resp) throws SynchException {
     try {
-      String[] resourceUri = getResourceUri(req);
+      List<String> resourceUri = getResourceUri(req);
 
-      if ((resourceUri == null) || (resourceUri.length == 0)) {
+      if (Util.isEmpty(resourceUri)) {
         throw new SynchException("Bad resource url - no connector specified");
       }
 
       /* Find a connector to handle the incoming request.
        */
-      Connector conn = syncher.getConnector(resourceUri[0]);
+      Connector conn = syncher.getConnector(resourceUri.get(0));
 
       if (conn == null) {
         throw new SynchException("Bad resource url - unknown connector specified");
       }
 
-      NotificationBatch notes = conn.handleCallback(req, resp,
-                          Arrays.copyOfRange(resourceUri, 1, resourceUri.length - 1));
+      resourceUri.remove(0);
+      NotificationBatch notes = conn.handleCallback(req, resp, resourceUri);
 
       if (notes != null) {
         syncher.handleNotifications(notes);

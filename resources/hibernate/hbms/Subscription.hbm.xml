@@ -9,11 +9,6 @@
 
 <hibernate-mapping>
   <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-           name="kind">
-    <param name="enumClassname">org.bedework.synch.SynchDefs$SynchKind</param>
-  </typedef>
-  
-  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
            name="direction">
     <param name="enumClassname">org.bedework.synch.wsmessages.SynchDirectionType</param>
   </typedef>
@@ -55,9 +50,6 @@
       <property name="connectorProperties" column="bwsyn_conn_props_b" 
                 type="string" length="3000" />
     </component>
-
-    <property name="kind" column="bwsyn_kind" type="kind" length="25"
-              not-null="true" />
 
     <property name="direction" column="bwsyn_dir" type="direction" length="25"
               not-null="true" />

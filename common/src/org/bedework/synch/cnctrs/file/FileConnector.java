@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.file;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
@@ -101,6 +102,11 @@ public class FileConnector
   }
 
   @Override
+  public SynchKind getKind() {
+    return SynchKind.poll;
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }
@@ -150,7 +156,7 @@ public class FileConnector
   @Override
   public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final String[] resourceUri) throws SynchException {
+                                     final List<String> resourceUri) throws SynchException {
     return null;
   }
 

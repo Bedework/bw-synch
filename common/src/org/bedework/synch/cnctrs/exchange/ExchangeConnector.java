@@ -20,6 +20,7 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
@@ -131,6 +132,11 @@ public class ExchangeConnector
   }
 
   @Override
+  public SynchKind getKind() {
+    return SynchKind.notify;
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }
@@ -180,15 +186,15 @@ public class ExchangeConnector
   @Override
   public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final String[] resourceUri) throws SynchException {
+                                     final List<String> resourceUri) throws SynchException {
     ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
 
-    if (resourceUri.length != 1) {
+    if (resourceUri.size() != 1) {
       enb.setStatus(StatusType.ERROR);
       return enb;
     }
 
-    String id = resourceUri[0];
+    String id = resourceUri.get(0);
     SynchEnd end;
 
     try {

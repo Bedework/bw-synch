@@ -212,6 +212,10 @@ public class SynchEngine {
 
             notificationInQueue.put(note);
           }
+
+          /* If this is a poll kind then we should add it to a poll queue
+           */
+          // XXX Add it to poll queue
         } catch (InterruptedException ie) {
           warn("Notification handler shutting down");
           break;

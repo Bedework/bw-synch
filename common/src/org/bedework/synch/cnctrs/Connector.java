@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
 
@@ -65,6 +66,11 @@ public interface Connector<C extends ConnectorInstance,
   void start(String connectorId,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
+
+  /**
+   * @return poll or notify?
+   */
+  SynchKind getKind();
 
   /**
    * @return id provided at start
@@ -158,7 +164,7 @@ public interface Connector<C extends ConnectorInstance,
    */
   NotificationBatch<N> handleCallback(HttpServletRequest req,
                                       HttpServletResponse resp,
-                                      String[] resourceUri) throws SynchException;
+                                      List<String> resourceUri) throws SynchException;
 
   /** Will respond to a notification.
    *

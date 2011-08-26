@@ -19,6 +19,7 @@
 package org.bedework.synch;
 
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
@@ -99,6 +100,11 @@ public class SynchConnector
   }
 
   @Override
+  public SynchKind getKind() {
+    return SynchKind.notify;
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }
@@ -128,11 +134,11 @@ public class SynchConnector
   @Override
   public NotificationBatch handleCallback(final HttpServletRequest req,
                                           final HttpServletResponse resp,
-                                          final String[] resourceUri) throws SynchException {
+                                          final List<String> resourceUri) throws SynchException {
     try {
       // Resource uri unused for the moment - must be null or zero length (or "/")
 
-      if (resourceUri.length > 0) {
+      if (resourceUri.size() > 0) {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return null;
       }

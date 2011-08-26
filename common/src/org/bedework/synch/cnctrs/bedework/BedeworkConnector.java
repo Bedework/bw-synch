@@ -22,6 +22,7 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
@@ -192,6 +193,11 @@ public class BedeworkConnector
   }
 
   @Override
+  public SynchKind getKind() {
+    return SynchKind.notify;
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }
@@ -245,7 +251,7 @@ public class BedeworkConnector
   @Override
   public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final String[] resourceUri) throws SynchException {
+                                     final List<String> resourceUri) throws SynchException {
     return null;
   }
 
@@ -353,6 +359,7 @@ public class BedeworkConnector
   private void initConnection() throws SynchException {
     StartServiceNotificationType ssn = new StartServiceNotificationType();
 
+    ssn.setConnectorId(connectorId);
     ssn.setSubscribeUrl(callbackUri);
 
     StartServiceResponseType ssr = getPort().startService(ssn);

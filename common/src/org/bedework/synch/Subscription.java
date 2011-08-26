@@ -18,7 +18,6 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchMasterType;
@@ -67,8 +66,6 @@ public class Subscription implements Comparable<Subscription> {
   private SubscriptionConnectorInfo endAConnectorInfo;
 
   private SubscriptionConnectorInfo endBConnectorInfo;
-
-  private SynchKind kind;
 
   private SynchDirectionType direction;
 
@@ -210,22 +207,6 @@ public class Subscription implements Comparable<Subscription> {
    */
   public SubscriptionConnectorInfo getEndBConnectorInfo() {
     return endBConnectorInfo;
-  }
-
-  /** What kind?
-   *
-   * @param val
-   */
-  public void setKind(final SynchKind val) {
-    kind = val;
-  }
-
-  /** What kind?
-   *
-   * @return kind
-   */
-  public SynchKind getKind() {
-    return kind;
   }
 
   /** Which way?
@@ -373,11 +354,6 @@ public class Subscription implements Comparable<Subscription> {
     sb.append(indent);
     sb.append("subscribe = ");
     sb.append(getSubscribe());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("kind = ");
-    sb.append(getKind());
 
     sb.append(",\n");
     sb.append(indent);
