@@ -91,16 +91,11 @@
   <!-- =================================================================
        Clean projects we depend on
        ================================================================= -->
-  <target name="clean">
-    <execProject project="bwxml" target="clean" />
+  <target name="clean" depends="clean.bwxml">
     <antcall target="doDeftasks.clean"/>
   </target>
   
-  <target name="build-init" depends="init">
-    <!-- Make sure bwxml is built -->
-    <execProject project="bwxml" target="build" />
-<!--    <ant antfile="${project.home}/../bwxml/build.xml" inheritall="false" /> -->
-    
+  <target name="build-init" depends="init,build.bwxml">
     <property name="org.bedework.getjar.property.prefix"
               value="org.bedework.appjar" />
     
@@ -127,15 +122,15 @@
     
     <getJar name="bw-davio" version="${org.bedework.davutil.version}" 
             project="davutil"
-            projecthome="${project.home}/../bedework/projects/davutil" />
+            projecthome="${project.home}/../davutil" />
     
     <getJar name="rpiutil" version="${org.bedework.rpiutil.version}" 
             project="rpiutil"
-            projecthome="${project.home}/../bedework/projects/rpiutil" />
+            projecthome="${project.home}/../rpiutil" />
 
     <getJar name="rpiaccess" version="${org.bedework.access.version}" 
             project="access"
-            projecthome="${project.home}/../bedework/projects/access" />
+            projecthome="${project.home}/../access" />
   </target>
   
   <target name="deploy-init" depends="init">

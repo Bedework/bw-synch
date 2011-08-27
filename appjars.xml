@@ -47,17 +47,17 @@
               libcache="${org.bedework.libcache.dir}"
               name="rpiaccess" 
       	      version="${org.bedework.access.version}" project="access"
-              projecthome="${bedework.home}/projects/access" />
+              projecthome="${bedework.home}/../access" />
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
               name="rpiutil" version="${org.bedework.rpiutil.version}" project="rpiutil"
-              projecthome="${bedework.home}/projects/rpiutil" />
+              projecthome="${bedework.home}/../rpiutil" />
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
               name="bw-davio" version="${org.bedework.davutil.version}"
-              projecthome="${bedework.home}/projects/davutil" />
+              projecthome="${bedework.home}/../davutil" />
 
       <!-- ======================= Commons jars ============================ -->
       
