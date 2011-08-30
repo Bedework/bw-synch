@@ -81,6 +81,8 @@ public class SynchConnector
 
   private boolean debug;
 
+  private boolean running;
+
   // Are these thread safe?
   private MessageFactory soapMsgFactory;
   private JAXBContext jc;
@@ -97,6 +99,22 @@ public class SynchConnector
     this.callbackUri = callbackUri;
 
     debug = getLogger().isDebugEnabled();
+    running = true;
+  }
+
+  @Override
+  public boolean isStarted() {
+    return running;
+  }
+
+  @Override
+  public boolean isFailed() {
+    return false;
+  }
+
+  @Override
+  public boolean isStopped() {
+    return !running;
   }
 
   @Override
@@ -171,7 +189,7 @@ public class SynchConnector
 
   @Override
   public void stop() throws SynchException {
-
+    running = false;
   }
 
   /* ====================================================================

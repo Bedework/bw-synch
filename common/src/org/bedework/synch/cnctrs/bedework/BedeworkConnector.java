@@ -193,6 +193,21 @@ public class BedeworkConnector
   }
 
   @Override
+  public boolean isStarted() {
+    return running;
+  }
+
+  @Override
+  public boolean isFailed() {
+    return false;
+  }
+
+  @Override
+  public boolean isStopped() {
+    return stopped;
+  }
+
+  @Override
   public SynchKind getKind() {
     return SynchKind.notify;
   }

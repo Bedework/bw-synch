@@ -84,6 +84,8 @@ public class FileConnector
 
   private long keepAliveInterval = 10 * 1000;
 
+  private boolean running;
+
   private ConnectorInstanceMap<FileConnectorInstance> cinstMap =
       new ConnectorInstanceMap<FileConnectorInstance>();
 
@@ -99,6 +101,22 @@ public class FileConnector
                                   connectorId + "FileConfig");
 
     this.syncher = syncher;
+    running = true;
+  }
+
+  @Override
+  public boolean isStarted() {
+    return running;
+  }
+
+  @Override
+  public boolean isFailed() {
+    return false;
+  }
+
+  @Override
+  public boolean isStopped() {
+    return !running;
   }
 
   @Override
@@ -168,6 +186,7 @@ public class FileConnector
 
   @Override
   public void stop() throws SynchException {
+    running = false;
   }
 
   /* ====================================================================

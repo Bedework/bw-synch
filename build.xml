@@ -87,15 +87,8 @@
     <property name="service.jar"
               location="${dist.home}/${org.bedework.module.service.jar}-${project.version}.jar" />
   </target>
-
-  <!-- =================================================================
-       Clean projects we depend on
-       ================================================================= -->
-  <target name="clean" depends="clean.bwxml">
-    <antcall target="doDeftasks.clean"/>
-  </target>
   
-  <target name="build-init" depends="init,build.bwxml">
+  <target name="build-init" depends="init">
     <property name="org.bedework.getjar.property.prefix"
               value="org.bedework.appjar" />
     

@@ -102,6 +102,8 @@ public class ExchangeConnector
 
   private String connectorId;
 
+  private boolean running;
+
   private ConnectorInstanceMap<ExchangeConnectorInstance> cinstMap =
       new ConnectorInstanceMap<ExchangeConnectorInstance>();
 
@@ -125,10 +127,26 @@ public class ExchangeConnector
       info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
       info("      callback URI: " + callbackUri);
       info("**************************************************");
+      running = true;
     } catch (Throwable t) {
       error(t);
       throw new SynchException(t);
     }
+  }
+
+  @Override
+  public boolean isStarted() {
+    return running;
+  }
+
+  @Override
+  public boolean isFailed() {
+    return false;
+  }
+
+  @Override
+  public boolean isStopped() {
+    return !running;
   }
 
   @Override
@@ -270,7 +288,7 @@ public class ExchangeConnector
 
   @Override
   public void stop() throws SynchException {
-
+    running = false;
   }
 
   /* ====================================================================

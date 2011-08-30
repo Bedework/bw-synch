@@ -68,6 +68,21 @@ public interface Connector<C extends ConnectorInstance,
              SynchEngine syncher) throws SynchException;
 
   /**
+   * @return true if we started
+   */
+  boolean isStarted();
+
+  /**
+   * @return true if we failed in some way
+   */
+  boolean isFailed();
+
+  /**
+   * @return true if we're stopped
+   */
+  boolean isStopped();
+
+  /**
    * @return poll or notify?
    */
   SynchKind getKind();

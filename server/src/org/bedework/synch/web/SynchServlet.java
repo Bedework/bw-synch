@@ -110,7 +110,7 @@ public class SynchServlet extends HttpServlet
 
       if (debug && dumpContent) {
         resp = new CharArrayWrappedResponse(resp,
-                                            getLogger(), debug);
+                                            getLogger());
       }
 
       String methodName = req.getHeader("X-HTTP-Method-Override");

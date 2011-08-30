@@ -350,6 +350,18 @@ public class SynchEngine {
         conn.start(cnctrId,
                    config.getCallbackURI() + cnctrId + "/",
                    this);
+
+        while (!conn.isStarted()) {
+          /* Wait for it to start */
+          synchronized (this) {
+            this.wait(250);
+          }
+
+          if (conn.isFailed()) {
+            error("Connector " + cnctrId + " failed to start");
+            break;
+          }
+        }
       }
 
       /* Get the list of subscriptions from our database and process them.
