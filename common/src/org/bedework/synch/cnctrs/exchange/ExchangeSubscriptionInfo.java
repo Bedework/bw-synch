@@ -18,30 +18,26 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
-
 
 /** The deserialized information for an Exchange connection.
  *
  * @author Mike Douglass
  */
-public class ExchangeSubscriptionInfo {
-  private SubscriptionConnectorInfo info;
+public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
+  /** Name of the calendar
+   */
+  public static final String propnameExchangeCalendar = "exchgCalendar";
 
-  private String exchangeCalendar;
+  /** The exchange subscription id
+   */
+  public static final String propnameExchangeSubscriptionId = "exchgSubid";
 
-  private String exchangeId;
-
-  private String exchangePw;
-
-  private String exchangeURI;
-
-  private String exchangeSubscriptionId;
-
-  private String exchangeWatermark;
-
-  private String exchangeError;
+  /** The exchange watermark
+   */
+  public static final String propnameExchangeWatermark = "exchgWatermark";
 
   /**
    *
@@ -49,8 +45,7 @@ public class ExchangeSubscriptionInfo {
    * @throws SynchException
    */
   public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
-    this.info = info;
-    info.loadProperties();
+    super(info);
   }
 
   /** Constructor
@@ -59,156 +54,91 @@ public class ExchangeSubscriptionInfo {
    * @param exchangeId
    * @param exchangePw
    * @param exchangeURI
+   * @throws SynchException
    */
-  public ExchangeSubscriptionInfo(final String exchangeCalendar,
+  public ExchangeSubscriptionInfo(final String exchangeURI,
                                   final String exchangeId,
                                   final String exchangePw,
-                                  final String exchangeURI) {
-    info = new SubscriptionConnectorInfo();
+                                  final String exchangeCalendar) throws SynchException {
+    super(exchangeURI, exchangeId, exchangePw);
 
     setExchangeCalendar(exchangeCalendar);
-    setExchangeId(exchangeId);
-    setExchangePw(exchangePw);
-    setExchangeURI(exchangeURI);
   }
 
   /** Exchange Calendar
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setExchangeCalendar(final String val) {
-    exchangeCalendar = val;
+  public void setExchangeCalendar(final String val) throws SynchException {
+    setProperty(propnameExchangeCalendar, val);
   }
 
   /** Exchange Calendar
    *
    * @return String
+   * @throws SynchException
    */
-  public String getExchangeCalendar() {
-    return exchangeCalendar;
-  }
-
-  /** Exchange Calendar id
-   *
-   * @param val    String
-   */
-  public void setExchangeId(final String val) {
-    exchangeId = val;
-  }
-
-  /** Exchange Calendar id
-   *
-   * @return String
-   */
-  public String getExchangeId() {
-    return exchangeId;
-  }
-
-  /** Encoded exchange Calendar pw
-   *
-   * @param val    String
-   */
-  public void setExchangePw(final String val) {
-    exchangePw = val;
-  }
-
-  /** Encoded xchange Calendar pw
-   *
-   * @return String
-   */
-  public String getExchangePw() {
-    return exchangePw;
-  }
-
-  /** Exchange web service uri
-   *
-   * @param val    String
-   */
-  public void setExchangeURI(final String val) {
-    exchangeURI = val;
-  }
-
-  /** Exchange web service uri
-   *
-   * @return String
-   */
-  public String getExchangeURI() {
-    return exchangeURI;
+  public String getExchangeCalendar() throws SynchException {
+    return getProperty(propnameExchangeCalendar);
   }
 
   /** Exchange system subscriptionId.
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setExchangeSubscriptionId(final String val) {
-    exchangeSubscriptionId = val;
+  public void setExchangeSubscriptionId(final String val) throws SynchException {
+    setProperty(propnameExchangeSubscriptionId, val);
   }
 
   /** Exchange system subscriptionId.
    *
    * @return String
+   * @throws SynchException
    */
-  public String getExchangeSubscriptionId() {
-    return exchangeSubscriptionId;
+  public String getExchangeSubscriptionId() throws SynchException {
+    return getProperty(propnameExchangeSubscriptionId);
   }
 
   /** Exchange watermark.
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setExchangeWatermark(final String val) {
-    exchangeWatermark = val;
+  public void setExchangeWatermark(final String val) throws SynchException {
+    setProperty(propnameExchangeWatermark, val);
   }
 
   /** Exchange watermark.
    *
    * @return String
+   * @throws SynchException
    */
-  public String getExchangeWatermark() {
-    return exchangeWatermark;
-  }
-
-  /** Exchange error code.
-   *
-   * @param val    String
-   */
-  public void setExchangeError(final String val) {
-    exchangeError = val;
-  }
-
-  /** Exchange error code.
-   *
-   * @return String
-   */
-  public String getExchangeError() {
-    return exchangeError;
+  public String getExchangeWatermark() throws SynchException {
+    return getProperty(propnameExchangeWatermark);
   }
 
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
 
+  @Override
   protected void toStringSegment(final StringBuilder sb,
                               final String indent) {
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("exchangeCalendar = ");
-    sb.append(getExchangeCalendar());
-    sb.append(", exchangeURI = ");
-    sb.append(getExchangeURI());
-  }
+    super.toStringSegment(sb, indent);
 
-  /* ====================================================================
-   *                        Object methods
-   * ==================================================================== */
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder("ExchangeSubscription{");
-
-    toStringSegment(sb, "  ");
-
-    sb.append("}");
-    return sb.toString();
+    try {
+      sb.append(",\n");
+      sb.append(indent);
+      sb.append("exchangeCalendar = ");
+      sb.append(getExchangeCalendar());
+      sb.append(", exchangeSubscriptionId = ");
+      sb.append(getExchangeSubscriptionId());
+      sb.append(", exchangeWatermark = ");
+      sb.append(getExchangeWatermark());
+    } catch (Throwable t) {
+      sb.append(t.getMessage());
+    }
   }
 }

@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
 
@@ -26,102 +27,23 @@ import org.bedework.synch.exception.SynchException;
  *
  * @author Mike Douglass
  */
-public class BedeworkSubscriptionInfo {
-  private SubscriptionConnectorInfo info;
-
+public class BedeworkSubscriptionInfo extends BaseSubscriptionInfo {
   /**
    * @param info
    * @throws SynchException
    */
   public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
-    this.info = info;
-    info.loadProperties();
+    super(info);
   }
 
   /** Constructor
    *
-   * @param subscriptionId - null means generate one
-   * @param subscribe
    * @param calPath
    * @param principalHref
    * @throws SynchException
    */
-  public BedeworkSubscriptionInfo(final String subscriptionId,
-                              final boolean subscribe,
-                              final String calPath,
-                              final String principalHref) throws SynchException {
-    info = new SubscriptionConnectorInfo();
-
-    setPrincipalHref(principalHref);
-    setCalPath(calPath);
-  }
-
-  /** Path to this systems calendar collection.
-   *
-   * @param val    String
-   * @throws SynchException
-   */
-  public void setCalPath(final String val) throws SynchException {
-    info.setProperty(BedeworkConnector.propnameCalendarHref, val);
-  }
-
-  /** Path to this systems calendar collection
-   *
-   * @return String
-   * @throws SynchException
-   */
-  public String getCalPath() throws SynchException {
-    return info.getProperty(BedeworkConnector.propnameCalendarHref);
-  }
-
-
-  /** Principal requesting synch service
-   *
-   * @param val    String
-   * @throws SynchException
-   */
-  public void setPrincipalHref(final String val) throws SynchException {
-    info.setProperty(BedeworkConnector.propnamePrincipal, val);
-  }
-
-  /** Principal requesting synch service
-   *
-   * @return String
-   * @throws SynchException
-   */
-  public String getPrincipalHref() throws SynchException {
-    return info.getProperty(BedeworkConnector.propnamePrincipal);
-  }
-
-  /* ====================================================================
-   *                   Convenience methods
-   * ==================================================================== */
-
-  protected void toStringSegment(final StringBuilder sb,
-                              final String indent) {
-    try {
-      sb.append(",\n");
-      sb.append(indent);
-      sb.append("calPath = ");
-      sb.append(getCalPath());
-      sb.append("principalHref = ");
-      sb.append(getPrincipalHref());
-    } catch (Throwable t) {
-      sb.append(t.getMessage());
-    }
-  }
-
-  /* ====================================================================
-   *                        Object methods
-   * ==================================================================== */
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
-
-    toStringSegment(sb, "  ");
-
-    sb.append("}");
-    return sb.toString();
+  public BedeworkSubscriptionInfo(final String calPath,
+                                  final String principalHref) throws SynchException {
+    super(calPath, principalHref, null);
   }
 }

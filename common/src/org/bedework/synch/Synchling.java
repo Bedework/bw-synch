@@ -24,6 +24,7 @@ import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchDirectionType;
 
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 
@@ -65,9 +66,9 @@ public class Synchling {
 
   private long synchlingId;
 
-  private ConnectorInstance endACnctr;
+//  private ConnectorInstance endACnctr;
 
-  private ConnectorInstance endBCnctr;
+  //private ConnectorInstance endBCnctr;
 
   private SynchEngine syncher;
 
@@ -289,9 +290,11 @@ public class Synchling {
       return StatusType.NO_ACCESS;
     }
 
-    // Unsubscribe request - set subscribed off and next callback will unsubscribe
+    // Unsubscribe request - call connector instance to carry out any required
+    // action
     sub.setOutstandingSubscription(null);
-    sub.setSubscribe(false);
+
+    // XXX do some stuff
 
     syncher.deleteSubscription(sub);
 
@@ -310,6 +313,12 @@ public class Synchling {
     /** Update none, A or B */
     public SynchEnd updateEnd = SynchEnd.none;
 
+    /** delete none, A or B */
+    public SynchEnd deleteFrom = SynchEnd.none;
+
+    /** both ends changed since last synch */
+    public boolean conflict;
+
     /** Constructor
      *
      * @param itemInfo
@@ -327,6 +336,20 @@ public class Synchling {
       sb.append("}");
 
       return sb.toString();
+    }
+  }
+
+  /** Information and objects needed to process one end of a resynch
+   */
+  private static class ResynchInfo {
+    SynchEnd end;
+    ConnectorInstance inst;
+    Map<String, ItemInfo> items;
+
+    ResynchInfo(final SynchEnd end,
+                final ConnectorInstance inst) {
+      this.end = end;
+      this.inst = inst;
     }
   }
 
@@ -362,103 +385,72 @@ public class Synchling {
        * last synched.
        */
 
-      endACnctr = syncher.getConnectorInstance(note.getSub(), SynchEnd.endA);
-      endBCnctr = syncher.getConnectorInstance(note.getSub(), SynchEnd.endB);
+      Subscription sub = note.getSub();
 
-      // XXX 2 way not fully done
-      /* ===================================================================
-       * Get the list of items that already exist in the calendar collections
-       * =================================================================== */
-      List<ItemInfo> aiis = endACnctr.getItemsInfo();
-      if (aiis == null) {
-        throw new SynchException("Unable to fetch endA items info");
+      ResynchInfo ainfo = new ResynchInfo(SynchEnd.endA,
+                                          syncher.getConnectorInstance(sub,
+                                                                       SynchEnd.endA));
+      ResynchInfo binfo = new ResynchInfo(SynchEnd.endB,
+                                          syncher.getConnectorInstance(sub,
+                                                                       SynchEnd.endB));
+
+      ainfo.items = getItemsMap(ainfo.inst);
+      binfo.items = getItemsMap(binfo.inst);
+
+      /* updateInfo is a list of changes we need to apply to one or both ends
+       */
+      List<SynchInfo> updateInfo = new ArrayList<SynchInfo>();
+
+      boolean bothWays = sub.getDirection() == SynchDirectionType.BOTH_WAYS;
+
+      /* First see what we need to transfer from A to B */
+      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+        getResynchs(updateInfo, ainfo, binfo);
       }
 
-      Map<String, ItemInfo> bitems = getItemsMap(endBCnctr);
+      /* Now B to A */
+      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+        getResynchs(updateInfo, binfo, ainfo);
+      }
 
-      /* toFetch is a list of those items we have to fetch from end A to
-       * resynch that item
-       */
-      List<SynchInfo> toFetch = new ArrayList<SynchInfo>();
+      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+        checkDeletes(updateInfo, binfo);
+      }
 
-      for (ItemInfo aii: aiis) {
-        ItemInfo bii = bitems.get(aii.uid);
+      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+        checkDeletes(updateInfo, ainfo);
+      }
 
-        if (bii == null) {
-          /* It's not in the B list - add to list to fetch from A */
-          if (debug) {
-            trace("Need to add to end B: uid:" + aii.uid);
-          }
-
-          SynchInfo si = new SynchInfo(aii);
-          si.addTo = SynchEnd.endB;
-          toFetch.add(si);
-          continue;
+      if (debug) {
+        trace("---------------- update set ----------------");
+        for (SynchInfo si: updateInfo) {
+          trace(si.toString());
         }
+        trace("---------------- end update set ----------------");
+      }
 
-        /* It is at the A end - mark as seen then compare to see if
-         * we need to update
+      if (updateInfo.size() > 0) {
+        Holder<List<SynchInfo>> unprocessedRes = new Holder<List<SynchInfo>>();
+
+        /* Now update end A from end B.
          */
-        bii.seen = true;
-
-        int cmp = cmpLastMods(bii.lastMod, aii.lastMod);
-        if (cmp == 0) {
-          /* No update needed */
-          continue;
+        while ((updateInfo.size() > 0) &&
+               processUpdates(note, updateInfo, unprocessedRes,
+                              binfo, ainfo)) {
+          updateInfo = unprocessedRes.value;
         }
 
-        /* We need to update one end from the other */
-        SynchInfo si = new SynchInfo(aii);
-
-        if (cmp < 0) {
-          if (debug) {
-            trace("Need to update end B: uid:" + aii.uid);
-          }
-          si.updateEnd = SynchEnd.endB;
-        } else {
-          if (debug) {
-            trace("Need to update end A: uid:" + aii.uid);
-          }
-          si.updateEnd = SynchEnd.endA;
-        }
-
-        toFetch.add(si);
-      }
-
-      /* Now go over the end B info and see if we need to fetch any from that
-       * end or simply delete them.
-       */
-      for (ItemInfo ii: bitems.values()) {
-        if (ii.seen) {
-          continue;
-        }
-
-        SynchInfo si = new SynchInfo(ii);
-        /* If the lastmod is later than the last synch and this is 2 way then
-         * this one got added after we synched. Add it to end B.
-         *
-         * If the lastmod is previous to our last synch then this one needs to
-         * be deleted.
+        /* Now update end B from end A.
          */
-        si.addTo = SynchEnd.endA;
-        toFetch.add(si);
+        while ((updateInfo.size() > 0) &&
+               processUpdates(note, updateInfo, unprocessedRes,
+                              ainfo, binfo)) {
+          updateInfo = unprocessedRes.value;
+        }
       }
 
-      Holder<List<SynchInfo>> unprocessedRes = new Holder<List<SynchInfo>>();
-
-      /* Now update end A from end B.
-       */
-      while ((toFetch.size() > 0) &&
-             processFetchList(note, toFetch, unprocessedRes, SynchEnd.endA)) {
-        toFetch = unprocessedRes.value;
-      }
-
-      /* Now update end B from end A.
-       */
-      while ((toFetch.size() > 0) &&
-             processFetchList(note, toFetch, unprocessedRes, SynchEnd.endB)) {
-        toFetch = unprocessedRes.value;
-      }
+      sub.updateLastRefresh();
+      syncher.reschedule(sub);
 
       return StatusType.OK;
     } catch (SynchException se) {
@@ -467,6 +459,67 @@ public class Synchling {
       throw new SynchException(t);
     }
   }
+
+  private void getResynchs(final List<SynchInfo> updateInfo,
+                           final ResynchInfo fromInfo,
+                           final ResynchInfo toInfo) throws SynchException {
+    for (ItemInfo fromIi: fromInfo.items.values()) {
+      ItemInfo toIi = toInfo.items.get(fromIi.uid);
+
+      if (toIi == null) {
+        /* It's not in the to list - add to list to fetch from the from end */
+        if (debug) {
+          trace("Need to add to end " + toInfo.end + ": uid:" + fromIi.uid);
+        }
+
+        SynchInfo si = new SynchInfo(fromIi);
+        si.addTo = toInfo.end;
+        updateInfo.add(si);
+        continue;
+      }
+
+      /* It is at the to end - mark as seen then compare to see if
+       * we need to update
+       */
+      toIi.seen = true;
+
+      int cmp = cmpLastMods(toIi.lastMod, fromIi.lastMod);
+
+      if (cmp < 0) {
+        if (debug) {
+          trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
+        }
+
+        SynchInfo si = new SynchInfo(fromIi);
+
+        si.updateEnd = toInfo.end;
+        updateInfo.add(si);
+      }
+    }
+  }
+
+  private void checkDeletes(final List<SynchInfo> updateInfo,
+                            final ResynchInfo toInfo) throws SynchException {
+    for (ItemInfo ii: toInfo.items.values()) {
+      if (ii.seen) {
+        continue;
+      }
+
+      SynchInfo si = new SynchInfo(ii);
+      /* If the lastmod is later than the last synch and this is 2 way then
+       * this one got added after we synched. Add it to end B.
+       *
+       * If the lastmod is previous to our last synch then this one needs to
+       * be deleted.
+       */
+      si.deleteFrom = toInfo.end;
+      updateInfo.add(si);
+    }
+  }
+
+  /* updateInfo is a list of changes we need to apply to one or both ends
+   */
+  List<SynchInfo> updateInfo = new ArrayList<SynchInfo>();
 
   private Map<String, ItemInfo> getItemsMap(final ConnectorInstance cinst) throws SynchException {
     /* Items is a table built from the endB calendar */
@@ -496,10 +549,11 @@ public class Synchling {
    * @return true if there are unprocessed entries for this end
    * @throws SynchException
    */
-  private boolean processFetchList(final Notification note,
-                                   final List<SynchInfo> toFetch,
-                                   final Holder<List<SynchInfo>> unprocessedRes,
-                                   final SynchEnd dest) throws SynchException {
+  private boolean processUpdates(final Notification note,
+                                 final List<SynchInfo> updateInfo,
+                                 final Holder<List<SynchInfo>> unprocessedRes,
+                                 final ResynchInfo fromInfo,
+                                 final ResynchInfo toInfo) throws SynchException {
     boolean callAgain = true;
     List<SynchInfo> unProcessed = new ArrayList<SynchInfo>();
     unprocessedRes.value = unProcessed;
@@ -509,10 +563,10 @@ public class Synchling {
 
     /* First fetch a batch of items */
     int i = 0;
-    while ((uids.size() < getItemsBatchSize) && (i < toFetch.size())) {
-      SynchInfo si = toFetch.get(i);
+    while ((uids.size() < getItemsBatchSize) && (i < updateInfo.size())) {
+      SynchInfo si = updateInfo.get(i);
 
-      if ((si.addTo != dest) && (si.updateEnd != dest)) {
+      if ((si.addTo != toInfo.end) && (si.updateEnd != toInfo.end)) {
         unProcessed.add(si);
         continue;
       }
@@ -525,25 +579,14 @@ public class Synchling {
       return false;
     }
 
-    ConnectorInstance fromInst;
-    ConnectorInstance toInst;
-
-    if (dest == SynchEnd.endA) {
-      toInst = endACnctr;
-      fromInst = endBCnctr;
-    } else {
-      toInst = endBCnctr;
-      fromInst = endACnctr;
-    }
-
-    List<FetchItemResponseType> firs = fromInst.fetchItems(uids);
+    List<FetchItemResponseType> firs = fromInfo.inst.fetchItems(uids);
 
     Iterator<SynchInfo> siit = sis.iterator();
     for (FetchItemResponseType fir: firs) {
       SynchInfo si = siit.next();
 
-      if (si.addTo == dest) {
-        AddItemResponseType air = toInst.addItem(fir.getIcalendar());
+      if (si.addTo == toInfo.end) {
+        AddItemResponseType air = toInfo.inst.addItem(fir.getIcalendar());
         if (debug) {
           trace("Add: status=" + air.getStatus() +
                 " msg=" + air.getMessage());
@@ -552,9 +595,9 @@ public class Synchling {
         continue;
       }
 
-      if (si.updateEnd == dest) {
+      if (si.updateEnd == toInfo.end) {
         // Update the instance
-        FetchItemResponseType toFir = toInst.fetchItem(si.itemInfo.uid);
+        FetchItemResponseType toFir = toInfo.inst.fetchItem(si.itemInfo.uid);
 
         if (toFir.getStatus() != StatusType.OK) {
           warn("Unable to fetch destination entity for update");
@@ -570,7 +613,7 @@ public class Synchling {
         ui.setEtoken(toFir.getEtoken());
         ui.getSelect().add(cst);
 
-        UpdateItemResponseType uir = toInst.updateItem(ui);
+        UpdateItemResponseType uir = toInfo.inst.updateItem(ui);
 
         if (uir.getStatus() != StatusType.OK) {
           warn("Unable to update destination entity");

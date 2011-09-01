@@ -18,10 +18,17 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.SynchDefs.SynchKind;
+import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchMasterType;
 
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.property.DtStamp;
+
+import java.util.Date;
 import java.util.UUID;
 
 /** Represents a subscription for the synch engine.
@@ -63,6 +70,8 @@ public class Subscription implements Comparable<Subscription> {
 
   private String subscriptionId;
 
+  private String lastRefresh;
+
   private SubscriptionConnectorInfo endAConnectorInfo;
 
   private SubscriptionConnectorInfo endBConnectorInfo;
@@ -73,15 +82,16 @@ public class Subscription implements Comparable<Subscription> {
 
   /* Following not persisted */
 
-  /* False for unsubscribe */
-  private boolean subscribe;
-
   /* Process outstanding after this */
   private Subscription outstandingSubscription;
 
-  private ConnectorInstance endAConn;
+  private Connector endAConn;
 
-  private ConnectorInstance endBConn;
+  private Connector endBConn;
+
+  private ConnectorInstance endAConnInst;
+
+  private ConnectorInstance endBConnInst;
 
   /** null constructor for hibernate
    *
@@ -92,16 +102,13 @@ public class Subscription implements Comparable<Subscription> {
   /** Constructor to create a new subscription.
    *
    * @param subscriptionId - null means generate one
-   * @param subscribe
    */
-  public Subscription(final String subscriptionId,
-                      final boolean subscribe) {
+  public Subscription(final String subscriptionId) {
     if (subscriptionId == null) {
       this.subscriptionId = UUID.randomUUID().toString();
     } else {
       this.subscriptionId = subscriptionId;
     }
-    this.subscribe = subscribe;
   }
 
   /**
@@ -155,6 +162,21 @@ public class Subscription implements Comparable<Subscription> {
    */
   public String getSubscriptionId() {
     return subscriptionId;
+  }
+
+  /** A UTC dtstamp value
+   *
+   * @param val
+   */
+  public void setLastRefresh(final String val) {
+    lastRefresh = val;
+  }
+
+  /**
+   * @return String lastRefresh
+   */
+  public String getLastRefresh() {
+    return lastRefresh;
   }
 
   /** The owner. This is the (verified) account that set up the subscription.
@@ -240,22 +262,6 @@ public class Subscription implements Comparable<Subscription> {
     return master;
   }
 
-  /** (un)subscribe?
-   *
-   * @param val    boolean
-   */
-  public void setSubscribe(final boolean val) {
-    subscribe = val;
-  }
-
-  /** (un)subscribe?
-   *
-   * @return boolean
-   */
-  public boolean getSubscribe() {
-    return subscribe;
-  }
-
   /** An outstanding request that requires an unsubscribe to complete first
    *
    * @param val Subscription
@@ -273,31 +279,59 @@ public class Subscription implements Comparable<Subscription> {
   }
 
   /**
-   * @param val a connection instance
+   * @param val a connection
    */
-  public void setEndAConn(final ConnectorInstance val) {
+  public void setEndAConn(final Connector val) {
     endAConn = val;
   }
 
   /**
-   * @return a connection instance or null
+   * @return a connection or null
    */
-  public ConnectorInstance getEndAConn() {
+  public Connector getEndAConn() {
     return endAConn;
+  }
+
+  /**
+   * @param val a connection
+   */
+  public void setEndBConn(final Connector val) {
+    endBConn = val;
+  }
+
+  /**
+   * @return a connection or null
+   */
+  public Connector getEndBConn() {
+    return endBConn;
   }
 
   /**
    * @param val a connection instance
    */
-  public void setEndBConn(final ConnectorInstance val) {
-    endBConn = val;
+  public void setEndAConnInst(final ConnectorInstance val) {
+    endAConnInst = val;
   }
 
   /**
    * @return a connection instance or null
    */
-  public ConnectorInstance getEndBConn() {
-    return endBConn;
+  public ConnectorInstance getEndAConnInst() {
+    return endAConnInst;
+  }
+
+  /**
+   * @param val a connection instance
+   */
+  public void setEndBConnInst(final ConnectorInstance val) {
+    endBConnInst = val;
+  }
+
+  /**
+   * @return a connection instance or null
+   */
+  public ConnectorInstance getEndBConnInst() {
+    return endBConnInst;
   }
 
   /**
@@ -324,6 +358,64 @@ public class Subscription implements Comparable<Subscription> {
    *                   Convenience methods
    * ==================================================================== */
 
+  /**
+   * @return true if this has to be put on a poll queue
+   */
+  public boolean polling() {
+    if (getDirection() == SynchDirectionType.A_TO_B){
+      return getEndAConn().getKind() == SynchKind.poll;
+    }
+
+    if (getDirection() == SynchDirectionType.B_TO_A){
+      return getEndBConn().getKind() == SynchKind.poll;
+    }
+
+    return (getEndAConn().getKind() == SynchKind.poll) ||
+        (getEndBConn().getKind() == SynchKind.poll);
+  }
+
+  /**
+   * @return the delay in millisecs.
+   * @throws SynchException
+   */
+  public long refreshDelay() throws SynchException {
+    String delay = "31536000000"; // About a year
+
+    if (getDirection() == SynchDirectionType.A_TO_B){
+      delay = new BaseSubscriptionInfo(getEndAConnectorInfo()).getRefreshDelay();
+    } else {
+      delay = new BaseSubscriptionInfo(getEndBConnectorInfo()).getRefreshDelay();
+    }
+
+    return Long.valueOf(delay);
+  }
+
+  /** Set the lastRefresh from the current time
+   *
+   */
+  public void updateLastRefresh() {
+    setLastRefresh(new DtStamp(new DateTime(true)).getValue());
+  }
+
+  /** Get a next refresh date based on the last refresh value
+   *
+   * @return date value incremented by delay.
+   * @throws SynchException
+   */
+  public Date nextRefresh() throws SynchException {
+    if (getLastRefresh() == null) {
+      return new Date();
+    }
+
+    try {
+      Date dt = new DtStamp(getLastRefresh()).getDate();
+
+      return new Date(dt.getTime() + refreshDelay());
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
   /** Add our stuff to the StringBuilder
    *
    * @param sb    StringBuilder for result
@@ -349,11 +441,6 @@ public class Subscription implements Comparable<Subscription> {
     sb.append(indent);
     sb.append("endBConnectorInfo = ");
     sb.append(getEndBConnectorInfo());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("subscribe = ");
-    sb.append(getSubscribe());
 
     sb.append(",\n");
     sb.append(indent);

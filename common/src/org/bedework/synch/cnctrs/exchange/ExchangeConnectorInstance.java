@@ -345,8 +345,8 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
 
   ExchangeServicePortType getPort(final ExchangeSubscriptionInfo sub) throws SynchException {
     try {
-      return getExchangeServicePort(sub.getExchangeId(),
-                                    sub.getExchangePw().toCharArray()); // XXX need to en/decrypt
+      return getExchangeServicePort(sub.getPrincipalHref(),
+                                    cnctr.getSyncher().decrypt(sub.getPassword()).toCharArray()); // XXX need to en/decrypt
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {

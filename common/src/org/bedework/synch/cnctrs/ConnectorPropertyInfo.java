@@ -31,17 +31,22 @@ public class ConnectorPropertyInfo {
 
   private String description;
 
+  private boolean required;
+
   /**
    * @param name - name for the property
    * @param secure - true if this property value should be hidden, e.g password
    * @param description - of the property
+   * @param required - true if this property is required
    */
   public ConnectorPropertyInfo(final String name,
                                final boolean secure,
-                               final String description) {
+                               final String description,
+                               final boolean required) {
     this.name = name;
     this.secure = secure;
     this.description = description;
+    this.required = required;
   }
 
   /**
@@ -65,6 +70,13 @@ public class ConnectorPropertyInfo {
     return description;
   }
 
+  /**
+   * @return required
+   */
+  public boolean getRequired() {
+    return required;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
@@ -77,6 +89,9 @@ public class ConnectorPropertyInfo {
 
     sb.append(",\n   description = ");
     sb.append(getDescription());
+
+    sb.append(",\n   required = ");
+    sb.append(getRequired());
 
     sb.append("}");
     return sb.toString();

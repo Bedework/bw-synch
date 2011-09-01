@@ -123,16 +123,20 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
 
     GetSynchInfoType gsi = new GetSynchInfoType();
 
-    gsi.setCalendarHref(info.getCalPath());
+    gsi.setCalendarHref(info.getUri());
 
     SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(),
                                                              gsi);
 
-    if (!sir.getCalendarHref().equals(info.getCalPath())) {
+    if (!sir.getCalendarHref().equals(info.getUri())) {
       warn("Mismatched calpath in response to GetSycnchInfo: expected '" +
-          info.getCalPath() + "' but received '" +
+          info.getUri() + "' but received '" +
            sir.getCalendarHref() + "'");
       return null;
+    }
+
+    if (sir.getStatus() != StatusType.OK) {
+
     }
 
     SynchInfoResponses sirs = sir.getSynchInfoResponses();
@@ -151,7 +155,7 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
   public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
     AddItemType ai = new AddItemType();
 
-    ai.setHref(info.getCalPath());
+    ai.setHref(info.getUri());
     ai.setIcalendar(val);
 
     return cnctr.getPort().addItem(getIdToken(), ai);
@@ -168,9 +172,8 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
     CalendarQueryType cq = new CalendarQueryType();
 
-    cq.setHref(info.getCalPath());
+    cq.setHref(info.getUri());
     cq.setAllprop(new AllpropType());
-
 
     FilterType fltr = new FilterType();
     cq.setFilter(fltr);

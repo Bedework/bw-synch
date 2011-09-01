@@ -133,7 +133,7 @@ public class FileConnectorInstance implements ConnectorInstance {
      * collection and match it against the stored token.
      */
 
-    if (info.getEtag() == null) {
+    if (info.getChangeToken() == null) {
       return true;
     }
 
@@ -147,13 +147,13 @@ public class FileConnectorInstance implements ConnectorInstance {
         if (debug) {
           trace("Unsuccessful response from server was " + rc);
         }
-        info.setEtag(null);  // Force refresh next time
+        info.setChangeToken(null);  // Force refresh next time
         return true;
       }
 
       Header etag = cl.getResponse().getResponseHeader("Etag");
       if (etag != null) {
-        return !info.getEtag().equals(etag.getValue());
+        return !info.getChangeToken().equals(etag.getValue());
       }
     } catch (SynchException se) {
       throw se;
@@ -242,7 +242,7 @@ public class FileConnectorInstance implements ConnectorInstance {
     }
 
     fir.setHref(info.getUri() + "#" + uid);
-    fir.setEtoken(info.getEtag());
+    fir.setEtoken(info.getChangeToken());
 
     IcalendarType ical = new IcalendarType();
     VcalendarType vcal = new VcalendarType();
@@ -266,7 +266,7 @@ public class FileConnectorInstance implements ConnectorInstance {
     aoc.getVcalendarContainedComponent().add(comp);
     fir.setIcalendar(ical);
 
-    return null;
+    return fir;
   }
 
   @Override
@@ -366,9 +366,9 @@ public class FileConnectorInstance implements ConnectorInstance {
 
       Header[] hdrs = null;
 
-      if (info.getEtag() != null) {
+      if ((comps != null) && (info.getChangeToken() != null)) {
         hdrs = new Header[] {
-          new Header("If-None-Match", info.getEtag())
+          new Header("If-None-Match", info.getChangeToken())
         };
       }
 
@@ -388,7 +388,7 @@ public class FileConnectorInstance implements ConnectorInstance {
         if (debug) {
           trace("Unsuccessful response from server was " + rc);
         }
-        info.setEtag(null);  // Force refresh next time
+        info.setChangeToken(null);  // Force refresh next time
         return;
       }
 
@@ -440,7 +440,7 @@ public class FileConnectorInstance implements ConnectorInstance {
 
       Header etag = cl.getResponse().getResponseHeader("Etag");
       if (etag != null) {
-        info.setEtag(etag.getValue());
+        info.setChangeToken(etag.getValue());
       }
     } catch (SynchException se) {
       throw se;

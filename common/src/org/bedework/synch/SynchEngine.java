@@ -18,8 +18,6 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.Notification.NotificationItem;
-import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
@@ -124,11 +122,11 @@ public class SynchEngine {
 
   private transient PwEncryptionIntf pwEncrypt;
 
-  /* Map of currently active subscriptions - that is - we have traffic between
-   * systems.
+  /* Map of currently active notification subscriptions. These are subscriptions
+   * for which we get change messages from the remote system(s).
    */
-//  private final Map<String, Subscription> subs =
-  //  new HashMap<String, Subscription>();
+  private final Map<String, Subscription> activeSubs =
+      new HashMap<String, Subscription>();
 
   private boolean starting;
 
@@ -145,6 +143,8 @@ public class SynchEngine {
   private Timezones timezones;
 
   private SynchlingPool synchlingPool;
+
+  private SynchTimer synchTimer;
 
   private BlockingQueue<Notification> notificationInQueue;
 
@@ -364,6 +364,8 @@ public class SynchEngine {
         }
       }
 
+      synchTimer = new SynchTimer(this);
+
       /* Get the list of subscriptions from our database and process them.
        * While starting, new subscribe requests get added to the list.
        */
@@ -385,25 +387,9 @@ public class SynchEngine {
           }
 
           for (Subscription sub: startList) {
-            Synchling sl;
+            setConnectors(sub);
 
-            while (true) {
-              if (stopping) {
-                break startup;
-              }
-
-              sl = synchlingPool.getNoException();
-              if (sl != null) {
-                break;
-              }
-            }
-
-            NotificationItem ni = new NotificationItem(ActionType.FullSynch,
-                                                       null, null);
-            Notification<NotificationItem> note = new Notification<NotificationItem>(
-                sub, SynchEnd.none, ni);
-
-            notificationInQueue.put(note);
+            reschedule(sub);
           }
 
           synchronized (this) {
@@ -443,6 +429,22 @@ public class SynchEngine {
     }
   }
 
+  /** Reschedule a subscription for updates.
+   *
+   * @param sub
+   * @throws SynchException
+   */
+  public void reschedule(final Subscription sub) throws SynchException {
+    if (sub.polling()) {
+      synchTimer.schedule(sub, sub.nextRefresh());
+      return;
+    }
+
+    // XXX start up the add to active subs
+
+    activeSubs.put(sub.getSubscriptionId(), sub);
+  }
+
   /**
    * @return true if we're running
    */
@@ -464,6 +466,7 @@ public class SynchEngine {
     List<Stat> stats = new ArrayList<Stat>();
 
     stats.addAll(synchlingPool.getStats());
+    stats.addAll(synchTimer.getStats());
     stats.add(notificationsCt);
     stats.add(notificationsAddWt);
 
@@ -522,6 +525,31 @@ public class SynchEngine {
   }
 
   /**
+   * @param note
+   * @throws SynchException
+   */
+  public void handleNotification(final Notification note) throws SynchException {
+    Synchling sl;
+
+    try {
+      while (true) {
+        if (stopping) {
+          return;
+        }
+
+        sl = synchlingPool.getNoException();
+        if (sl != null) {
+          break;
+        }
+      }
+
+      notificationInQueue.put(note);
+    } catch (InterruptedException ie) {
+      return;
+    }
+  }
+
+  /**
    * @return config object
    */
   public SynchConfig getConfig() {
@@ -577,22 +605,20 @@ public class SynchEngine {
   public ConnectorInstance getConnectorInstance(final Subscription sub,
                                                 final SynchEnd end) throws SynchException {
     ConnectorInstance cinst;
-    String connectorId;
+    Connector conn;
 
     if (end == SynchEnd.endA) {
-      cinst = sub.getEndAConn();
-      connectorId = sub.getEndAConnectorInfo().getConnectorId();
+      cinst = sub.getEndAConnInst();
+      conn = sub.getEndAConn();
     } else {
-      cinst = sub.getEndBConn();
-      connectorId = sub.getEndBConnectorInfo().getConnectorId();
+      cinst = sub.getEndBConnInst();
+      conn = sub.getEndBConn();
     }
 
     if (cinst != null) {
       return cinst;
     }
 
-
-    Connector conn = getConnector(connectorId);
     if (conn == null) {
       throw new SynchException("No connector for " + sub + "(" + end + ")");
     }
@@ -604,12 +630,38 @@ public class SynchEngine {
     }
 
     if (end == SynchEnd.endA) {
-      sub.setEndAConn(cinst);
+      sub.setEndAConnInst(cinst);
     } else {
-      sub.setEndBConn(cinst);
+      sub.setEndBConnInst(cinst);
     }
 
     return cinst;
+  }
+
+  /** When we start up a new subscription we implant a Connector in the object.
+   *
+   * @param sub
+   */
+  private void setConnectors(final Subscription sub) throws SynchException {
+    String connectorId = sub.getEndAConnectorInfo().getConnectorId();
+
+    Connector conn = getConnector(connectorId);
+    if (conn == null) {
+      throw new SynchException("No connector for " + sub + "(" +
+                               SynchEnd.endA + ")");
+    }
+
+    sub.setEndAConn(conn);
+
+    connectorId = sub.getEndBConnectorInfo().getConnectorId();
+
+    conn = getConnector(connectorId);
+    if (conn == null) {
+      throw new SynchException("No connector for " + sub + "(" +
+                               SynchEnd.endB + ")");
+    }
+
+    sub.setEndBConn(conn);
   }
 
   private Collection<Connector> getConnectors() {

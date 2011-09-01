@@ -83,15 +83,18 @@ public class ExchangeConnector
   static {
     propInfo.add(new ConnectorPropertyInfo(propnameFolderId,
                                            false,
-                                           ""));
+                                           "",
+                                           true));
 
     propInfo.add(new ConnectorPropertyInfo(propnameAccount,
                                            false,
-                                           ""));
+                                           "",
+                                           true));
 
     propInfo.add(new ConnectorPropertyInfo(propnamePw,
                                            true,
-                                           ""));
+                                           "",
+                                           true));
   }
 
   private SynchEngine syncher;

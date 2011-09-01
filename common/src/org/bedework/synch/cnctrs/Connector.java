@@ -38,7 +38,11 @@ import javax.servlet.http.HttpServletResponse;
  * connectors for files, for exchange for bedework etc.
  *
  * <p>The connector instance carries out global initialization and provides
- * ConncetorInstance objects per subscription.
+ * ConnectorInstance objects per subscription.
+ *
+ * <p>There is only one instance of each kind of connector with a particular
+ * configuration. This connector is called to obtain a ConnectorInstance which
+ * carries out the actual operations for a given subscription.
  *
  * @author Mike Douglass
  *

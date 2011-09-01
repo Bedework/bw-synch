@@ -302,7 +302,7 @@ public class SynchConnector
 
   private Notification subscribe(final HttpServletResponse resp,
                                  final SubscribeRequestType sr) throws SynchException {
-    Subscription sub = new Subscription(null, true);
+    Subscription sub = new Subscription(null);
 
     sub.setDirection(sr.getDirection());
     sub.setMaster(sr.getMaster());

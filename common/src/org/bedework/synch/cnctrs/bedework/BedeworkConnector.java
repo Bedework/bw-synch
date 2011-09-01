@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs;
@@ -61,23 +62,19 @@ public class BedeworkConnector
 
   private transient Logger log;
 
-  /** */
-  public static final String propnameCalendarHref = "calendar-href";
-
-  /** */
-  public static final String propnamePrincipal = "principal";
-
   private static List<ConnectorPropertyInfo> propInfo =
       new ArrayList<ConnectorPropertyInfo>();
 
   static {
-    propInfo.add(new ConnectorPropertyInfo(propnameCalendarHref,
+    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnameUri,
                                            false,
-                                           ""));
+                                           "",
+                                           true));
 
-    propInfo.add(new ConnectorPropertyInfo(propnamePrincipal,
+    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
                                            false,
-                                           ""));
+                                           "",
+                                           true));
   }
 
   private SynchEngine syncher;
