@@ -35,6 +35,14 @@
               not-null="true"
               index="bwsynidx_subid" />
 
+    <property name="owner" column="bwsyn_owner" type="string" length="500"
+              not-null="true"
+              index="bwsynidx_subowner" />
+
+    <property name="lastRefresh" column="bwsyn_lrefresh" type="string" length="20" />
+
+    <property name="errorCt" column="bwsyn_errorct" type="integer" />
+
     <component name="endAConnectorInfo"
                class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_a" 

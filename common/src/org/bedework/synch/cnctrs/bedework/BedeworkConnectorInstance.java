@@ -118,9 +118,7 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
    * @see org.bedework.synch.ConnectorInstance#getItemsInfo()
    */
   @Override
-  public List<ItemInfo> getItemsInfo() throws SynchException {
-    List<ItemInfo> items = new ArrayList<ItemInfo>();
-
+  public SynchItemsInfo getItemsInfo() throws SynchException {
     GetSynchInfoType gsi = new GetSynchInfoType();
 
     gsi.setCalendarHref(info.getUri());
@@ -128,27 +126,38 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
     SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(),
                                                              gsi);
 
+    SynchItemsInfo sii = new SynchItemsInfo();
+    sii.items = new ArrayList<ItemInfo>();
+    sii.setStatus(StatusType.OK);
+
     if (!sir.getCalendarHref().equals(info.getUri())) {
-      warn("Mismatched calpath in response to GetSycnchInfo: expected '" +
+      sii.setMessage("Mismatched calpath in response to GetSycnchInfo: expected '" +
           info.getUri() + "' but received '" +
            sir.getCalendarHref() + "'");
-      return null;
+
+      sii.setStatus(StatusType.ERROR);
+
+      return sii;
     }
 
     if (sir.getStatus() != StatusType.OK) {
+      sii.setStatus(sir.getStatus());
+      sii.setErrorResponse(sir.getErrorResponse());
+      sii.setMessage(sir.getMessage());
 
+      return sii;
     }
 
     SynchInfoResponses sirs = sir.getSynchInfoResponses();
     if (sirs == null) {
-      return items;
+      return sii;
     }
 
     for (SynchInfoType si: sirs.getSynchInfo()) {
-      items.add(new ItemInfo(si.getUid(), si.getExchangeLastmod()));
+      sii.items.add(new ItemInfo(si.getUid(), si.getLastMod(), si.getLastSynch()));
     }
 
-    return items;
+    return sii;
   }
 
   @Override

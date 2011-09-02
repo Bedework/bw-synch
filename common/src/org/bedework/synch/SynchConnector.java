@@ -18,6 +18,8 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.Notification.NotificationItem;
+import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.cnctrs.Connector;
@@ -43,9 +45,11 @@ import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
+import org.w3c.dom.Document;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +58,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPMessage;
@@ -185,6 +191,40 @@ public class SynchConnector
   public void respondCallback(final HttpServletResponse resp,
                               final NotificationBatch<Notification> notifications)
                                                     throws SynchException {
+    try {
+      /* We only expect single notification items in a batch */
+
+      if (notifications.getNotifications().size() != 1) {
+        // XXX Error?
+        return;
+      }
+
+      @SuppressWarnings("unchecked")
+      Notification<NotificationItem> note = notifications.getNotifications().get(0);
+
+      // Again one item per notification.
+
+      if (note.getNotifications().size() != 1) {
+        // XXX Error?
+        return;
+      }
+
+      NotificationItem ni = note.getNotifications().get(0);
+
+      if (ni.getAction() == ActionType.NewSubscription) {
+        SubscribeResponseType sresp = ni.getSubResponse();
+
+        ObjectFactory of = new ObjectFactory();
+
+        JAXBElement<SubscribeResponseType> jax = of.createSubscribeResponse(sresp);
+
+        marshal(jax, resp.getOutputStream());
+      }
+    } catch (SynchException se) {
+      throw se;
+    } catch(Throwable t) {
+      throw new SynchException(t);
+    }
   }
 
   @Override
@@ -296,6 +336,28 @@ public class SynchConnector
     }
   }
 
+  protected void marshal(final Object o,
+                         final OutputStream out) throws SynchException {
+    try {
+      Marshaller marshaller = jc.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      dbf.setNamespaceAware(true);
+      Document doc = dbf.newDocumentBuilder().newDocument();
+
+      SOAPMessage msg = soapMsgFactory.createMessage();
+      msg.getSOAPBody().addDocument(doc);
+
+      marshaller.marshal(o,
+                         msg.getSOAPBody());
+
+      msg.writeTo(out);
+    } catch(Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
@@ -304,6 +366,7 @@ public class SynchConnector
                                  final SubscribeRequestType sr) throws SynchException {
     Subscription sub = new Subscription(null);
 
+    sub.setOwner(sr.getPrincipalHref());
     sub.setDirection(sr.getDirection());
     sub.setMaster(sr.getMaster());
     sub.setEndAConnectorInfo(makeConnInfo(sr.getEndAConnector()));
@@ -402,7 +465,7 @@ public class SynchConnector
     }
 
     @Override
-    public List<ItemInfo> getItemsInfo() throws SynchException {
+    public SynchItemsInfo getItemsInfo() throws SynchException {
       throw new SynchException("Uncallable");
     }
 

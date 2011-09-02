@@ -641,8 +641,9 @@ public class SynchEngine {
   /** When we start up a new subscription we implant a Connector in the object.
    *
    * @param sub
+   * @throws SynchException
    */
-  private void setConnectors(final Subscription sub) throws SynchException {
+  public void setConnectors(final Subscription sub) throws SynchException {
     String connectorId = sub.getEndAConnectorInfo().getConnectorId();
 
     Connector conn = getConnector(connectorId);

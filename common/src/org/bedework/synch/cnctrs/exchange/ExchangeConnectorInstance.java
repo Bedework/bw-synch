@@ -217,7 +217,7 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     return false;
   }
 
-  /** This class is passed back and contans the publicly visible uid and lastmod
+  /** This class is passed back and contains the publicly visible uid and lastmod
    * but also a private BaseItemIdType used to retrieve the item from Exchange.
    *
    * @author douglm
@@ -228,7 +228,8 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     public ExchangeItemInfo(final String uid,
                             final String lastMod,
                             final ItemIdType itemId) {
-      super(uid, lastMod);
+      super(uid, lastMod,
+            null); // lastsynch?
 
       this.itemId = itemId;
     }
@@ -239,7 +240,7 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
   }
 
   @Override
-  public List<ItemInfo> getItemsInfo() throws SynchException {
+  public SynchItemsInfo getItemsInfo() throws SynchException {
     DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
     fid.setId(DistinguishedFolderIdNameType.fromValue(info.getExchangeCalendar()));
     FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
@@ -257,7 +258,8 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     List<JAXBElement<? extends ResponseMessageType>> rms =
       fiResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
-    List<ItemInfo> res = new ArrayList<ItemInfo>();
+    SynchItemsInfo sii = new SynchItemsInfo();
+    sii.items = new ArrayList<ItemInfo>();
 
     for (JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
       FindItemResponseMessageType firm = (FindItemResponseMessageType)jaxbrm.getValue();
@@ -274,11 +276,11 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
                                                     si.lastMod,
                                                     si.itemId);
 
-        res.add(eii);
+        sii.items.add(eii);
       }
     }
 
-    return res;
+    return sii;
   }
 
   @Override

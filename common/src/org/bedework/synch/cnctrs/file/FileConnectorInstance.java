@@ -174,8 +174,10 @@ public class FileConnectorInstance implements ConnectorInstance {
    * @see org.bedework.synch.ConnectorInstance#getItemsInfo()
    */
   @Override
-  public List<ItemInfo> getItemsInfo() throws SynchException {
-    List<ItemInfo> items = new ArrayList<ItemInfo>();
+  public SynchItemsInfo getItemsInfo() throws SynchException {
+    SynchItemsInfo sii = new SynchItemsInfo();
+    sii.items = new ArrayList<ItemInfo>();
+    sii.setStatus(StatusType.OK);
 
     getIcal();
 
@@ -202,10 +204,11 @@ public class FileConnectorInstance implements ConnectorInstance {
         lastmod = lm.getUtcDateTime().toXMLFormat();
       }
 
-      items.add(new ItemInfo(uid, lastmod));
+      sii.items.add(new ItemInfo(uid, lastmod,
+                                 null));  // lastSynch
     }
 
-    return items;
+    return sii;
   }
 
   @Override

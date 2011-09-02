@@ -22,6 +22,7 @@ import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
+import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;
@@ -144,10 +145,12 @@ public class Synchling {
         break;
 
       case NewSubscription:
-        st = subscribe(note, ni);
-        if (st != StatusType.OK) {
-          return st;
+        ni.getSubResponse().setStatus(subscribe(note, ni));
+        if (ni.getSubResponse().getStatus() != StatusType.OK) {
+          return ni.getSubResponse().getStatus();
         }
+
+        ni.getSubResponse().setSubscriptionId(note.getSubscriptionId());
         continue;
 
       case Unsubscribe:
@@ -170,6 +173,8 @@ public class Synchling {
     if (debug) {
       trace("new subscription " + note.getSub());
     }
+
+    syncher.setConnectors(note.getSub());
 
     /* Try to subscribe to both ends */
     ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
@@ -342,12 +347,15 @@ public class Synchling {
   /** Information and objects needed to process one end of a resynch
    */
   private static class ResynchInfo {
+    Subscription sub;
     SynchEnd end;
     ConnectorInstance inst;
     Map<String, ItemInfo> items;
 
-    ResynchInfo(final SynchEnd end,
+    ResynchInfo(final Subscription sub,
+                final SynchEnd end,
                 final ConnectorInstance inst) {
+      this.sub = sub;
       this.end = end;
       this.inst = inst;
     }
@@ -387,15 +395,29 @@ public class Synchling {
 
       Subscription sub = note.getSub();
 
-      ResynchInfo ainfo = new ResynchInfo(SynchEnd.endA,
+      ResynchInfo ainfo = new ResynchInfo(sub,
+                                          SynchEnd.endA,
                                           syncher.getConnectorInstance(sub,
                                                                        SynchEnd.endA));
-      ResynchInfo binfo = new ResynchInfo(SynchEnd.endB,
+      ResynchInfo binfo = new ResynchInfo(sub,
+                                          SynchEnd.endB,
                                           syncher.getConnectorInstance(sub,
                                                                        SynchEnd.endB));
 
-      ainfo.items = getItemsMap(ainfo.inst);
-      binfo.items = getItemsMap(binfo.inst);
+      ainfo.items = getItemsMap(ainfo);
+      if (ainfo.items == null) {
+        sub.updateLastRefresh();
+        syncher.reschedule(sub);
+
+        return StatusType.ERROR;
+      }
+      binfo.items = getItemsMap(binfo);
+      if (binfo.items == null) {
+        sub.updateLastRefresh();
+        syncher.reschedule(sub);
+
+        return StatusType.ERROR;
+      }
 
       /* updateInfo is a list of changes we need to apply to one or both ends
        */
@@ -449,6 +471,7 @@ public class Synchling {
         }
       }
 
+      sub.setErrorCt(0);
       sub.updateLastRefresh();
       syncher.reschedule(sub);
 
@@ -517,20 +540,22 @@ public class Synchling {
     }
   }
 
-  /* updateInfo is a list of changes we need to apply to one or both ends
+  /**
+   * @param rinfo
+   * @return map or null for error
+   * @throws SynchException
    */
-  List<SynchInfo> updateInfo = new ArrayList<SynchInfo>();
-
-  private Map<String, ItemInfo> getItemsMap(final ConnectorInstance cinst) throws SynchException {
+  private Map<String, ItemInfo> getItemsMap(final ResynchInfo rinfo) throws SynchException {
     /* Items is a table built from the endB calendar */
     Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
 
-    List<ItemInfo> iis = cinst.getItemsInfo();
-    if (iis == null) {
-      throw new SynchException("Unable to fetch items info");
+    SynchItemsInfo sii = rinfo.inst.getItemsInfo();
+    if (sii.getStatus() != StatusType.OK) {
+      rinfo.sub.setErrorCt(rinfo.sub.getErrorCt() + 1);
+      return null;
     }
 
-    for (ItemInfo ii: iis) {
+    for (ItemInfo ii: sii.items) {
       if (debug) {
         trace(ii.toString());
       }

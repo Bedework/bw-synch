@@ -72,6 +72,8 @@ public class Subscription implements Comparable<Subscription> {
 
   private String lastRefresh;
 
+  private int errorCt;
+
   private SubscriptionConnectorInfo endAConnectorInfo;
 
   private SubscriptionConnectorInfo endBConnectorInfo;
@@ -177,6 +179,21 @@ public class Subscription implements Comparable<Subscription> {
    */
   public String getLastRefresh() {
     return lastRefresh;
+  }
+
+  /** int consecutive errors
+   *
+   * @param val
+   */
+  public void setErrorCt(final int val) {
+    errorCt = val;
+  }
+
+  /**
+   * @return int consecutive errors
+   */
+  public int getErrorCt() {
+    return errorCt;
   }
 
   /** The owner. This is the (verified) account that set up the subscription.
@@ -410,7 +427,7 @@ public class Subscription implements Comparable<Subscription> {
     try {
       Date dt = new DtStamp(getLastRefresh()).getDate();
 
-      return new Date(dt.getTime() + refreshDelay());
+      return new Date(dt.getTime() + ((getErrorCt() + 1) * refreshDelay()));
     } catch (Throwable t) {
       throw new SynchException(t);
     }
@@ -431,6 +448,9 @@ public class Subscription implements Comparable<Subscription> {
     sb.append(indent);
     sb.append("subscriptionId = ");
     sb.append(getSubscriptionId());
+
+    sb.append(", errorCt = ");
+    sb.append(getErrorCt());
 
     sb.append(",\n");
     sb.append(indent);

@@ -83,16 +83,22 @@ public interface ConnectorInstance {
     public String lastMod;
 
     /** */
+    public String lastSynch;
+
+    /** */
     public boolean seen;
 
     /**
      * @param uid
      * @param lastMod
+     * @param lastSynch
      */
     public ItemInfo(final String uid,
-                     final String lastMod) {
+                     final String lastMod,
+                     final String lastSynch) {
       this.uid = uid;
       this.lastMod = lastMod;
+      this.lastSynch = lastSynch;
     }
 
     @Override
@@ -105,10 +111,21 @@ public interface ConnectorInstance {
       sb.append(",\n   lastMod=");
       sb.append(lastMod);
 
+      sb.append(",\n   lastSynch=");
+      sb.append(lastSynch);
+
       sb.append("}");
 
       return sb.toString();
     }
+  }
+
+  /**
+   */
+  public class SynchItemsInfo extends BaseResponseType {
+    /** the items.
+     */
+    public List<ItemInfo> items;
   }
 
   /** Get information about items in the subscribed calendar. Used for initial
@@ -117,7 +134,7 @@ public interface ConnectorInstance {
    * @return List of items - never null, maybe empty.
    * @throws SynchException
    */
-  List<ItemInfo> getItemsInfo() throws SynchException;
+  SynchItemsInfo getItemsInfo() throws SynchException;
 
   /** Add a calendar component
    *
