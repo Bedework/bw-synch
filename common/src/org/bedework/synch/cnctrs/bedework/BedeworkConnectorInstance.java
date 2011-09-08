@@ -22,12 +22,11 @@ import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.wsmessages.GetSynchInfoType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
-import org.bedework.synch.wsmessages.SynchInfoResponseType;
-import org.bedework.synch.wsmessages.SynchInfoResponseType.SynchInfoResponses;
-import org.bedework.synch.wsmessages.SynchInfoType;
+
+import edu.rpi.cmt.calendar.XcalUtil;
+import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
@@ -41,6 +40,7 @@ import org.oasis_open.docs.ns.wscal.calws_soap.CompFilterType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FilterType;
 import org.oasis_open.docs.ns.wscal.calws_soap.MultistatResponseElementType;
+import org.oasis_open.docs.ns.wscal.calws_soap.MultistatusPropElementType;
 import org.oasis_open.docs.ns.wscal.calws_soap.PropFilterType;
 import org.oasis_open.docs.ns.wscal.calws_soap.PropstatType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -48,10 +48,20 @@ import org.oasis_open.docs.ns.wscal.calws_soap.TextMatchType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
+import ietf.params.xml.ns.icalendar_2.ArrayOfVcalendarContainedComponents;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
+import ietf.params.xml.ns.icalendar_2.UidPropType;
+import ietf.params.xml.ns.icalendar_2.VcalendarContainedComponentType;
+import ietf.params.xml.ns.icalendar_2.VcalendarType;
+import ietf.params.xml.ns.icalendar_2.VeventType;
+import ietf.params.xml.ns.icalendar_2.VtodoType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBElement;
 
 /** Calls from exchange synch processor to the service.
  *
@@ -119,45 +129,147 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
    */
   @Override
   public SynchItemsInfo getItemsInfo() throws SynchException {
-    GetSynchInfoType gsi = new GetSynchInfoType();
+    CalendarQueryType cq = new CalendarQueryType();
 
-    gsi.setCalendarHref(info.getUri());
+    cq.setHref(info.getUri());
 
-    SynchInfoResponseType sir = cnctr.getPort().getSynchInfo(getIdToken(),
-                                                             gsi);
+    /* Build a set of required properties which we will specify for all
+     * component types we can handle
+     */
+
+    cq.setIcalendar(new IcalendarType());
+    VcalendarType vcal = new VcalendarType();
+    cq.getIcalendar().getVcalendar().add(vcal);
+
+    ArrayOfVcalendarContainedComponents aovcc = new ArrayOfVcalendarContainedComponents();
+    vcal.setComponents(aovcc);
+
+    /* Build the properties we want */
+
+    ArrayOfProperties aop = new ArrayOfProperties();
+
+    UidPropType propUid = new UidPropType();
+    aop.getBasePropertyOrTzid().add(cnctr.getIcalObjectFactory().createUid(propUid));
+
+    LastModifiedPropType propLastMod = new LastModifiedPropType();
+    aop.getBasePropertyOrTzid().add(cnctr.getIcalObjectFactory().createLastModified(propLastMod));
+
+    VcalendarContainedComponentType comp = new VeventType();
+    comp.setProperties(aop);
+
+    aovcc.getVcalendarContainedComponent().add(
+                 cnctr.getIcalObjectFactory().createVevent((VeventType)comp));
+
+    comp = new VtodoType();
+    comp.setProperties(aop);
+
+    aovcc.getVcalendarContainedComponent().add(
+                 cnctr.getIcalObjectFactory().createVtodo((VtodoType)comp));
+
+    /* Now build a filter which returns all the types we want.
+     */
+    FilterType fltr = new FilterType();
+    cq.setFilter(fltr);
+
+    CompFilterType cf = new CompFilterType();
+    cf.setName("vcalendar");
+    cf.setTest("anyof");
+
+    fltr.setCompFilter(cf);
+
+    CompFilterType cfent = new CompFilterType();
+    cf.getCompFilter().add(cfent);
+    cfent.setName("vevent");
+
+    cfent = new CompFilterType();
+    cf.getCompFilter().add(cfent);
+    cfent.setName("vtodo");
+
+    CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(),
+                                                                  cq);
 
     SynchItemsInfo sii = new SynchItemsInfo();
     sii.items = new ArrayList<ItemInfo>();
     sii.setStatus(StatusType.OK);
 
-    if (!sir.getCalendarHref().equals(info.getUri())) {
-      sii.setMessage("Mismatched calpath in response to GetSycnchInfo: expected '" +
-          info.getUri() + "' but received '" +
-           sir.getCalendarHref() + "'");
-
-      sii.setStatus(StatusType.ERROR);
+    if (cqr.getStatus() != StatusType.OK) {
+      sii.setStatus(cqr.getStatus());
+      sii.setErrorResponse(cqr.getErrorResponse());
+      sii.setMessage(cqr.getMessage());
 
       return sii;
     }
 
-    if (sir.getStatus() != StatusType.OK) {
-      sii.setStatus(sir.getStatus());
-      sii.setErrorResponse(sir.getErrorResponse());
-      sii.setMessage(sir.getMessage());
+    List<MultistatResponseElementType> responses = cqr.getResponse();
 
-      return sii;
-    }
+    for (MultistatResponseElementType mre: responses) {
+      List<PropstatType> pss = mre.getPropstat();
 
-    SynchInfoResponses sirs = sir.getSynchInfoResponses();
-    if (sirs == null) {
-      return sii;
-    }
+      for (PropstatType ps: pss) {
+        if (ps.getStatus() != StatusType.OK) {
+          continue;
+        }
 
-    for (SynchInfoType si: sirs.getSynchInfo()) {
-      sii.items.add(new ItemInfo(si.getUid(), si.getLastMod(), si.getLastSynch()));
+        for (MultistatusPropElementType prop: ps.getProp()) {
+          if (prop.getCalendarData() == null) {
+            continue;
+          }
+
+          CalendarDataResponseType cd = prop.getCalendarData();
+
+          if (cd.getIcalendar() == null) {
+            continue;
+          }
+
+          sii.items.add(getItem(cd.getIcalendar()));
+        }
+      }
     }
 
     return sii;
+    /*
+     *     sb.append("<?xml version='1.0' encoding='utf-8' ?>");
+    sb.append("<C:calendar-query xmlns:C='urn:ietf:params:xml:ns:caldav'>");
+    sb.append("  <D:prop xmlns:D='DAV:'>");
+    sb.append("    <D:getetag/>");
+    sb.append("    <C:calendar-data content-type='application/calendar+xml'>");
+    sb.append("      <C:comp name='VCALENDAR'>");
+    sb.append("        <C:comp name='VEVENT'>");
+    sb.append("          <C:prop name='X-BEDEWORK-EXSYNC-LASTMOD'/>");
+    sb.append("          <C:prop name='UID'/>");
+    sb.append("        </C:comp>");
+    sb.append("        <C:comp name='VTODO'>");
+    sb.append("          <C:prop name='X-BEDEWORK-EXSYNC-LASTMOD'/>");
+    sb.append("          <C:prop name='UID'/>");
+    sb.append("        </C:comp>");
+    sb.append("      </C:comp>");
+    sb.append("    </C:calendar-data>");
+    sb.append("  </D:prop>");
+    sb.append("  <C:filter>");
+    sb.append("    <C:comp-filter name='VCALENDAR'>");
+    //sb.append("      <C:comp-filter name='VEVENT'>");
+    //sb.append("      </C:comp-filter>");
+    sb.append("    </C:comp-filter>");
+    sb.append("  </C:filter>");
+    sb.append("</C:calendar-query>");
+
+     */
+  }
+
+  private ItemInfo getItem(final IcalendarType ical) {
+    VcalendarType vcal = ical.getVcalendar().get(0);
+
+    List<JAXBElement<? extends VcalendarContainedComponentType>> comps =
+        vcal.getComponents().getVcalendarContainedComponent();
+    VcalendarContainedComponentType comp = comps.get(0).getValue();
+
+    UidPropType uid = (UidPropType)XcalUtil.findProperty(comp,
+                                             XcalTags.uid);
+
+    LastModifiedPropType lastmod = (LastModifiedPropType)XcalUtil.findProperty(comp,
+                                                         XcalTags.lastModified);
+
+    return new ItemInfo(uid.getText(), lastmod.getUtcDateTime().toXMLFormat(), null);
   }
 
   @Override

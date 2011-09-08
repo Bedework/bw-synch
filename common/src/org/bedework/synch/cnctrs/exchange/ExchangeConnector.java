@@ -60,6 +60,9 @@ public class ExchangeConnector
                            ExchangeNotification> {
   protected transient Logger log;
 
+  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
+
   /* Information required from the user for an Exchange connection
    *
    * exchange-folder-id
@@ -170,6 +173,11 @@ public class ExchangeConnector
   @Override
   public SynchEngine getSyncher() {
     return syncher;
+  }
+
+  @Override
+  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
+    return icalOf;
   }
 
   @Override

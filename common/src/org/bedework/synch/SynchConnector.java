@@ -85,6 +85,9 @@ public class SynchConnector
 
   private transient Logger log;
 
+  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
+
   private boolean debug;
 
   private boolean running;
@@ -141,6 +144,11 @@ public class SynchConnector
   @Override
   public SynchEngine getSyncher() {
     return syncher;
+  }
+
+  @Override
+  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
+    return icalOf;
   }
 
   @Override

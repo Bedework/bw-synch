@@ -46,6 +46,9 @@ public class FileConnector
                            Notification> {
   private transient Logger log;
 
+  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
+
   /** lastmod in the file is accurate */
   public static final String propnameUseLastmod = "use-lastmod";
 
@@ -137,6 +140,11 @@ public class FileConnector
   @Override
   public SynchEngine getSyncher() {
     return syncher;
+  }
+
+  @Override
+  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
+    return icalOf;
   }
 
   @Override

@@ -106,6 +106,11 @@ public interface Connector<C extends ConnectorInstance,
    */
   SynchEngine getSyncher();
 
+  /**
+   * @return an object factory for icalendar
+   */
+  ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory();
+
   /** List the information about properties required for subscriptions via this
    * connector.
    *

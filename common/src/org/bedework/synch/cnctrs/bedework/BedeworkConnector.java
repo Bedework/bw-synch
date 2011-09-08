@@ -31,6 +31,7 @@ import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.KeepAliveNotificationType;
 import org.bedework.synch.wsmessages.KeepAliveResponseType;
+import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -61,6 +62,9 @@ public class BedeworkConnector
   private boolean debug;
 
   private transient Logger log;
+
+  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
 
   private static List<ConnectorPropertyInfo> propInfo =
       new ArrayList<ConnectorPropertyInfo>();
@@ -95,6 +99,8 @@ public class BedeworkConnector
 
   private ConnectorInstanceMap<BedeworkConnectorInstance> cinstMap =
       new ConnectorInstanceMap<BedeworkConnectorInstance>();
+
+  ObjectFactory of = new ObjectFactory();
 
   /** This process will send keep-alive notifications to the remote system.
    * During startup the first notification is sent so this process starts with
@@ -225,6 +231,11 @@ public class BedeworkConnector
   }
 
   @Override
+  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
+    return icalOf;
+  }
+
+  @Override
   public List<ConnectorPropertyInfo> getPropertyInfo() {
     return propInfo;
   }
@@ -318,6 +329,10 @@ public class BedeworkConnector
   /* ====================================================================
    *                         Package methods
    * ==================================================================== */
+
+  ObjectFactory getObjectFactory() {
+    return of;
+  }
 
   SynchRemoteServicePortType getPort() throws SynchException {
     try {
