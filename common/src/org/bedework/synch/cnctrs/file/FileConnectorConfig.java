@@ -18,30 +18,14 @@
 */
 package org.bedework.synch.cnctrs.file;
 
+import org.bedework.synch.cnctrs.ConnectorConfig;
+
 /** File synch connector config
  *
  * @author douglm
  */
-public class FileConnectorConfig {
-  private boolean readOnly;
-
+public class FileConnectorConfig extends ConnectorConfig {
   private int minPoll;
-
-  /** Read only file?
-   *
-   * @param val    int seconds
-   */
-  public void setReadOnly(final boolean val) {
-    readOnly = val;
-  }
-
-  /** Read only file?
-   *
-   * @return int seconds
-   */
-  public boolean getReadOnly() {
-    return readOnly;
-  }
 
   /** Min poll - seconds
    *
@@ -57,5 +41,28 @@ public class FileConnectorConfig {
    */
   public int getMinPoll() {
     return minPoll;
+  }
+
+  /** Add our stuff to the StringBuilder
+   *
+   * @param sb    StringBuilder for result
+   */
+  @Override
+  protected void toStringSegment(final StringBuilder sb,
+                                 final String indent) {
+    super.toStringSegment(sb, indent);
+
+    sb.append(", minPoll = ");
+    sb.append(getMinPoll());
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+
+    toStringSegment(sb, "  ");
+
+    sb.append("}");
+    return sb.toString();
   }
 }

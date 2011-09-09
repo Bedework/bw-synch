@@ -16,89 +16,60 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.cnctrs.bedework;
+package org.bedework.synch.cnctrs;
 
-import org.bedework.synch.cnctrs.ConnectorConfig;
-
-/** Bedework synch connector config
+/** Common connector config properties
  *
  * @author douglm
  */
-public class BedeworkConnectorConfig extends ConnectorConfig {
-  /* WSDL for remote service */
-  private String bwWSDLURI;
+public class ConnectorConfig {
+  private boolean readOnly;
 
-  private int retryInterval;
+  private boolean trustLastmod;
 
-  private int keepAliveInterval;
-
-  /** bedework web service WSDL uri
-   *
-   * @param val    String
-   */
-  public void setBwWSDLURI(final String val) {
-    bwWSDLURI = val;
-  }
-
-  /** Bedework web service WSDL uri
-   *
-   * @return String
-   */
-  public String getBwWSDLURI() {
-    return bwWSDLURI;
-  }
-
-  /** retryInterval - seconds
+  /** Read only?
    *
    * @param val    int seconds
    */
-  public void setRetryInterval(final int val) {
-    retryInterval = val;
+  public void setReadOnly(final boolean val) {
+    readOnly = val;
   }
 
-  /** retryInterval - seconds
+  /** Read only?
    *
    * @return int seconds
    */
-  public int getRetryInterval() {
-    return retryInterval;
+  public boolean getReadOnly() {
+    return readOnly;
   }
 
-  /** KeepAliveInterval - seconds
+  /** Can we trust the lastmod from this connector?
    *
-   * @param val    int seconds
+   * @param val    boolean
    */
-  public void setKeepAliveInterval(final int val) {
-    keepAliveInterval = val;
+  public void setTrustLastmod(final boolean val) {
+    trustLastmod = val;
   }
 
-  /** KeepAliveInterval - seconds
+  /** Can we trust the lastmod from this connector?
    *
-   * @return int seconds
+   * @return boolean
    */
-  public int getKeepAliveInterval() {
-    return keepAliveInterval;
+  public boolean getTrustLastmod() {
+    return trustLastmod;
   }
 
   /** Add our stuff to the StringBuilder
    *
    * @param sb    StringBuilder for result
    */
-  @Override
   protected void toStringSegment(final StringBuilder sb,
                                  final String indent) {
-    super.toStringSegment(sb, indent);
+    sb.append("readOnly = ");
+    sb.append(getReadOnly());
 
-    sb.append(",");
-    sb.append(indent);
-    sb.append("bwWSDLURI = ");
-    sb.append(getBwWSDLURI());
-
-    sb.append("retryInterval = ");
-    sb.append(getRetryInterval());
-
-    sb.append("keepAliveInterval = ");
-    sb.append(getKeepAliveInterval());
+    sb.append(", trustLastmod = ");
+    sb.append(getTrustLastmod());
   }
 
   @Override

@@ -67,10 +67,6 @@ public class Synchling {
 
   private long synchlingId;
 
-//  private ConnectorInstance endACnctr;
-
-  //private ConnectorInstance endBCnctr;
-
   private SynchEngine syncher;
 
   private XmlIcalCompare differ = new XmlIcalCompare();
@@ -349,14 +345,17 @@ public class Synchling {
   private static class ResynchInfo {
     Subscription sub;
     SynchEnd end;
+    boolean trustLastmod;
     ConnectorInstance inst;
     Map<String, ItemInfo> items;
 
     ResynchInfo(final Subscription sub,
                 final SynchEnd end,
+                final boolean trustLastmod,
                 final ConnectorInstance inst) {
       this.sub = sub;
       this.end = end;
+      this.trustLastmod = trustLastmod;
       this.inst = inst;
     }
   }
@@ -397,10 +396,12 @@ public class Synchling {
 
       ResynchInfo ainfo = new ResynchInfo(sub,
                                           SynchEnd.endA,
+                                          sub.getEndAConn().getTrustLastmod(),
                                           syncher.getConnectorInstance(sub,
                                                                        SynchEnd.endA));
       ResynchInfo binfo = new ResynchInfo(sub,
                                           SynchEnd.endB,
+                                          sub.getEndBConn().getTrustLastmod(),
                                           syncher.getConnectorInstance(sub,
                                                                        SynchEnd.endB));
 
@@ -486,6 +487,8 @@ public class Synchling {
   private void getResynchs(final List<SynchInfo> updateInfo,
                            final ResynchInfo fromInfo,
                            final ResynchInfo toInfo) throws SynchException {
+    boolean useLastmods = fromInfo.trustLastmod && toInfo.trustLastmod;
+
     for (ItemInfo fromIi: fromInfo.items.values()) {
       ItemInfo toIi = toInfo.items.get(fromIi.uid);
 
@@ -506,18 +509,26 @@ public class Synchling {
        */
       toIi.seen = true;
 
-      int cmp = cmpLastMods(toIi.lastMod, fromIi.lastMod);
+      boolean update = true;
 
-      if (cmp < 0) {
-        if (debug) {
-          trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
-        }
-
-        SynchInfo si = new SynchInfo(fromIi);
-
-        si.updateEnd = toInfo.end;
-        updateInfo.add(si);
+      if (useLastmods) {
+        update = cmpLastMods(toIi.lastMod, fromIi.lastMod) < 0;
       }
+
+      if (!update) {
+        if (debug) {
+          trace("No need to update end " + toInfo.end + ": uid:" + fromIi.uid);
+        }
+      }
+
+      if (debug) {
+        trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
+      }
+
+      SynchInfo si = new SynchInfo(fromIi);
+
+      si.updateEnd = toInfo.end;
+      updateInfo.add(si);
     }
   }
 
@@ -625,12 +636,21 @@ public class Synchling {
         FetchItemResponseType toFir = toInfo.inst.fetchItem(si.itemInfo.uid);
 
         if (toFir.getStatus() != StatusType.OK) {
-          warn("Unable to fetch destination entity for update");
+          warn("Unable to fetch destination entity for update: message was " +
+               toFir.getMessage());
           continue;
         }
 
         ComponentSelectionType cst = differ.diff(fir.getIcalendar(),
                                                  toFir.getIcalendar());
+
+        if (cst == null) {
+          if (debug) {
+            trace("No update needed for " + si.itemInfo.uid);
+          }
+
+          continue;
+        }
 
         UpdateItemType ui = new UpdateItemType();
 

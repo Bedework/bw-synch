@@ -227,33 +227,6 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
     }
 
     return sii;
-    /*
-     *     sb.append("<?xml version='1.0' encoding='utf-8' ?>");
-    sb.append("<C:calendar-query xmlns:C='urn:ietf:params:xml:ns:caldav'>");
-    sb.append("  <D:prop xmlns:D='DAV:'>");
-    sb.append("    <D:getetag/>");
-    sb.append("    <C:calendar-data content-type='application/calendar+xml'>");
-    sb.append("      <C:comp name='VCALENDAR'>");
-    sb.append("        <C:comp name='VEVENT'>");
-    sb.append("          <C:prop name='X-BEDEWORK-EXSYNC-LASTMOD'/>");
-    sb.append("          <C:prop name='UID'/>");
-    sb.append("        </C:comp>");
-    sb.append("        <C:comp name='VTODO'>");
-    sb.append("          <C:prop name='X-BEDEWORK-EXSYNC-LASTMOD'/>");
-    sb.append("          <C:prop name='UID'/>");
-    sb.append("        </C:comp>");
-    sb.append("      </C:comp>");
-    sb.append("    </C:calendar-data>");
-    sb.append("  </D:prop>");
-    sb.append("  <C:filter>");
-    sb.append("    <C:comp-filter name='VCALENDAR'>");
-    //sb.append("      <C:comp-filter name='VEVENT'>");
-    //sb.append("      </C:comp-filter>");
-    sb.append("    </C:comp-filter>");
-    sb.append("  </C:filter>");
-    sb.append("</C:calendar-query>");
-
-     */
   }
 
   private ItemInfo getItem(final IcalendarType ical) {
@@ -349,7 +322,7 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
       return fir;
     }
 
-    if (mres.size() > 0) {
+    if (mres.size() > 1) {
       fir.setStatus(StatusType.ERROR);
       fir.setMessage("More than one response");
       return fir;

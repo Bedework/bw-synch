@@ -128,6 +128,9 @@
   
   <target name="deploy-init" depends="init">
     <deployInit ear-name="bw-${ant.project.name}" />
+    <property name="org.bedework.extra.properties.dir"
+              value="${org.bedework.configuration.defaults}" />
+    
     <property name="org.bedework.extra.properties"
               value="synch-config.xml" />
     

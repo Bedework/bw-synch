@@ -49,9 +49,6 @@ public class FileConnector
   private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
       new ietf.params.xml.ns.icalendar_2.ObjectFactory();
 
-  /** lastmod in the file is accurate */
-  public static final String propnameUseLastmod = "use-lastmod";
-
   private static List<ConnectorPropertyInfo> propInfo =
       new ArrayList<ConnectorPropertyInfo>();
 
@@ -125,6 +122,11 @@ public class FileConnector
   @Override
   public SynchKind getKind() {
     return SynchKind.poll;
+  }
+
+  @Override
+  public boolean getTrustLastmod() {
+    return config.getTrustLastmod();
   }
 
   @Override

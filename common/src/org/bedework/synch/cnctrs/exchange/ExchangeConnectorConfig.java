@@ -18,11 +18,13 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.synch.cnctrs.ConnectorConfig;
+
 /** Exchange synch connector config
 *
 * @author douglm
 */
-public class ExchangeConnectorConfig {
+public class ExchangeConnectorConfig extends ConnectorConfig {
   private String exchangeWSDLURI;
 
   /** Exchange web service WSDL uri
@@ -39,5 +41,30 @@ public class ExchangeConnectorConfig {
    */
   public String getExchangeWSDLURI() {
     return exchangeWSDLURI;
+  }
+
+  /** Add our stuff to the StringBuilder
+   *
+   * @param sb    StringBuilder for result
+   */
+  @Override
+  protected void toStringSegment(final StringBuilder sb,
+                                 final String indent) {
+    super.toStringSegment(sb, indent);
+
+    sb.append(",");
+    sb.append(indent);
+    sb.append("exchangeWSDLURI = ");
+    sb.append(getExchangeWSDLURI());
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+
+    toStringSegment(sb, "  ");
+
+    sb.append("}");
+    return sb.toString();
   }
 }

@@ -28,6 +28,7 @@ import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import edu.rpi.cmt.calendar.IcalToXcal;
 import edu.rpi.cmt.calendar.XcalUtil;
+import edu.rpi.sss.util.Util;
 import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
@@ -89,16 +90,25 @@ public class FileConnectorInstance implements ConnectorInstance {
   private String prodid;
   private String version;
 
-  private Map<String, JAXBElement<? extends VcalendarContainedComponentType>> uidMap;
-  private List<JAXBElement<? extends VcalendarContainedComponentType>> comps;
+  /* Each entry in the map is the set of entities - master + overrides
+   * for a single uid along with some extracted data
+   */
+  private static class MapEntry {
+    List<JAXBElement<? extends VcalendarContainedComponentType>> comps =
+        new ArrayList<JAXBElement<? extends VcalendarContainedComponentType>>();
+    String lastMod;
+    String uid;
+  }
+
+  private Map<String, MapEntry> uidMap;
 
   private ObjectFactory of = new ObjectFactory();
 
   FileConnectorInstance(final FileConnectorConfig config,
-                            final FileConnector cnctr,
-                            final Subscription sub,
-                            final SynchEnd end,
-                            final FileSubscriptionInfo info) {
+                        final FileConnector cnctr,
+                        final Subscription sub,
+                        final SynchEnd end,
+                        final FileSubscriptionInfo info) {
     this.config = config;
     this.cnctr = cnctr;
     this.sub = sub;
@@ -185,26 +195,8 @@ public class FileConnectorInstance implements ConnectorInstance {
       cnctr.getSyncher().updateSubscription(sub);
     }
 
-    for (JAXBElement<? extends VcalendarContainedComponentType> comp: comps) {
-      UidPropType uidProp = (UidPropType)XcalUtil.findProperty(comp.getValue(),
-                                                               XcalTags.uid);
-
-      if (uidProp == null) {
-        // Should flag as an error
-        continue;
-      }
-
-      String uid = uidProp.getText();
-
-      LastModifiedPropType lm = (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
-                                                              XcalTags.lastModified);
-
-      String lastmod= null;
-      if (lm != null) {
-        lastmod = lm.getUtcDateTime().toXMLFormat();
-      }
-
-      sii.items.add(new ItemInfo(uid, lastmod,
+    for (MapEntry me: uidMap.values()) {
+      sii.items.add(new ItemInfo(me.uid, me.lastMod,
                                  null));  // lastSynch
     }
 
@@ -235,11 +227,11 @@ public class FileConnectorInstance implements ConnectorInstance {
       cnctr.getSyncher().updateSubscription(sub);
     }
 
-    JAXBElement<? extends VcalendarContainedComponentType> comp = uidMap.get(uid);
+    MapEntry me = uidMap.get(uid);
 
     FetchItemResponseType fir = new FetchItemResponseType();
 
-    if (comp == null) {
+    if (me == null) {
       fir.setStatus(StatusType.NOT_FOUND);
       return fir;
     }
@@ -266,7 +258,7 @@ public class FileConnectorInstance implements ConnectorInstance {
     ArrayOfVcalendarContainedComponents aoc = new ArrayOfVcalendarContainedComponents();
     vcal.setComponents(aoc);
 
-    aoc.getVcalendarContainedComponent().add(comp);
+    aoc.getVcalendarContainedComponent().addAll(me.comps);
     fir.setIcalendar(ical);
 
     return fir;
@@ -369,7 +361,7 @@ public class FileConnectorInstance implements ConnectorInstance {
 
       Header[] hdrs = null;
 
-      if ((comps != null) && (info.getChangeToken() != null)) {
+      if ((uidMap != null) && (info.getChangeToken() != null)) {
         hdrs = new Header[] {
           new Header("If-None-Match", info.getChangeToken())
         };
@@ -405,12 +397,14 @@ public class FileConnectorInstance implements ConnectorInstance {
 
       fetchedIcal = IcalToXcal.fromIcal(ical, null);
 
-      uidMap = new HashMap<String,
-                           JAXBElement<? extends VcalendarContainedComponentType>>();
-      comps = new ArrayList<JAXBElement<? extends VcalendarContainedComponentType>>();
+      uidMap = new HashMap<String, MapEntry>();
+
       prodid = null;
 
       for (VcalendarType vcal: fetchedIcal.getVcalendar()) {
+        /* Extract the prodid from the converted calendar - we use it when we
+         * generate a new icalendar for each entity.
+         */
         if ((prodid == null) &&
             (vcal.getProperties() != null)) {
           for (JAXBElement<? extends BasePropertyType> pel:
@@ -432,8 +426,29 @@ public class FileConnectorInstance implements ConnectorInstance {
             continue;
           }
 
-          uidMap.put(uidProp.getText(), comp);
-          comps.add(comp);
+          String uid = uidProp.getText();
+
+          MapEntry me = uidMap.get(uid);
+
+          if (me == null) {
+            me = new MapEntry();
+            me.uid = uid;
+            uidMap.put(uidProp.getText(), me);
+          }
+
+          LastModifiedPropType lm = (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
+                                                                                XcalTags.lastModified);
+
+          String lastmod= null;
+          if (lm != null) {
+            lastmod = lm.getUtcDateTime().toXMLFormat();
+          }
+
+          if (Util.cmpObjval(me.lastMod, lastmod) < 0) {
+            me.lastMod = lastmod;
+          }
+
+          me.comps.add(comp);
         }
       }
 

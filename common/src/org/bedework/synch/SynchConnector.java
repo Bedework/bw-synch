@@ -132,6 +132,11 @@ public class SynchConnector
   }
 
   @Override
+  public boolean getTrustLastmod() {
+    return false;
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }

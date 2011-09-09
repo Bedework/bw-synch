@@ -91,6 +91,12 @@ public interface Connector<C extends ConnectorInstance,
    */
   SynchKind getKind();
 
+  /** Can we trust the lastmod from this connector?
+   *
+   * @return boolean
+   */
+  boolean getTrustLastmod();
+
   /**
    * @return id provided at start
    */

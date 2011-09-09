@@ -216,6 +216,11 @@ public class BedeworkConnector
   }
 
   @Override
+  public boolean getTrustLastmod() {
+    return config.getTrustLastmod();
+  }
+
+  @Override
   public String getId() {
     return connectorId;
   }
