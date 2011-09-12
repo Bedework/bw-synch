@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -28,11 +28,9 @@ import org.bedework.synch.wsmessages.SynchIdTokenType;
 import edu.rpi.cmt.calendar.XcalUtil;
 import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemType;
 import org.oasis_open.docs.ns.wscal.calws_soap.AllpropType;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.CalendarDataResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.CalendarQueryResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.CalendarQueryType;
@@ -63,37 +61,26 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-/** Calls from exchange synch processor to the service.
+/** Handles bedework synch interactions.
  *
  * @author Mike Douglass
  */
-public class BedeworkConnectorInstance implements ConnectorInstance {
-  private transient Logger log;
-
-  private final boolean debug;
-
+public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   private BedeworkConnectorConfig config;
 
   private final BedeworkConnector cnctr;
 
   private BedeworkSubscriptionInfo info;
 
-  private final Subscription sub;
-
-  private SynchEnd end;
-
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
                             final Subscription sub,
                             final SynchEnd end,
                             final BedeworkSubscriptionInfo info) {
+    super(sub, end, info);
     this.config = config;
     this.cnctr = cnctr;
-    this.sub = sub;
-    this.end = end;
     this.info = info;
-
-    debug = getLogger().isDebugEnabled();
   }
 
   /* (non-Javadoc)
@@ -102,15 +89,6 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
   @Override
   public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
     return val;
-  }
-
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#open()
-   */
-  @Override
-  public BaseResponseType open() throws SynchException {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   /* (non-Javadoc)
@@ -382,40 +360,6 @@ public class BedeworkConnectorInstance implements ConnectorInstance {
   @Override
   public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
     return cnctr.getPort().updateItem(getIdToken(), updates);
-  }
-
-  /* ====================================================================
-   *                   Protected methods
-   * ==================================================================== */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
   }
 
   /* ====================================================================

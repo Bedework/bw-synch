@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
@@ -71,6 +72,31 @@ public interface ConnectorInstance {
    * @throws SynchException
    */
   boolean changed() throws SynchException;
+
+  /**
+   * @param val
+   * @throws SynchException
+   */
+  public void setLastCrudCts(final CrudCts val) throws SynchException;
+
+  /**
+   * @return cts
+   * @throws SynchException
+   */
+  public CrudCts getLastCrudCts() throws SynchException;
+
+  /**
+   * @param val
+   * @throws SynchException
+   */
+  public void setTotalCrudCts(final CrudCts val) throws SynchException;
+
+  /**
+   * @return cts
+   * @throws SynchException
+   */
+  public CrudCts getTotalCrudCts() throws SynchException;
+
 
   /** Information used to synch ends A and B
    * This information is only valid in the context of a given subscription.

@@ -19,5 +19,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/bwxml"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/rpituil"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/davutil"/>
+	<classpathentry kind="lib" path="/bwxml/dist/bw-icalschema-3.8.jar"/>
+	<classpathentry kind="lib" path="/bwxml/dist/bw-calws-soapschema-3.8.jar"/>
+	<classpathentry kind="lib" path="/bwxml/dist/bw-exchangewsschema-3.8.jar"/>
+	<classpathentry kind="lib" path="/bwxml/dist/bw-synchwsschema-3.8.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

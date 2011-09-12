@@ -55,6 +55,59 @@ public class BaseSubscriptionInfo {
    */
   public static final String propnameLastRefreshStatus = "last-refresh-status";
 
+  /** The numbers created, updated, deleted last time */
+  public static final String propnameLastCrudCts = "lastCrudCt";
+
+  /** The numbers created, updated, deleted this subscription */
+  public static final String propnameTotalCrudCts = "totalCrudCt";
+
+  /** maintain some counts
+   */
+  public static class CrudCts {
+    /** The counts
+     */
+    public long created;
+    /** The counts
+     */
+    public long updated;
+    /** The counts
+     */
+    public long deleted;
+
+    /** Deserialize
+     * @param val
+     * @return cts
+     */
+    public static CrudCts fromString(final String val) {
+      CrudCts cc = new CrudCts();
+
+      if (val == null) {
+        return cc;
+      }
+
+      String[] cts = val.split(",");
+
+      if (cts.length != 3) {
+        return cc;
+      }
+
+      try {
+        cc.created = Long.valueOf(cts[0]);
+        cc.updated = Long.valueOf(cts[1]);
+        cc.deleted = Long.valueOf(cts[2]);
+      } catch (Throwable t) {
+      }
+
+      return cc;
+    }
+
+    @Override
+    public String toString() {
+      return new StringBuilder().append(created).append(",").
+          append(deleted).append(",").append(updated).toString();
+    }
+  }
+
   /**
    * @param info
    * @throws SynchException
@@ -169,6 +222,38 @@ public class BaseSubscriptionInfo {
     return info.getProperty(propnameLastRefreshStatus);
   }
 
+  /**
+   * @param val
+   * @throws SynchException
+   */
+  public void setLastCrudCts(final CrudCts val) throws SynchException {
+    info.setProperty(propnameLastCrudCts, val.toString());
+  }
+
+  /**
+   * @return cts
+   * @throws SynchException
+   */
+  public CrudCts getLastCrudCts() throws SynchException {
+    return CrudCts.fromString(info.getProperty(propnameLastCrudCts));
+  }
+
+  /**
+   * @param val
+   * @throws SynchException
+   */
+  public void setTotalCrudCts(final CrudCts val) throws SynchException {
+    info.setProperty(propnameTotalCrudCts, val.toString());
+  }
+
+  /**
+   * @return cts
+   * @throws SynchException
+   */
+  public CrudCts getTotalCrudCts() throws SynchException {
+    return CrudCts.fromString(info.getProperty(propnameTotalCrudCts));
+  }
+
   /** Refresh delay - millisecs
    *
    * @param val
@@ -218,6 +303,12 @@ public class BaseSubscriptionInfo {
       sb.append(indent);
       sb.append("lastRefreshStatus = ");
       sb.append(getLastRefreshStatus());
+      sb.append("\n");
+      sb.append(indent);
+      sb.append("lastCrudCts = ");
+      sb.append(getLastCrudCts());
+      sb.append("totalCrudCts = ");
+      sb.append(getTotalCrudCts());
       sb.append(", refreshDelay = ");
       sb.append(getRefreshDelay());
     } catch (Throwable t) {

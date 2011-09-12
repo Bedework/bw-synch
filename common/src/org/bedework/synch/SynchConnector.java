@@ -22,8 +22,8 @@ import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
+import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
 import org.bedework.synch.exception.SynchException;
@@ -461,7 +461,11 @@ public class SynchConnector
   }
 
   /* Null class to do nothing except fail. */
-  static class SynchConnectorInstance implements ConnectorInstance {
+  static class SynchConnectorInstance extends AbstractConnectorInstance {
+    SynchConnectorInstance(){
+      super(null, null, null);
+    }
+
     @Override
     public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
       return val;

@@ -82,8 +82,6 @@ public class FileConnector
 
   private String connectorId;
 
-  private long keepAliveInterval = 10 * 1000;
-
   private boolean running;
 
   private ConnectorInstanceMap<FileConnectorInstance> cinstMap =

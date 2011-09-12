@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.GetItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
@@ -29,7 +29,6 @@ import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
 import org.bedework.synch.exception.SynchException;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
@@ -72,20 +71,12 @@ import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
  *
  * @author Mike Douglass
  */
-public class ExchangeConnectorInstance implements ConnectorInstance {
-  private transient Logger log;
-
-  private boolean debug;
-
+public class ExchangeConnectorInstance extends AbstractConnectorInstance {
   private ExchangeConnectorConfig config;
 
   private ExchangeConnector cnctr;
 
   private ExchangeSubscriptionInfo info;
-
-  private Subscription sub;
-
-  private SynchEnd end;
 
   private final XmlIcalConvert icalConverter = new XmlIcalConvert();
 
@@ -94,13 +85,10 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
                             final Subscription sub,
                             final SynchEnd end,
                             final ExchangeSubscriptionInfo info) {
+    super(sub, end, info);
     this.config = config;
     this.cnctr = cnctr;
-    this.sub = sub;
-    this.end = end;
     this.info = info;
-
-    debug = getLogger().isDebugEnabled();
   }
 
   @Override
@@ -309,40 +297,6 @@ public class ExchangeConnectorInstance implements ConnectorInstance {
     mbc.setValue("en-US"); // XXX This probably needs to come from the locale
 
     return mbc;
-  }
-
-  /* ====================================================================
-   *                   Protected methods
-   * ==================================================================== */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
   }
 
   ExchangeServicePortType getPort(final ExchangeSubscriptionInfo sub) throws SynchException {

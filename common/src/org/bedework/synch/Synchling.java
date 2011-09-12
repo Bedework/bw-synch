@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.ConnectorInstance;
@@ -361,6 +362,8 @@ public class Synchling {
   }
 
   private StatusType reSynch(final Notification note) throws SynchException {
+    Subscription sub = note.getSub();
+
     try {
       /* The action here depends on which way we are synching.
        *
@@ -392,8 +395,6 @@ public class Synchling {
        * last synched.
        */
 
-      Subscription sub = note.getSub();
-
       ResynchInfo ainfo = new ResynchInfo(sub,
                                           SynchEnd.endA,
                                           sub.getEndAConn().getTrustLastmod(),
@@ -407,16 +408,11 @@ public class Synchling {
 
       ainfo.items = getItemsMap(ainfo);
       if (ainfo.items == null) {
-        sub.updateLastRefresh();
-        syncher.reschedule(sub);
-
         return StatusType.ERROR;
       }
+
       binfo.items = getItemsMap(binfo);
       if (binfo.items == null) {
-        sub.updateLastRefresh();
-        syncher.reschedule(sub);
-
         return StatusType.ERROR;
       }
 
@@ -473,14 +469,16 @@ public class Synchling {
       }
 
       sub.setErrorCt(0);
-      sub.updateLastRefresh();
-      syncher.reschedule(sub);
 
       return StatusType.OK;
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
       throw new SynchException(t);
+    } finally {
+      sub.updateLastRefresh();
+      syncher.updateSubscription(sub);
+      syncher.reschedule(sub);
     }
   }
 
@@ -594,6 +592,9 @@ public class Synchling {
     List<SynchInfo> unProcessed = new ArrayList<SynchInfo>();
     unprocessedRes.value = unProcessed;
 
+    CrudCts toLastCrudCts = new CrudCts();
+    CrudCts toTotalCrudCts = toInfo.inst.getTotalCrudCts();
+
     List<String> uids = new ArrayList<String>();
     List<SynchInfo> sis = new ArrayList<SynchInfo>();
 
@@ -623,6 +624,10 @@ public class Synchling {
 
       if (si.addTo == toInfo.end) {
         AddItemResponseType air = toInfo.inst.addItem(fir.getIcalendar());
+
+        toLastCrudCts.created++;
+        toTotalCrudCts.created++;
+
         if (debug) {
           trace("Add: status=" + air.getStatus() +
                 " msg=" + air.getMessage());
@@ -662,10 +667,17 @@ public class Synchling {
 
         if (uir.getStatus() != StatusType.OK) {
           warn("Unable to update destination entity");
+          continue;
         }
+
+        toLastCrudCts.updated++;
+        toTotalCrudCts.updated++;
 
         continue;
       }
+
+      toInfo.inst.setLastCrudCts(toLastCrudCts);
+      toInfo.inst.setTotalCrudCts(toTotalCrudCts);
 
       warn("Should not get here");
     }

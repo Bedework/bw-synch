@@ -22,7 +22,7 @@ import org.bedework.http.client.DavioException;
 import org.bedework.http.client.dav.DavClient;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
-import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 
@@ -35,9 +35,7 @@ import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 
 import org.apache.commons.httpclient.Header;
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
@@ -64,31 +62,22 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
 
-/** Calls from exchange synch processor to the service.
+/** Handles file synch interactions.
  *
  * @author Mike Douglass
  */
-public class FileConnectorInstance implements ConnectorInstance {
-  private transient Logger log;
-
-  private final boolean debug;
-
+public class FileConnectorInstance extends AbstractConnectorInstance {
   private FileConnectorConfig config;
 
   private final FileConnector cnctr;
 
   private FileSubscriptionInfo info;
 
-  private final Subscription sub;
-
-  private SynchEnd end;
-
   private DavClient client;
 
   /* Only non-null if we actually fetched the data */
   private IcalendarType fetchedIcal;
   private String prodid;
-  private String version;
 
   /* Each entry in the map is the set of entities - master + overrides
    * for a single uid along with some extracted data
@@ -109,13 +98,10 @@ public class FileConnectorInstance implements ConnectorInstance {
                         final Subscription sub,
                         final SynchEnd end,
                         final FileSubscriptionInfo info) {
+    super(sub, end, info);
     this.config = config;
     this.cnctr = cnctr;
-    this.sub = sub;
-    this.end = end;
     this.info = info;
-
-    debug = getLogger().isDebugEnabled();
   }
 
   /* (non-Javadoc)
@@ -124,14 +110,6 @@ public class FileConnectorInstance implements ConnectorInstance {
   @Override
   public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
     return val;
-  }
-
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#open()
-   */
-  @Override
-  public BaseResponseType open() throws SynchException {
-    return null;
   }
 
   /* (non-Javadoc)
@@ -284,40 +262,6 @@ public class FileConnectorInstance implements ConnectorInstance {
     }
 
     throw new SynchException("Unimplemented");
-  }
-
-  /* ====================================================================
-   *                   Protected methods
-   * ==================================================================== */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
   }
 
   /* ====================================================================
