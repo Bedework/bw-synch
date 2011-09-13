@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /** Synch processor.
  * <p>The synch processor manages subscriptions made by a subscriber to a target.
@@ -187,30 +188,38 @@ public class SynchEngine {
             continue;
           }
 
-          notificationsCt.inc();
-          Synchling sl;
-
-          /* Get a synchling from the pool */
-          while (true) {
-            if (stopping) {
-              return;
-            }
-
-            sl = synchlingPool.getNoException();
-            if (sl != null) {
-              break;
-            }
+          if (debug) {
+            trace("Received notification");
           }
 
-          /* The synchling needs to be running it's own thread. */
-          StatusType st = sl.handleNotification(note);
+          notificationsCt.inc();
+          Synchling sl = null;
 
-          if (st == StatusType.WARNING) {
-            /* Back on the queue - these need to be flagged so we don't get an
-             * endless loop - perhaps we need a delay queue
-             */
+          try {
+            /* Get a synchling from the pool */
+            while (true) {
+              if (stopping) {
+                return;
+              }
 
-            notificationInQueue.put(note);
+              sl = synchlingPool.getNoException();
+              if (sl != null) {
+                break;
+              }
+            }
+
+            /* The synchling needs to be running it's own thread. */
+            StatusType st = sl.handleNotification(note);
+
+            if (st == StatusType.WARNING) {
+              /* Back on the queue - these need to be flagged so we don't get an
+               * endless loop - perhaps we need a delay queue
+               */
+
+              notificationInQueue.put(note);
+            }
+          } finally {
+            synchlingPool.add(sl);
           }
 
           /* If this is a poll kind then we should add it to a poll queue
@@ -435,6 +444,10 @@ public class SynchEngine {
    * @throws SynchException
    */
   public void reschedule(final Subscription sub) throws SynchException {
+    if (debug) {
+      trace("reschedule subscription " + sub);
+    }
+
     if (sub.polling()) {
       synchTimer.schedule(sub, sub.nextRefresh());
       return;
@@ -475,9 +488,8 @@ public class SynchEngine {
 
   /** Stop synch process.
    *
-   * @throws SynchException
    */
-  public void stop() throws SynchException {
+  public void stop() {
     if (stopping) {
       return;
     }
@@ -488,7 +500,15 @@ public class SynchEngine {
      */
     for (Connector conn: getConnectors()) {
       info("Stopping connector " + conn.getId());
-      conn.stop();
+      try {
+        conn.stop();
+      } catch (Throwable t) {
+        if (debug) {
+          error(t);
+        } else {
+          error(t.getMessage());
+        }
+      }
     }
 
     info("Connectors stopped");
@@ -519,6 +539,8 @@ public class SynchEngine {
       }
     }
 
+    syncher = null;
+
     info("**************************************************");
     info("Synch shutdown complete");
     info("**************************************************");
@@ -529,23 +551,17 @@ public class SynchEngine {
    * @throws SynchException
    */
   public void handleNotification(final Notification note) throws SynchException {
-    Synchling sl;
-
     try {
       while (true) {
         if (stopping) {
           return;
         }
 
-        sl = synchlingPool.getNoException();
-        if (sl != null) {
+        if (notificationInQueue.offer(note, 5, TimeUnit.SECONDS)) {
           break;
         }
       }
-
-      notificationInQueue.put(note);
     } catch (InterruptedException ie) {
-      return;
     }
   }
 
@@ -705,12 +721,16 @@ public class SynchEngine {
             final NotificationBatch<Notification> notes) throws SynchException {
     for (Notification note: notes.getNotifications()) {
       db.open();
+      Synchling sl = null;
       try {
-        Synchling sl = synchlingPool.get();
+        sl = synchlingPool.get();
 
         sl.handleNotification(note);
       } finally {
         db.close();
+        if (sl != null) {
+          synchlingPool.add(sl);
+        }
       }
     }
 

@@ -235,7 +235,16 @@ public class BaseSubscriptionInfo {
    * @throws SynchException
    */
   public CrudCts getLastCrudCts() throws SynchException {
-    return CrudCts.fromString(info.getProperty(propnameLastCrudCts));
+    String s = info.getProperty(propnameLastCrudCts);
+
+
+    CrudCts cc = CrudCts.fromString(s);
+
+    if (s == null) {
+      setLastCrudCts(cc); // Ensure they get saved
+    }
+
+    return cc;
   }
 
   /**
@@ -251,7 +260,16 @@ public class BaseSubscriptionInfo {
    * @throws SynchException
    */
   public CrudCts getTotalCrudCts() throws SynchException {
-    return CrudCts.fromString(info.getProperty(propnameTotalCrudCts));
+    String s = info.getProperty(propnameTotalCrudCts);
+
+
+    CrudCts cc = CrudCts.fromString(s);
+
+    if (s == null) {
+      setTotalCrudCts(cc); // Ensure they get saved
+    }
+
+    return cc;
   }
 
   /** Refresh delay - millisecs

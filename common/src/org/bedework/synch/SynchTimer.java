@@ -23,6 +23,8 @@ import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +40,10 @@ import java.util.TimerTask;
  *   @author Mike Douglass   douglm   rpi.edu
  */
 public class SynchTimer {
+  private boolean debug;
+
+  protected transient Logger log;
+
   private SynchEngine syncher;
 
   /** This is the class that goes into a wait. The run method MUST only take  a
@@ -63,6 +69,10 @@ public class SynchTimer {
         waiting.remove(sub.getSubscriptionId());
       }
 
+      if (debug){
+        trace("About to send resynch notification for " + sub.getSubscriptionId());
+      }
+
       NotificationItem ni = new NotificationItem(ActionType.FullSynch,
                                                  null, null);
       Notification<NotificationItem> note = new Notification<NotificationItem>(
@@ -71,7 +81,11 @@ public class SynchTimer {
       try {
         syncher.handleNotification(note);
       } catch (SynchException se) {
-        se.printStackTrace();
+        if (debug) {
+          error(se);
+        } else {
+          error(se.getMessage());
+        }
       }
     }
   }
@@ -90,6 +104,8 @@ public class SynchTimer {
     this.syncher =syncher;
 
     timer = new Timer("SynchTimer", true);
+
+    debug = getLogger().isDebugEnabled();
   }
 
   /** Stop our timer thread.
@@ -112,6 +128,10 @@ public class SynchTimer {
    */
   public void schedule(final Subscription sub,
                        final Date when) throws SynchException {
+    if (debug){
+      trace("reschedule " + sub.getSubscriptionId() + " for " + when);
+    }
+
     SynchTask st = new SynchTask(sub);
     timer.schedule(st, when);
   }
@@ -155,4 +175,34 @@ public class SynchTimer {
     return stats;
   }
 
+  private Logger getLogger() {
+    if (log == null) {
+      log = Logger.getLogger(this.getClass());
+    }
+
+    return log;
+  }
+
+  @SuppressWarnings("unused")
+  private void trace(final String msg) {
+    getLogger().debug(msg);
+  }
+
+  @SuppressWarnings("unused")
+  private void warn(final String msg) {
+    getLogger().warn(msg);
+  }
+
+  private void error(final Throwable t) {
+    getLogger().error(this, t);
+  }
+
+  private void error(final String msg) {
+    getLogger().error(msg);
+  }
+
+  @SuppressWarnings("unused")
+  private void info(final String msg) {
+    getLogger().info(msg);
+  }
 }

@@ -140,9 +140,20 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       }
 
       Header etag = cl.getResponse().getResponseHeader("Etag");
-      if (etag != null) {
-        return !info.getChangeToken().equals(etag.getValue());
+      if (etag == null) {
+        if (debug) {
+          trace("Received null etag");
+        }
+
+        return false;
       }
+
+      if (debug) {
+        trace("Received etag:" + etag.getValue() +
+              ", ours=" + info.getChangeToken());
+      }
+
+      return !info.getChangeToken().equals(etag.getValue());
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
@@ -153,9 +164,6 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       } catch (Throwable t) {
       }
     }
-
-
-    return false;
   }
 
   /* (non-Javadoc)

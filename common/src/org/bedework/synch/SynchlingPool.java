@@ -149,7 +149,7 @@ public class SynchlingPool {
       return 0;
     }
 
-    return thePool.size() - thePool.remainingCapacity();
+    return thePool.remainingCapacity();
   }
 
   /** Put a synchling back in the pool if there's room else discard it
@@ -158,10 +158,10 @@ public class SynchlingPool {
    * @throws SynchException
    */
   public void add(final Synchling s) throws SynchException {
-    getPool().offer(s);
     synchronized (active) {
       active.remove(s.getSynchlingId());
     }
+    getPool().offer(s);
   }
 
   /** Get a synchling from the pool if possible
@@ -170,16 +170,7 @@ public class SynchlingPool {
    * @throws SynchException if none available
    */
   public Synchling get() throws SynchException {
-    Synchling s = get(true);
-    if (s == null) {
-      return null;
-    }
-
-    synchronized (active) {
-      active.put(s.getSynchlingId(), s);
-    }
-
-    return s;
+    return get(true);
   }
 
   /** Get a synchling from the pool if possible. Return null if timed out
@@ -210,6 +201,10 @@ public class SynchlingPool {
       if (throwOnFailure) {
         throw new SynchTimeout("Synchling pool wait");
       }
+    } else {
+      synchronized (active) {
+        active.put(s.getSynchlingId(), s);
+      }
     }
 
     return s;
@@ -226,13 +221,13 @@ public class SynchlingPool {
   public List<Stat> getStats() {
     List<Stat> stats = new ArrayList<Stat>();
 
-    stats.add(new Stat("timeout", getTimeout()));
-    stats.add(new Stat("active", getActiveCt()));
-    stats.add(new Stat("gets", getGets()));
-    stats.add(new Stat("waitTimes", getWaitTimes()));
-    stats.add(new Stat("getSynchlingFailures", getGetSynchlingFailures()));
-    stats.add(new Stat("currentMaxSize", getCurrentMaxSize()));
-    stats.add(new Stat("currentAvailable", getCurrentAvailable()));
+    stats.add(new Stat("synchling get timeout", getTimeout()));
+    stats.add(new Stat("synchling active", getActiveCt()));
+    stats.add(new Stat("synchling gets", getGets()));
+    stats.add(new Stat("synchling waitTimes", getWaitTimes()));
+    stats.add(new Stat("synchling get failures", getGetSynchlingFailures()));
+    stats.add(new Stat("synchling currentMaxSize", getCurrentMaxSize()));
+    stats.add(new Stat("synchling currentAvailable", getCurrentAvailable()));
 
     return stats;
   }

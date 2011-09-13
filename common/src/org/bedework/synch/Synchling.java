@@ -395,6 +395,8 @@ public class Synchling {
        * last synched.
        */
 
+      boolean bothWays = sub.getDirection() == SynchDirectionType.BOTH_WAYS;
+
       ResynchInfo ainfo = new ResynchInfo(sub,
                                           SynchEnd.endA,
                                           sub.getEndAConn().getTrustLastmod(),
@@ -405,6 +407,22 @@ public class Synchling {
                                           sub.getEndBConn().getTrustLastmod(),
                                           syncher.getConnectorInstance(sub,
                                                                        SynchEnd.endB));
+
+      boolean aChanged = false;
+      boolean bChanged = false;
+
+      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+        aChanged = ainfo.inst.changed();
+      }
+
+      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+        bChanged = binfo.inst.changed();
+      }
+
+      if (!aChanged && !bChanged) {
+        // Nothing to do. last refresh updated on the way out.
+        return StatusType.OK;
+      }
 
       ainfo.items = getItemsMap(ainfo);
       if (ainfo.items == null) {
@@ -419,8 +437,6 @@ public class Synchling {
       /* updateInfo is a list of changes we need to apply to one or both ends
        */
       List<SynchInfo> updateInfo = new ArrayList<SynchInfo>();
-
-      boolean bothWays = sub.getDirection() == SynchDirectionType.BOTH_WAYS;
 
       /* First see what we need to transfer from A to B */
       if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
@@ -593,6 +609,7 @@ public class Synchling {
     unprocessedRes.value = unProcessed;
 
     CrudCts toLastCrudCts = new CrudCts();
+    toInfo.inst.setLastCrudCts(toLastCrudCts);
     CrudCts toTotalCrudCts = toInfo.inst.getTotalCrudCts();
 
     List<String> uids = new ArrayList<String>();

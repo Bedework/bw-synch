@@ -218,7 +218,7 @@ public class SubscriptionConnectorInfo implements Comparable<SubscriptionConnect
       sb.append(getConnectorId());
 
       if (getConnectorProperties() != null) {
-        sb.append(", onnectorProperties = ");
+        sb.append(", connectorProperties = ");
         sb.append(getConnectorProperties());
       }
 

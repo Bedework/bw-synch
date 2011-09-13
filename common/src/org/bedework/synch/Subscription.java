@@ -449,6 +449,8 @@ public class Subscription implements Comparable<Subscription> {
     sb.append("subscriptionId = ");
     sb.append(getSubscriptionId());
 
+    sb.append(", lastRefresh = ");
+    sb.append(getLastRefresh());
     sb.append(", errorCt = ");
     sb.append(getErrorCt());
 

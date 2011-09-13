@@ -126,7 +126,7 @@ public class Synch implements SynchMBean {
     /* This apparently must be the same as the name attribute in the
      * jboss service definition
      */
-    return "org.bedework:service=ExchgSynch";
+    return "org.bedework:service=Synch";
   }
 
   @Override
@@ -495,6 +495,8 @@ public class Synch implements SynchMBean {
 
     running = false;
 
+    syncher.stop();
+
     processor.interrupt();
     try {
       processor.join(20 * 1000);
@@ -505,6 +507,7 @@ public class Synch implements SynchMBean {
     }
 
     processor = null;
+
     syncher = null;
 
     info("************************************************************");
