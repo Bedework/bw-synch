@@ -349,15 +349,26 @@ public class Synchling {
     boolean trustLastmod;
     ConnectorInstance inst;
     Map<String, ItemInfo> items;
+    CrudCts lastCts;
+    CrudCts totalCts;
 
     ResynchInfo(final Subscription sub,
                 final SynchEnd end,
                 final boolean trustLastmod,
-                final ConnectorInstance inst) {
+                final ConnectorInstance inst) throws SynchException {
       this.sub = sub;
       this.end = end;
       this.trustLastmod = trustLastmod;
       this.inst = inst;
+
+      lastCts = new CrudCts();
+      inst.setLastCrudCts(lastCts);
+      totalCts = inst.getTotalCrudCts();
+    }
+
+    void updateCts() throws SynchException {
+      inst.setLastCrudCts(lastCts);
+      inst.setTotalCrudCts(totalCts);
     }
   }
 
@@ -469,18 +480,26 @@ public class Synchling {
 
         /* Now update end A from end B.
          */
-        while ((updateInfo.size() > 0) &&
-               processUpdates(note, updateInfo, unprocessedRes,
-                              binfo, ainfo)) {
-          updateInfo = unprocessedRes.value;
+        if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+          while ((updateInfo.size() > 0) &&
+                 processUpdates(note, updateInfo, unprocessedRes,
+                                binfo, ainfo)) {
+            updateInfo = unprocessedRes.value;
+          }
+
+          ainfo.updateCts();
         }
 
         /* Now update end B from end A.
          */
-        while ((updateInfo.size() > 0) &&
-               processUpdates(note, updateInfo, unprocessedRes,
-                              ainfo, binfo)) {
-          updateInfo = unprocessedRes.value;
+        if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+          while ((updateInfo.size() > 0) &&
+                 processUpdates(note, updateInfo, unprocessedRes,
+                                ainfo, binfo)) {
+            updateInfo = unprocessedRes.value;
+          }
+
+          binfo.updateCts();
         }
       }
 
@@ -604,24 +623,30 @@ public class Synchling {
                                  final Holder<List<SynchInfo>> unprocessedRes,
                                  final ResynchInfo fromInfo,
                                  final ResynchInfo toInfo) throws SynchException {
-    boolean callAgain = true;
+    boolean callAgain = false;
     List<SynchInfo> unProcessed = new ArrayList<SynchInfo>();
     unprocessedRes.value = unProcessed;
-
-    CrudCts toLastCrudCts = new CrudCts();
-    toInfo.inst.setLastCrudCts(toLastCrudCts);
-    CrudCts toTotalCrudCts = toInfo.inst.getTotalCrudCts();
 
     List<String> uids = new ArrayList<String>();
     List<SynchInfo> sis = new ArrayList<SynchInfo>();
 
-    /* First fetch a batch of items */
     int i = 0;
-    while ((uids.size() < getItemsBatchSize) && (i < updateInfo.size())) {
-      SynchInfo si = updateInfo.get(i);
+    /* First make a batch of items to fetch */
 
+    while (i < updateInfo.size()) {
+      SynchInfo si = updateInfo.get(i);
+      i++;
+
+      // Add to unprocessed if it's not one of ours
       if ((si.addTo != toInfo.end) && (si.updateEnd != toInfo.end)) {
         unProcessed.add(si);
+        continue;
+      }
+
+      // Add to unprocessed if the batch is big enough
+      if (uids.size() == getItemsBatchSize) {
+        unProcessed.add(si);
+        callAgain = true;
         continue;
       }
 
@@ -630,6 +655,7 @@ public class Synchling {
     }
 
     if (uids.size() == 0) {
+      // Nothing left to do
       return false;
     }
 
@@ -642,8 +668,8 @@ public class Synchling {
       if (si.addTo == toInfo.end) {
         AddItemResponseType air = toInfo.inst.addItem(fir.getIcalendar());
 
-        toLastCrudCts.created++;
-        toTotalCrudCts.created++;
+        toInfo.lastCts.created++;
+        toInfo.totalCts.created++;
 
         if (debug) {
           trace("Add: status=" + air.getStatus() +
@@ -674,6 +700,10 @@ public class Synchling {
           continue;
         }
 
+        if (debug) {
+          trace("Update needed for " + si.itemInfo.uid);
+        }
+
         UpdateItemType ui = new UpdateItemType();
 
         ui.setHref(toFir.getHref());
@@ -687,14 +717,11 @@ public class Synchling {
           continue;
         }
 
-        toLastCrudCts.updated++;
-        toTotalCrudCts.updated++;
+        toInfo.lastCts.updated++;
+        toInfo.totalCts.updated++;
 
         continue;
       }
-
-      toInfo.inst.setLastCrudCts(toLastCrudCts);
-      toInfo.inst.setTotalCrudCts(toTotalCrudCts);
 
       warn("Should not get here");
     }
