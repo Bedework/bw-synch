@@ -70,7 +70,7 @@ public class Synchling {
 
   private SynchEngine syncher;
 
-  private XmlIcalCompare differ = new XmlIcalCompare();
+  private XmlIcalCompare differ = new XmlIcalCompare(XmlIcalCompare.defaultSkipList);
 
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;
@@ -242,9 +242,17 @@ public class Synchling {
 
     IcalendarType targetIcal = fresp.getIcalendar();
 
-    XmlIcalCompare comp = new XmlIcalCompare();
+    XmlIcalCompare comp = new XmlIcalCompare(XmlIcalCompare.defaultSkipList);
 
     ComponentSelectionType cst = comp.diff(ical, targetIcal);
+
+    if (cst == null) {
+      if (debug) {
+        trace("No update needed for " + ni.getUid());
+      }
+
+      return StatusType.OK;
+    }
 
     UpdateItemType ui = new UpdateItemType();
 
