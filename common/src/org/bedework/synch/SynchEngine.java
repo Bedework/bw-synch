@@ -24,8 +24,10 @@ import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 
+import edu.rpi.cmt.calendar.XcalUtil.TzGetter;
 import edu.rpi.cmt.security.PwEncryptionIntf;
 import edu.rpi.cmt.timezones.Timezones;
+import edu.rpi.cmt.timezones.TimezonesImpl;
 import edu.rpi.sss.util.Util;
 
 import net.fortuna.ical4j.model.TimeZone;
@@ -107,7 +109,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Mike Douglass
  */
-public class SynchEngine {
+public class SynchEngine extends TzGetter {
   protected transient Logger log;
 
   private final boolean debug;
@@ -142,6 +144,8 @@ public class SynchEngine {
   private static SynchEngine syncher;
 
   private Timezones timezones;
+
+  static TzGetter tzgetter;
 
   private SynchlingPool synchlingPool;
 
@@ -261,6 +265,11 @@ public class SynchEngine {
       throw new SynchException("callbackURI MUST end with '/'");
     }
 
+    timezones = new TimezonesImpl();
+    timezones.init(config.getTimezonesURI());
+
+    tzgetter = this;
+
     synchlingPool = new SynchlingPool();
     synchlingPool.start(this,
                         config.getSynchlingPoolSize(),
@@ -305,16 +314,18 @@ public class SynchEngine {
    *
    * @param id
    * @return TimeZone with id or null
-   * @throws SynchException
+   * @throws Throwable
    */
-   public static TimeZone getTz(final String id) throws SynchException {
-     try {
-       return getSyncher().timezones.getTimeZone(id);
-     } catch (SynchException se) {
-       throw se;
-     } catch (Throwable t) {
-       throw new SynchException(t);
-     }
+   @Override
+  public TimeZone getTz(final String id) throws Throwable {
+     return getSyncher().timezones.getTimeZone(id);
+   }
+
+   /**
+    * @return a getter for timezones
+    */
+   public static TzGetter getTzGetter() {
+     return tzgetter;
    }
 
   /** Start synch process.

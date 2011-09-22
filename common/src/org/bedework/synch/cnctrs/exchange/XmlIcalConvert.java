@@ -604,23 +604,27 @@ public class XmlIcalConvert implements Defs {
    */
   public static TzStuff getTz(final TimeZoneDefinitionType tzdef,
                               final String extzid) throws SynchException {
-    TzStuff t = new TzStuff();
+    try {
+      TzStuff t = new TzStuff();
 
-    if (tzdef != null) {
-      t.id = tzdef.getId();
-      if ((extzid != null) && (extzid.equals(t.id))) {
-        t.id = null;
-      } else {
-        t.tz = SynchEngine.getTz(t.id);
-        return t;
+      if (tzdef != null) {
+        t.id = tzdef.getId();
+        if ((extzid != null) && (extzid.equals(t.id))) {
+          t.id = null;
+        } else {
+          t.tz = SynchEngine.getTzGetter().getTz(t.id);
+          return t;
+        }
       }
-    }
 
-    if (extzid != null) {
-      t.tz = SynchEngine.getTz(extzid);
-    }
+      if (extzid != null) {
+        t.tz = SynchEngine.getTzGetter().getTz(extzid);
+      }
 
-    return t;
+      return t;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
   }
 
   private JAXBElement<? extends OrganizerPropType>

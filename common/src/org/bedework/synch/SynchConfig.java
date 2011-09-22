@@ -35,6 +35,9 @@ public class SynchConfig implements Serializable {
   /* web service push callback uri - null for no service */
   private String callbackURI;
 
+  /* Timezone server location */
+  private String timezonesURI;
+
   /* Path to keystore - null for use default */
   private String keystore;
 
@@ -87,6 +90,22 @@ public class SynchConfig implements Serializable {
    */
   public String getCallbackURI() {
     return callbackURI;
+  }
+
+  /** Timezone server location
+   *
+   * @param val    String
+   */
+  public void setTimezonesURI(final String val) {
+    timezonesURI = val;
+  }
+
+  /** Timezone server location
+   *
+   * @return String
+   */
+  public String getTimezonesURI() {
+    return timezonesURI;
   }
 
   /** Path to keystore - null for use default
