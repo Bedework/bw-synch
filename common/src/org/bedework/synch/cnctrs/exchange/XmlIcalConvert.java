@@ -25,10 +25,9 @@ import org.bedework.synch.intf.Defs;
 import org.apache.log4j.Logger;
 
 import ietf.params.xml.ns.icalendar_2.ActionPropType;
-import ietf.params.xml.ns.icalendar_2.ArrayOfEventTodoContainedComponents;
+import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfParameters;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
-import ietf.params.xml.ns.icalendar_2.ArrayOfVcalendarContainedComponents;
 import ietf.params.xml.ns.icalendar_2.AttendeePropType;
 import ietf.params.xml.ns.icalendar_2.BaseComponentType;
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;
@@ -41,7 +40,6 @@ import ietf.params.xml.ns.icalendar_2.DescriptionPropType;
 import ietf.params.xml.ns.icalendar_2.DtendPropType;
 import ietf.params.xml.ns.icalendar_2.DtstartPropType;
 import ietf.params.xml.ns.icalendar_2.DuePropType;
-import ietf.params.xml.ns.icalendar_2.EventTodoComponentType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.LocationPropType;
 import ietf.params.xml.ns.icalendar_2.ObjectFactory;
@@ -55,7 +53,6 @@ import ietf.params.xml.ns.icalendar_2.TriggerPropType;
 import ietf.params.xml.ns.icalendar_2.TzidParamType;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
 import ietf.params.xml.ns.icalendar_2.ValarmType;
-import ietf.params.xml.ns.icalendar_2.VcalendarContainedComponentType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VeventType;
 import ietf.params.xml.ns.icalendar_2.VjournalType;
@@ -115,7 +112,6 @@ public class XmlIcalConvert implements Defs {
    * @return Icalendar
    * @throws SynchException
    */
-  @SuppressWarnings("unchecked")
   public IcalendarType toXml(final CalendarItemType cal) throws SynchException {
     /* TODO
      * Transparency - derived from what?
@@ -128,7 +124,7 @@ public class XmlIcalConvert implements Defs {
     VcalendarType vcal = new VcalendarType();
 
     ical.getVcalendar().add(vcal);
-    vcal.setComponents(new ArrayOfVcalendarContainedComponents());
+    vcal.setComponents(new ArrayOfComponents());
 
     JAXBElement<? extends BaseComponentType> el;
 
@@ -152,7 +148,7 @@ public class XmlIcalConvert implements Defs {
 
     comp.setProperties(aop);
 
-    vcal.getComponents().getVcalendarContainedComponent().add((JAXBElement<? extends VcalendarContainedComponentType>)el);
+    vcal.getComponents().getBaseComponent().add(el);
 
     /* ============ Read only properties - may not need preserving ========== */
     /* ======================= cal:OriginalStart ============================ */
@@ -489,12 +485,12 @@ public class XmlIcalConvert implements Defs {
       JAXBElement<TriggerPropType> jaxbTrig = xcalOF.createTrigger(t);
       props.add(jaxbTrig);
 
-      ArrayOfEventTodoContainedComponents comps = new ArrayOfEventTodoContainedComponents();
-      comps.getValarm().add(xcalOF.createValarm(al).getValue());
+      ArrayOfComponents comps = new ArrayOfComponents();
+      comps.getBaseComponent().add(xcalOF.createValarm(al));
 
       if ((itemType == ItemType.Event) ||
           (itemType == ItemType.Task)) {
-        ((EventTodoComponentType)comp).setComponents(comps);
+        comp.setComponents(comps);
       }
     }
 

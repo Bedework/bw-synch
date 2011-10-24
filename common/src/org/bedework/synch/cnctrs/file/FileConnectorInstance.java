@@ -41,15 +41,15 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
-import ietf.params.xml.ns.icalendar_2.ArrayOfVcalendarContainedComponents;
+import ietf.params.xml.ns.icalendar_2.BaseComponentType;
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
 import ietf.params.xml.ns.icalendar_2.ObjectFactory;
 import ietf.params.xml.ns.icalendar_2.ProdidPropType;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
-import ietf.params.xml.ns.icalendar_2.VcalendarContainedComponentType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VersionPropType;
 
@@ -83,8 +83,8 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    * for a single uid along with some extracted data
    */
   private static class MapEntry {
-    List<JAXBElement<? extends VcalendarContainedComponentType>> comps =
-        new ArrayList<JAXBElement<? extends VcalendarContainedComponentType>>();
+    List<JAXBElement<? extends BaseComponentType>> comps =
+        new ArrayList<JAXBElement<? extends BaseComponentType>>();
     String lastMod;
     String uid;
   }
@@ -241,10 +241,10 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     vers.setText("2.0");
     pl.add(of.createVersion(vers));
 
-    ArrayOfVcalendarContainedComponents aoc = new ArrayOfVcalendarContainedComponents();
+    ArrayOfComponents aoc = new ArrayOfComponents();
     vcal.setComponents(aoc);
 
-    aoc.getVcalendarContainedComponent().addAll(me.comps);
+    aoc.getBaseComponent().addAll(me.comps);
     fir.setIcalendar(ical);
 
     return fir;
@@ -368,8 +368,8 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
           }
         }
 
-        for (JAXBElement<? extends VcalendarContainedComponentType> comp:
-             vcal.getComponents().getVcalendarContainedComponent()) {
+        for (JAXBElement<? extends BaseComponentType> comp:
+             vcal.getComponents().getBaseComponent()) {
           UidPropType uidProp = (UidPropType)XcalUtil.findProperty(comp.getValue(),
                                                                    XcalTags.uid);
 

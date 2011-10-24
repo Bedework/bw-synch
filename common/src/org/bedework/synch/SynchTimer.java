@@ -183,7 +183,6 @@ public class SynchTimer {
     return log;
   }
 
-  @SuppressWarnings("unused")
   private void trace(final String msg) {
     getLogger().debug(msg);
   }

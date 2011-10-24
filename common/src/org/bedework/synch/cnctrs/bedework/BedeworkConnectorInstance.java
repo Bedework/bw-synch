@@ -46,12 +46,13 @@ import org.oasis_open.docs.ns.wscal.calws_soap.TextMatchType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
-import ietf.params.xml.ns.icalendar_2.ArrayOfVcalendarContainedComponents;
+import ietf.params.xml.ns.icalendar_2.BaseComponentType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
+import ietf.params.xml.ns.icalendar_2.ObjectFactory;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
-import ietf.params.xml.ns.icalendar_2.VcalendarContainedComponentType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VeventType;
 import ietf.params.xml.ns.icalendar_2.VtodoType;
@@ -109,6 +110,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   public SynchItemsInfo getItemsInfo() throws SynchException {
     CalendarQueryType cq = new CalendarQueryType();
 
+    ObjectFactory of = cnctr.getIcalObjectFactory();
+
     cq.setHref(info.getUri());
 
     /* Build a set of required properties which we will specify for all
@@ -119,7 +122,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     VcalendarType vcal = new VcalendarType();
     cq.getIcalendar().getVcalendar().add(vcal);
 
-    ArrayOfVcalendarContainedComponents aovcc = new ArrayOfVcalendarContainedComponents();
+    ArrayOfComponents aovcc = new ArrayOfComponents();
     vcal.setComponents(aovcc);
 
     /* Build the properties we want */
@@ -127,22 +130,20 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     ArrayOfProperties aop = new ArrayOfProperties();
 
     UidPropType propUid = new UidPropType();
-    aop.getBasePropertyOrTzid().add(cnctr.getIcalObjectFactory().createUid(propUid));
+    aop.getBasePropertyOrTzid().add(of.createUid(propUid));
 
     LastModifiedPropType propLastMod = new LastModifiedPropType();
-    aop.getBasePropertyOrTzid().add(cnctr.getIcalObjectFactory().createLastModified(propLastMod));
+    aop.getBasePropertyOrTzid().add(of.createLastModified(propLastMod));
 
-    VcalendarContainedComponentType comp = new VeventType();
+    BaseComponentType comp = new VeventType();
     comp.setProperties(aop);
 
-    aovcc.getVcalendarContainedComponent().add(
-                 cnctr.getIcalObjectFactory().createVevent((VeventType)comp));
+    aovcc.getBaseComponent().add(of.createVevent((VeventType)comp));
 
     comp = new VtodoType();
     comp.setProperties(aop);
 
-    aovcc.getVcalendarContainedComponent().add(
-                 cnctr.getIcalObjectFactory().createVtodo((VtodoType)comp));
+    aovcc.getBaseComponent().add(of.createVtodo((VtodoType)comp));
 
     /* Now build a filter which returns all the types we want.
      */
@@ -150,18 +151,24 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cq.setFilter(fltr);
 
     CompFilterType cf = new CompFilterType();
-    cf.setName("vcalendar");
+//    vc.setComponents(new ArrayOfVcalendarContainedComponents());
+  //  cf.setBaseComponent(of.createVcalendar(vc));
+
+    //cf.setVcalendar(new VcalendarType());
+    cf.setName(XcalTags.vcalendar.getLocalPart());
     cf.setTest("anyof");
 
     fltr.setCompFilter(cf);
 
     CompFilterType cfent = new CompFilterType();
     cf.getCompFilter().add(cfent);
-    cfent.setName("vevent");
+//    cfent.setBaseComponent(of.createVevent(new VeventType()));
+    cfent.setName(XcalTags.vevent.getLocalPart());
 
     cfent = new CompFilterType();
     cf.getCompFilter().add(cfent);
-    cfent.setName("vtodo");
+//    cfent.setBaseComponent(of.createVtodo(new VtodoType()));
+    cfent.setName(XcalTags.vtodo.getLocalPart());
 
     CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(),
                                                                   cq);
@@ -210,9 +217,9 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   private ItemInfo getItem(final IcalendarType ical) {
     VcalendarType vcal = ical.getVcalendar().get(0);
 
-    List<JAXBElement<? extends VcalendarContainedComponentType>> comps =
-        vcal.getComponents().getVcalendarContainedComponent();
-    VcalendarContainedComponentType comp = comps.get(0).getValue();
+    List<JAXBElement<? extends BaseComponentType>> comps =
+        vcal.getComponents().getBaseComponent();
+    BaseComponentType comp = comps.get(0).getValue();
 
     UidPropType uid = (UidPropType)XcalUtil.findProperty(comp,
                                              XcalTags.uid);
@@ -244,6 +251,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
     CalendarQueryType cq = new CalendarQueryType();
 
+    ObjectFactory of = cnctr.getIcalObjectFactory();
+
     cq.setHref(info.getUri());
     cq.setAllprop(new AllpropType());
 
@@ -251,7 +260,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cq.setFilter(fltr);
 
     CompFilterType cf = new CompFilterType();
-    cf.setName("vcalendar");
+    cf.setName(XcalTags.vcalendar.getLocalPart());
+//    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
 
     fltr.setCompFilter(cf);
 
@@ -261,7 +271,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     CompFilterType cfev = new CompFilterType();
     cf.getCompFilter().add(cfev);
-    cfev.setName("vevent");
+    cfev.setName(XcalTags.vevent.getLocalPart());
+//    cfev.setBaseComponent(of.createVevent(new VeventType()));
 
     /* XXX We need to limit the time range we are synching
     if (start != null) {
@@ -274,7 +285,9 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     }*/
 
     PropFilterType pr = new PropFilterType();
-    pr.setName("uid");
+    pr.setName(XcalTags.uid.getLocalPart());
+//    pr.setBaseProperty(of.createUid(new UidPropType()));
+
     TextMatchType tm = new TextMatchType();
     tm.setValue(uid);
 
