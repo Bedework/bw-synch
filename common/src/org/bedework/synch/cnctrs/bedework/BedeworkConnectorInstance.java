@@ -151,24 +151,23 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cq.setFilter(fltr);
 
     CompFilterType cf = new CompFilterType();
-//    vc.setComponents(new ArrayOfVcalendarContainedComponents());
-  //  cf.setBaseComponent(of.createVcalendar(vc));
+    //vc.setComponents(new ArrayOfVcalendarContainedComponents());
+    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
 
     //cf.setVcalendar(new VcalendarType());
-    cf.setName(XcalTags.vcalendar.getLocalPart());
+    //cf.setName(XcalTags.vcalendar.getLocalPart());
     cf.setTest("anyof");
 
     fltr.setCompFilter(cf);
 
     CompFilterType cfent = new CompFilterType();
     cf.getCompFilter().add(cfent);
-//    cfent.setBaseComponent(of.createVevent(new VeventType()));
-    cfent.setName(XcalTags.vevent.getLocalPart());
+    cfent.setBaseComponent(of.createVevent(new VeventType()));
+    //cfent.setName(XcalTags.vevent.getLocalPart());
 
     cfent = new CompFilterType();
     cf.getCompFilter().add(cfent);
-//    cfent.setBaseComponent(of.createVtodo(new VtodoType()));
-    cfent.setName(XcalTags.vtodo.getLocalPart());
+    cfent.setBaseComponent(of.createVtodo(new VtodoType()));
 
     CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(),
                                                                   cq);
@@ -260,8 +259,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cq.setFilter(fltr);
 
     CompFilterType cf = new CompFilterType();
-    cf.setName(XcalTags.vcalendar.getLocalPart());
-//    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
+    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
 
     fltr.setCompFilter(cf);
 
@@ -271,8 +269,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     CompFilterType cfev = new CompFilterType();
     cf.getCompFilter().add(cfev);
-    cfev.setName(XcalTags.vevent.getLocalPart());
-//    cfev.setBaseComponent(of.createVevent(new VeventType()));
+    cfev.setBaseComponent(of.createVevent(new VeventType()));
 
     /* XXX We need to limit the time range we are synching
     if (start != null) {
@@ -285,8 +282,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     }*/
 
     PropFilterType pr = new PropFilterType();
-    pr.setName(XcalTags.uid.getLocalPart());
-//    pr.setBaseProperty(of.createUid(new UidPropType()));
+    pr.setBaseProperty(of.createUid(new UidPropType()));
 
     TextMatchType tm = new TextMatchType();
     tm.setValue(uid);
