@@ -26,7 +26,7 @@ import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
+import org.bedework.synch.cnctrs.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
@@ -49,26 +49,26 @@ public class FileConnector
   private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
       new ietf.params.xml.ns.icalendar_2.ObjectFactory();
 
-  private static List<ConnectorPropertyInfo> propInfo =
-      new ArrayList<ConnectorPropertyInfo>();
+  private static List<SynchPropertyInfo> propInfo =
+      new ArrayList<SynchPropertyInfo>();
 
   static {
-    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnameUri,
+    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameUri,
                                            false,
                                            "",
                                            true));
 
-    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
+    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
                                            false,
                                            "",
                                            false));
 
-    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnamePassword,
+    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePassword,
                                            true,
                                            "",
                                            false));
 
-    propInfo.add(new ConnectorPropertyInfo(BaseSubscriptionInfo.propnameRefreshDelay,
+    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameRefreshDelay,
                                            false,
                                            "",
                                            false));
@@ -148,8 +148,13 @@ public class FileConnector
   }
 
   @Override
-  public List<ConnectorPropertyInfo> getPropertyInfo() {
+  public List<SynchPropertyInfo> getPropertyInfo() {
     return propInfo;
+  }
+
+  @Override
+  public List<Object> getSkipList() {
+    return null;
   }
 
   @Override

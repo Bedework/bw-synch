@@ -24,7 +24,7 @@ import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
+import org.bedework.synch.cnctrs.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
@@ -96,8 +96,8 @@ public class SynchConnector
   private MessageFactory soapMsgFactory;
   private JAXBContext jc;
 
-  private static List<ConnectorPropertyInfo> propInfo =
-      new ArrayList<ConnectorPropertyInfo>();
+  private static List<SynchPropertyInfo> propInfo =
+      new ArrayList<SynchPropertyInfo>();
 
   @Override
   public void start(final String connectorId,
@@ -157,8 +157,13 @@ public class SynchConnector
   }
 
   @Override
-  public List<ConnectorPropertyInfo> getPropertyInfo() {
+  public List<SynchPropertyInfo> getPropertyInfo() {
     return propInfo;
+  }
+
+  @Override
+  public List<Object> getSkipList() {
+    return null;
   }
 
   @Override

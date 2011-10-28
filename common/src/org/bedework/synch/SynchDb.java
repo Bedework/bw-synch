@@ -162,11 +162,11 @@ public class SynchDb implements Serializable {
       sess.setString("aconnid",
                      sub.getEndAConnectorInfo().getConnectorId());
       sess.setString("aconnprops",
-                     sub.getEndAConnectorInfo().getConnectorProperties());
+                     sub.getEndAConnectorInfo().getSynchProperties());
       sess.setString("bconnid",
                      sub.getEndBConnectorInfo().getConnectorId());
       sess.setString("bconnprops",
-                     sub.getEndBConnectorInfo().getConnectorProperties());
+                     sub.getEndBConnectorInfo().getSynchProperties());
       sess.setString("dir",
                      sub.getDirection().name());
       sess.setString("mstr",

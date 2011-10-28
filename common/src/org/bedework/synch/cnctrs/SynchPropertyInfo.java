@@ -24,7 +24,7 @@ package org.bedework.synch.cnctrs;
  *
  * @author Mike Douglass
  */
-public class ConnectorPropertyInfo {
+public class SynchPropertyInfo {
   private String name;
 
   private boolean secure;
@@ -39,7 +39,7 @@ public class ConnectorPropertyInfo {
    * @param description - of the property
    * @param required - true if this property is required
    */
-  public ConnectorPropertyInfo(final String name,
+  public SynchPropertyInfo(final String name,
                                final boolean secure,
                                final String description,
                                final boolean required) {

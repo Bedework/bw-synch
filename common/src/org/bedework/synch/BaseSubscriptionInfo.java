@@ -117,23 +117,6 @@ public class BaseSubscriptionInfo {
     info.loadProperties();
   }
 
-  /** Constructor for a new connection
-   *
-   * @param uri
-   * @param principalHref
-   * @param password
-   * @throws SynchException
-   */
-  public BaseSubscriptionInfo(final String uri,
-                              final String principalHref,
-                              final String password) throws SynchException {
-    info = new SubscriptionConnectorInfo();
-
-    setUri(uri);
-    setPrincipalHref(principalHref);
-    setPassword(password);
-  }
-
   /** Path to the calendar collection.
    *
    * @param val    String

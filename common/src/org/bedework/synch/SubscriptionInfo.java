@@ -18,58 +18,74 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.exception.SynchException;
 
-/** Serializable form of information for a connection to a system via a
- * connector - a connector id and the serialized proeprties.
+
+/** Serializable form of information about the whole subscription.
  *
  * @author douglm
  */
-public class SubscriptionConnectorInfo extends SerializableProperties<SubscriptionConnectorInfo> {
-  private String connectorId;
+public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
+  /* properties saved by connector instance */
 
-  /**
-   * @param val id
-   */
-  public void setConnectorId(final String val) {
-    connectorId = val;
-  }
 
-  /**
-   * @return id
-   */
-  public String getConnectorId() {
-    return connectorId;
-  }
+  /** Strip out alarms if true */
+  public static final String propnameStripAlarms = "strip-alarms";
+
+  /** Strip out scheduling properties if true */
+  public static final String propnameStripScheduling = "strip-scheduling";
 
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
+
+  /** stripAlarms - boolean
+   *
+   * @param val
+   * @throws SynchException
+   */
+  public void setStripAlarms(final boolean val) throws SynchException {
+    setProperty(propnameStripAlarms, String.valueOf(val));
+  }
+
+  /** stripAlarms - boolean
+   *
+   * @return boolean
+   * @throws SynchException
+   */
+  public boolean getStripAlarms() throws SynchException {
+    return Boolean.parseBoolean(getProperty(propnameStripAlarms));
+  }
+
+  /** stripScheduling - boolean
+   *
+   * @param val
+   * @throws SynchException
+   */
+  public void setStripScheduling(final boolean val) throws SynchException {
+    setProperty(propnameStripScheduling, String.valueOf(val));
+  }
+
+  /** stripScheduling - boolean
+   *
+   * @return boolean
+   * @throws SynchException
+   */
+  public boolean getStripScheduling() throws SynchException {
+    return Boolean.parseBoolean(getProperty(propnameStripScheduling));
+  }
 
   /* ====================================================================
    *                   Object methods
    * ==================================================================== */
 
   @Override
-  public int hashCode() {
-    try {
-      return getConnectorId().hashCode() * super.hashCode();
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
-    }
-  }
-
-  @Override
-  public int compareTo(final SubscriptionConnectorInfo that) {
+  public int compareTo(final SubscriptionInfo that) {
     if (this == that) {
       return 0;
     }
 
     try {
-      int res = getConnectorId().compareTo(that.getConnectorId());
-      if (res != 0) {
-        return res;
-      }
-
       return super.compareTo(that);
     } catch (Throwable t) {
       throw new RuntimeException(t);
@@ -80,9 +96,6 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
   public String toString() {
     try {
       StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
-
-      sb.append("connectorId= ");
-      sb.append(getConnectorId());
 
       super.toStringSegment(sb, "  ");
 

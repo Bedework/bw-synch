@@ -24,7 +24,7 @@ import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.cnctrs.ConnectorPropertyInfo;
+import org.bedework.synch.cnctrs.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
@@ -80,21 +80,21 @@ public class ExchangeConnector
   /** */
   public static final String propnamePw = "password";
 
-  private static List<ConnectorPropertyInfo> propInfo =
-      new ArrayList<ConnectorPropertyInfo>();
+  private static List<SynchPropertyInfo> propInfo =
+      new ArrayList<SynchPropertyInfo>();
 
   static {
-    propInfo.add(new ConnectorPropertyInfo(propnameFolderId,
+    propInfo.add(new SynchPropertyInfo(propnameFolderId,
                                            false,
                                            "",
                                            true));
 
-    propInfo.add(new ConnectorPropertyInfo(propnameAccount,
+    propInfo.add(new SynchPropertyInfo(propnameAccount,
                                            false,
                                            "",
                                            true));
 
-    propInfo.add(new ConnectorPropertyInfo(propnamePw,
+    propInfo.add(new SynchPropertyInfo(propnamePw,
                                            true,
                                            "",
                                            true));
@@ -186,8 +186,13 @@ public class ExchangeConnector
   }
 
   @Override
-  public List<ConnectorPropertyInfo> getPropertyInfo() {
+  public List<SynchPropertyInfo> getPropertyInfo() {
     return propInfo;
+  }
+
+  @Override
+  public List<Object> getSkipList() {
+    return null;
   }
 
   @Override

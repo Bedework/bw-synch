@@ -35,17 +35,4 @@ public class FileSubscriptionInfo extends BaseSubscriptionInfo {
   public FileSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
     super(info);
   }
-
-  /** Constructor
-   *
-   * @param uri
-   * @param principalHref
-   * @param password
-   * @throws SynchException
-   */
-  public FileSubscriptionInfo(final String uri,
-                              final String principalHref,
-                              final String password) throws SynchException {
-    super(uri, principalHref, password);
-  }
 }

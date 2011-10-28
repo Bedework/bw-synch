@@ -122,7 +122,12 @@ public interface Connector<C extends ConnectorInstance,
    *
    * @return
    */
-  List<ConnectorPropertyInfo> getPropertyInfo();
+  List<SynchPropertyInfo> getPropertyInfo();
+
+  /**
+   * @return list of icalendar properties to skip.
+   */
+  List<Object> getSkipList();
 
   /** Called to obtain a connector instance for a subscription.
    * A response of null means no synch available.

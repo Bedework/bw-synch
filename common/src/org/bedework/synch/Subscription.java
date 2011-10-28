@@ -58,6 +58,18 @@ import java.util.UUID;
  *
  * <p>The full feature connections are used for bedework, Exchange etc.
  *
+ * <h1>Skip Lists</h1>
+ * A skip list allows the diffing process to skip properties that are not to be
+ * considered, for example lastmod. We create a skip list from 3 lists;<ul>
+ * <li>one for each end of the subscription. This marks properties used
+ * exclusively by that end, for example x-properties.</li>
+ * <li> One for the middle which might skip properties we want to ignore such as
+ * alarms</li>
+ * </ul>
+ *
+ * <p>An empty list means exactly that, no skip properties. A null list means
+ * the default diff skip list - probably more useful.
+ *
  * @author Mike Douglass
  */
 @SuppressWarnings("rawtypes")
@@ -77,6 +89,8 @@ public class Subscription implements Comparable<Subscription> {
   private SubscriptionConnectorInfo endAConnectorInfo;
 
   private SubscriptionConnectorInfo endBConnectorInfo;
+
+  private SubscriptionInfo info;
 
   private SynchDirectionType direction;
 
@@ -246,6 +260,21 @@ public class Subscription implements Comparable<Subscription> {
    */
   public SubscriptionConnectorInfo getEndBConnectorInfo() {
     return endBConnectorInfo;
+  }
+
+  /** Info for the subscription.
+   *
+   * @param val    SubscriptionInfo
+   */
+  public void info(final SubscriptionInfo val) {
+    info = val;
+  }
+
+  /**
+   * @return SubscriptionInfo
+   */
+  public SubscriptionInfo getInfo() {
+    return info;
   }
 
   /** Which way?
@@ -463,6 +492,11 @@ public class Subscription implements Comparable<Subscription> {
     sb.append(indent);
     sb.append("endBConnectorInfo = ");
     sb.append(getEndBConnectorInfo());
+
+    sb.append(",\n");
+    sb.append(indent);
+    sb.append("info = ");
+    sb.append(getInfo());
 
     sb.append(",\n");
     sb.append(indent);

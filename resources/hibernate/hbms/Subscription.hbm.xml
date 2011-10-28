@@ -47,7 +47,7 @@
                class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_a" 
                 type="string" length="100" />
-      <property name="connectorProperties" column="bwsyn_conn_props_a" 
+      <property name="synchProperties" column="bwsyn_conn_props_a" 
                 type="string" length="3000" />
     </component>
 
@@ -55,7 +55,13 @@
                class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_b" 
                 type="string" length="100" />
-      <property name="connectorProperties" column="bwsyn_conn_props_b" 
+      <property name="synchProperties" column="bwsyn_conn_props_b" 
+                type="string" length="3000" />
+    </component>
+
+    <component name="info"
+               class="org.bedework.synch.SubscriptionInfo" >
+      <property name="synchProperties" column="bwsyn_conn_props_b" 
                 type="string" length="3000" />
     </component>
 

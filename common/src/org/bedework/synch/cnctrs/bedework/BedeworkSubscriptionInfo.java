@@ -35,15 +35,4 @@ public class BedeworkSubscriptionInfo extends BaseSubscriptionInfo {
   public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
     super(info);
   }
-
-  /** Constructor
-   *
-   * @param calPath
-   * @param principalHref
-   * @throws SynchException
-   */
-  public BedeworkSubscriptionInfo(final String calPath,
-                                  final String principalHref) throws SynchException {
-    super(calPath, principalHref, null);
-  }
 }

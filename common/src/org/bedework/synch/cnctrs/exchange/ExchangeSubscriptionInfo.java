@@ -48,23 +48,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
     super(info);
   }
 
-  /** Constructor
-   *
-   * @param exchangeCalendar
-   * @param exchangeId
-   * @param exchangePw
-   * @param exchangeURI
-   * @throws SynchException
-   */
-  public ExchangeSubscriptionInfo(final String exchangeURI,
-                                  final String exchangeId,
-                                  final String exchangePw,
-                                  final String exchangeCalendar) throws SynchException {
-    super(exchangeURI, exchangeId, exchangePw);
-
-    setExchangeCalendar(exchangeCalendar);
-  }
-
   /** Exchange Calendar
    *
    * @param val    String

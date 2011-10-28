@@ -38,7 +38,10 @@ import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.AttendeePropType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import ietf.params.xml.ns.icalendar_2.OrganizerPropType;
+import ietf.params.xml.ns.icalendar_2.ValarmType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,8 +73,10 @@ public class Synchling {
 
   private SynchEngine syncher;
 
-  private XmlIcalCompare differ = new XmlIcalCompare(XmlIcalCompare.defaultSkipList,
-                                                     SynchEngine.getTzGetter());
+  private XmlIcalCompare diff = new XmlIcalCompare(XmlIcalCompare.defaultSkipList,
+                                                   SynchEngine.getTzGetter());
+  // Subscription id used when getting the diff object.
+  private String diffSubid;
 
   /* Max number of items we fetch at a time */
   private final int getItemsBatchSize = 20;
@@ -243,7 +248,7 @@ public class Synchling {
 
     IcalendarType targetIcal = fresp.getIcalendar();
 
-    ComponentSelectionType cst = differ.diff(ical, targetIcal);
+    ComponentSelectionType cst = getDiffer(note).diff(ical, targetIcal);
 
     if (cst == null) {
       if (debug) {
@@ -696,8 +701,8 @@ public class Synchling {
           continue;
         }
 
-        ComponentSelectionType cst = differ.diff(fir.getIcalendar(),
-                                                 toFir.getIcalendar());
+        ComponentSelectionType cst = getDiffer(note).diff(fir.getIcalendar(),
+                                                          toFir.getIcalendar());
 
         if (cst == null) {
           if (debug) {
@@ -769,6 +774,55 @@ public class Synchling {
   private boolean checkAccess(final Subscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
+  }
+
+  @SuppressWarnings("unchecked")
+  private XmlIcalCompare getDiffer(final Notification note) throws SynchException {
+    if ((diff != null) && diffSubid.equals(note.getSub().getSubscriptionId())) {
+      return diff;
+    }
+
+    /* Make up diff lists - use a map to make them unique */
+    Map<String, Object> skipMap = new HashMap<String, Object>();
+
+    /* First the defaults */
+    addSkips(skipMap, XmlIcalCompare.defaultSkipList);
+
+    /* Any needed for stuff we skip */
+    Subscription sub = note.getSub();
+    if (sub.getInfo().getStripAlarms()) {
+      addSkip(skipMap, new ValarmType());
+    }
+
+    if (sub.getInfo().getStripScheduling()) {
+      addSkip(skipMap, new OrganizerPropType());
+      addSkip(skipMap, new AttendeePropType());
+    }
+
+    addSkips(skipMap, sub.getEndAConn().getSkipList());
+    addSkips(skipMap, sub.getEndBConn().getSkipList());
+
+    List<Object> skipList = new ArrayList<Object>(skipMap.values());
+
+    diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
+    diffSubid = sub.getSubscriptionId();
+    return diff;
+  }
+
+  private void addSkips(final Map<String, Object> skipMap,
+                        final List<Object> skipList) {
+    if (skipList == null) {
+      return;
+    }
+
+    for (Object o: skipList) {
+      addSkip(skipMap, o);
+    }
+  }
+
+  private void addSkip(final Map<String, Object> skipMap,
+                       final Object o) {
+    skipMap.put(o.getClass().getCanonicalName(), o);
   }
 
   private Logger getLogger() {
