@@ -20,6 +20,7 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
+import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
