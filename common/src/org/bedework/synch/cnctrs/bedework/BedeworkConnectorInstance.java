@@ -152,7 +152,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     CompFilterType cf = new CompFilterType();
     //vc.setComponents(new ArrayOfVcalendarContainedComponents());
-    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
+    cf.setVcalendar(new VcalendarType());
 
     //cf.setVcalendar(new VcalendarType());
     //cf.setName(XcalTags.vcalendar.getLocalPart());
@@ -259,7 +259,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cq.setFilter(fltr);
 
     CompFilterType cf = new CompFilterType();
-    cf.setBaseComponent(of.createVcalendar(new VcalendarType()));
+    cf.setVcalendar(new VcalendarType());
 
     fltr.setCompFilter(cf);
 

@@ -32,6 +32,9 @@ public class SynchConfig implements Serializable {
   /* millisecs */
   private long synchlingPoolTimeout;
 
+  /* How often we retry when a target is missing */
+  private int missingTargetRetries;
+
   /* web service push callback uri - null for no service */
   private String callbackURI;
 
@@ -74,6 +77,21 @@ public class SynchConfig implements Serializable {
    */
   public long getSynchlingPoolTimeout() {
     return synchlingPoolTimeout;
+  }
+
+  /** How often we retry when a target is missing
+   *
+   * @param val
+   */
+  public void setMissingTargetRetries(final int val) {
+    missingTargetRetries = val;
+  }
+
+  /**
+   * @return How often we retry when a target is missing
+   */
+  public int getMissingTargetRetries() {
+    return missingTargetRetries;
   }
 
   /** web service push callback uri - null for no service

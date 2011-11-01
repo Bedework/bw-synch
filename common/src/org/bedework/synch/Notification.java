@@ -111,6 +111,14 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /**
+   * @param action
+   */
+  @SuppressWarnings("unchecked")
+  public Notification(final NotificationItem.ActionType action) {
+    addNotificationItem((NI)new NotificationItem(action));
+  }
+
+  /**
    * @return Subscription
    */
   public Subscription getSub() {
@@ -176,6 +184,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
       /** */
       Unsubscribe,
+
+      /** Getting system information */
+      GetInfo,
     }
 
     private ActionType action;
@@ -189,13 +200,21 @@ public class Notification<NI extends Notification.NotificationItem> {
     /** Create a notification item for an action.
      *
      * @param action
+     */
+    public NotificationItem(final ActionType action) {
+      this.action = action;
+    }
+
+    /** Create a notification item for an action.
+     *
+     * @param action
      * @param ical - the entity if available
      * @param uid - Uid for the entity if entity not available
      */
     public NotificationItem(final ActionType action,
                             final IcalendarType ical,
                             final String uid) {
-      this.action = action;
+      this(action);
       this.ical = ical;
       this.uid = uid;
     }

@@ -28,7 +28,9 @@ import org.bedework.synch.wsmessages.SynchMasterType;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.property.DtStamp;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /** Represents a subscription for the synch engine.
@@ -86,6 +88,8 @@ public class Subscription implements Comparable<Subscription> {
 
   private int errorCt;
 
+  private boolean missingTarget;
+
   private SubscriptionConnectorInfo endAConnectorInfo;
 
   private SubscriptionConnectorInfo endBConnectorInfo;
@@ -108,6 +112,22 @@ public class Subscription implements Comparable<Subscription> {
   private ConnectorInstance endAConnInst;
 
   private ConnectorInstance endBConnInst;
+
+  /* Information about general subscription properties */
+  private static List<SynchPropertyInfo> propInfo =
+      new ArrayList<SynchPropertyInfo>();
+
+  static {
+    propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripAlarms,
+                                       false,
+                                       "",
+                                       false));
+
+    propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripScheduling,
+                                       false,
+                                       "",
+                                       false));
+  }
 
   /** null constructor for hibernate
    *
@@ -210,6 +230,21 @@ public class Subscription implements Comparable<Subscription> {
     return errorCt;
   }
 
+  /** True if either target is missing
+   *
+   * @param val
+   */
+  public void setMissingTarget(final boolean val) {
+    missingTarget = val;
+  }
+
+  /**
+   * @return True if either target is missing
+   */
+  public boolean getMissingTarget() {
+    return missingTarget;
+  }
+
   /** The owner. This is the (verified) account that set up the subscription.
    * It is either the authenticated user or provided by a proxy that has
    * verified the account. The owner is only needed for subcribing, unsubscribing
@@ -266,7 +301,7 @@ public class Subscription implements Comparable<Subscription> {
    *
    * @param val    SubscriptionInfo
    */
-  public void info(final SubscriptionInfo val) {
+  public void setInfo(final SubscriptionInfo val) {
     info = val;
   }
 
@@ -400,6 +435,14 @@ public class Subscription implements Comparable<Subscription> {
     getEndBConnectorInfo().resetChanged();
   }
 
+  /** List the information about properties for subscriptions
+   *
+   * @return list of info
+   */
+  public List<SynchPropertyInfo> getPropertyInfo() {
+    return propInfo;
+  }
+
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
@@ -480,8 +523,13 @@ public class Subscription implements Comparable<Subscription> {
 
     sb.append(", lastRefresh = ");
     sb.append(getLastRefresh());
-    sb.append(", errorCt = ");
+
+    sb.append(",\n");
+    sb.append(indent);
+    sb.append("errorCt = ");
     sb.append(getErrorCt());
+    sb.append(", missingTarget = ");
+    sb.append(getMissingTarget());
 
     sb.append(",\n");
     sb.append(indent);

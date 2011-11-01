@@ -33,8 +33,10 @@ import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.ComponentSelectionType;
+import org.oasis_open.docs.ns.wscal.calws_soap.ErrorCodeType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ns.wscal.calws_soap.TargetDoesNotExistType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
@@ -163,6 +165,7 @@ public class Synchling {
       return StatusType.ERROR;
     }
 
+    note.getSub().setErrorCt(0);
     return StatusType.OK;
   }
 
@@ -364,6 +367,9 @@ public class Synchling {
     CrudCts lastCts;
     CrudCts totalCts;
 
+    // True if our target is missing.
+    boolean missingTarget;
+
     ResynchInfo(final Subscription sub,
                 final SynchEnd end,
                 final boolean trustLastmod,
@@ -447,13 +453,21 @@ public class Synchling {
         return StatusType.OK;
       }
 
+      sub.setMissingTarget(false);
+
       ainfo.items = getItemsMap(ainfo);
       if (ainfo.items == null) {
+        if (ainfo.missingTarget) {
+          sub.setMissingTarget(true);
+        }
         return StatusType.ERROR;
       }
 
       binfo.items = getItemsMap(binfo);
       if (binfo.items == null) {
+        if (binfo.missingTarget) {
+          sub.setMissingTarget(true);
+        }
         return StatusType.ERROR;
       }
 
@@ -607,6 +621,15 @@ public class Synchling {
 
     SynchItemsInfo sii = rinfo.inst.getItemsInfo();
     if (sii.getStatus() != StatusType.OK) {
+      if ((sii.getErrorResponse() != null) &&
+          (sii.getErrorResponse().getError() != null)) {
+        // More information
+        ErrorCodeType ecode = sii.getErrorResponse().getError().getValue();
+        if (ecode instanceof TargetDoesNotExistType) {
+          // The target we are addressing is no longer available.
+          rinfo.missingTarget = true;
+        }
+      }
       rinfo.sub.setErrorCt(rinfo.sub.getErrorCt() + 1);
       return null;
     }

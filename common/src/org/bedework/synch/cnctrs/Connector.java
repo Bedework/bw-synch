@@ -20,10 +20,10 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -73,6 +73,11 @@ public interface Connector<C extends ConnectorInstance,
              SynchEngine syncher) throws SynchException;
 
   /**
+   * @return true if we are the manager
+   */
+  boolean isManager();
+
+  /**
    * @return true if we started
    */
   boolean isStarted();
@@ -91,6 +96,12 @@ public interface Connector<C extends ConnectorInstance,
    * @return poll or notify?
    */
   SynchKind getKind();
+
+  /** Is this a read-only connector?
+   *
+   * @return boolean
+   */
+  boolean isReadOnly();
 
   /** Can we trust the lastmod from this connector?
    *
@@ -121,7 +132,7 @@ public interface Connector<C extends ConnectorInstance,
   /** List the information about properties required for subscriptions via this
    * connector.
    *
-   * @return
+   * @return list of info
    */
   List<SynchPropertyInfo> getPropertyInfo();
 

@@ -18,21 +18,15 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.wsmessages.SynchPropertyInfoType;
+
 /** Information about a single connector property. This information will be
  * published by the system allowing clients to determine what properties are
  * needed.
  *
  * @author Mike Douglass
  */
-public class SynchPropertyInfo {
-  private String name;
-
-  private boolean secure;
-
-  private String description;
-
-  private boolean required;
-
+public class SynchPropertyInfo extends SynchPropertyInfoType {
   /**
    * @param name - name for the property
    * @param secure - true if this property value should be hidden, e.g password
@@ -43,38 +37,10 @@ public class SynchPropertyInfo {
                                final boolean secure,
                                final String description,
                                final boolean required) {
-    this.name = name;
-    this.secure = secure;
-    this.description = description;
-    this.required = required;
-  }
-
-  /**
-   * @return name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @return secure flag
-   */
-  public boolean getSecure() {
-    return secure;
-  }
-
-  /**
-   * @return description
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * @return required
-   */
-  public boolean getRequired() {
-    return required;
+    setName(name);
+    setSecure(secure);
+    setDescription(description);
+    setRequired(required);
   }
 
   @Override
@@ -85,13 +51,13 @@ public class SynchPropertyInfo {
     sb.append(getName());
 
     sb.append(", secure = ");
-    sb.append(getSecure());
+    sb.append(isSecure());
 
     sb.append(",\n   description = ");
     sb.append(getDescription());
 
     sb.append(",\n   required = ");
-    sb.append(getRequired());
+    sb.append(isRequired());
 
     sb.append("}");
     return sb.toString();

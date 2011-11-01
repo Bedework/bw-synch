@@ -43,6 +43,9 @@
 
     <property name="errorCt" column="bwsyn_errorct" type="integer" />
 
+    <property name="missingTarget" column="bwsyn_missing" 
+              type="true_false" not-null="true" />
+
     <component name="endAConnectorInfo"
                class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_a" 
@@ -61,7 +64,7 @@
 
     <component name="info"
                class="org.bedework.synch.SubscriptionInfo" >
-      <property name="synchProperties" column="bwsyn_conn_props_b" 
+      <property name="synchProperties" column="bwsyn_props" 
                 type="string" length="3000" />
     </component>
 

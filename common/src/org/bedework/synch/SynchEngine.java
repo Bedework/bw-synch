@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -213,7 +214,7 @@ public class SynchEngine extends TzGetter {
             }
 
             /* The synchling needs to be running it's own thread. */
-            StatusType st = sl.handleNotification(note);
+            StatusType st = handleNotification(sl, note);
 
             if (st == StatusType.WARNING) {
               /* Back on the queue - these need to be flagged so we don't get an
@@ -705,6 +706,13 @@ public class SynchEngine extends TzGetter {
     return connectorMap.get(id);
   }
 
+  /**
+   * @return registered ids.
+   */
+  public Set<String> getConnectorIds() {
+    return connectorMap.keySet();
+  }
+
   private void registerConnector(final String id,
                                  final String className) throws SynchException {
     try {
@@ -727,7 +735,6 @@ public class SynchEngine extends TzGetter {
    * @param notes
    * @throws SynchException
    */
-  @SuppressWarnings("unchecked")
   public void handleNotifications(
             final NotificationBatch<Notification> notes) throws SynchException {
     for (Notification note: notes.getNotifications()) {
@@ -736,7 +743,7 @@ public class SynchEngine extends TzGetter {
       try {
         sl = synchlingPool.get();
 
-        sl.handleNotification(note);
+        handleNotification(sl, note);
       } finally {
         db.close();
         if (sl != null) {
@@ -746,6 +753,24 @@ public class SynchEngine extends TzGetter {
     }
 
     return;
+  }
+
+  @SuppressWarnings("unchecked")
+  private StatusType handleNotification(final Synchling sl,
+                                        final Notification note) throws SynchException {
+    StatusType st = sl.handleNotification(note);
+
+    Subscription sub = note.getSub();
+    if (!sub.getMissingTarget()) {
+      return st;
+    }
+
+    if (sub.getErrorCt() > config.getMissingTargetRetries()) {
+      deleteSubscription(sub);
+      info("Subscription deleted after missing target retries exhausted: " + sub);
+    }
+
+    return st;
   }
 
   /* ====================================================================

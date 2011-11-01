@@ -27,10 +27,16 @@ import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
+import org.bedework.synch.wsmessages.ArrayOfSynchConnectorInfo;
+import org.bedework.synch.wsmessages.ArrayOfSynchPropertyInfo;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
+import org.bedework.synch.wsmessages.GetInfoRequestType;
+import org.bedework.synch.wsmessages.GetInfoResponseType;
 import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchConnectorInfoType;
+import org.bedework.synch.wsmessages.SynchInfoType;
 import org.bedework.synch.wsmessages.SynchPropertyType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
@@ -111,6 +117,11 @@ public class SynchConnector
   }
 
   @Override
+  public boolean isManager() {
+    return true;
+  }
+
+  @Override
   public boolean isStarted() {
     return running;
   }
@@ -128,6 +139,11 @@ public class SynchConnector
   @Override
   public SynchKind getKind() {
     return SynchKind.notify;
+  }
+
+  @Override
+  public boolean isReadOnly() {
+    return true;
   }
 
   @Override
@@ -186,6 +202,11 @@ public class SynchConnector
 
       Object o = unmarshalBody(req);
 
+      if (o instanceof GetInfoRequestType) {
+        return new NotificationBatch(
+            new Notification(NotificationItem.ActionType.GetInfo));
+      }
+
       if (o instanceof SubscribeRequestType) {
         return new NotificationBatch(subscribe(resp, (SubscribeRequestType)o));
       }
@@ -227,6 +248,48 @@ public class SynchConnector
       }
 
       NotificationItem ni = note.getNotifications().get(0);
+
+      if (ni.getAction() == ActionType.GetInfo) {
+        GetInfoResponseType giresp = new GetInfoResponseType();
+        SynchInfoType sit = new SynchInfoType();
+
+        giresp.setInfo(sit);
+        ArrayOfSynchConnectorInfo asci = new ArrayOfSynchConnectorInfo();
+        sit.setConnectors(asci);
+
+        for (String id: syncher.getConnectorIds()) {
+          Connector c = syncher.getConnector(id);
+
+          if (c == null) {
+            continue;
+          }
+
+          SynchConnectorInfoType scit = new SynchConnectorInfoType();
+
+          scit.setName(id);
+          scit.setManager(c.isManager());
+          scit.setReadOnly(c.isReadOnly());
+
+          ArrayOfSynchPropertyInfo aspi = new ArrayOfSynchPropertyInfo();
+          scit.setProperties(aspi);
+
+          @SuppressWarnings("unchecked")
+          List<SynchPropertyInfo> l = c.getPropertyInfo();
+          for (SynchPropertyInfo spit: l) {
+            aspi.getProperty().add(spit);
+          }
+
+          asci.getConnector().add(scit);
+        }
+
+        ObjectFactory of = new ObjectFactory();
+
+        JAXBElement<GetInfoResponseType> jax = of.createGetInfoResponse(giresp);
+
+        marshal(jax, resp.getOutputStream());
+
+        return;
+      }
 
       if (ni.getAction() == ActionType.NewSubscription) {
         SubscribeResponseType sresp = ni.getSubResponse();
