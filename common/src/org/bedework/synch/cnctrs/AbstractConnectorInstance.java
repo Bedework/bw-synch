@@ -22,10 +22,15 @@ import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
+import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+
+import java.util.List;
 
 /** Abstract connector instance to handle some trivia.
  *
@@ -99,6 +104,23 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
   /* ====================================================================
    *                   Protected methods
    * ==================================================================== */
+
+  protected boolean validateSubInfo(final SubscribeResponseType sr,
+                                    final Connector cnctr,
+                                    final BaseSubscriptionInfo info) throws SynchException {
+    @SuppressWarnings("unchecked")
+    List<SynchPropertyInfo> propInfo = cnctr.getPropertyInfo();
+
+    for (SynchPropertyInfo spi: propInfo) {
+      if (spi.isRequired() &&
+          (info.getProperty(spi.getName()) == null)) {
+        sr.setStatus(StatusType.ERROR);
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   protected void info(final String msg) {
     getLogger().info(msg);

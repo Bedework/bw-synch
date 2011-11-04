@@ -109,6 +109,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    */
   @Override
   public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
+    validateSubInfo(val, cnctr, info);
     return val;
   }
 
@@ -304,16 +305,13 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    * return null. Unchanged data will return null with no status change.
    */
   private void getIcal() throws SynchException {
-    if (fetchedIcal != null) {
-      return;
-    }
-
     try {
       DavClient cl = getClient();
 
       Header[] hdrs = null;
 
-      if ((uidMap != null) && (info.getChangeToken() != null)) {
+      if ((uidMap != null) && (info.getChangeToken() != null) &&
+          (fetchedIcal != null)) {
         hdrs = new Header[] {
           new Header("If-None-Match", info.getChangeToken())
         };

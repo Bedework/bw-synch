@@ -89,8 +89,8 @@ public class BedeworkConnector
 
   private String connectorId;
 
-  private static boolean running;
-  private static boolean stopped;
+  private boolean running;
+  private boolean stopped;
 
   /* If non-null this is the token we currently have for bedework */
   private String remoteToken;
@@ -370,7 +370,11 @@ public class BedeworkConnector
     }
   }
 
-  SynchIdTokenType getIdToken(final String principal) {
+  SynchIdTokenType getIdToken(final String principal) throws SynchException {
+    if (remoteToken == null) {
+      throw new SynchException(SynchException.connectorNotStarted);
+    }
+
     SynchIdTokenType idToken = new SynchIdTokenType();
 
     idToken.setPrincipalHref(principal);

@@ -91,11 +91,13 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
     this.info = info;
   }
 
+  /* (non-Javadoc)
+   * @see org.bedework.synch.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
+   */
   @Override
-  public org.bedework.synch.wsmessages.SubscribeResponseType subscribe(final org.bedework.synch.wsmessages.SubscribeResponseType sr)
-                                                                                                                              throws SynchException {
-    // TODO Auto-generated method stub
-    return null;
+  public org.bedework.synch.wsmessages.SubscribeResponseType subscribe(final org.bedework.synch.wsmessages.SubscribeResponseType val) throws SynchException {
+    validateSubInfo(val, cnctr, info);
+    return val;
   }
 
   @Override

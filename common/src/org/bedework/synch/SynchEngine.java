@@ -179,7 +179,6 @@ public class SynchEngine extends TzGetter {
       super("NotifyIn");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void run() {
       while (true) {
@@ -740,10 +739,13 @@ public class SynchEngine extends TzGetter {
     for (Notification note: notes.getNotifications()) {
       db.open();
       Synchling sl = null;
-      try {
-        sl = synchlingPool.get();
 
-        handleNotification(sl, note);
+      try {
+        if (note.getSub() != null) {
+          sl = synchlingPool.get();
+
+          handleNotification(sl, note);
+        }
       } finally {
         db.close();
         if (sl != null) {

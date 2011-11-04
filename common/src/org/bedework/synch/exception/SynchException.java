@@ -37,6 +37,9 @@ public class SynchException extends Throwable {
   public static QName unknownCalendarItemType = new QName(SynchDefs.synchNamespace,
                                             "unknown-calendar-item-type");
 
+  /* Internal errors */
+  public static String connectorNotStarted = "org.bedework.synch.error.connectorNotStarted";
+
   /** Constructor
    *
    * @param s

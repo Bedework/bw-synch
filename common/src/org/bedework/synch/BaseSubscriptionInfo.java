@@ -273,11 +273,21 @@ public class BaseSubscriptionInfo {
     return info.getProperty(propnameRefreshDelay);
   }
 
-  protected void setProperty(final String name, final String val) throws SynchException {
+  /** set arbitrary named property
+   * @param name
+   * @param val - String property value
+   * @throws SynchException
+   */
+  public void setProperty(final String name, final String val) throws SynchException {
     info.setProperty(name, val);
   }
 
-  protected String getProperty(final String name) throws SynchException {
+  /** Get arbitrary named property
+   * @param name
+   * @return String property value
+   * @throws SynchException
+   */
+  public String getProperty(final String name) throws SynchException {
     return info.getProperty(name);
   }
 

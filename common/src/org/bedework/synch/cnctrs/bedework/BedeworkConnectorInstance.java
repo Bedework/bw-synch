@@ -89,6 +89,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
    */
   @Override
   public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
+    validateSubInfo(val, cnctr, info);
     return val;
   }
 

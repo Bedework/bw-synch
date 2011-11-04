@@ -156,6 +156,12 @@ public class Synchling {
         }
 
         ni.getSubResponse().setSubscriptionId(note.getSubscriptionId());
+
+        /* Now put it on the queue for a refresh */
+        syncher.setConnectors(note.getSub());
+
+        syncher.reschedule(note.getSub());
+
         continue;
 
       case Unsubscribe:
@@ -801,7 +807,11 @@ public class Synchling {
 
   @SuppressWarnings("unchecked")
   private XmlIcalCompare getDiffer(final Notification note) throws SynchException {
-    if ((diff != null) && diffSubid.equals(note.getSub().getSubscriptionId())) {
+    Subscription sub = note.getSub();
+
+    if ((diff != null) &&
+        (diffSubid != null) &&
+        diffSubid.equals(sub.getSubscriptionId())) {
       return diff;
     }
 
@@ -811,15 +821,16 @@ public class Synchling {
     /* First the defaults */
     addSkips(skipMap, XmlIcalCompare.defaultSkipList);
 
-    /* Any needed for stuff we skip */
-    Subscription sub = note.getSub();
-    if (sub.getInfo().getStripAlarms()) {
-      addSkip(skipMap, new ValarmType());
-    }
+    if (sub.getInfo() != null) {
+      /* Any needed for stuff we skip */
+      if (sub.getInfo().getStripAlarms()) {
+        addSkip(skipMap, new ValarmType());
+      }
 
-    if (sub.getInfo().getStripScheduling()) {
-      addSkip(skipMap, new OrganizerPropType());
-      addSkip(skipMap, new AttendeePropType());
+      if (sub.getInfo().getStripScheduling()) {
+        addSkip(skipMap, new OrganizerPropType());
+        addSkip(skipMap, new AttendeePropType());
+      }
     }
 
     addSkips(skipMap, sub.getEndAConn().getSkipList());

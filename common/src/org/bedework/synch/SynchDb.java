@@ -152,9 +152,9 @@ public class SynchDb implements Serializable {
       sb.append("from ");
       sb.append(Subscription.class.getName());
       sb.append(" sub where sub.endAConnectorInfo.connectorId=:aconnid");
-      sb.append(" and sub.endAConnectorInfo.connectorProperties=:aconnprops");
+      sb.append(" and sub.endAConnectorInfo.synchProperties=:aconnprops");
       sb.append(" and sub.endBConnectorInfo.connectorId=:bconnid");
-      sb.append(" and sub.endBConnectorInfo.connectorProperties=:bconnprops");
+      sb.append(" and sub.endBConnectorInfo.synchProperties=:bconnprops");
       sb.append(" and sub.direction=:dir");
       sb.append(" and sub.master=:mstr");
 
