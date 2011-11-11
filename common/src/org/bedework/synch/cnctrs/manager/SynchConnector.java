@@ -16,18 +16,25 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.cnctrs.manager;
 
+import org.bedework.synch.Notification;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
+import org.bedework.synch.Subscription;
+import org.bedework.synch.SubscriptionConnectorInfo;
+import org.bedework.synch.SubscriptionInfo;
+import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
-import org.bedework.synch.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
 import org.bedework.synch.wsmessages.ArrayOfSynchConnectorInfo;
+import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
 import org.bedework.synch.wsmessages.ArrayOfSynchPropertyInfo;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.GetInfoRequestType;
@@ -40,19 +47,14 @@ import org.bedework.synch.wsmessages.SynchInfoType;
 import org.bedework.synch.wsmessages.SynchPropertyType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
+import org.bedework.synch.wsmessages.UnknownSubscriptionType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
+import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.ErrorResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 import org.w3c.dom.Document;
-
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.io.OutputStream;
 import java.net.URL;
@@ -77,9 +79,8 @@ import javax.xml.soap.SOAPMessage;
  *
  * @author Mike Douglass
  */
-public class SynchConnector
-      implements Connector<SynchConnector.SynchConnectorInstance,
-                           Notification> {
+public class SynchConnector implements Connector<SynchConnectorInstance,
+                                                 Notification> {
   private BedeworkConnectorConfig config;
 
   private String callbackUri;
@@ -98,6 +99,7 @@ public class SynchConnector
   private boolean running;
 
   // Are these thread safe?
+  private ObjectFactory of = new ObjectFactory();
   private MessageFactory soapMsgFactory;
   private JAXBContext jc;
 
@@ -212,8 +214,7 @@ public class SynchConnector
       }
 
       if (o instanceof UnsubscribeRequestType) {
-//        unsubscribe(resp, (UnsubscribeRequestType)o);
-        return null;
+        return new NotificationBatch(unsubscribe(resp, (UnsubscribeRequestType)o));
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -282,8 +283,6 @@ public class SynchConnector
           asci.getConnector().add(scit);
         }
 
-        ObjectFactory of = new ObjectFactory();
-
         JAXBElement<GetInfoResponseType> jax = of.createGetInfoResponse(giresp);
 
         marshal(jax, resp.getOutputStream());
@@ -294,9 +293,15 @@ public class SynchConnector
       if (ni.getAction() == ActionType.NewSubscription) {
         SubscribeResponseType sresp = ni.getSubResponse();
 
-        ObjectFactory of = new ObjectFactory();
-
         JAXBElement<SubscribeResponseType> jax = of.createSubscribeResponse(sresp);
+
+        marshal(jax, resp.getOutputStream());
+      }
+
+      if (ni.getAction() == ActionType.Unsubscribe) {
+        UnsubscribeResponseType usresp = ni.getUnsubResponse();
+
+        JAXBElement<UnsubscribeResponseType> jax = of.createUnsubscribeResponse(usresp);
 
         marshal(jax, resp.getOutputStream());
       }
@@ -452,6 +457,16 @@ public class SynchConnector
     sub.setEndAConnectorInfo(makeConnInfo(sr.getEndAConnector()));
     sub.setEndBConnectorInfo(makeConnInfo(sr.getEndBConnector()));
 
+    ArrayOfSynchProperties info = sr.getInfo();
+    if (info != null) {
+      SubscriptionInfo sinfo = new SubscriptionInfo();
+
+      for (SynchPropertyType sp: info.getProperty()) {
+        sinfo.setProperty(sp.getName(), sp.getValue());
+      }
+      sub.setInfo(sinfo);
+    }
+
     if (debug) {
       trace("Handle subscribe " +  sub);
     }
@@ -459,7 +474,6 @@ public class SynchConnector
     /* Look for a subscription that matches the 2 end points */
 
     Subscription s = syncher.find(sub);
-    ObjectFactory of = new ObjectFactory();
 
     SubscribeResponseType sresp = of.createSubscribeResponseType();
 
@@ -469,6 +483,7 @@ public class SynchConnector
       sresp.getErrorResponse().setError(of.createAlreadySubscribed(new AlreadySubscribedType()));
     } else {
       sresp.setStatus(StatusType.OK);
+      sresp.setSubscriptionId(sub.getSubscriptionId());
     }
 
     return new Notification(sub, sresp);
@@ -490,87 +505,50 @@ public class SynchConnector
     return subCinfo;
   }
 
-  /**
-   * @param resp
-   * @param u
-   * @throws SynchException
-   */
-  private void unsubscribe(final HttpServletResponse resp,
+  private Notification unsubscribe(final HttpServletResponse resp,
                            final UnsubscribeRequestType u) throws SynchException {
     if (debug) {
       trace("Handle unsubscribe " +  u.getSubscriptionId());
     }
-/*
-    Subscription sub;
 
-    sub = syncher.getSubscription(u.getSubscriptionId());
-
-    if (sub == null) {
-      // No subscription - nothing to do
-      return;
-    }
-
-    // Ensure fields match
-    if (!sub.getPrincipalHref().equals(u.getPrincipalHref()) ||
-        !sub.getCalPath().equals(u.getCalendarHref())) {
-      info("No access for subscription - unmatched parameters " + sub);
-      return;
-    }
-
-    ObjectFactory of = new ObjectFactory();
+    Subscription sub = syncher.getSubscription(u.getSubscriptionId());
 
     UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
 
-    usr.setSubscribeStatus(syncher.unsubscribe(sub));
+    /* Most errors we'll treat as an unknown subscription */
 
-    marshalBody(resp, usr);
-    */
-  }
+    boolean ok = false;
 
-  /* Null class to do nothing except fail. */
-  static class SynchConnectorInstance extends AbstractConnectorInstance {
-    SynchConnectorInstance(){
-      super(null, null, null);
+    checkSub: {
+      if (sub == null) {
+        break checkSub;
+      }
+
+      // Ensure fields match
+      if (!sub.getOwner().equals(u.getPrincipalHref())) {
+        break checkSub;
+      }
+
+      // Check with the connector to see if this is a valid match
+      //    !sub.getCalPath().equals(u.getCalendarHref())) {
+      //  info("No access for subscription - unmatched parameters " + sub);
+      //  return;
+      //}
+
+      ok = true;
+    } // checkSub
+
+    if (!ok) {
+      // No subscription or error - nothing to do
+      usr.setStatus(StatusType.ERROR);
+      usr.setErrorResponse(new ErrorResponseType());
+      usr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
+
+      return new Notification(sub, usr);
     }
 
-    @Override
-    public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
-      return val;
-    }
+    //usr.setSubscribeStatus(syncher.unsubscribe(sub));
 
-    @Override
-    public BaseResponseType open() throws SynchException {
-      return null;
-    }
-
-    @Override
-    public boolean changed() throws SynchException {
-      return false;
-    }
-
-    @Override
-    public SynchItemsInfo getItemsInfo() throws SynchException {
-      throw new SynchException("Uncallable");
-    }
-
-    @Override
-    public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
-      throw new SynchException("Uncallable");
-    }
-
-    @Override
-    public FetchItemResponseType fetchItem(final String uid) throws SynchException {
-      throw new SynchException("Uncallable");
-    }
-
-    @Override
-    public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
-      return null;
-    }
-
-    @Override
-    public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
-      throw new SynchException("Uncallable");
-    }
+    return new Notification(sub, usr);
   }
 }

@@ -47,6 +47,11 @@ public class StatLong extends Stat {
     return longValue;
   }
 
+  @Override
+  public String getValue() {
+    return String.valueOf(getLongValue());
+  }
+
   /**
    */
   public void inc() {

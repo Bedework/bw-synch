@@ -240,12 +240,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     return cnctr.getPort().addItem(getIdToken(), ai);
   }
 
-  /** Fetch a calendar component
-   *
-   * @param sub
-   * @param uid of item
-   * @return response
-   * @throws SynchException
+  /* (non-Javadoc)
+   * @see org.bedework.synch.cnctrs.ConnectorInstance#fetchItem(java.lang.String)
    */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {

@@ -27,18 +27,45 @@ import org.bedework.synch.wsmessages.SynchPropertyInfoType;
  * @author Mike Douglass
  */
 public class SynchPropertyInfo extends SynchPropertyInfoType {
+  /** */
+  public static String typeBoolean = "boolean";
+
+  /** */
+  public static String typeDate = "date";
+
+  /** */
+  public static String typeDateTime = "date-time";
+
+  /** */
+  public static String typeDuration = "duration";
+
+  /** */
+  public static String typeInteger = "integer";
+
+  /** */
+  public static String typePassword = "password";
+
+  /** */
+  public static String typeString = "string";
+
+  /** */
+  public static String typeUri = "uri";
+
   /**
    * @param name - name for the property
    * @param secure - true if this property value should be hidden, e.g password
+   * @param type - type of the property - see above
    * @param description - of the property
    * @param required - true if this property is required
    */
   public SynchPropertyInfo(final String name,
-                               final boolean secure,
-                               final String description,
-                               final boolean required) {
+                           final boolean secure,
+                           final String type,
+                           final String description,
+                           final boolean required) {
     setName(name);
     setSecure(secure);
+    setType(type);
     setDescription(description);
     setRequired(required);
   }
@@ -52,6 +79,9 @@ public class SynchPropertyInfo extends SynchPropertyInfoType {
 
     sb.append(", secure = ");
     sb.append(isSecure());
+
+    sb.append(",\n   type = ");
+    sb.append(getType());
 
     sb.append(",\n   description = ");
     sb.append(getDescription());

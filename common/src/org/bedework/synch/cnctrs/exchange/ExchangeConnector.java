@@ -85,19 +85,22 @@ public class ExchangeConnector
 
   static {
     propInfo.add(new SynchPropertyInfo(propnameFolderId,
-                                           false,
-                                           "",
-                                           true));
+                                       false,
+                                       SynchPropertyInfo.typeString,
+                                       "",
+                                       true));
 
     propInfo.add(new SynchPropertyInfo(propnameAccount,
-                                           false,
-                                           "",
-                                           true));
+                                       false,
+                                       SynchPropertyInfo.typeString,
+                                       "",
+                                       true));
 
     propInfo.add(new SynchPropertyInfo(propnamePw,
-                                           true,
-                                           "",
-                                           true));
+                                       true,
+                                       SynchPropertyInfo.typePassword,
+                                       "",
+                                       true));
   }
 
   private SynchEngine syncher;

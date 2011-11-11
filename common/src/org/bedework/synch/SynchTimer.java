@@ -101,7 +101,7 @@ public class SynchTimer {
    * @param syncher
    */
   public SynchTimer(final SynchEngine syncher){
-    this.syncher =syncher;
+    this.syncher = syncher;
 
     timer = new Timer("SynchTimer", true);
 

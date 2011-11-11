@@ -20,6 +20,7 @@ package org.bedework.synch;
 
 import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -106,6 +107,18 @@ public class Notification<NI extends Notification.NotificationItem> {
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
                       final SubscribeResponseType response) {
+    this(sub, SynchEnd.none);
+    addNotificationItem((NI)new NotificationItem(response));
+  }
+
+  /** Create a new unsubscription object
+   *
+   * @param sub
+   * @param response
+   */
+  @SuppressWarnings("unchecked")
+  public Notification(final Subscription sub,
+                      final UnsubscribeResponseType response) {
     this(sub, SynchEnd.none);
     addNotificationItem((NI)new NotificationItem(response));
   }
@@ -197,6 +210,8 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private SubscribeResponseType subResponse;
 
+    private UnsubscribeResponseType unsubResponse;
+
     /** Create a notification item for an action.
      *
      * @param action
@@ -228,6 +243,15 @@ public class Notification<NI extends Notification.NotificationItem> {
       this.subResponse = subResponse;
     }
 
+    /** Create a notification item for unsubscribe.
+     *
+     * @param unsubResponse
+     */
+    public NotificationItem(final UnsubscribeResponseType unsubResponse) {
+      action = ActionType.Unsubscribe;
+      this.unsubResponse = unsubResponse;
+    }
+
     /**
      * @return the action
      */
@@ -254,6 +278,13 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public SubscribeResponseType getSubResponse() {
       return subResponse;
+    }
+
+    /**
+     * @return response to a notification item
+     */
+    public UnsubscribeResponseType getUnsubResponse() {
+      return unsubResponse;
     }
 
     protected void toStringSegment(final StringBuilder sb) {

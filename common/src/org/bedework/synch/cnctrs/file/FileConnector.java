@@ -54,24 +54,28 @@ public class FileConnector
 
   static {
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameUri,
-                                           false,
-                                           "",
-                                           true));
+                                       false,
+                                       SynchPropertyInfo.typeUri,
+                                       "",
+                                       true));
 
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
-                                           false,
-                                           "",
-                                           false));
+                                       false,
+                                       SynchPropertyInfo.typeString,
+                                       "",
+                                       false));
 
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePassword,
-                                           true,
-                                           "",
-                                           false));
+                                       true,
+                                       SynchPropertyInfo.typePassword,
+                                       "",
+                                       false));
 
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameRefreshDelay,
-                                           false,
-                                           "",
-                                           false));
+                                       false,
+                                       SynchPropertyInfo.typeInteger,
+                                       "",
+                                       false));
   }
 
   private SynchEngine syncher;

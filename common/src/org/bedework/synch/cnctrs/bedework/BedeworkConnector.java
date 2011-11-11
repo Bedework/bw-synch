@@ -71,14 +71,16 @@ public class BedeworkConnector
 
   static {
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameUri,
-                                           false,
-                                           "",
-                                           true));
+                                       false,
+                                       SynchPropertyInfo.typeUri,
+                                       "",
+                                       true));
 
     propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
-                                           false,
-                                           "",
-                                           true));
+                                       false,
+                                       SynchPropertyInfo.typeString,
+                                       "",
+                                       true));
   }
 
   private SynchEngine syncher;

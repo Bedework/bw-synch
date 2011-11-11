@@ -28,6 +28,7 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 
+import edu.rpi.cmt.calendar.XcalUtil;
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 
 import org.apache.log4j.Logger;
@@ -40,10 +41,15 @@ import org.oasis_open.docs.ns.wscal.calws_soap.TargetDoesNotExistType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
 
+import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
+import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
 import ietf.params.xml.ns.icalendar_2.AttendeePropType;
+import ietf.params.xml.ns.icalendar_2.BaseComponentType;
+import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.OrganizerPropType;
 import ietf.params.xml.ns.icalendar_2.ValarmType;
+import ietf.params.xml.ns.icalendar_2.VcalendarType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 
 /** The synchling handles the processing of a single subscription when there is
@@ -373,6 +380,8 @@ public class Synchling {
     CrudCts lastCts;
     CrudCts totalCts;
 
+    Map<String, Object> stripMap = new HashMap<String, Object>();
+
     // True if our target is missing.
     boolean missingTarget;
 
@@ -384,6 +393,8 @@ public class Synchling {
       this.end = end;
       this.trustLastmod = trustLastmod;
       this.inst = inst;
+
+      makeStripMap(stripMap, sub);
 
       lastCts = new CrudCts();
       inst.setLastCrudCts(lastCts);
@@ -535,6 +546,18 @@ public class Synchling {
         }
       }
 
+      /* -------------------- Deletions ------------------------ */
+
+      if (((updateInfo.size() > 0) &&
+          (sub.getDirection() == SynchDirectionType.B_TO_A)) || bothWays) {
+        processDeletes(note, updateInfo, ainfo);
+      }
+
+      if (((updateInfo.size() > 0) &&
+          (sub.getDirection() == SynchDirectionType.A_TO_B)) || bothWays) {
+        processDeletes(note, updateInfo, binfo);
+      }
+
       sub.setErrorCt(0);
 
       return StatusType.OK;
@@ -651,11 +674,13 @@ public class Synchling {
     return items;
   }
 
-  /**
+  /** Do the adds and updates for the end specified by toInfo.
+   *
    * @param note
-   * @param toFetch
+   * @param updateInfo
    * @param unprocessedRes
-   * @param from
+   * @param fromInfo
+   * @param toInfo
    * @return true if there are unprocessed entries for this end
    * @throws SynchException
    */
@@ -707,7 +732,8 @@ public class Synchling {
       SynchInfo si = siit.next();
 
       if (si.addTo == toInfo.end) {
-        AddItemResponseType air = toInfo.inst.addItem(fir.getIcalendar());
+        IcalendarType stripped = stripIcal(toInfo.stripMap, fir.getIcalendar());
+        AddItemResponseType air = toInfo.inst.addItem(stripped);
 
         toInfo.lastCts.created++;
         toInfo.totalCts.created++;
@@ -770,6 +796,149 @@ public class Synchling {
     return callAgain;
   }
 
+  /* Remove all the properties or components we are not sending to the "to" end.
+   */
+  private IcalendarType stripIcal(final Map<String, Object> stripMap,
+                                  final IcalendarType val) throws SynchException {
+    try {
+      if ((stripMap == null) || stripMap.isEmpty()) {
+        return val;
+      }
+
+      IcalendarType res = new IcalendarType();
+
+      for (VcalendarType vcal: val.getVcalendar()) {
+        VcalendarType v = (VcalendarType)XcalUtil.cloneComponent(vcal);
+        res.getVcalendar().add(v);
+
+        v.setProperties(stripProps(stripMap, vcal));
+        v.setComponents(stripComps(stripMap, vcal));
+      }
+
+      return res;
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private ArrayOfComponents stripComps(final Map<String, Object> stripMap,
+                                       final BaseComponentType val) throws SynchException {
+    try {
+      ArrayOfComponents comps = val.getComponents();
+
+      if (comps == null) {
+        return null;
+      }
+
+      ArrayOfComponents c = new ArrayOfComponents();
+
+      boolean stripped = false;
+
+      for (JAXBElement jaxbCcomp:
+           comps.getBaseComponent()) {
+        BaseComponentType jcomp = (BaseComponentType)jaxbCcomp.getValue();
+
+        /* Skip if we don't want this component */
+        if (stripMap.get(jcomp.getClass().getCanonicalName()) != null) {
+          stripped = true;
+          continue;
+        }
+
+        /* Possibly remove some properties */
+        ArrayOfProperties p = stripProps(stripMap, jcomp);
+
+        if (jcomp.getProperties() != p) {
+          // Some properties were removed
+          stripped = true;
+
+          jcomp = XcalUtil.cloneComponent(jcomp);
+          jcomp.setProperties(p);
+
+          jaxbCcomp.setValue(jcomp);
+        }
+
+        /* Possibly remove some sub-components */
+        ArrayOfComponents strippedComps = stripComps(stripMap, jcomp);
+
+        if (jcomp.getComponents() != strippedComps) {
+          // Some components were removed
+          stripped = true;
+
+          BaseComponentType comp = XcalUtil.cloneComponent(jcomp);
+          comp.setProperties(jcomp.getProperties());
+          comp.setComponents(strippedComps);
+
+          jaxbCcomp.setValue(comp);
+        }
+
+        c.getBaseComponent().add(jaxbCcomp);
+      }
+
+      if (stripped) {
+        return c;
+      }
+
+      return comps;
+    } catch (SynchException se) {
+      throw se;
+    } catch (Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  private ArrayOfProperties stripProps(final Map<String, Object> stripMap,
+                                       final BaseComponentType val) throws SynchException {
+    ArrayOfProperties props = val.getProperties();
+
+    if (props == null) {
+      return null;
+    }
+
+    ArrayOfProperties p = new ArrayOfProperties();
+
+    boolean stripped = false;
+
+    for (JAXBElement<? extends BasePropertyType> jprop:
+         props.getBasePropertyOrTzid()) {
+      if (stripMap.get(jprop.getValue().getClass().getCanonicalName()) != null) {
+        stripped = true;
+        continue;
+      }
+
+      //XXX Should do params
+
+      p.getBasePropertyOrTzid().add(jprop);
+    }
+
+    if (stripped) {
+      return p;
+    }
+
+    return props;
+  }
+
+  /**
+   * @param note
+   * @param updateInfo
+   * @param toInfo
+   * @throws SynchException
+   */
+  private void processDeletes(final Notification note,
+                              final List<SynchInfo> updateInfo,
+                              final ResynchInfo toInfo) throws SynchException {
+    for (SynchInfo si: updateInfo) {
+      // Add to unprocessed if it's not one of ours
+      if (si.deleteFrom != toInfo.end) {
+        continue;
+      }
+
+      //DeleteItemResponseType dir = toInfo.inst.deleteItems(si.itemInfo.uid);
+    }
+  }
+
   private int cmpLastMods(final String calLmod, final String exLmod) {
     int exi = 0;
     if (calLmod == null) {
@@ -820,18 +989,7 @@ public class Synchling {
 
     /* First the defaults */
     addSkips(skipMap, XmlIcalCompare.defaultSkipList);
-
-    if (sub.getInfo() != null) {
-      /* Any needed for stuff we skip */
-      if (sub.getInfo().getStripAlarms()) {
-        addSkip(skipMap, new ValarmType());
-      }
-
-      if (sub.getInfo().getStripScheduling()) {
-        addSkip(skipMap, new OrganizerPropType());
-        addSkip(skipMap, new AttendeePropType());
-      }
-    }
+    makeStripMap(skipMap, sub);
 
     addSkips(skipMap, sub.getEndAConn().getSkipList());
     addSkips(skipMap, sub.getEndBConn().getSkipList());
@@ -841,6 +999,23 @@ public class Synchling {
     diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
     diffSubid = sub.getSubscriptionId();
     return diff;
+  }
+
+  private static void makeStripMap(final Map<String, Object> stripMap,
+                                   final Subscription sub) throws SynchException {
+    if (sub.getInfo() == null) {
+      return;
+    }
+
+    /* Any needed for stuff we skip */
+    if (sub.getInfo().getStripAlarms()) {
+      addSkip(stripMap, new ValarmType());
+    }
+
+    if (sub.getInfo().getStripScheduling()) {
+      addSkip(stripMap, new OrganizerPropType());
+      addSkip(stripMap, new AttendeePropType());
+    }
   }
 
   private void addSkips(final Map<String, Object> skipMap,
@@ -854,8 +1029,8 @@ public class Synchling {
     }
   }
 
-  private void addSkip(final Map<String, Object> skipMap,
-                       final Object o) {
+  private static void addSkip(final Map<String, Object> skipMap,
+                              final Object o) {
     skipMap.put(o.getClass().getCanonicalName(), o);
   }
 

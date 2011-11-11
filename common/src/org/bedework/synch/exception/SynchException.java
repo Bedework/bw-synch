@@ -38,6 +38,9 @@ public class SynchException extends Throwable {
                                             "unknown-calendar-item-type");
 
   /* Internal errors */
+
+  /**
+   */
   public static String connectorNotStarted = "org.bedework.synch.error.connectorNotStarted";
 
   /** Constructor

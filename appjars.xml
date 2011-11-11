@@ -72,10 +72,16 @@
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
               name="commons-httpclient" version="3.0"/>
+      
+      <!-- ======================= Ical4j jars ============================ -->
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
-              name="ical4j" version="1.0-rc3-SNAPSHOT"/>
+              name="ical4j" version="head-20100601"/>
+
+      <getJar lib="${org.bedework.temp.extrajars.dir}"
+              libcache="${org.bedework.libcache.dir}"
+              name="backport-util-concurrent" />
 
       <!--
       <getJar lib="${org.bedework.temp.extrajars.dir}"

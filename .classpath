@@ -7,7 +7,6 @@
 	<classpathentry kind="lib" path="lib/ejb3-persistence-3.4.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate-3.3.1.ga.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate-annotations-3.4.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/ical4j-1.0-rc3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/servletapi-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-context-3.0.5.RELEASE.jar"/>
@@ -22,5 +21,6 @@
 	<classpathentry kind="lib" path="/bwxml/dist/bw-calws-soapschema-3.8.jar"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-exchangewsschema-3.8.jar"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-synchwsschema-3.8.jar"/>
+	<classpathentry kind="lib" path="lib/ical4j-head-20100601.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

@@ -1,4 +1,4 @@
-#Mon Aug 08 22:30:06 EDT 2011
+#Fri Nov 04 16:20:30 EDT 2011
 eclipse.preferences.version=1
 org.eclipse.jdt.core.codeComplete.argumentPrefixes=
 org.eclipse.jdt.core.codeComplete.argumentSuffixes=
@@ -31,8 +31,8 @@ org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts=disabled
 org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod=warning
 org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch=ignore
 org.eclipse.jdt.core.compiler.problem.indirectStaticAccess=ignore
-org.eclipse.jdt.core.compiler.problem.invalidJavadoc=ignore
-org.eclipse.jdt.core.compiler.problem.invalidJavadocTags=disabled
+org.eclipse.jdt.core.compiler.problem.invalidJavadoc=warning
+org.eclipse.jdt.core.compiler.problem.invalidJavadocTags=enabled
 org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsDeprecatedRef=disabled
 org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsNotVisibleRef=disabled
 org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsVisibility=public

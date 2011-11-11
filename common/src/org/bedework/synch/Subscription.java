@@ -120,11 +120,13 @@ public class Subscription implements Comparable<Subscription> {
   static {
     propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripAlarms,
                                        false,
+                                       SynchPropertyInfo.typeBoolean,
                                        "",
                                        false));
 
     propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripScheduling,
                                        false,
+                                       SynchPropertyInfo.typeBoolean,
                                        "",
                                        false));
   }
