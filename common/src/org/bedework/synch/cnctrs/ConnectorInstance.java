@@ -18,9 +18,12 @@
 */
 package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.UnsubscribeRequestType;
+import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
@@ -49,10 +52,25 @@ public interface ConnectorInstance {
    * subscribed-to service.
    *
    * @param sr
-   * @return sr
+   * @return false if the subscription fails - status has been set in response
    * @throws SynchException
    */
-  SubscribeResponseType subscribe(SubscribeResponseType sr) throws SynchException;
+  boolean subscribe(SubscribeResponseType sr) throws SynchException;
+
+  /** Check to see if an unsubscribe can go ahead. This method should ensure
+   * that the important properties in the request match those set in the
+   * subscription, e.g. paths
+   *
+   * <p>This method should set the appropriate status and return false if an
+   * error occurs.
+   *
+   * @param usreq
+   * @param usresp
+   * @return false if the unsubscribe fails - status has been set in response
+   * @throws SynchException
+   */
+  boolean unsubscribe(UnsubscribeRequestType usreq,
+                      UnsubscribeResponseType usresp) throws SynchException;
 
   /** Called when a subscription is activated on synch engine startup or after
    * creation of a new subscription.
@@ -61,6 +79,18 @@ public interface ConnectorInstance {
    * @throws SynchException
    */
   BaseResponseType open() throws SynchException;
+
+  /**
+   * @return the connector for this instance
+   * @throws SynchException
+   */
+  Connector getConnector() throws SynchException;
+
+  /**
+   * @return the info for the subscription this instance is handling.
+   * @throws SynchException
+   */
+  BaseSubscriptionInfo getSubInfo() throws SynchException;
 
   /** Called before a resynch takes place to determine if the end point has
    * changed and needs resynch. Only the source end of a subscription will be

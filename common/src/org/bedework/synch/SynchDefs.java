@@ -23,17 +23,6 @@ package org.bedework.synch;
  *   @author Mike Douglass   douglm@rpi.edu
  */
 public interface SynchDefs {
-  /** To which end are we referring?
-   */
-  public enum SynchEnd {
-    /** */
-    none,
-    /** */
-    endA,
-    /** */
-    endB
-  }
-
   /** and does it tell us when something changes or do we have to ask?
    */
   public enum SynchKind {

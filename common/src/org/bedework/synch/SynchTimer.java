@@ -20,8 +20,8 @@ package org.bedework.synch;
 
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import org.apache.log4j.Logger;
 
@@ -76,7 +76,7 @@ public class SynchTimer {
       NotificationItem ni = new NotificationItem(ActionType.FullSynch,
                                                  null, null);
       Notification<NotificationItem> note = new Notification<NotificationItem>(
-          sub, SynchEnd.none, ni);
+          sub, SynchEndType.NONE, ni);
 
       try {
         syncher.handleNotification(note);

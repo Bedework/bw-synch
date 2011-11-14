@@ -58,14 +58,17 @@ public class SynchDb implements Serializable {
   }
 
   /**
+   * @return true if we had to open it. False if already open
    * @throws SynchException
    */
-  public void open() throws SynchException {
+  public boolean open() throws SynchException {
     if (isOpen()) {
-      return;
+      return false;
     }
+
     openSession();
     open = true;
+    return true;
   }
 
   /**

@@ -19,6 +19,8 @@
 package org.bedework.synch;
 
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
+import org.bedework.synch.wsmessages.SynchPropertyType;
 
 import edu.rpi.sss.util.Util;
 
@@ -39,6 +41,26 @@ public class SerializableProperties<T> implements Comparable<T> {
   private Properties properties;
 
   private boolean changed;
+
+  /**
+   *
+   */
+  public SerializableProperties() {
+  }
+
+  /** Build from an array of properties
+   * @param props
+   * @throws SynchException
+   */
+  public SerializableProperties(final ArrayOfSynchProperties props) throws SynchException {
+    if (props == null) {
+      return;
+    }
+
+    for (SynchPropertyType prop: props.getProperty()) {
+      setProperty(prop.getName(), prop.getValue());
+    }
+  }
 
   /**
    * @param val serialized properties

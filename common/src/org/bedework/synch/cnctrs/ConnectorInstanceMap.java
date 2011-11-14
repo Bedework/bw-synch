@@ -19,8 +19,8 @@
 package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,10 +36,10 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
   static class Key {
     Subscription sub;
 
-    SynchEnd end;
+    SynchEndType end;
 
     Key(final Subscription sub,
-        final SynchEnd end) {
+        final SynchEndType end) {
       this.sub = sub;
       this.end = end;
     }
@@ -85,7 +85,7 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
    * @throws SynchException
    */
   public synchronized void add(final Subscription sub,
-                               final SynchEnd end,
+                               final SynchEndType end,
                                final CI cinst) throws SynchException {
     Key key = new Key(sub, end);
 
@@ -104,7 +104,7 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
    * @throws SynchException
    */
   public synchronized CI find(final Subscription sub,
-                              final SynchEnd end) throws SynchException {
+                              final SynchEndType end) throws SynchException {
     return theMap.get(new Key(sub, end));
   }
 
@@ -116,7 +116,7 @@ public class ConnectorInstanceMap<CI extends ConnectorInstance> {
    * @throws SynchException
    */
   public synchronized void remove(final Subscription sub,
-                                  final SynchEnd end) throws SynchException {
+                                  final SynchEndType end) throws SynchException {
     theMap.remove(new Key(sub, end));
   }
 }

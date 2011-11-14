@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange.messages;
 
-import org.bedework.synch.SynchDefs.SynchEnd;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeType;
 import com.microsoft.schemas.exchange.services._2006.types.DistinguishedFolderIdNameType;
@@ -43,7 +43,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
    * @param callBackUri
    */
   public SubscribeRequest(final String subId,
-                          final SynchEnd end,
+                          final SynchEndType end,
                           final String watermark,
                           final String callBackUri) {
     super();

@@ -18,11 +18,11 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import edu.rpi.cmt.calendar.XcalUtil.TzGetter;
 import edu.rpi.cmt.security.PwEncryptionIntf;
@@ -194,6 +194,16 @@ public class SynchEngine extends TzGetter {
 
           if (debug) {
             trace("Received notification");
+          }
+
+          if ((note.getSub() != null) && note.getSub().getDeleted()) {
+            // Drop it
+
+            if (debug) {
+              trace("Dropping deleted notification");
+            }
+
+            continue;
           }
 
           notificationsCt.inc();
@@ -630,11 +640,11 @@ public class SynchEngine extends TzGetter {
    * @throws SynchException
    */
   public ConnectorInstance getConnectorInstance(final Subscription sub,
-                                                final SynchEnd end) throws SynchException {
+                                                final SynchEndType end) throws SynchException {
     ConnectorInstance cinst;
     Connector conn;
 
-    if (end == SynchEnd.endA) {
+    if (end == SynchEndType.A) {
       cinst = sub.getEndAConnInst();
       conn = sub.getEndAConn();
     } else {
@@ -656,7 +666,7 @@ public class SynchEngine extends TzGetter {
                                "(" + end + ")");
     }
 
-    if (end == SynchEnd.endA) {
+    if (end == SynchEndType.A) {
       sub.setEndAConnInst(cinst);
     } else {
       sub.setEndBConnInst(cinst);
@@ -676,7 +686,7 @@ public class SynchEngine extends TzGetter {
     Connector conn = getConnector(connectorId);
     if (conn == null) {
       throw new SynchException("No connector for " + sub + "(" +
-                               SynchEnd.endA + ")");
+                               SynchEndType.A + ")");
     }
 
     sub.setEndAConn(conn);
@@ -686,7 +696,7 @@ public class SynchEngine extends TzGetter {
     conn = getConnector(connectorId);
     if (conn == null) {
       throw new SynchException("No connector for " + sub + "(" +
-                               SynchEnd.endB + ")");
+                               SynchEndType.B + ")");
     }
 
     sub.setEndBConn(conn);
@@ -785,11 +795,15 @@ public class SynchEngine extends TzGetter {
    * @throws SynchException
    */
   public Subscription getSubscription(final String id) throws SynchException {
-    db.open();
+    boolean opened = db.open();
+
     try {
       return db.get(id);
     } finally {
-      db.close();
+      if (opened) {
+        // It's a one-shot
+        db.close();
+      }
     }
   }
 
@@ -807,12 +821,16 @@ public class SynchEngine extends TzGetter {
    * @throws SynchException
    */
   public void updateSubscription(final Subscription sub) throws SynchException {
-    db.open();
+    boolean opened = db.open();
+
     try {
       db.update(sub);
       sub.resetChanged();
     } finally {
-      db.close();
+      if (opened) {
+        // It's a one-shot
+        db.close();
+      }
     }
   }
 
@@ -821,12 +839,7 @@ public class SynchEngine extends TzGetter {
    * @throws SynchException
    */
   public void deleteSubscription(final Subscription sub) throws SynchException {
-    db.open();
-    try {
-      db.delete(sub);
-    } finally {
-      db.close();
-    }
+    db.delete(sub);
   }
 
   /** Find any subscription that matches this one. There can only be one with
@@ -837,11 +850,15 @@ public class SynchEngine extends TzGetter {
    * @throws SynchException
    */
   public Subscription find(final Subscription sub) throws SynchException {
-    db.open();
+    boolean opened = db.open();
+
     try {
       return db.find(sub);
     } finally {
-      db.close();
+      if (opened) {
+        // It's a one-shot
+        db.close();
+      }
     }
   }
 

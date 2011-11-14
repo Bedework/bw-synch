@@ -22,7 +22,6 @@ import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
@@ -34,6 +33,7 @@ import org.bedework.synch.wsmessages.KeepAliveResponseType;
 import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
+import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
@@ -264,7 +264,7 @@ public class BedeworkConnector
 
   @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEnd end) throws SynchException {
+                                                        final SynchEndType end) throws SynchException {
     if (!running) {
       return null;
     }
@@ -278,7 +278,7 @@ public class BedeworkConnector
     //debug = getLogger().isDebugEnabled();
     BedeworkSubscriptionInfo info;
 
-    if (end == SynchEnd.endA) {
+    if (end == SynchEndType.A) {
       info = new BedeworkSubscriptionInfo(sub.getEndAConnectorInfo());
     } else {
       info = new BedeworkSubscriptionInfo(sub.getEndBConnectorInfo());

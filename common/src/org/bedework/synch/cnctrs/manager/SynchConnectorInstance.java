@@ -18,9 +18,10 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.wsmessages.SubscribeResponseType;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
@@ -37,13 +38,22 @@ import java.util.List;
  * @author Mike Douglass
  */
 public class SynchConnectorInstance extends AbstractConnectorInstance {
-  SynchConnectorInstance(){
+  private SynchConnector cnctr;
+
+  SynchConnectorInstance(final SynchConnector cnctr){
     super(null, null, null);
+
+    this.cnctr = cnctr;
   }
 
   @Override
-  public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
-    return val;
+  public Connector getConnector() {
+    return cnctr;
+  }
+
+  @Override
+  public BaseSubscriptionInfo getSubInfo() {
+    return null;
   }
 
   @Override

@@ -20,13 +20,15 @@ package org.bedework.synch;
 
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.Notification.NotificationItem;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;
+import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.synch.wsmessages.UnsubscribeRequestType;
+import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import edu.rpi.cmt.calendar.XcalUtil;
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
@@ -172,7 +174,11 @@ public class Synchling {
         continue;
 
       case Unsubscribe:
-        break;
+        st = unsubscribe(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
       }
 
       return StatusType.ERROR;
@@ -197,19 +203,17 @@ public class Synchling {
 
     /* Try to subscribe to both ends */
     ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
-                                                           SynchEnd.endA);
+                                                           SynchEndType.A);
 
-    SubscribeResponseType sr = cinst.subscribe(ni.getSubResponse());
+    SubscribeResponseType sr = ni.getSubResponse();
 
-    if (sr.getStatus() != StatusType.OK) {
+    if (!cinst.subscribe(sr)) {
       return sr.getStatus();
     }
 
     cinst = syncher.getConnectorInstance(note.getSub(),
-                                         SynchEnd.endB);
-    sr = cinst.subscribe(ni.getSubResponse());
-
-    if (sr.getStatus() != StatusType.OK) {
+                                         SynchEndType.B);
+    if (!cinst.subscribe(sr)) {
       return sr.getStatus();
     }
 
@@ -277,7 +281,7 @@ public class Synchling {
     UpdateItemType ui = new UpdateItemType();
 
     ui.setHref(fresp.getHref());
-    ui.setEtoken(fresp.getEtoken());
+    ui.setChangeToken(fresp.getChangeToken());
     ui.getSelect().add(cst);
 
     UpdateItemResponseType uir = cinst.updateItem(ui);
@@ -289,11 +293,11 @@ public class Synchling {
   }
 
   private ConnectorInstance getOtherCinst(final Notification note) throws SynchException {
-    SynchEnd otherEnd;
-    if (note.getEnd() == SynchEnd.endA) {
-      otherEnd = SynchEnd.endB;
+    SynchEndType otherEnd;
+    if (note.getEnd() == SynchEndType.A) {
+      otherEnd = SynchEndType.B;
     } else {
-      otherEnd = SynchEnd.endA;
+      otherEnd = SynchEndType.A;
     }
 
     return syncher.getConnectorInstance(note.getSub(),
@@ -309,8 +313,9 @@ public class Synchling {
    * @return status
    * @throws SynchException
    */
-  public StatusType unsubscribe(final Notification note) throws SynchException {
-    Subscription sub = syncher.getSubscription(note.getSubscriptionId());
+  private StatusType unsubscribe(final Notification note,
+                                 final NotificationItem ni) throws SynchException {
+    Subscription sub = note.getSub();
     if (sub == null){
       return StatusType.ERROR;
     }
@@ -320,11 +325,30 @@ public class Synchling {
       return StatusType.NO_ACCESS;
     }
 
+    syncher.setConnectors(sub);
+
+    /* See if it's OK by the connector instances */
+
+    ConnectorInstance cinst = syncher.getConnectorInstance(sub,
+                                                           SynchEndType.A);
+
+    UnsubscribeRequestType usreq = ni.getUnsubRequest();
+    UnsubscribeResponseType usr = ni.getUnsubResponse();
+
+    if (!cinst.unsubscribe(usreq, usr)) {
+      return usr.getStatus();
+    }
+
+    cinst = syncher.getConnectorInstance(note.getSub(),
+                                         SynchEndType.B);
+    if (!cinst.unsubscribe(usreq, usr)) {
+      return usr.getStatus();
+    }
+
     // Unsubscribe request - call connector instance to carry out any required
     // action
     sub.setOutstandingSubscription(null);
-
-    // XXX do some stuff
+    sub.setDeleted(true);
 
     syncher.deleteSubscription(sub);
 
@@ -338,13 +362,13 @@ public class Synchling {
     /* Fields set during the actual synch process */
 
     /** add to none, A or B */
-    public SynchEnd addTo = SynchEnd.none;
+    public SynchEndType addTo = SynchEndType.NONE;
 
     /** Update none, A or B */
-    public SynchEnd updateEnd = SynchEnd.none;
+    public SynchEndType updateEnd = SynchEndType.NONE;
 
     /** delete none, A or B */
-    public SynchEnd deleteFrom = SynchEnd.none;
+    public SynchEndType deleteFrom = SynchEndType.NONE;
 
     /** both ends changed since last synch */
     public boolean conflict;
@@ -373,7 +397,7 @@ public class Synchling {
    */
   private static class ResynchInfo {
     Subscription sub;
-    SynchEnd end;
+    SynchEndType end;
     boolean trustLastmod;
     ConnectorInstance inst;
     Map<String, ItemInfo> items;
@@ -386,7 +410,7 @@ public class Synchling {
     boolean missingTarget;
 
     ResynchInfo(final Subscription sub,
-                final SynchEnd end,
+                final SynchEndType end,
                 final boolean trustLastmod,
                 final ConnectorInstance inst) throws SynchException {
       this.sub = sub;
@@ -444,15 +468,15 @@ public class Synchling {
       boolean bothWays = sub.getDirection() == SynchDirectionType.BOTH_WAYS;
 
       ResynchInfo ainfo = new ResynchInfo(sub,
-                                          SynchEnd.endA,
+                                          SynchEndType.A,
                                           sub.getEndAConn().getTrustLastmod(),
                                           syncher.getConnectorInstance(sub,
-                                                                       SynchEnd.endA));
+                                                                       SynchEndType.A));
       ResynchInfo binfo = new ResynchInfo(sub,
-                                          SynchEnd.endB,
+                                          SynchEndType.B,
                                           sub.getEndBConn().getTrustLastmod(),
                                           syncher.getConnectorInstance(sub,
-                                                                       SynchEnd.endB));
+                                                                       SynchEndType.B));
 
       boolean aChanged = false;
       boolean bChanged = false;
@@ -774,7 +798,7 @@ public class Synchling {
         UpdateItemType ui = new UpdateItemType();
 
         ui.setHref(toFir.getHref());
-        ui.setEtoken(toFir.getEtoken());
+        ui.setChangeToken(toFir.getChangeToken());
         ui.getSelect().add(cst);
 
         UpdateItemResponseType uir = toInfo.inst.updateItem(ui);

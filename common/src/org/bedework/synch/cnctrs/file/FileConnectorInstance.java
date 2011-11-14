@@ -20,11 +20,12 @@ package org.bedework.synch.cnctrs.file;
 
 import org.bedework.http.client.DavioException;
 import org.bedework.http.client.dav.DavClient;
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import edu.rpi.cmt.calendar.IcalToXcal;
 import edu.rpi.cmt.calendar.XcalUtil;
@@ -96,7 +97,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
   FileConnectorInstance(final FileConnectorConfig config,
                         final FileConnector cnctr,
                         final Subscription sub,
-                        final SynchEnd end,
+                        final SynchEndType end,
                         final FileSubscriptionInfo info) {
     super(sub, end, info);
     this.config = config;
@@ -104,13 +105,14 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     this.info = info;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
-   */
   @Override
-  public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
-    validateSubInfo(val, cnctr, info);
-    return val;
+  public Connector getConnector() {
+    return cnctr;
+  }
+
+  @Override
+  public BaseSubscriptionInfo getSubInfo() {
+    return info;
   }
 
   /* (non-Javadoc)
@@ -220,7 +222,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     }
 
     fir.setHref(info.getUri() + "#" + uid);
-    fir.setEtoken(info.getChangeToken());
+    fir.setChangeToken(info.getChangeToken());
 
     IcalendarType ical = new IcalendarType();
     VcalendarType vcal = new VcalendarType();

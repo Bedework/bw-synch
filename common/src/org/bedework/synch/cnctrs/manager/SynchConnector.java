@@ -25,7 +25,6 @@ import org.bedework.synch.Subscription;
 import org.bedework.synch.SubscriptionConnectorInfo;
 import org.bedework.synch.SubscriptionInfo;
 import org.bedework.synch.SynchDefs;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
@@ -43,6 +42,7 @@ import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchConnectorInfoType;
+import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchInfoType;
 import org.bedework.synch.wsmessages.SynchPropertyType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
@@ -185,7 +185,7 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
 
   @Override
   public SynchConnectorInstance getConnectorInstance(final Subscription sub,
-                                                     final SynchEnd end) throws SynchException {
+                                                     final SynchEndType end) throws SynchException {
     return null;
   }
 
@@ -529,12 +529,6 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
         break checkSub;
       }
 
-      // Check with the connector to see if this is a valid match
-      //    !sub.getCalPath().equals(u.getCalendarHref())) {
-      //  info("No access for subscription - unmatched parameters " + sub);
-      //  return;
-      //}
-
       ok = true;
     } // checkSub
 
@@ -544,11 +538,11 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
       usr.setErrorResponse(new ErrorResponseType());
       usr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
 
-      return new Notification(sub, usr);
+      return new Notification(sub, u, usr);
     }
 
     //usr.setSubscribeStatus(syncher.unsubscribe(sub));
 
-    return new Notification(sub, usr);
+    return new Notification(sub, u, usr);
   }
 }

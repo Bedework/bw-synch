@@ -20,11 +20,11 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 
@@ -150,7 +150,7 @@ public interface Connector<C extends ConnectorInstance,
    * @throws SynchException
    */
   C getConnectorInstance(Subscription sub,
-                         SynchEnd end) throws SynchException;
+                         SynchEndType end) throws SynchException;
 
   /** Far end may send a batch of notifications. These should not be batched
    * arbitrarily. One batch per message and response.

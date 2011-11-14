@@ -21,13 +21,13 @@ package org.bedework.synch.cnctrs.file;
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import org.apache.log4j.Logger;
 
@@ -173,7 +173,7 @@ public class FileConnector
 
   @Override
   public FileConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEnd end) throws SynchException {
+                                                        final SynchEndType end) throws SynchException {
     FileConnectorInstance inst = cinstMap.find(sub, end);
 
     if (inst != null) {
@@ -183,7 +183,7 @@ public class FileConnector
     //debug = getLogger().isDebugEnabled();
     FileSubscriptionInfo info;
 
-    if (end == SynchEnd.endA) {
+    if (end == SynchEndType.A) {
       info = new FileSubscriptionInfo(sub.getEndAConnectorInfo());
     } else {
       info = new FileSubscriptionInfo(sub.getEndBConnectorInfo());

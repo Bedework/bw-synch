@@ -19,13 +19,13 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -210,7 +210,7 @@ public class ExchangeConnector
 
   @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEnd end) throws SynchException {
+                                                        final SynchEndType end) throws SynchException {
     ExchangeConnectorInstance inst = cinstMap.find(sub, end);
 
     if (inst != null) {
@@ -220,7 +220,7 @@ public class ExchangeConnector
     //debug = getLogger().isDebugEnabled();
     ExchangeSubscriptionInfo info;
 
-    if (end == SynchEnd.endA) {
+    if (end == SynchEndType.A) {
       info = new ExchangeSubscriptionInfo(sub.getEndAConnectorInfo());
     } else {
       info = new ExchangeSubscriptionInfo(sub.getEndBConnectorInfo());
@@ -247,11 +247,11 @@ public class ExchangeConnector
     }
 
     String id = resourceUri.get(0);
-    SynchEnd end;
+    SynchEndType end;
 
     try {
       String endFlag = id.substring(0, 1);
-      end = SynchEnd.valueOf(endFlag);
+      end = SynchEndType.valueOf(endFlag);
     } catch (Throwable t) {
       enb.setStatus(StatusType.ERROR);
       enb.setMessage("Id not starting with end flag");

@@ -18,8 +18,9 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
@@ -57,7 +58,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   private String subscriptionId;
 
-  private SynchEnd end;
+  private SynchEndType end;
 
   private List<NI> notifications = new ArrayList<NI>();
 
@@ -66,6 +67,9 @@ public class Notification<NI extends Notification.NotificationItem> {
    */
   public Notification(final Subscription sub) {
     this.sub = sub;
+    if (sub != null) {
+      this.subscriptionId = sub.getSubscriptionId();
+    }
   }
 
   /** Create a notification for an unsubscribe
@@ -81,7 +85,7 @@ public class Notification<NI extends Notification.NotificationItem> {
    * @param end
    */
   public Notification(final Subscription sub,
-                      final SynchEnd end) {
+                      final SynchEndType end) {
     this(sub);
     this.end = end;
   }
@@ -93,7 +97,7 @@ public class Notification<NI extends Notification.NotificationItem> {
    * @param notificationItem
    */
   public Notification(final Subscription sub,
-                      final SynchEnd end,
+                      final SynchEndType end,
                       final NI notificationItem) {
     this(sub, end);
     addNotificationItem(notificationItem);
@@ -107,20 +111,22 @@ public class Notification<NI extends Notification.NotificationItem> {
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
                       final SubscribeResponseType response) {
-    this(sub, SynchEnd.none);
+    this(sub, SynchEndType.NONE);
     addNotificationItem((NI)new NotificationItem(response));
   }
 
   /** Create a new unsubscription object
    *
    * @param sub
+   * @param request
    * @param response
    */
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
+                      final UnsubscribeRequestType request,
                       final UnsubscribeResponseType response) {
-    this(sub, SynchEnd.none);
-    addNotificationItem((NI)new NotificationItem(response));
+    this(sub, SynchEndType.NONE);
+    addNotificationItem((NI)new NotificationItem(request, response));
   }
 
   /**
@@ -149,7 +155,7 @@ public class Notification<NI extends Notification.NotificationItem> {
   /**
    * @return end designator
    */
-  public SynchEnd getEnd() {
+  public SynchEndType getEnd() {
     return end;
   }
 
@@ -210,6 +216,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private SubscribeResponseType subResponse;
 
+    private UnsubscribeRequestType unsubRequest;
     private UnsubscribeResponseType unsubResponse;
 
     /** Create a notification item for an action.
@@ -245,10 +252,13 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for unsubscribe.
      *
+     * @param unsubRequest
      * @param unsubResponse
      */
-    public NotificationItem(final UnsubscribeResponseType unsubResponse) {
+    public NotificationItem(final UnsubscribeRequestType unsubRequest,
+                            final UnsubscribeResponseType unsubResponse) {
       action = ActionType.Unsubscribe;
+      this.unsubRequest = unsubRequest;
       this.unsubResponse = unsubResponse;
     }
 
@@ -278,6 +288,13 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public SubscribeResponseType getSubResponse() {
       return subResponse;
+    }
+
+    /**
+     * @return request leading to a notification item
+     */
+    public UnsubscribeRequestType getUnsubRequest() {
+      return unsubRequest;
     }
 
     /**

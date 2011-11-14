@@ -20,8 +20,8 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Notification;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -39,7 +39,7 @@ public class ExchangeNotification extends
    * @throws SynchException
    */
   public ExchangeNotification(final Subscription sub,
-                              final SynchEnd end,
+                              final SynchEndType end,
                               final ExchangeNotificationMessage enm) throws SynchException {
     super(sub, end);
 

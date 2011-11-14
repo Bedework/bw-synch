@@ -20,11 +20,14 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
+import org.bedework.synch.SerializableProperties;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.synch.wsmessages.UnsubscribeRequestType;
+import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
@@ -43,12 +46,12 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
 
   protected Subscription sub;
 
-  protected SynchEnd end;
+  protected SynchEndType end;
 
   protected BaseSubscriptionInfo baseInfo;
 
   protected AbstractConnectorInstance(final Subscription sub,
-                                      final SynchEnd end,
+                                      final SynchEndType end,
                                       final BaseSubscriptionInfo baseInfo) {
     this.sub = sub;
     this.end = end;
@@ -63,6 +66,20 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
   @Override
   public BaseResponseType open() throws SynchException {
     return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.bedework.synch.cnctrs.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
+   */
+  @Override
+  public boolean subscribe(final SubscribeResponseType sr) throws SynchException {
+    return validateSubInfo(sr, getConnector(), getSubInfo());
+  }
+
+  @Override
+  public boolean unsubscribe(final UnsubscribeRequestType usreq,
+                             final UnsubscribeResponseType usresp) throws SynchException {
+    return validateUnsubInfo(usreq, usresp, getConnector(), getSubInfo());
   }
 
   /**
@@ -105,6 +122,14 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
    *                   Protected methods
    * ==================================================================== */
 
+  /** Ensure subscription info is valid
+   *
+   * @param sr
+   * @param cnctr
+   * @param info
+   * @return true if all ok
+   * @throws SynchException
+   */
   protected boolean validateSubInfo(final SubscribeResponseType sr,
                                     final Connector cnctr,
                                     final BaseSubscriptionInfo info) throws SynchException {
@@ -115,6 +140,51 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
       if (spi.isRequired() &&
           (info.getProperty(spi.getName()) == null)) {
         sr.setStatus(StatusType.ERROR);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /** Ensure unsubscribe info matches the subscription
+   *
+   * @param sr
+   * @param cnctr
+   * @param info
+   * @return true if all ok
+   * @throws SynchException
+   */
+  protected boolean validateUnsubInfo(final UnsubscribeRequestType usreq,
+                                      final UnsubscribeResponseType usresp,
+                                      final Connector cnctr,
+                                      final BaseSubscriptionInfo info) throws SynchException {
+    if (usreq.getEnd() != end) {
+      return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    List<SynchPropertyInfo> propInfo = cnctr.getPropertyInfo();
+    SerializableProperties unsubProps =
+        new SerializableProperties(usreq.getConnectorInfo().getProperties());
+
+    for (SynchPropertyInfo spi: propInfo) {
+      if (!spi.isRequired()) {
+        continue;
+      }
+
+      String propName = spi.getName();
+      String subVal = info.getProperty(propName);
+
+      if (subVal == null) {
+        // It should never be null - but a change of requirement s may have caused this
+        continue;
+      }
+
+      String unsubVal = unsubProps.getProperty(propName);
+
+      if ((unsubVal == null) || !unsubVal.equals(subVal)) {
+        usresp.setStatus(StatusType.ERROR);
         return false;
       }
     }

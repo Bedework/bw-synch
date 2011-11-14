@@ -18,8 +18,8 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.SynchEndType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class CallbackRegistry {
 
     private Subscription sub;
 
-    private SynchEnd end;
+    private SynchEndType end;
 
     /**
      * @param connectorId
@@ -58,7 +58,7 @@ public class CallbackRegistry {
      */
     public CallbackRegistryEntry(final String connectorId,
                                  final Subscription sub,
-                                 final SynchEnd end) {
+                                 final SynchEndType end) {
       this.connectorId = connectorId;
       this.sub = sub;
       this.end = end;
@@ -81,7 +81,7 @@ public class CallbackRegistry {
     /**
      * @return end designator
      */
-    public SynchEnd getEnd() {
+    public SynchEndType getEnd() {
       return end;
     }
 

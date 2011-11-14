@@ -105,6 +105,8 @@ public class Subscription implements Comparable<Subscription> {
   /* Process outstanding after this */
   private Subscription outstandingSubscription;
 
+  private boolean deleted;
+
   private Connector endAConn;
 
   private Connector endBConn;
@@ -359,6 +361,21 @@ public class Subscription implements Comparable<Subscription> {
    */
   public Subscription getOutstandingSubscription() {
     return outstandingSubscription;
+  }
+
+  /** True if subscription deleted
+   *
+   * @param val
+   */
+  public void setDeleted(final boolean val) {
+    deleted = val;
+  }
+
+  /**
+   * @return True if deleted
+   */
+  public boolean getDeleted() {
+    return deleted;
   }
 
   /**

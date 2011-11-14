@@ -18,11 +18,12 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Subscription;
-import org.bedework.synch.SynchDefs.SynchEnd;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
 
 import edu.rpi.cmt.calendar.XcalUtil;
@@ -76,7 +77,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
                             final Subscription sub,
-                            final SynchEnd end,
+                            final SynchEndType end,
                             final BedeworkSubscriptionInfo info) {
     super(sub, end, info);
     this.config = config;
@@ -84,13 +85,14 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     this.info = info;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
-   */
   @Override
-  public SubscribeResponseType subscribe(final SubscribeResponseType val) throws SynchException {
-    validateSubInfo(val, cnctr, info);
-    return val;
+  public Connector getConnector() {
+    return cnctr;
+  }
+
+  @Override
+  public BaseSubscriptionInfo getSubInfo() {
+    return info;
   }
 
   /* (non-Javadoc)
@@ -314,7 +316,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     MultistatResponseElementType mre = mres.get(0);
     fir.setHref(mre.getHref());
-    fir.setEtoken(mre.getEtoken());
+    fir.setChangeToken(mre.getChangeToken());
 
     /* Expect a single propstat element */
 
