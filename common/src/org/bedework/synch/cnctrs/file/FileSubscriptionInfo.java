@@ -19,7 +19,7 @@
 package org.bedework.synch.cnctrs.file;
 
 import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.SubscriptionConnectorInfo;
+import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
 
 /** Represents connection information for a file connector instance.

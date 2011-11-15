@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
 
 /** Provides an internal deserialized view of the subscription info for one

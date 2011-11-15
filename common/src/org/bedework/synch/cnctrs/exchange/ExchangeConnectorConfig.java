@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.cnctrs.ConnectorConfig;
+import org.bedework.synch.db.ConnectorConfig;
 
 /** Exchange synch connector config
 *

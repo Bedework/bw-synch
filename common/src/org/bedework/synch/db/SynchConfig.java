@@ -16,16 +16,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.db;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
-public class SynchConfig implements Serializable {
+public class SynchConfig extends DbItem<SynchConfig> {
   /* Size of synchling pool */
   private int synchlingPoolSize;
 
@@ -188,5 +187,23 @@ public class SynchConfig implements Serializable {
    */
   public Map<String, String> getConnectors() {
     return connectors;
+  }
+
+  /* ====================================================================
+   *                   Object methods
+   * We only allow one of these in teh db so any and all are equal.
+   * ==================================================================== */
+
+  /* (non-Javadoc)
+   * @see java.lang.Comparable#compareTo(java.lang.Object)
+   */
+  @Override
+  public int compareTo(final SynchConfig o) {
+    return 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return 4;
   }
 }

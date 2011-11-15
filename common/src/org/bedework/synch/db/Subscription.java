@@ -16,9 +16,11 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.db;
 
+import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
+import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
@@ -75,11 +77,7 @@ import java.util.UUID;
  * @author Mike Douglass
  */
 @SuppressWarnings("rawtypes")
-public class Subscription implements Comparable<Subscription> {
-  private long id;
-
-  private int seq;
-
+public class Subscription extends DbItem<Subscription> {
   private String owner;
 
   private String subscriptionId;
@@ -149,43 +147,6 @@ public class Subscription implements Comparable<Subscription> {
     } else {
       this.subscriptionId = subscriptionId;
     }
-  }
-
-  /**
-   * @param val
-   */
-  public void setId(final Long val) {
-    id = val;
-  }
-
-  /**
-   * @return Long id
-   */
-  public Long getId() {
-    return id;
-  }
-
-  /**
-   * @return true if this entity is not saved.
-   */
-  public boolean unsaved() {
-    return getId() == null;
-  }
-
-  /** Set the seq for this entity
-   *
-   * @param val    int seq
-   */
-  public void setSeq(final Integer val) {
-    seq = val;
-  }
-
-  /** Get the entity seq
-   *
-   * @return int    the entity seq
-   */
-  public Integer getSeq() {
-    return seq;
   }
 
   /** Our generated subscriptionId.
@@ -597,13 +558,10 @@ public class Subscription implements Comparable<Subscription> {
   }
 
   @Override
-  public boolean equals(final Object o) {
-    return compareTo((Subscription)o) == 0;
-  }
-
-  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+
+    super.toStringSegment(sb);
 
     toStringSegment(sb, "  ");
 

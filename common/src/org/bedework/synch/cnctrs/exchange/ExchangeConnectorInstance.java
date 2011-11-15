@@ -19,7 +19,6 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.Subscription;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
@@ -28,6 +27,7 @@ import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 

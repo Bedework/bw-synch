@@ -20,9 +20,9 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
-import org.bedework.synch.SerializableProperties;
-import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchPropertyInfo;
+import org.bedework.synch.db.SerializableProperties;
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;

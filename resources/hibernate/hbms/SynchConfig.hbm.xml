@@ -4,22 +4,12 @@
   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <!-- ===================================================================
-     Object to represent a synch subscription.
+     Object to represent the configuration state of the synch engine.
      =================================================================== -->
 
 <hibernate-mapping>
-  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-           name="direction">
-    <param name="enumClassname">org.bedework.synch.wsmessages.SynchDirectionType</param>
-  </typedef>
-  
-  <typedef class="edu.rpi.cmt.db.hibernate.GenericEnumUserType"
-           name="master">
-    <param name="enumClassname">org.bedework.synch.wsmessages.SynchMasterType</param>
-  </typedef>
-  
-  <class name="org.bedework.synch.db.Subscription"
-         table="bwsynch_subs" >
+  <class name="org.bedework.synch.db.SynchConfig"
+         table="bwsynch_config" >
     <cache usage="read-write"/>
     
     <id name="id" type="long" column="bwsyn_id">
@@ -30,10 +20,29 @@
 
     <version name="seq" column="bwsyn_seq" type="integer" />
 
-    <property name="subscriptionId" column="bwsyn_subid" type="string" length="250"
-              unique="true"
-              not-null="true"
-              index="bwsynidx_subid" />
+    <property name="synchlingPoolSize" 
+              column="bwsyn_sling_poolsv" type="integer" />
+
+    <property name="synchlingPoolTimeout" 
+              column="bwsyn_sling_pooltout" type="long" />
+
+    <property name="missingTargetRetries" 
+              column="bwsyn_missing_retries" type="integer" />
+
+    <property name="callbackURI" column="bwsyn_callback_uri" 
+              type="string" length="1000" />
+
+    <property name="timezonesURI" column="bwsyn_tzs_uri" 
+              type="string" length="1000" />
+
+    <property name="keystore" column="bwsyn_keystore" 
+              type="string" length="1000" />
+
+    <property name="privKeys" column="bwsyn_privKeys" 
+              type="string" length="1000" />
+
+    <property name="pubKeys" column="bwsyn_pubKeys" 
+              type="string" length="1000" />
 
     <property name="owner" column="bwsyn_owner" type="string" length="500"
               not-null="true"
@@ -47,7 +56,7 @@
               type="true_false" not-null="true" />
 
     <component name="endAConnectorInfo"
-               class="org.bedework.synch.db.SubscriptionConnectorInfo" >
+               class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_a" 
                 type="string" length="100" />
       <property name="synchProperties" column="bwsyn_conn_props_a" 
@@ -55,7 +64,7 @@
     </component>
 
     <component name="endBConnectorInfo"
-               class="org.bedework.synch.db.SubscriptionConnectorInfo" >
+               class="org.bedework.synch.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_b" 
                 type="string" length="100" />
       <property name="synchProperties" column="bwsyn_conn_props_b" 
@@ -63,7 +72,7 @@
     </component>
 
     <component name="info"
-               class="org.bedework.synch.db.SubscriptionInfo" >
+               class="org.bedework.synch.SubscriptionInfo" >
       <property name="synchProperties" column="bwsyn_props" 
                 type="string" length="3000" />
     </component>

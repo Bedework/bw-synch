@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.file;
 
-import org.bedework.synch.cnctrs.ConnectorConfig;
+import org.bedework.synch.db.ConnectorConfig;
 
 /** File synch connector config
  *

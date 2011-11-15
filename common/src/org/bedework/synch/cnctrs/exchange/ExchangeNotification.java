@@ -19,7 +19,7 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.Notification;
-import org.bedework.synch.Subscription;
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 

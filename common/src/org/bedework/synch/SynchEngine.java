@@ -21,6 +21,9 @@ package org.bedework.synch;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.db.Subscription;
+import org.bedework.synch.db.SynchConfig;
+import org.bedework.synch.db.SynchDb;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 

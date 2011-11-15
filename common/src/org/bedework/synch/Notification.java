@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;

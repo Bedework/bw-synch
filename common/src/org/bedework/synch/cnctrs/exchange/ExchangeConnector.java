@@ -18,12 +18,12 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.Subscription;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 

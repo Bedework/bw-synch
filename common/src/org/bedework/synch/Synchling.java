@@ -23,6 +23,7 @@ import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
+import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;

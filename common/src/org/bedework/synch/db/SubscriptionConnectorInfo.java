@@ -16,11 +16,12 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch;
+package org.bedework.synch.db;
+
 
 
 /** Serializable form of information for a connection to a system via a
- * connector - a connector id and the serialized proeprties.
+ * connector - a connector id and the serialized properties.
  *
  * @author douglm
  */
