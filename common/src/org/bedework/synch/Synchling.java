@@ -49,6 +49,7 @@ import ietf.params.xml.ns.icalendar_2.AttendeePropType;
 import ietf.params.xml.ns.icalendar_2.BaseComponentType;
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import ietf.params.xml.ns.icalendar_2.MethodPropType;
 import ietf.params.xml.ns.icalendar_2.OrganizerPropType;
 import ietf.params.xml.ns.icalendar_2.ValarmType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
@@ -61,6 +62,7 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
+
 
 /** The synchling handles the processing of a single subscription when there is
  * some activity.
@@ -84,8 +86,8 @@ public class Synchling {
 
   private SynchEngine syncher;
 
-  private XmlIcalCompare diff = new XmlIcalCompare(XmlIcalCompare.defaultSkipList,
-                                                   SynchEngine.getTzGetter());
+  private XmlIcalCompare diff;
+
   // Subscription id used when getting the diff object.
   private String diffSubid;
 
@@ -1013,6 +1015,8 @@ public class Synchling {
 
     /* First the defaults */
     addSkips(skipMap, XmlIcalCompare.defaultSkipList);
+    addSkip(skipMap, new MethodPropType());
+
     makeStripMap(skipMap, sub);
 
     addSkips(skipMap, sub.getEndAConn().getSkipList());
@@ -1020,16 +1024,26 @@ public class Synchling {
 
     List<Object> skipList = new ArrayList<Object>(skipMap.values());
 
-    diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
     diffSubid = sub.getSubscriptionId();
+    diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
     return diff;
   }
 
+  /** This adds the properties we are going to strip out of an event we add to
+   * either end. This depends upon the global subscription properties. These are
+   * also properties we ignore when comparing entries.
+   *
+   * @param stripMap
+   * @param sub
+   * @throws SynchException
+   */
   private static void makeStripMap(final Map<String, Object> stripMap,
                                    final Subscription sub) throws SynchException {
     if (sub.getInfo() == null) {
       return;
     }
+
+    addSkip(stripMap, new MethodPropType());
 
     /* Any needed for stuff we skip */
     if (sub.getInfo().getStripAlarms()) {
