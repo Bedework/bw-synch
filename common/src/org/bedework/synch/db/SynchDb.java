@@ -97,6 +97,70 @@ public class SynchDb implements Serializable {
     }
   }
 
+  /* ====================================================================
+   *                   Config Object methods
+   * ==================================================================== */
+
+  /**
+   * @return SynchConfig
+   * @throws SynchException
+   */
+  public SynchConfig getConfig() throws SynchException {
+    try {
+      StringBuilder sb = new StringBuilder();
+
+      sb.append("from ");
+      sb.append(SynchConfig.class.getName());
+
+      sess.createQuery(sb.toString());
+
+      @SuppressWarnings("unchecked")
+      List<SynchConfig> scs = sess.getList();
+
+      if (scs.size() == 0) {
+        return null;
+      }
+
+      if (scs.size() == 1) {
+        return scs.get(0);
+      }
+
+      throw new SynchException("Expect only 1 synch config element");
+    } catch (HibException he) {
+      throw new SynchException(he);
+    }
+  }
+
+  /** Add the synch config.
+   *
+   * @param sc
+   * @throws SynchException
+   */
+  public void add(final SynchConfig sc) throws SynchException {
+    try {
+      sess.save(sc);
+    } catch (HibException he) {
+      throw new SynchException(he);
+    }
+  }
+
+  /** Update the persisted state of the config.
+   *
+   * @param sc
+   * @throws SynchException
+   */
+  public void update(final SynchConfig sc) throws SynchException {
+    try {
+      sess.update(sc);
+    } catch (HibException he) {
+      throw new SynchException(he);
+    }
+  }
+
+  /* ====================================================================
+   *                   Subscription Object methods
+   * ==================================================================== */
+
   /**
    * @return list of subscriptions
    * @throws SynchException

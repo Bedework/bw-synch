@@ -18,96 +18,122 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
+import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.exception.SynchException;
+
+import edu.rpi.sss.util.ToString;
 
 /** Bedework synch connector config
  *
  * @author douglm
  */
-public class BedeworkConnectorConfig extends ConnectorConfig {
-  /* WSDL for remote service */
-  private String bwWSDLURI;
+public class BedeworkConnectorConfig
+    extends ConnectorConfigWrapper<BedeworkConnectorConfig> {
+  /** WSDL for remote service */
+  private static final String propBwWSDLURI = "bwWSDLURI";
 
-  private int retryInterval;
+  /** seconds before retry on failure  */
+  private static final String propRetryInterval = "retryInterval";
 
-  private int keepAliveInterval;
+  /** seconds before we ping just to say we're still around  */
+  private static final String propKeepAliveInterval = "keepAliveInterval";
+
+  /**
+   * @param conf
+   */
+  public BedeworkConnectorConfig(final ConnectorConfig conf) {
+    super(conf);
+  }
 
   /** bedework web service WSDL uri
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setBwWSDLURI(final String val) {
-    bwWSDLURI = val;
+  public void setBwWSDLURI(final String val) throws SynchException {
+    setProperty(propBwWSDLURI, val);
   }
 
   /** Bedework web service WSDL uri
    *
    * @return String
+   * @throws SynchException
    */
-  public String getBwWSDLURI() {
-    return bwWSDLURI;
+  public String getBwWSDLURI() throws SynchException {
+    return getPropertyValue(propBwWSDLURI);
   }
 
   /** retryInterval - seconds
    *
    * @param val    int seconds
+   * @throws SynchException
    */
-  public void setRetryInterval(final int val) {
-    retryInterval = val;
+  public void setRetryInterval(final int val) throws SynchException {
+    setProperty(propRetryInterval, String.valueOf(val));
   }
 
   /** retryInterval - seconds
    *
    * @return int seconds
+   * @throws SynchException
    */
-  public int getRetryInterval() {
-    return retryInterval;
+  public int getRetryInterval() throws SynchException {
+    Integer i = getIntPropertyValue(propRetryInterval);
+
+    if (i == null) {
+      return 0;
+    }
+
+    return i.intValue();
   }
 
   /** KeepAliveInterval - seconds
    *
    * @param val    int seconds
+   * @throws SynchException
    */
-  public void setKeepAliveInterval(final int val) {
-    keepAliveInterval = val;
+  public void setKeepAliveInterval(final int val) throws SynchException {
+    setProperty(propKeepAliveInterval, String.valueOf(val));
   }
 
   /** KeepAliveInterval - seconds
    *
    * @return int seconds
+   * @throws SynchException
    */
-  public int getKeepAliveInterval() {
-    return keepAliveInterval;
+  public int getKeepAliveInterval() throws SynchException {
+    Integer i = getIntPropertyValue(propKeepAliveInterval);
+
+    if (i == null) {
+      return 0;
+    }
+
+    return i.intValue();
   }
 
   /** Add our stuff to the StringBuilder
    *
-   * @param sb    StringBuilder for result
+   * @param ts    ToString for result
    */
-  @Override
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
-    super.toStringSegment(sb, indent);
+  protected void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts.getSb(), "  ");
 
-    sb.append(",");
-    sb.append(indent);
-    sb.append("bwWSDLURI = ");
-    sb.append(getBwWSDLURI());
-
-    sb.append("retryInterval = ");
-    sb.append(getRetryInterval());
-
-    sb.append("keepAliveInterval = ");
-    sb.append(getKeepAliveInterval());
+    try {
+      ts.append("bwWSDLURI", getBwWSDLURI()).
+        append("retryInterval", getRetryInterval()).
+        append("keepAliveInterval", getKeepAliveInterval());
+    } catch (SynchException e) {
+      ts.append(e);
+    }
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    ToString ts = new ToString(this);
 
-    toStringSegment(sb, "  ");
+    toStringSegment(ts);
 
-    sb.append("}");
-    return sb.toString();
+    return ts.toString();
   }
 }

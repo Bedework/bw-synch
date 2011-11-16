@@ -21,6 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
+import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SynchConfig;
 import org.bedework.synch.db.SynchDb;
@@ -37,8 +38,6 @@ import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -120,13 +119,6 @@ public class SynchEngine extends TzGetter {
 
   private static String appname = "Synch";
 
-  private static final String synchConfigPath = "/properties/synch/synch-config.xml";
-
-  /* Config bean name */
-  private static String synchConfigName = "synchConfig";
-
-  private ApplicationContext appContext;
-
   private transient PwEncryptionIntf pwEncrypt;
 
   /* Map of currently active notification subscriptions. These are subscriptions
@@ -141,7 +133,7 @@ public class SynchEngine extends TzGetter {
 
   private boolean stopping;
 
-  private SynchConfig config;
+  private Configurator config;
 
   private static Object getSyncherLock = new Object();
 
@@ -268,25 +260,6 @@ public class SynchEngine extends TzGetter {
 
     System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
                        String.valueOf(debug));
-
-    appContext = new ClassPathXmlApplicationContext(synchConfigPath);
-
-    config = (SynchConfig)appContext.getBean(synchConfigName);
-
-    if ((config.getCallbackURI() != null) &&
-        !config.getCallbackURI().endsWith("/")) {
-      throw new SynchException("callbackURI MUST end with '/'");
-    }
-
-    timezones = new TimezonesImpl();
-    timezones.init(config.getTimezonesURI());
-
-    tzgetter = this;
-
-    synchlingPool = new SynchlingPool();
-    synchlingPool.start(this,
-                        config.getSynchlingPoolSize(),
-                        config.getSynchlingPoolTimeout());
   }
 
   /**
@@ -358,30 +331,46 @@ public class SynchEngine extends TzGetter {
         starting = true;
       }
 
+      db = new SynchDb();
+      config = new Configurator(db);
+
+      timezones = new TimezonesImpl();
+      timezones.init(config.getSynchConfig().getTimezonesURI());
+
+      tzgetter = this;
+
+      synchlingPool = new SynchlingPool();
+      synchlingPool.start(this,
+                          config.getSynchConfig().getSynchlingPoolSize(),
+                          config.getSynchConfig().getSynchlingPoolTimeout());
+
       notificationInQueue = new ArrayBlockingQueue<Notification>(100);
 
       info("**************************************************");
       info("Starting synch");
-      info("      callback URI: " + config.getCallbackURI());
+      info("      callback URI: " + config.getSynchConfig().getCallbackURI());
       info("**************************************************");
 
-      if (config.getKeystore() != null) {
-        System.setProperty("javax.net.ssl.trustStore", config.getKeystore());
+      if (config.getSynchConfig().getKeystore() != null) {
+        System.setProperty("javax.net.ssl.trustStore", config.getSynchConfig().getKeystore());
         System.setProperty("javax.net.ssl.trustStorePassword", "bedework");
       }
 
-      Map<String, String> connectors = config.getConnectors();
+      Set<ConnectorConfig> connectors = config.getSynchConfig().getConnectors();
+      String callbackUriBase = config.getSynchConfig().getCallbackURI();
 
       /* Register the connectors and start them */
-      for (String cnctrId: connectors.keySet()) {
+      for (ConnectorConfig conf: connectors) {
+        String cnctrId = conf.getName();
         info("Register and start connector " + cnctrId);
 
-        registerConnector(cnctrId, connectors.get(cnctrId));
+        registerConnector(cnctrId, conf);
 
         Connector conn = getConnector(cnctrId);
 
         conn.start(cnctrId,
-                   config.getCallbackURI() + cnctrId + "/",
+                   conf,
+                   callbackUriBase + cnctrId + "/",
                    this);
 
         while (!conn.isStarted()) {
@@ -405,8 +394,6 @@ public class SynchEngine extends TzGetter {
 
       notifyInHandler = new NotificationInThread();
       notifyInHandler.start();
-
-      db = new SynchDb();
 
       try {
         db.open();
@@ -490,13 +477,6 @@ public class SynchEngine extends TzGetter {
   }
 
   /**
-   * @return Spring framework application context.
-   */
-  public ApplicationContext getAppContext() {
-    return appContext;
-  }
-
-  /**
    * @return stats for synch service bean
    */
   public List<Stat> getStats() {
@@ -537,30 +517,8 @@ public class SynchEngine extends TzGetter {
 
     info("Connectors stopped");
 
-    long maxWait = 1000 * 90; // 90 seconds - needs to be longer than longest poll interval
-    long startTime = System.currentTimeMillis();
-    long delay = 1000 * 5; // 5 sec delay
-
-    while (synchlingPool.getActiveCt() > 0) {
-      if ((System.currentTimeMillis() - startTime) > maxWait) {
-        warn("**************************************************");
-        warn("Synch shutdown completed with " +
-            synchlingPool.getActiveCt() + " active synchlings");
-        warn("**************************************************");
-
-        break;
-      }
-
-      info("**************************************************");
-      info("Synch shutdown - " +
-           synchlingPool.getActiveCt() + " active synchlings");
-      info("**************************************************");
-
-      try {
-        wait(delay);
-      } catch (InterruptedException ie) {
-        maxWait = 0; // Force exit
-      }
+    if (synchlingPool != null) {
+      synchlingPool.stop();
     }
 
     syncher = null;
@@ -591,9 +549,10 @@ public class SynchEngine extends TzGetter {
 
   /**
    * @return config object
+   * @throws SynchException
    */
-  public SynchConfig getConfig() {
-    return config;
+  public SynchConfig getConfig() throws SynchException {
+    return config.getSynchConfig();
   }
 
   /**
@@ -627,9 +586,12 @@ public class SynchEngine extends TzGetter {
       pwEncrypt = (PwEncryptionIntf)Util.getObject(pwEncryptClass,
                                                    PwEncryptionIntf.class);
 
-      pwEncrypt.init(config.getPrivKeys(), config.getPubKeys());
+      pwEncrypt.init(config.getSynchConfig().getPrivKeys(),
+                     config.getSynchConfig().getPubKeys());
 
       return pwEncrypt;
+    } catch (SynchException se) {
+      throw se;
     } catch (Throwable t) {
       t.printStackTrace();
       throw new SynchException(t);
@@ -726,9 +688,9 @@ public class SynchEngine extends TzGetter {
   }
 
   private void registerConnector(final String id,
-                                 final String className) throws SynchException {
+                                 final ConnectorConfig conf) throws SynchException {
     try {
-      Class cl = Class.forName(className);
+      Class cl = Class.forName(conf.getClassName());
 
       if (connectorMap.containsKey(id)) {
         throw new SynchException("Connector " + id + " already registered");
@@ -780,7 +742,7 @@ public class SynchEngine extends TzGetter {
       return st;
     }
 
-    if (sub.getErrorCt() > config.getMissingTargetRetries()) {
+    if (sub.getErrorCt() > config.getSynchConfig().getMissingTargetRetries()) {
       deleteSubscription(sub);
       info("Subscription deleted after missing target retries exhausted: " + sub);
     }

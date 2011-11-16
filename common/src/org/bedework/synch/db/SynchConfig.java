@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.db;
 
-import java.util.Map;
+import java.util.Set;
 
 /** This class defines the various properties we need for the synch engine
  *
@@ -48,7 +48,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
   /* Path to keystores  */
   private String pubKeys;
 
-  private Map<String, String> connectors;
+  private Set<ConnectorConfig> connectors;
 
   /**
    * @param val current size of synchling pool
@@ -177,15 +177,15 @@ public class SynchConfig extends DbItem<SynchConfig> {
    *
    * @param val
    */
-  public void setConnectors(final Map<String, String> val) {
+  public void setConnectors(final Set<ConnectorConfig> val) {
     connectors = val;
   }
 
-  /** Map of (name, className)
+  /** Set<ConnectorConfig>
    *
    * @return map
    */
-  public Map<String, String> getConnectors() {
+  public Set<ConnectorConfig> getConnectors() {
     return connectors;
   }
 

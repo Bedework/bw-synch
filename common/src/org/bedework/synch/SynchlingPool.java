@@ -22,6 +22,8 @@ package org.bedework.synch;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.exception.SynchTimeout;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,8 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class SynchlingPool {
+  protected transient Logger log;
+
   private SynchEngine syncher;
 
   private ArrayBlockingQueue<Synchling> pool;
@@ -62,6 +66,36 @@ public class SynchlingPool {
     this.syncher = syncher;
     this.timeout = timeout;
     resize(size);
+  }
+
+  /** Shut down active synchlings
+   */
+  public void stop() {
+    long maxWait = 1000 * 90; // 90 seconds - needs to be longer than longest poll interval
+    long startTime = System.currentTimeMillis();
+    long delay = 1000 * 5; // 5 sec delay
+
+    while (getActiveCt() > 0) {
+      if ((System.currentTimeMillis() - startTime) > maxWait) {
+        warn("**************************************************");
+        warn("Synch shutdown completed with " +
+            getActiveCt() + " active synchlings");
+        warn("**************************************************");
+
+        break;
+      }
+
+      info("**************************************************");
+      info("Synch shutdown - " +
+           getActiveCt() + " active synchlings");
+      info("**************************************************");
+
+      try {
+        wait(delay);
+      } catch (InterruptedException ie) {
+        maxWait = 0; // Force exit
+      }
+    }
   }
 
   /** Resize the pool
@@ -257,5 +291,25 @@ public class SynchlingPool {
     sb.append("}");
 
     return sb.toString();
+  }
+
+  /* ====================================================================
+   *                        private methods
+   * ==================================================================== */
+
+  private Logger getLogger() {
+    if (log == null) {
+      log = Logger.getLogger(this.getClass());
+    }
+
+    return log;
+  }
+
+  private void info(final String msg) {
+    getLogger().info(msg);
+  }
+
+  private void warn(final String msg) {
+    getLogger().warn(msg);
   }
 }

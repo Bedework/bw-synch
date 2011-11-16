@@ -22,6 +22,7 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
+import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
@@ -64,11 +65,13 @@ public interface Connector<C extends ConnectorInstance,
    * active subscription for which the callback is intended.
    *
    * @param connectorId - registered id for the connector
+   * @param conf
    * @param callbackUri
    * @param syncher
    * @throws SynchException
    */
   void start(String connectorId,
+             ConnectorConfig conf,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
 

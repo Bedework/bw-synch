@@ -18,51 +18,72 @@
 */
 package org.bedework.synch.cnctrs.file;
 
+import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.exception.SynchException;
+
+import edu.rpi.sss.util.ToString;
 
 /** File synch connector config
  *
  * @author douglm
  */
-public class FileConnectorConfig extends ConnectorConfig {
-  private int minPoll;
+public class FileConnectorConfig
+  extends ConnectorConfigWrapper<FileConnectorConfig> {
+  /** Min polling interval - seconds */
+  private static final String propMinPoll = "minPoll";
+
+  /**
+   * @param conf
+   */
+  public FileConnectorConfig(final ConnectorConfig conf) {
+    super(conf);
+  }
 
   /** Min poll - seconds
    *
    * @param val    int seconds
+   * @throws SynchException
    */
-  public void setMinPoll(final int val) {
-    minPoll = val;
+  public void setMinPoll(final int val) throws SynchException {
+    setProperty(propMinPoll, String.valueOf(val));
   }
 
-  /** KeepAliveInterval - seconds
+  /** Min poll - seconds
    *
    * @return int seconds
+   * @throws SynchException
    */
-  public int getMinPoll() {
-    return minPoll;
+  public int getMinPoll() throws SynchException {
+    Integer i = getIntPropertyValue(propMinPoll);
+
+    if (i == null) {
+      return 60;
+    }
+
+    return i.intValue();
   }
 
   /** Add our stuff to the StringBuilder
    *
    * @param sb    StringBuilder for result
    */
-  @Override
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
-    super.toStringSegment(sb, indent);
+  protected void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts.getSb(), "  ");
 
-    sb.append(", minPoll = ");
-    sb.append(getMinPoll());
+    try {
+      ts.append(propMinPoll, getMinPoll());
+    } catch (SynchException e) {
+      ts.append(e);
+    }
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    ToString ts = new ToString(this);
 
-    toStringSegment(sb, "  ");
+    toStringSegment(ts);
 
-    sb.append("}");
-    return sb.toString();
+    return ts.toString();
   }
 }

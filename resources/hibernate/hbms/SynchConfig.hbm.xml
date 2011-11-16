@@ -44,44 +44,12 @@
     <property name="pubKeys" column="bwsyn_pubKeys" 
               type="string" length="1000" />
 
-    <property name="owner" column="bwsyn_owner" type="string" length="500"
-              not-null="true"
-              index="bwsynidx_subowner" />
-
-    <property name="lastRefresh" column="bwsyn_lrefresh" type="string" length="20" />
-
-    <property name="errorCt" column="bwsyn_errorct" type="integer" />
-
-    <property name="missingTarget" column="bwsyn_missing" 
-              type="true_false" not-null="true" />
-
-    <component name="endAConnectorInfo"
-               class="org.bedework.synch.SubscriptionConnectorInfo" >
-      <property name="connectorId" column="bwsyn_connectorid_a" 
-                type="string" length="100" />
-      <property name="synchProperties" column="bwsyn_conn_props_a" 
-                type="string" length="3000" />
-    </component>
-
-    <component name="endBConnectorInfo"
-               class="org.bedework.synch.SubscriptionConnectorInfo" >
-      <property name="connectorId" column="bwsyn_connectorid_b" 
-                type="string" length="100" />
-      <property name="synchProperties" column="bwsyn_conn_props_b" 
-                type="string" length="3000" />
-    </component>
-
-    <component name="info"
-               class="org.bedework.synch.SubscriptionInfo" >
-      <property name="synchProperties" column="bwsyn_props" 
-                type="string" length="3000" />
-    </component>
-
-    <property name="direction" column="bwsyn_dir" type="direction" length="25"
-              not-null="true" />
-
-    <property name="master" column="bwsyn_mstr" type="master"  length="25"
-              not-null="true" />
+    <set name="connectors" table="bwsyn_connectors"
+         cascade="all,delete-orphan"
+         lazy="false">
+      <key column="bwsyncnctr_id" foreign-key="bwsynconn_fk" />
+      <one-to-many class="org.bedework.synch.db.ConnectorConfig" />
+    </set>
   </class>
 </hibernate-mapping>
 

@@ -16,29 +16,38 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.db;
+package org.bedework.synch.cnctrs;
 
+import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.db.ConnectorConfigI;
+import org.bedework.synch.db.SynchProperty;
 import org.bedework.synch.exception.SynchException;
 
-import java.util.Collection;
 import java.util.Set;
-import java.util.TreeSet;
 
 /** Common connector config properties
  *
  * @author douglm
+ *
+ * @param <T>
  */
-public class ConnectorConfig
-      extends DbItem<ConnectorConfig> implements ConnectorConfigI {
-  private String name;
+public class ConnectorConfigWrapper<T extends ConnectorConfigWrapper>
+      implements Comparable<T>, ConnectorConfigI {
+  ConnectorConfig conf;
 
-  private String className;
+  /**
+   * @param conf
+   */
+  public ConnectorConfigWrapper(final ConnectorConfig conf) {
+    this.conf = conf;
+  }
 
-  private boolean readOnly;
-
-  private boolean trustLastmod;
-
-  private Set<SynchProperty> properties;
+  /**
+   * @return the wrapped object
+   */
+  public ConnectorConfig unwrap() {
+    return conf;
+  }
 
   /** Connector name - unique key
    *
@@ -46,7 +55,7 @@ public class ConnectorConfig
    */
   @Override
   public void setName(final String val) {
-    name = val;
+    conf.setName(val);
   }
 
   /** Connector name - unique key
@@ -55,7 +64,7 @@ public class ConnectorConfig
    */
   @Override
   public String getName() {
-    return name;
+    return conf.getName();
   }
 
   /** Class name
@@ -64,7 +73,7 @@ public class ConnectorConfig
    */
   @Override
   public void setClassName(final String val) {
-    className = val;
+    conf.setClassName(val);
   }
 
   /** Class name
@@ -73,7 +82,7 @@ public class ConnectorConfig
    */
   @Override
   public String getClassName() {
-    return className;
+    return conf.getClassName();
   }
 
   /** Read only?
@@ -82,7 +91,7 @@ public class ConnectorConfig
    */
   @Override
   public void setReadOnly(final boolean val) {
-    readOnly = val;
+    conf.setReadOnly(val);
   }
 
   /** Read only?
@@ -91,7 +100,7 @@ public class ConnectorConfig
    */
   @Override
   public boolean getReadOnly() {
-    return readOnly;
+    return conf.getReadOnly();
   }
 
   /** Can we trust the lastmod from this connector?
@@ -100,7 +109,7 @@ public class ConnectorConfig
    */
   @Override
   public void setTrustLastmod(final boolean val) {
-    trustLastmod = val;
+    conf.setTrustLastmod(val);
   }
 
   /** Can we trust the lastmod from this connector?
@@ -109,7 +118,7 @@ public class ConnectorConfig
    */
   @Override
   public boolean getTrustLastmod() {
-    return trustLastmod;
+    return conf.getTrustLastmod();
   }
 
   /* ====================================================================
@@ -121,7 +130,7 @@ public class ConnectorConfig
    */
   @Override
   public void setProperties(final Set<SynchProperty> val) {
-    properties = val;
+    conf.setProperties(val);
   }
 
   /**
@@ -129,7 +138,7 @@ public class ConnectorConfig
    */
   @Override
   public Set<SynchProperty> getProperties() {
-    return properties;
+    return conf.getProperties();
   }
 
   /**
@@ -138,19 +147,7 @@ public class ConnectorConfig
    */
   @Override
   public Set<SynchProperty> getProperties(final String name) {
-    TreeSet<SynchProperty> ps = new TreeSet<SynchProperty>();
-
-    if (getNumProperties() == 0) {
-      return null;
-    }
-
-    for (SynchProperty p: getProperties()) {
-      if (p.getName().equals(name)) {
-        ps.add(p);
-      }
-    }
-
-    return ps;
+    return conf.getProperties(name);
   }
 
   /** Remove all with given name
@@ -159,15 +156,7 @@ public class ConnectorConfig
    */
   @Override
   public void removeProperties(final String name) {
-    Set<SynchProperty> ps = getProperties(name);
-
-    if (ps == null) {
-      return;
-    }
-
-    for (SynchProperty p: ps) {
-      removeProperty(p);
-    }
+    conf.removeProperties(name);
   }
 
   /**
@@ -175,100 +164,45 @@ public class ConnectorConfig
    */
   @Override
   public int getNumProperties() {
-    Collection<SynchProperty> c = getProperties();
-    if (c == null) {
-      return 0;
-    }
-
-    return c.size();
+    return conf.getNumProperties();
   }
 
+  /**
+   * @param name
+   * @return property or null
+   */
   @Override
   public SynchProperty findProperty(final String name) {
-    Collection<SynchProperty> props = getProperties();
-
-    if (props == null) {
-      return null;
-    }
-
-    for (SynchProperty prop: props) {
-      if (name.equals(prop.getName())) {
-        return prop;
-      }
-    }
-
-    return null;
+    return conf.findProperty(name);
   }
 
   @Override
   public void setProperty(final String name,
                           final String value) throws SynchException {
-    Set<SynchProperty> ps = getProperties(name);
-
-    if (ps.size() == 0) {
-      addProperty(new SynchProperty(name, value));
-      return;
-    }
-
-    if (ps.size() > 1) {
-      throw new SynchException("Multiple values for single valued property " + name);
-    }
-
-    SynchProperty p = ps.iterator().next();
-
-    if (!p.getValue().equals(value)) {
-      p.setValue(value);
-    }
+    conf.setProperty(name, value);
   }
 
   @Override
   public String getPropertyValue(final String name) throws SynchException {
-    Set<SynchProperty> ps = getProperties(name);
-
-    if (ps.size() == 0) {
-      return null;
-    }
-
-    if (ps.size() > 1) {
-      throw new SynchException("Multiple values for single valued property " + name);
-    }
-
-    return ps.iterator().next().getValue();
+    return  conf.getPropertyValue(name);
   }
 
   @Override
   public Integer getIntPropertyValue(final String name) throws SynchException {
-    String s = getPropertyValue(name);
-
-    if (s == null) {
-      return null;
-    }
-
-    return Integer.valueOf(s);
+    return conf.getIntPropertyValue(name);
   }
 
   @Override
   public Long getLongPropertyValue(final String name) throws SynchException {
-    String s = getPropertyValue(name);
-
-    if (s == null) {
-      return null;
-    }
-
-    return Long.valueOf(s);
+    return conf.getLongPropertyValue(name);
   }
 
+  /**
+   * @param val
+   */
   @Override
   public void addProperty(final SynchProperty val) {
-    Set<SynchProperty> c = getProperties();
-    if (c == null) {
-      c = new TreeSet<SynchProperty>();
-      setProperties(c);
-    }
-
-    if (!c.contains(val)) {
-      c.add(val);
-    }
+    conf.addProperty(val);
   }
 
   /**
@@ -277,12 +211,7 @@ public class ConnectorConfig
    */
   @Override
   public boolean removeProperty(final SynchProperty val) {
-    Set<SynchProperty> c = getProperties();
-    if (c == null) {
-      return false;
-    }
-
-    return c.remove(val);
+    return conf.removeProperty(val);
   }
 
   /**
@@ -290,16 +219,7 @@ public class ConnectorConfig
    */
   @Override
   public Set<SynchProperty> copyProperties() {
-    if (getNumProperties() == 0) {
-      return null;
-    }
-    TreeSet<SynchProperty> ts = new TreeSet<SynchProperty>();
-
-    for (SynchProperty p: getProperties()) {
-      ts.add(p);
-    }
-
-    return ts;
+    return conf.copyProperties();
   }
 
   /**
@@ -307,38 +227,16 @@ public class ConnectorConfig
    */
   @Override
   public Set<SynchProperty> cloneProperties() {
-    if (getNumProperties() == 0) {
-      return null;
-    }
-    TreeSet<SynchProperty> ts = new TreeSet<SynchProperty>();
-
-    for (SynchProperty p: getProperties()) {
-      ts.add((SynchProperty)p.clone());
-    }
-
-    return ts;
+    return conf.cloneProperties();
   }
 
   /** Add our stuff to the StringBuilder
    *
    * @param sb    StringBuilder for result
-   * @param indent
    */
-  public void toStringSegment(final StringBuilder sb,
+  protected void toStringSegment(final StringBuilder sb,
                                  final String indent) {
-    sb.append("name = ");
-    sb.append(getName());
-
-    sb.append(", className = ");
-    sb.append(getClassName());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("readOnly = ");
-    sb.append(getReadOnly());
-
-    sb.append(", trustLastmod = ");
-    sb.append(getTrustLastmod());
+    conf.toStringSegment(sb, indent);
   }
 
   /* ====================================================================
@@ -346,26 +244,18 @@ public class ConnectorConfig
    * We only allow one of these in teh db so any and all are equal.
    * ==================================================================== */
 
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
   @Override
-  public int compareTo(final ConnectorConfig that) {
-    return getName().compareTo(that.getName());
+  public int compareTo(final T that) {
+    return unwrap().compareTo(that.unwrap());
   }
 
   @Override
   public int hashCode() {
-    return getName().hashCode();
+    return unwrap().hashCode();
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
-
-    toStringSegment(sb, "  ");
-
-    sb.append("}");
-    return sb.toString();
+    return unwrap().toString();
   }
 }

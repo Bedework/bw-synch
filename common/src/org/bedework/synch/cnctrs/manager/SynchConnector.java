@@ -27,6 +27,7 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
+import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.db.SubscriptionInfo;
@@ -108,6 +109,7 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
 
   @Override
   public void start(final String connectorId,
+                    final ConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
     this.connectorId = connectorId;

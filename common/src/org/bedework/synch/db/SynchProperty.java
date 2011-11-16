@@ -93,7 +93,8 @@ public class SynchProperty extends DbItem<SynchProperty> {
    * @param c
    * @return BwProperty or null if no strings.
    */
-  public static SynchProperty findName(final String name, final Collection<SynchProperty> c) {
+  public static SynchProperty findName(final String name,
+                                       final Collection<SynchProperty> c) {
     if (c == null) {
       return null;
     }

@@ -12,6 +12,8 @@
     <property name="hibernate.query.substitutions">true 'T', false 'F', yes 'Y', no 'N'</property>
 
     <!-- Mapping files -->
+    <mapping resource="SynchConfig.hbm.xml"/>
+    <mapping resource="ConnectorConfig.hbm.xml"/>
     <mapping resource="Subscription.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

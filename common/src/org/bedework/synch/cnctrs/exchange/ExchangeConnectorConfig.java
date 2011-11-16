@@ -18,53 +18,66 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.exception.SynchException;
+
+import edu.rpi.sss.util.ToString;
 
 /** Exchange synch connector config
 *
 * @author douglm
 */
-public class ExchangeConnectorConfig extends ConnectorConfig {
-  private String exchangeWSDLURI;
+public class ExchangeConnectorConfig
+  extends ConnectorConfigWrapper<ExchangeConnectorConfig> {
+  /** WSDL for remote service */
+  private static final String propExchangeWSDLURI = "exchangeWSDLURI";
+
+  /**
+   * @param conf
+   */
+  public ExchangeConnectorConfig(final ConnectorConfig conf) {
+    super(conf);
+  }
 
   /** Exchange web service WSDL uri
    *
    * @param val    String
+   * @throws SynchException
    */
-  public void setExchangeWSDLURI(final String val) {
-    exchangeWSDLURI = val;
+  public void setExchangeWSDLURI(final String val) throws SynchException {
+    setProperty(propExchangeWSDLURI, val);
   }
 
   /** Exchange web service WSDL uri
    *
    * @return String
+   * @throws SynchException
    */
-  public String getExchangeWSDLURI() {
-    return exchangeWSDLURI;
+  public String getExchangeWSDLURI() throws SynchException {
+    return getPropertyValue(propExchangeWSDLURI);
   }
 
   /** Add our stuff to the StringBuilder
    *
    * @param sb    StringBuilder for result
    */
-  @Override
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
-    super.toStringSegment(sb, indent);
+  protected void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts.getSb(), "  ");
 
-    sb.append(",");
-    sb.append(indent);
-    sb.append("exchangeWSDLURI = ");
-    sb.append(getExchangeWSDLURI());
+    try {
+      ts.append(propExchangeWSDLURI, getExchangeWSDLURI());
+    } catch (SynchException e) {
+      ts.append(e);
+    }
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    ToString ts = new ToString(this);
 
-    toStringSegment(sb, "  ");
+    toStringSegment(ts);
 
-    sb.append("}");
-    return sb.toString();
+    return ts.toString();
   }
 }

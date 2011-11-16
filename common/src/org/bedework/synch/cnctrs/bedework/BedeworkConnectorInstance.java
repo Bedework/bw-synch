@@ -68,6 +68,7 @@ import javax.xml.bind.JAXBElement;
  * @author Mike Douglass
  */
 public class BedeworkConnectorInstance extends AbstractConnectorInstance {
+  @SuppressWarnings("unused")
   private BedeworkConnectorConfig config;
 
   private final BedeworkConnector cnctr;
