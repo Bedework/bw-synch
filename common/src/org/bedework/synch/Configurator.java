@@ -80,7 +80,12 @@ public class Configurator {
    * @throws SynchException
    */
   public void updateSynchConfig() throws SynchException {
-    db.update(synchConfig);
+    try {
+      db.open();
+      db.update(synchConfig);
+    } finally {
+      db.close();
+    }
   }
 
   private void initFromBeans() throws SynchException {

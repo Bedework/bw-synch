@@ -59,4 +59,9 @@
          name="org.bedework:service=SynchConf"
          xmbean-dd="resource:xmdesc/bwsynchConf-xmbean.xml">
   </mbean>
+  
+  <mbean code="org.bedework.synch.service.SynchConnConf"
+         name="org.bedework:service=SynchConnConf"
+         xmbean-dd="resource:xmdesc/bwsynchConnConf-xmbean.xml">
+  </mbean>
 </server>

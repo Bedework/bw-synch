@@ -13,7 +13,7 @@
   <class>org.bedework.synch.service.SynchConf</class>
   <constructor>
     <description>The default constructor</description>
-    <name>Tzsvc</name>
+    <name>SynchConf</name>
   </constructor>
 
   &defaultAttributes;

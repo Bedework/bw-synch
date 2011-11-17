@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mbean PUBLIC "-//JBoss//DTD JBOSS XMBEAN 1.1//EN"
+   "http://www.jboss.org/j2ee/dtd/jboss_xmbean_1_1.dtd" [
+	<!ATTLIST interceptor
+	proxyName CDATA #IMPLIED
+>
+]>
+
+<mbean>
+  <description>
+    This allows configuration of connectors for the synch engine
+  </description>
+  <class>org.bedework.synch.service.SynchConnConf</class>
+  <constructor>
+    <description>The default constructor</description>
+    <name>SynchConnConf</name>
+  </constructor>
+
+  &defaultAttributes;
+
+  <attribute access="read-only" getMethod="getStatus" >
+    <description>Status of operations</description>
+    <name>Status</name>
+    <type>java.lang.String</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getConnectorId">
+    <description>Name of connector</description>
+    <name>ConnectorId</name>
+    <type>java.lang.String</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getConnectorNames" >
+    <description>List of connector names</description>
+    <name>ConnectorNames</name>
+    <type>java.util.List</type>
+  </attribute>
+
+  <attribute access="read-write" getMethod="getClassName"
+             setMethod="setClassName">
+    <description>Class name for connector</description>
+    <name>ClassName</name>
+    <type>java.lang.String</type>
+  </attribute>
+
+  <attribute access="read-write" getMethod="getReadOnly"
+    setMethod="setReadOnly">
+    <description>Is this a read-only connector?</description>
+    <name>ReadOnly</name>
+    <type>boolean</type>
+  </attribute>
+
+  <attribute access="read-write" getMethod="getTrustLastmod"
+    setMethod="setTrustLastmod">
+    <description>Can we trust the lastmod from this connector?</description>
+    <name>TrustLastmod</name>
+    <type>boolean</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getProperties" >
+    <description>Set of properties</description>
+    <name>Properties</name>
+    <type>java.lang.String</type>
+  </attribute>
+
+  <!-- Operations -->
+
+  <operation>
+    <description>Get the named connector.</description>
+    <name>getConnector</name>
+    <parameter>
+      <description>Name of the connector</description>
+      <name>name</name>
+      <type>java.lang.String</type>
+    </parameter>
+  </operation>
+
+  <operation>
+    <description>Add a property - name need not be unique.</description>
+    <name>addProperty</name>
+    <parameter>
+      <description>Name of the property</description>
+      <name>name</name>
+      <type>java.lang.String</type>
+    </parameter>
+    <parameter>
+      <description>Value of the property</description>
+      <name>value</name>
+      <type>java.lang.String</type>
+    </parameter>
+  </operation>
+
+  <operation>
+    <description>Add the current connector.</description>
+    <name>add</name>
+  </operation>
+
+  <operation>
+    <description>Delete the named connector.</description>
+    <name>delete</name>
+    <parameter>
+      <description>Name of the connector</description>
+      <name>name</name>
+      <type>java.lang.String</type>
+    </parameter>
+  </operation>
+
+  &defaultOperations;
+
+</mbean>
+

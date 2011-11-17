@@ -58,55 +58,31 @@ public class ConnectorConfig
     return name;
   }
 
-  /** Class name
-   *
-   * @param val    String
-   */
   @Override
   public void setClassName(final String val) {
     className = val;
   }
 
-  /** Class name
-   *
-   * @return String
-   */
   @Override
   public String getClassName() {
     return className;
   }
 
-  /** Read only?
-   *
-   * @param val    int seconds
-   */
   @Override
   public void setReadOnly(final boolean val) {
     readOnly = val;
   }
 
-  /** Read only?
-   *
-   * @return int seconds
-   */
   @Override
   public boolean getReadOnly() {
     return readOnly;
   }
 
-  /** Can we trust the lastmod from this connector?
-   *
-   * @param val    boolean
-   */
   @Override
   public void setTrustLastmod(final boolean val) {
     trustLastmod = val;
   }
 
-  /** Can we trust the lastmod from this connector?
-   *
-   * @return boolean
-   */
   @Override
   public boolean getTrustLastmod() {
     return trustLastmod;
