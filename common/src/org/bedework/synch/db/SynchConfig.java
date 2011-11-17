@@ -19,6 +19,7 @@
 package org.bedework.synch.db;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 /** This class defines the various properties we need for the synch engine
  *
@@ -49,6 +50,8 @@ public class SynchConfig extends DbItem<SynchConfig> {
   private String pubKeys;
 
   private Set<ConnectorConfig> connectors;
+
+  private SortedSet<IpAddrInfo> ipInfo;
 
   /**
    * @param val current size of synchling pool
@@ -171,6 +174,20 @@ public class SynchConfig extends DbItem<SynchConfig> {
    */
   public String getPubKeys() {
     return pubKeys;
+  }
+
+  /**
+   * @param val
+   */
+  public void setIpInfo(final SortedSet<IpAddrInfo> val) {
+    ipInfo = val;
+  }
+
+  /**
+   * @return ip info
+   */
+  public SortedSet<IpAddrInfo> getIpInfo() {
+    return ipInfo;
   }
 
   /** Map of (name, className)

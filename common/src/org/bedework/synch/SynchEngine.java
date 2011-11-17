@@ -556,6 +556,13 @@ public class SynchEngine extends TzGetter {
   }
 
   /**
+   * @throws SynchException
+   */
+  public void updateConfig() throws SynchException {
+    config.updateSynchConfig();
+  }
+
+  /**
    * @param val
    * @return decrypted string
    * @throws SynchException

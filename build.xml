@@ -43,6 +43,8 @@
   
   <property name="ear.meta.dir" location="${project.home}/ear.meta"/>
 
+  <property name="service.xmdesc.dir" location="${project.home}/resources/xmdesc"/>
+
   <!-- =================================================================
        init:
        ================================================================= -->
@@ -97,7 +99,11 @@
     <getJar name="log4j" version="1.2.8" />
     <getJar name="servletapi" version="2.4" />
     <getJar name="ical4j" version="head-20100601" />
-    
+    <getJar name="jboss-j2se" version="5.1.0.GA" />
+    <getJar name="jboss-kernel" version="5.1.0.GA" />
+    <getJar name="jboss-system" version="5.1.0.GA" />
+    <getJar name="jboss-system-jmx" version="5.1.0.GA" />
+
     <getJar name="ejb3-persistence" version="3.4.0.GA" />
     <getJar name="hibernate" version="3.3.1.ga" />
     <getJar name="hibernate-annotations" version="3.4.0.GA" />

@@ -29,7 +29,7 @@ import org.bedework.synch.Stat;
 
 import java.util.List;
 
-/** Run the Exchange synch service
+/** Run the Bedework synch engine service
  *
  * @author douglm
  */

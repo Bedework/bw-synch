@@ -76,6 +76,13 @@ public class Configurator {
     return synchConfig;
   }
 
+  /**
+   * @throws SynchException
+   */
+  public void updateSynchConfig() throws SynchException {
+    db.update(synchConfig);
+  }
+
   private void initFromBeans() throws SynchException {
     ApplicationContext appContext =
          new ClassPathXmlApplicationContext(synchConfigPath);

@@ -44,6 +44,19 @@
     <property name="pubKeys" column="bwsyn_pubKeys" 
               type="string" length="1000" />
 
+    <set name="ipInfo" table="bwsyn_ipinfo"
+         cascade="all,delete-orphan"
+         lazy="false"
+         sort="natural" >
+      <key column="bwsynipinfo_id" foreign-key="bwsynipinfo_fk" />
+
+      <composite-element class="org.bedework.synch.db.IpAddrInfo">
+        <property name="order" column="bwsyn_order"/>
+        <property name="addr" column="bwsyn_addr" not-null="true"/>
+        <property name="block" column="bwsyn_block" type="true_false" />
+      </composite-element>
+    </set>
+
     <set name="connectors" table="bwsyn_connectors"
          cascade="all,delete-orphan"
          lazy="false">

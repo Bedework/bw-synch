@@ -54,4 +54,9 @@
     <!-- We also need the database -->
     <depends>jboss.jca:service=DataSourceBinding,name=SynchDS</depends>
   </mbean>
+  
+  <mbean code="org.bedework.synch.service.SynchConf"
+         name="org.bedework:service=SynchConf"
+         xmbean-dd="resource:xmdesc/bwsynchConf-xmbean.xml">
+  </mbean>
 </server>
