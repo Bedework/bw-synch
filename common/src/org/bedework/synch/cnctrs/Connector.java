@@ -19,9 +19,9 @@
 package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.Notification;
+import org.bedework.synch.PropertiesInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
@@ -132,12 +132,12 @@ public interface Connector<C extends ConnectorInstance,
    */
   ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory();
 
-  /** List the information about properties required for subscriptions via this
+  /** Information about properties required for subscriptions via this
    * connector.
    *
    * @return list of info
    */
-  List<SynchPropertyInfo> getPropertyInfo();
+  PropertiesInfo getPropertyInfo();
 
   /**
    * @return list of icalendar properties to skip.

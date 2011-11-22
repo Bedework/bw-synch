@@ -18,32 +18,27 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
+import org.bedework.synch.PropertiesInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
-import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPMessage;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
@@ -57,13 +52,9 @@ import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusTyp
  * @author Mike Douglass
  */
 public class ExchangeConnector
-      implements Connector<ExchangeConnectorInstance,
-                           ExchangeNotification> {
-  protected transient Logger log;
-
-  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
-      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
-
+      extends AbstractConnector<ExchangeConnector,
+                                ExchangeConnectorInstance,
+                                ExchangeNotification> {
   /* Information required from the user for an Exchange connection
    *
    * exchange-folder-id
@@ -75,94 +66,51 @@ public class ExchangeConnector
   /** */
   public static final String propnameFolderId = "exchange-folder-id";
 
-  /** */
-  public static final String propnameAccount = "account";
-
-  /** */
-  public static final String propnamePw = "password";
-
-  private static List<SynchPropertyInfo> propInfo =
-      new ArrayList<SynchPropertyInfo>();
+  private static PropertiesInfo exPropInfo = new PropertiesInfo();
 
   static {
-    propInfo.add(new SynchPropertyInfo(propnameFolderId,
-                                       false,
-                                       SynchPropertyInfo.typeString,
-                                       "",
-                                       true));
+    exPropInfo.add(propnameFolderId,
+                   false,
+                   SynchPropertyInfo.typeString,
+                   "",
+                   true);
 
-    propInfo.add(new SynchPropertyInfo(propnameAccount,
-                                       false,
-                                       SynchPropertyInfo.typeString,
-                                       "",
-                                       true));
+    exPropInfo.requiredPrincipal(null);
 
-    propInfo.add(new SynchPropertyInfo(propnamePw,
-                                       true,
-                                       SynchPropertyInfo.typePassword,
-                                       "",
-                                       true));
+    exPropInfo.requiredPassword(null);
   }
-
-  private SynchEngine syncher;
-
-  private ExchangeConnectorConfig config;
-
-  private String callbackUri;
-
-  private String connectorId;
-
-  private boolean running;
 
   private ConnectorInstanceMap<ExchangeConnectorInstance> cinstMap =
       new ConnectorInstanceMap<ExchangeConnectorInstance>();
 
   // Are these thread safe?
-  private MessageFactory soapMsgFactory;
   private JAXBContext ewsjc;
+
+  /**
+   */
+  public ExchangeConnector() {
+    super(exPropInfo);
+  }
 
   @Override
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
-    try {
-      this.connectorId = connectorId;
-      this.syncher = syncher;
-      this.callbackUri = callbackUri;
+    super.start(connectorId, conf, callbackUri, syncher);
 
-      config = new ExchangeConnectorConfig(conf);
+    config = new ExchangeConnectorConfig(conf);
 
-      info("**************************************************");
-      info("Starting exchange connector " + connectorId);
-      info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
-      info("      callback URI: " + callbackUri);
-      info("**************************************************");
-      running = true;
-    } catch (Throwable t) {
-      error(t);
-      throw new SynchException(t);
-    }
+    info("**************************************************");
+    info("Starting exchange connector " + connectorId);
+    info(" Exchange WSDL URI: " + ((ExchangeConnectorConfig)config).getExchangeWSDLURI());
+    info("      callback URI: " + callbackUri);
+    info("**************************************************");
   }
 
   @Override
   public boolean isManager() {
     return false;
-  }
-
-  @Override
-  public boolean isStarted() {
-    return running;
-  }
-
-  @Override
-  public boolean isFailed() {
-    return false;
-  }
-
-  @Override
-  public boolean isStopped() {
-    return !running;
   }
 
   @Override
@@ -178,31 +126,6 @@ public class ExchangeConnector
   @Override
   public boolean getTrustLastmod() {
     return config.getTrustLastmod();
-  }
-
-  @Override
-  public String getId() {
-    return connectorId;
-  }
-
-  @Override
-  public String getCallbackUri() {
-    return callbackUri;
-  }
-
-  @Override
-  public SynchEngine getSyncher() {
-    return syncher;
-  }
-
-  @Override
-  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
-    return icalOf;
-  }
-
-  @Override
-  public List<SynchPropertyInfo> getPropertyInfo() {
-    return propInfo;
   }
 
   @Override
@@ -228,7 +151,8 @@ public class ExchangeConnector
       info = new ExchangeSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new ExchangeConnectorInstance(config, this, sub, end, info);
+    inst = new ExchangeConnectorInstance((ExchangeConnectorConfig)config,
+                                         this, sub, end, info);
     cinstMap.add(sub, end, inst);
 
     return inst;
@@ -331,42 +255,6 @@ public class ExchangeConnector
    *                        package methods
    * ==================================================================== */
 
-  Object unmarshalBody(final HttpServletRequest req) throws SynchException {
-    try {
-      SOAPMessage msg = getSoapMsgFactory().createMessage(null, // headers
-                                                          req.getInputStream());
-
-      SOAPBody body = msg.getSOAPBody();
-
-      Unmarshaller u = getEwsJAXBContext().createUnmarshaller();
-
-      Object o = u.unmarshal(body.getFirstChild());
-
-      if (o instanceof JAXBElement) {
-        // Some of them get wrapped.
-        o = ((JAXBElement)o).getValue();
-      }
-
-      return o;
-    } catch (SynchException se) {
-      throw se;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  MessageFactory getSoapMsgFactory() throws SynchException {
-    try {
-      if (soapMsgFactory == null) {
-        soapMsgFactory = MessageFactory.newInstance();
-      }
-
-      return soapMsgFactory;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
   JAXBContext getEwsJAXBContext() throws SynchException {
     try {
       if (ewsjc == null) {
@@ -384,30 +272,4 @@ public class ExchangeConnector
   /* ====================================================================
    *                        private methods
    * ==================================================================== */
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  @SuppressWarnings("unused")
-  private void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  @SuppressWarnings("unused")
-  private void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  private void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  private void info(final String msg) {
-    getLogger().info(msg);
-  }
 }

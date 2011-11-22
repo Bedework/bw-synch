@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs;
 
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
-import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.db.SerializableProperties;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
@@ -32,8 +31,6 @@ import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-
-import java.util.List;
 
 /** Abstract connector instance to handle some trivia.
  *
@@ -133,15 +130,9 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
   protected boolean validateSubInfo(final SubscribeResponseType sr,
                                     final Connector cnctr,
                                     final BaseSubscriptionInfo info) throws SynchException {
-    @SuppressWarnings("unchecked")
-    List<SynchPropertyInfo> propInfo = cnctr.getPropertyInfo();
-
-    for (SynchPropertyInfo spi: propInfo) {
-      if (spi.isRequired() &&
-          (info.getProperty(spi.getName()) == null)) {
-        sr.setStatus(StatusType.ERROR);
-        return false;
-      }
+    if (!cnctr.getPropertyInfo().validSubscribeInfoProperties(info)) {
+      sr.setStatus(StatusType.ERROR);
+      return false;
     }
 
     return true;
@@ -163,30 +154,10 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
       return true;
     }
 
-    @SuppressWarnings("unchecked")
-    List<SynchPropertyInfo> propInfo = cnctr.getPropertyInfo();
-    SerializableProperties unsubProps =
-        new SerializableProperties(usreq.getConnectorInfo().getProperties());
-
-    for (SynchPropertyInfo spi: propInfo) {
-      if (!spi.isRequired()) {
-        continue;
-      }
-
-      String propName = spi.getName();
-      String subVal = info.getProperty(propName);
-
-      if (subVal == null) {
-        // It should never be null - but a change of requirement s may have caused this
-        continue;
-      }
-
-      String unsubVal = unsubProps.getProperty(propName);
-
-      if ((unsubVal == null) || !unsubVal.equals(subVal)) {
-        usresp.setStatus(StatusType.ERROR);
-        return false;
-      }
+    if (!cnctr.getPropertyInfo().validRequestProperties(info,
+        new SerializableProperties(usreq.getConnectorInfo().getProperties()))) {
+      usresp.setStatus(StatusType.ERROR);
+      return false;
     }
 
     return true;

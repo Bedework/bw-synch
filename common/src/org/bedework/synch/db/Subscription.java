@@ -20,7 +20,6 @@ package org.bedework.synch.db;
 
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
-import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
@@ -30,9 +29,7 @@ import org.bedework.synch.wsmessages.SynchMasterType;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.property.DtStamp;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /** Represents a subscription for the synch engine.
@@ -112,24 +109,6 @@ public class Subscription extends DbItem<Subscription> {
   private ConnectorInstance endAConnInst;
 
   private ConnectorInstance endBConnInst;
-
-  /* Information about general subscription properties */
-  private static List<SynchPropertyInfo> propInfo =
-      new ArrayList<SynchPropertyInfo>();
-
-  static {
-    propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripAlarms,
-                                       false,
-                                       SynchPropertyInfo.typeBoolean,
-                                       "",
-                                       false));
-
-    propInfo.add(new SynchPropertyInfo(SubscriptionInfo.propnameStripScheduling,
-                                       false,
-                                       SynchPropertyInfo.typeBoolean,
-                                       "",
-                                       false));
-  }
 
   /** null constructor for hibernate
    *
@@ -413,14 +392,6 @@ public class Subscription extends DbItem<Subscription> {
 
     getEndAConnectorInfo().resetChanged();
     getEndBConnectorInfo().resetChanged();
-  }
-
-  /** List the information about properties for subscriptions
-   *
-   * @return list of info
-   */
-  public List<SynchPropertyInfo> getPropertyInfo() {
-    return propInfo;
   }
 
   /* ====================================================================

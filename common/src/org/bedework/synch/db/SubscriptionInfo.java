@@ -19,6 +19,7 @@
 package org.bedework.synch.db;
 
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.CalProcessingType;
 
 
 /** Serializable form of information about the whole subscription.
@@ -30,49 +31,49 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
 
 
   /** Strip out alarms if true */
-  public static final String propnameStripAlarms = "strip-alarms";
+  public static final String propnameAlarmProcessing = "alarm-processing";
 
   /** Strip out scheduling properties if true */
-  public static final String propnameStripScheduling = "strip-scheduling";
+  public static final String propnameSchedulingProcessing = "scheduling-processing";
 
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
 
-  /** stripAlarms - boolean
+  /** AlarmsProcessing - CalProcessingType
    *
    * @param val
    * @throws SynchException
    */
-  public void setStripAlarms(final boolean val) throws SynchException {
-    setProperty(propnameStripAlarms, String.valueOf(val));
+  public void setAlarmsProcessing(final CalProcessingType val) throws SynchException {
+    setProperty(propnameAlarmProcessing, String.valueOf(val));
   }
 
-  /** stripAlarms - boolean
+  /** AlarmsProcessing - CalProcessingType
    *
    * @return boolean
    * @throws SynchException
    */
-  public boolean getStripAlarms() throws SynchException {
-    return Boolean.parseBoolean(getProperty(propnameStripAlarms));
+  public CalProcessingType getAlarmsProcessing() throws SynchException {
+    return CalProcessingType.fromValue(getProperty(propnameAlarmProcessing));
   }
 
-  /** stripScheduling - boolean
+  /** SchedulingProcessing - CalProcessingType
    *
    * @param val
    * @throws SynchException
    */
-  public void setStripScheduling(final boolean val) throws SynchException {
-    setProperty(propnameStripScheduling, String.valueOf(val));
+  public void setSchedulingProcessing(final CalProcessingType val) throws SynchException {
+    setProperty(propnameSchedulingProcessing, String.valueOf(val));
   }
 
-  /** stripScheduling - boolean
+  /** SchedulingProcessing - CalProcessingType
    *
-   * @return boolean
+   * @return CalProcessingType
    * @throws SynchException
    */
-  public boolean getStripScheduling() throws SynchException {
-    return Boolean.parseBoolean(getProperty(propnameStripScheduling));
+  public CalProcessingType getSchedulingProcessing() throws SynchException {
+    return CalProcessingType.fromValue(getProperty(propnameSchedulingProcessing));
   }
 
   /* ====================================================================

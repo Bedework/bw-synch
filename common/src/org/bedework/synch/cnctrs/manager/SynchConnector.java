@@ -21,13 +21,9 @@ package org.bedework.synch.cnctrs.manager;
 import org.bedework.synch.Notification;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
-import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchDefs.SynchKind;
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchPropertyInfo;
+import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.cnctrs.bedework.BedeworkConnectorConfig;
-import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.db.SubscriptionInfo;
@@ -39,40 +35,24 @@ import org.bedework.synch.wsmessages.ArrayOfSynchPropertyInfo;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.GetInfoRequestType;
 import org.bedework.synch.wsmessages.GetInfoResponseType;
-import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchConnectorInfoType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchInfoType;
 import org.bedework.synch.wsmessages.SynchPropertyType;
-import org.bedework.synch.wsmessages.SynchRemoteService;
-import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 import org.bedework.synch.wsmessages.UnknownSubscriptionType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.ErrorResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.w3c.dom.Document;
 
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPMessage;
 
 /** A special connector to handle calls to the synch engine via the web context.
  *
@@ -80,64 +60,19 @@ import javax.xml.soap.SOAPMessage;
  *
  * @author Mike Douglass
  */
-public class SynchConnector implements Connector<SynchConnectorInstance,
-                                                 Notification> {
-  private BedeworkConnectorConfig config;
-
-  private String callbackUri;
-
-  private String connectorId;
-
-  private SynchEngine syncher;
-
-  private transient Logger log;
-
-  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
-      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
-
-  private boolean debug;
-
-  private boolean running;
-
-  // Are these thread safe?
-  private ObjectFactory of = new ObjectFactory();
-  private MessageFactory soapMsgFactory;
-  private JAXBContext jc;
-
-  private static List<SynchPropertyInfo> propInfo =
-      new ArrayList<SynchPropertyInfo>();
-
-  @Override
-  public void start(final String connectorId,
-                    final ConnectorConfig conf,
-                    final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
-    this.connectorId = connectorId;
-    this.syncher = syncher;
-    this.callbackUri = callbackUri;
-
-    debug = getLogger().isDebugEnabled();
-    running = true;
+public class SynchConnector
+      extends AbstractConnector<SynchConnector,
+                                SynchConnectorInstance,
+                                Notification> {
+  /**
+   */
+  public SynchConnector() {
+    super(null);
   }
 
   @Override
   public boolean isManager() {
     return true;
-  }
-
-  @Override
-  public boolean isStarted() {
-    return running;
-  }
-
-  @Override
-  public boolean isFailed() {
-    return false;
-  }
-
-  @Override
-  public boolean isStopped() {
-    return !running;
   }
 
   @Override
@@ -153,36 +88,6 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
   @Override
   public boolean getTrustLastmod() {
     return false;
-  }
-
-  @Override
-  public String getId() {
-    return connectorId;
-  }
-
-  @Override
-  public String getCallbackUri() {
-    return callbackUri;
-  }
-
-  @Override
-  public SynchEngine getSyncher() {
-    return syncher;
-  }
-
-  @Override
-  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
-    return icalOf;
-  }
-
-  @Override
-  public List<SynchPropertyInfo> getPropertyInfo() {
-    return propInfo;
-  }
-
-  @Override
-  public List<Object> getSkipList() {
-    return null;
   }
 
   @Override
@@ -276,11 +181,7 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
           ArrayOfSynchPropertyInfo aspi = new ArrayOfSynchPropertyInfo();
           scit.setProperties(aspi);
 
-          @SuppressWarnings("unchecked")
-          List<SynchPropertyInfo> l = c.getPropertyInfo();
-          for (SynchPropertyInfo spit: l) {
-            aspi.getProperty().add(spit);
-          }
+          c.getPropertyInfo().addAllToList(aspi.getProperty());
 
           asci.getConnector().add(scit);
         }
@@ -309,137 +210,6 @@ public class SynchConnector implements Connector<SynchConnectorInstance,
       }
     } catch (SynchException se) {
       throw se;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  @Override
-  public void stop() throws SynchException {
-    running = false;
-  }
-
-  /* ====================================================================
-   *                   Protected methods
-   * ==================================================================== */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  /* ====================================================================
-   *                         Package methods
-   * ==================================================================== */
-
-  SynchRemoteServicePortType getPort() throws SynchException {
-    try {
-      URL wsURL = new URL(config.getBwWSDLURI());
-
-      SynchRemoteService ers =
-        new SynchRemoteService(wsURL,
-                               new QName(SynchDefs.synchNamespace,
-                                         "SynchRemoteService"));
-      SynchRemoteServicePortType port = ers.getSynchRSPort();
-
-      return port;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-
-  Object unmarshalBody(final HttpServletRequest req) throws SynchException {
-    try {
-      SOAPMessage msg = getSoapMsgFactory().createMessage(null, // headers
-                                                          req.getInputStream());
-
-      SOAPBody body = msg.getSOAPBody();
-
-      Unmarshaller u = getSynchJAXBContext().createUnmarshaller();
-
-      Object o = u.unmarshal(body.getFirstChild());
-
-      if (o instanceof JAXBElement) {
-        // Some of them get wrapped.
-        o = ((JAXBElement)o).getValue();
-      }
-
-      return o;
-    } catch (SynchException se) {
-      throw se;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  MessageFactory getSoapMsgFactory() throws SynchException {
-    try {
-      if (soapMsgFactory == null) {
-        soapMsgFactory = MessageFactory.newInstance();
-      }
-
-      return soapMsgFactory;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  JAXBContext getSynchJAXBContext() throws SynchException {
-    try {
-      if (jc == null) {
-        jc = JAXBContext.newInstance("org.bedework.synch.wsmessages:" +
-                                     "ietf.params.xml.ns.icalendar_2");
-      }
-
-      return jc;
-    } catch(Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  protected void marshal(final Object o,
-                         final OutputStream out) throws SynchException {
-    try {
-      Marshaller marshaller = jc.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      dbf.setNamespaceAware(true);
-      Document doc = dbf.newDocumentBuilder().newDocument();
-
-      SOAPMessage msg = soapMsgFactory.createMessage();
-      msg.getSOAPBody().addDocument(doc);
-
-      marshaller.marshal(o,
-                         msg.getSOAPBody());
-
-      msg.writeTo(out);
     } catch(Throwable t) {
       throw new SynchException(t);
     }

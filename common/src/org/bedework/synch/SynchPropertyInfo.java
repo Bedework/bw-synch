@@ -30,6 +30,9 @@ public class SynchPropertyInfo extends SynchPropertyInfoType {
   /** */
   public static String typeBoolean = "boolean";
 
+  /** @see org.bedework.synch.wsmessages.CalProcessingType */
+  public static String typeCalProcessing = "CalProcessing";
+
   /** */
   public static String typeDate = "date";
 
@@ -51,7 +54,8 @@ public class SynchPropertyInfo extends SynchPropertyInfoType {
   /** */
   public static String typeUri = "uri";
 
-  /**
+  /** No-value constructor
+   *
    * @param name - name for the property
    * @param secure - true if this property value should be hidden, e.g password
    * @param type - type of the property - see above
@@ -68,6 +72,25 @@ public class SynchPropertyInfo extends SynchPropertyInfoType {
     setType(type);
     setDescription(description);
     setRequired(required);
+  }
+
+  /** Constructor with current or default value
+   *
+   * @param name - name for the property
+   * @param secure - true if this property value should be hidden, e.g password
+   * @param type - type of the property - see above
+   * @param description - of the property
+   * @param required - true if this property is required
+   * @param value - the default or current value as a Java string representation
+   */
+  public SynchPropertyInfo(final String name,
+                           final boolean secure,
+                           final String type,
+                           final String description,
+                           final boolean required,
+                           final String value) {
+    this(name, secure, type, description, required);
+    setValue(value);
   }
 
   @Override

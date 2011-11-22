@@ -18,82 +18,58 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.Notification;
-import org.bedework.synch.SynchDefs;
+import org.bedework.synch.PropertiesInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchPropertyInfo;
-import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
+import org.bedework.synch.db.SubscriptionInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.synch.wsmessages.KeepAliveNotificationType;
 import org.bedework.synch.wsmessages.KeepAliveResponseType;
-import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.StartServiceNotificationType;
 import org.bedework.synch.wsmessages.StartServiceResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
-import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
 import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.namespace.QName;
 
 /** The synch processor connector for connections to bedework.
  *
  * @author Mike Douglass
  */
 public class BedeworkConnector
-      implements Connector<BedeworkConnectorInstance,
-                           Notification> {
-  private boolean debug;
-
-  private transient Logger log;
-
-  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
-      new ietf.params.xml.ns.icalendar_2.ObjectFactory();
-
-  private static List<SynchPropertyInfo> propInfo =
-      new ArrayList<SynchPropertyInfo>();
+      extends AbstractConnector<BedeworkConnector,
+                                BedeworkConnectorInstance,
+                                Notification> {
+  private static PropertiesInfo bwPropInfo = new PropertiesInfo();
 
   static {
-    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnameUri,
-                                       false,
-                                       SynchPropertyInfo.typeUri,
-                                       "",
-                                       true));
+    bwPropInfo.requiredUri(null);
 
-    propInfo.add(new SynchPropertyInfo(BaseSubscriptionInfo.propnamePrincipal,
-                                       false,
-                                       SynchPropertyInfo.typeString,
-                                       "",
-                                       true));
+    bwPropInfo.requiredPrincipal(null);
+
+    bwPropInfo.optionCalProcessing(SubscriptionInfo.propnameAlarmProcessing,
+                                   "",
+                                   CalProcessingType.REMOVE.toString());
+
+    bwPropInfo.optionCalProcessing(SubscriptionInfo.propnameSchedulingProcessing,
+                                   "",
+                                   CalProcessingType.REMOVE.toString());
   }
-
-  private SynchEngine syncher;
-
-  private BedeworkConnectorConfig config;
-
-  private String callbackUri;
-
-  private String connectorId;
-
-  private boolean running;
-  private boolean stopped;
 
   /* If non-null this is the token we currently have for bedework */
   private String remoteToken;
@@ -103,7 +79,11 @@ public class BedeworkConnector
   private ConnectorInstanceMap<BedeworkConnectorInstance> cinstMap =
       new ConnectorInstanceMap<BedeworkConnectorInstance>();
 
-  ObjectFactory of = new ObjectFactory();
+  /**
+   */
+  public BedeworkConnector() {
+    super(bwPropInfo);
+  }
 
   /** This process will send keep-alive notifications to the remote system.
    * During startup the first notification is sent so this process starts with
@@ -113,16 +93,20 @@ public class BedeworkConnector
   private class PingThread extends Thread {
     boolean showedTrace;
 
+    BedeworkConnector conn;
+
     /**
      * @param name - for the thread
+     * @param conn
      */
-    public PingThread(final String name) {
+    public PingThread(final String name,
+                      final BedeworkConnector conn) {
       super(name);
     }
 
     @Override
     public void run() {
-      while (!stopped) {
+      while (!conn.isStopped()) {
         if (debug) {
           trace("About to call service - token = " + remoteToken);
         }
@@ -157,9 +141,9 @@ public class BedeworkConnector
           long waitTime;
 
           if (remoteToken == null) {
-            waitTime = config.getRetryInterval() * 1000;
+            waitTime = ((BedeworkConnectorConfig)config).getRetryInterval() * 1000;
           } else {
-            waitTime = config.getKeepAliveInterval() * 1000;
+            waitTime = ((BedeworkConnectorConfig)config).getKeepAliveInterval() * 1000;
           }
 
           synchronized (o) {
@@ -181,42 +165,19 @@ public class BedeworkConnector
                     final ConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) throws SynchException {
-    this.connectorId = connectorId;
-    this.syncher = syncher;
-    this.callbackUri = callbackUri;
-
-    stopped = false;
-
-    debug = getLogger().isDebugEnabled();
+    super.start(connectorId, conf, callbackUri, syncher);
 
     config = new BedeworkConnectorConfig(conf);
 
     if (pinger == null) {
-      pinger = new PingThread(connectorId);
+      pinger = new PingThread(connectorId, this);
       pinger.start();
     }
-
-    this.syncher = syncher;
   }
 
   @Override
   public boolean isManager() {
     return false;
-  }
-
-  @Override
-  public boolean isStarted() {
-    return running;
-  }
-
-  @Override
-  public boolean isFailed() {
-    return false;
-  }
-
-  @Override
-  public boolean isStopped() {
-    return stopped;
   }
 
   @Override
@@ -235,36 +196,6 @@ public class BedeworkConnector
   }
 
   @Override
-  public String getId() {
-    return connectorId;
-  }
-
-  @Override
-  public String getCallbackUri() {
-    return callbackUri;
-  }
-
-  @Override
-  public SynchEngine getSyncher() {
-    return syncher;
-  }
-
-  @Override
-  public ietf.params.xml.ns.icalendar_2.ObjectFactory getIcalObjectFactory() {
-    return icalOf;
-  }
-
-  @Override
-  public List<SynchPropertyInfo> getPropertyInfo() {
-    return propInfo;
-  }
-
-  @Override
-  public List<Object> getSkipList() {
-    return null;
-  }
-
-  @Override
   public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final SynchEndType end) throws SynchException {
     if (!running) {
@@ -277,7 +208,6 @@ public class BedeworkConnector
       return inst;
     }
 
-    //debug = getLogger().isDebugEnabled();
     BedeworkSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
@@ -286,7 +216,8 @@ public class BedeworkConnector
       info = new BedeworkSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new BedeworkConnectorInstance(config, this, sub, end, info);
+    inst = new BedeworkConnectorInstance((BedeworkConnectorConfig)config,
+                                         this, sub, end, info);
     cinstMap.add(sub, end, inst);
 
     return inst;
@@ -317,61 +248,11 @@ public class BedeworkConnector
   }
 
   /* ====================================================================
-   *                   Protected methods
-   * ==================================================================== */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  /* ====================================================================
    *                         Package methods
    * ==================================================================== */
 
-  ObjectFactory getObjectFactory() {
-    return of;
-  }
-
   SynchRemoteServicePortType getPort() throws SynchException {
-    try {
-      URL wsURL = new URL(config.getBwWSDLURI());
-
-      SynchRemoteService ers =
-        new SynchRemoteService(wsURL,
-                               new QName(SynchDefs.synchNamespace,
-                                         "SynchRemoteService"));
-      SynchRemoteServicePortType port = ers.getSynchRSPort();
-
-      return port;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    }
+    return getPort(((BedeworkConnectorConfig)config).getBwWSDLURI());
   }
 
   SynchIdTokenType getIdToken(final String principal) throws SynchException {
@@ -414,7 +295,7 @@ public class BedeworkConnector
   private void initConnection() throws SynchException {
     StartServiceNotificationType ssn = new StartServiceNotificationType();
 
-    ssn.setConnectorId(connectorId);
+    ssn.setConnectorId(getConnectorId());
     ssn.setSubscribeUrl(callbackUri);
 
     StartServiceResponseType ssr = getPort().startService(ssn);

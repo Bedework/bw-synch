@@ -25,6 +25,7 @@ import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchEndType;
@@ -1047,11 +1048,11 @@ public class Synchling {
     addSkip(stripMap, new MethodPropType());
 
     /* Any needed for stuff we skip */
-    if (sub.getInfo().getStripAlarms()) {
+    if (sub.getInfo().getAlarmsProcessing() == CalProcessingType.REMOVE) {
       addSkip(stripMap, new ValarmType());
     }
 
-    if (sub.getInfo().getStripScheduling()) {
+    if (sub.getInfo().getSchedulingProcessing() == CalProcessingType.REMOVE) {
       addSkip(stripMap, new OrganizerPropType());
       addSkip(stripMap, new AttendeePropType());
     }
