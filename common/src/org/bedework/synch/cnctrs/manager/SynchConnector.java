@@ -22,8 +22,10 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.Notification.NotificationItem;
 import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.SynchDefs.SynchKind;
+import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.db.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.db.SubscriptionInfo;
@@ -68,6 +70,17 @@ public class SynchConnector
    */
   public SynchConnector() {
     super(null);
+  }
+
+  @Override
+  public void start(final String connectorId,
+                    final ConnectorConfig conf,
+                    final String callbackUri,
+                    final SynchEngine syncher) throws SynchException {
+    super.start(connectorId, conf, callbackUri, syncher);
+
+    stopped = false;
+    running = true;
   }
 
   @Override

@@ -78,6 +78,9 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
     super.start(connectorId, conf, callbackUri, syncher);
 
     config = new FileConnectorConfig(conf);
+
+    stopped = false;
+    running = true;
   }
 
   @Override

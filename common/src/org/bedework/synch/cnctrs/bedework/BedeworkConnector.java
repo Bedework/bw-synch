@@ -102,6 +102,7 @@ public class BedeworkConnector
     public PingThread(final String name,
                       final BedeworkConnector conn) {
       super(name);
+      this.conn = conn;
     }
 
     @Override
@@ -158,7 +159,7 @@ public class BedeworkConnector
     }
   }
 
-  private static PingThread pinger;
+  private PingThread pinger;
 
   @Override
   public void start(final String connectorId,
@@ -173,6 +174,9 @@ public class BedeworkConnector
       pinger = new PingThread(connectorId, this);
       pinger.start();
     }
+
+    stopped = false;
+    running = true;
   }
 
   @Override
@@ -245,6 +249,8 @@ public class BedeworkConnector
     if (pinger != null) {
       pinger.interrupt();
     }
+
+    pinger = null;
   }
 
   /* ====================================================================

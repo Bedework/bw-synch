@@ -106,6 +106,9 @@ public class ExchangeConnector
     info(" Exchange WSDL URI: " + ((ExchangeConnectorConfig)config).getExchangeWSDLURI());
     info("      callback URI: " + callbackUri);
     info("**************************************************");
+
+    stopped = false;
+    running = true;
   }
 
   @Override
