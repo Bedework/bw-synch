@@ -27,6 +27,8 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
+import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
@@ -179,6 +181,13 @@ public class Synchling {
 
       case Unsubscribe:
         st = unsubscribe(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
+
+      case SubscriptionStatus:
+        st = subStatus(note, ni);
         if (st != StatusType.OK) {
           return st;
         }
@@ -355,6 +364,42 @@ public class Synchling {
     sub.setDeleted(true);
 
     syncher.deleteSubscription(sub);
+
+    return StatusType.OK;
+  }
+
+  /**
+   * @param note
+   * @return status
+   * @throws SynchException
+   */
+  private StatusType subStatus(final Notification note,
+                               final NotificationItem ni) throws SynchException {
+    Subscription sub = note.getSub();
+    if (sub == null){
+      return StatusType.ERROR;
+    }
+
+    if (!checkAccess(sub)) {
+      info("No access for subscription " + sub);
+      return StatusType.NO_ACCESS;
+    }
+
+    syncher.setConnectors(sub);
+
+    /* See if it's OK by the connector instances */
+
+    ConnectorInstance cinst = syncher.getConnectorInstance(sub,
+                                                           SynchEndType.A);
+
+    SubscriptionStatusRequestType ssreq = ni.getSubStatusReq();
+    SubscriptionStatusResponseType ssr = ni.getSubStatusResponse();
+
+    if (!cinst.validateActiveSubInfo(ssreq, ssr,
+                                     cinst.getConnector(),
+                                     cinst.getSubInfo())) {
+      return ssr.getStatus();
+    }
 
     return StatusType.OK;
   }

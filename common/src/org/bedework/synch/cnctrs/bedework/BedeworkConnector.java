@@ -306,6 +306,11 @@ public class BedeworkConnector
 
     StartServiceResponseType ssr = getPort().startService(ssn);
 
+    if (ssr == null) {
+      warn("Received null response to start notification");
+      return;
+    }
+
     if (ssr.getStatus() != StatusType.OK) {
       warn("Received status " + ssr.getStatus() + " to start notification");
       return;

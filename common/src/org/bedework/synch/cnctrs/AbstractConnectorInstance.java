@@ -23,6 +23,7 @@ import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.db.SerializableProperties;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
@@ -76,7 +77,25 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
   @Override
   public boolean unsubscribe(final UnsubscribeRequestType usreq,
                              final UnsubscribeResponseType usresp) throws SynchException {
-    return validateUnsubInfo(usreq, usresp, getConnector(), getSubInfo());
+    return validateActiveSubInfo(usreq, usresp, getConnector(), getSubInfo());
+  }
+
+  @Override
+  public boolean validateActiveSubInfo(final ActiveSubscriptionRequestType req,
+                                       final BaseResponseType resp,
+                                       final Connector cnctr,
+                                       final BaseSubscriptionInfo info) throws SynchException {
+    if (req.getEnd() != end) {
+      return true;
+    }
+
+    if (!cnctr.getPropertyInfo().validRequestProperties(info,
+        new SerializableProperties(req.getConnectorInfo().getProperties()))) {
+      resp.setStatus(StatusType.ERROR);
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -138,30 +157,17 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
     return true;
   }
 
-  /** Ensure unsubscribe info matches the subscription
-   *
-   * @param sr
-   * @param cnctr
-   * @param info
-   * @return true if all ok
-   * @throws SynchException
-   */
-  protected boolean validateUnsubInfo(final UnsubscribeRequestType usreq,
-                                      final UnsubscribeResponseType usresp,
-                                      final Connector cnctr,
-                                      final BaseSubscriptionInfo info) throws SynchException {
-    if (usreq.getEnd() != end) {
-      return true;
-    }
+  /*
 
-    if (!cnctr.getPropertyInfo().validRequestProperties(info,
-        new SerializableProperties(usreq.getConnectorInfo().getProperties()))) {
-      usresp.setStatus(StatusType.ERROR);
-      return false;
+  private String decryptPw(final BwCalendar val) throws CalFacadeException {
+    try {
+      return getSvc().getEncrypter().decrypt(val.getRemotePw());
+    } catch (Throwable t) {
+      throw new CalFacadeException(t);
     }
-
-    return true;
   }
+   *
+   */
 
   protected void info(final String msg) {
     getLogger().info(msg);

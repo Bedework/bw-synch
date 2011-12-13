@@ -20,6 +20,8 @@ package org.bedework.synch;
 
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
+import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
@@ -130,6 +132,20 @@ public class Notification<NI extends Notification.NotificationItem> {
     addNotificationItem((NI)new NotificationItem(request, response));
   }
 
+  /** Create a new subscription status object
+   *
+   * @param sub
+   * @param request
+   * @param response
+   */
+  @SuppressWarnings("unchecked")
+  public Notification(final Subscription sub,
+                      final SubscriptionStatusRequestType request,
+                      final SubscriptionStatusResponseType response) {
+    this(sub, SynchEndType.NONE);
+    addNotificationItem((NI)new NotificationItem(request, response));
+  }
+
   /**
    * @param action
    */
@@ -205,6 +221,9 @@ public class Notification<NI extends Notification.NotificationItem> {
       /** */
       Unsubscribe,
 
+      /** */
+      SubscriptionStatus,
+
       /** Getting system information */
       GetInfo,
     }
@@ -219,6 +238,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private UnsubscribeRequestType unsubRequest;
     private UnsubscribeResponseType unsubResponse;
+
+    private SubscriptionStatusRequestType subStatusReq;
+    private SubscriptionStatusResponseType subStatusResponse;
 
     /** Create a notification item for an action.
      *
@@ -263,6 +285,18 @@ public class Notification<NI extends Notification.NotificationItem> {
       this.unsubResponse = unsubResponse;
     }
 
+    /** Create a notification item for status.
+     *
+     * @param subStatusReq
+     * @param subStatusResponse
+     */
+    public NotificationItem(final SubscriptionStatusRequestType subStatusReq,
+                            final SubscriptionStatusResponseType subStatusResponse) {
+      action = ActionType.SubscriptionStatus;
+      this.subStatusReq = subStatusReq;
+      this.subStatusResponse = subStatusResponse;
+    }
+
     /**
      * @return the action
      */
@@ -303,6 +337,20 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public UnsubscribeResponseType getUnsubResponse() {
       return unsubResponse;
+    }
+
+    /**
+     * @return request leading to a notification item
+     */
+    public SubscriptionStatusRequestType getSubStatusReq() {
+      return subStatusReq;
+    }
+
+    /**
+     * @return response to a notification item
+     */
+    public SubscriptionStatusResponseType getSubStatusResponse() {
+      return subStatusResponse;
     }
 
     protected void toStringSegment(final StringBuilder sb) {

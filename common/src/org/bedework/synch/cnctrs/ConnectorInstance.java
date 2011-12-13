@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs;
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
@@ -71,6 +72,20 @@ public interface ConnectorInstance {
    */
   boolean unsubscribe(UnsubscribeRequestType usreq,
                       UnsubscribeResponseType usresp) throws SynchException;
+
+  /** Ensure active subscription info matches the subscription
+   *
+   * @param req
+   * @param resp
+   * @param cnctr
+   * @param info
+   * @return true if all ok
+   * @throws SynchException
+   */
+  boolean validateActiveSubInfo(final ActiveSubscriptionRequestType req,
+                                final BaseResponseType resp,
+                                final Connector cnctr,
+                                final BaseSubscriptionInfo info) throws SynchException;
 
   /** Called when a subscription is activated on synch engine startup or after
    * creation of a new subscription.

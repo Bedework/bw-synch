@@ -30,6 +30,7 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.db.SubscriptionInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
 import org.bedework.synch.wsmessages.ArrayOfSynchConnectorInfo;
 import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
@@ -39,6 +40,8 @@ import org.bedework.synch.wsmessages.GetInfoRequestType;
 import org.bedework.synch.wsmessages.GetInfoResponseType;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
+import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
+import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
 import org.bedework.synch.wsmessages.SynchConnectorInfoType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchInfoType;
@@ -134,7 +137,13 @@ public class SynchConnector
       }
 
       if (o instanceof UnsubscribeRequestType) {
-        return new NotificationBatch(unsubscribe(resp, (UnsubscribeRequestType)o));
+        return new NotificationBatch(unsubscribe(resp,
+                                                 (UnsubscribeRequestType)o));
+      }
+
+      if (o instanceof SubscriptionStatusRequestType) {
+        return new NotificationBatch(subStatus(resp,
+                                               (SubscriptionStatusRequestType)o));
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -221,6 +230,14 @@ public class SynchConnector
 
         marshal(jax, resp.getOutputStream());
       }
+
+      if (ni.getAction() == ActionType.SubscriptionStatus) {
+        SubscriptionStatusResponseType ssresp = ni.getSubStatusResponse();
+
+        JAXBElement<SubscriptionStatusResponseType> jax = of.createSubscriptionStatusResponse(ssresp);
+
+        marshal(jax, resp.getOutputStream());
+      }
     } catch (SynchException se) {
       throw se;
     } catch(Throwable t) {
@@ -274,6 +291,69 @@ public class SynchConnector
     return new Notification(sub, sresp);
   }
 
+  private Notification unsubscribe(final HttpServletResponse resp,
+                           final UnsubscribeRequestType u) throws SynchException {
+    if (debug) {
+      trace("Handle unsubscribe " +  u.getSubscriptionId());
+    }
+
+    UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
+
+    Subscription sub = checkAsr(u);
+
+    if (sub == null) {
+      // No subscription or error - nothing to do
+      usr.setStatus(StatusType.ERROR);
+      usr.setErrorResponse(new ErrorResponseType());
+      usr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
+
+      return new Notification(null, u, usr);
+    }
+
+    return new Notification(sub, u, usr);
+  }
+
+  private Notification subStatus(final HttpServletResponse resp,
+                           final SubscriptionStatusRequestType ss) throws SynchException {
+    if (debug) {
+      trace("Handle status " +  ss.getSubscriptionId());
+    }
+
+    SubscriptionStatusResponseType ssr = of.createSubscriptionStatusResponseType();
+
+    Subscription sub = checkAsr(ss);
+
+    if (sub == null) {
+      // No subscription or error - nothing to do
+      ssr.setStatus(StatusType.NOT_FOUND);
+      ssr.setErrorResponse(new ErrorResponseType());
+      ssr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
+
+      return new Notification(null, ss, ssr);
+    }
+
+    return new Notification(sub, ss, ssr);
+  }
+
+  private Subscription checkAsr(final ActiveSubscriptionRequestType asr) throws SynchException {
+    Subscription sub = syncher.getSubscription(asr.getSubscriptionId());
+
+    /* Most errors we'll treat as an unknown subscription */
+
+    if (sub == null) {
+      return null;
+    }
+
+    // Ensure fields match
+    if (!sub.getOwner().equals(asr.getPrincipalHref())) {
+      return null;
+    }
+
+    // XXX Should check the end info.
+
+    return sub;
+  }
+
   private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
     SubscriptionConnectorInfo subCinfo = new SubscriptionConnectorInfo();
 
@@ -288,46 +368,5 @@ public class SynchConnector
     }
 
     return subCinfo;
-  }
-
-  private Notification unsubscribe(final HttpServletResponse resp,
-                           final UnsubscribeRequestType u) throws SynchException {
-    if (debug) {
-      trace("Handle unsubscribe " +  u.getSubscriptionId());
-    }
-
-    Subscription sub = syncher.getSubscription(u.getSubscriptionId());
-
-    UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
-
-    /* Most errors we'll treat as an unknown subscription */
-
-    boolean ok = false;
-
-    checkSub: {
-      if (sub == null) {
-        break checkSub;
-      }
-
-      // Ensure fields match
-      if (!sub.getOwner().equals(u.getPrincipalHref())) {
-        break checkSub;
-      }
-
-      ok = true;
-    } // checkSub
-
-    if (!ok) {
-      // No subscription or error - nothing to do
-      usr.setStatus(StatusType.ERROR);
-      usr.setErrorResponse(new ErrorResponseType());
-      usr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
-
-      return new Notification(sub, u, usr);
-    }
-
-    //usr.setSubscribeStatus(syncher.unsubscribe(sub));
-
-    return new Notification(sub, u, usr);
   }
 }
