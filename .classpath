@@ -15,7 +15,7 @@
 	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/access"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/rpituil"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/rpiutil"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/davutil"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-icalschema-3.8.jar"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-calws-soapschema-3.8.jar"/>
