@@ -40,7 +40,6 @@ import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.oasis_open.docs.ns.xri.xrd_1.XRDType;
 
 import java.util.List;
 
@@ -74,7 +73,7 @@ public class BedeworkConnector
   /* If non-null this is the token we currently have for bedework */
   private String remoteToken;
 
-  private XRDType sysInfo;
+  private GetPropertiesResponseType sysInfo;
 
   private ConnectorInstanceMap<BedeworkConnectorInstance> cinstMap =
       new ConnectorInstanceMap<BedeworkConnectorInstance>();
@@ -324,12 +323,8 @@ public class BedeworkConnector
 
       gp.setHref("/");
 
-      GetPropertiesResponseType gpr = getPort().getProperties(getIdToken(null),
-                                                              gp);
-
-      if (gpr != null) {
-        sysInfo = gpr.getXRD();
-      }
+      sysInfo = getPort().getProperties(getIdToken(null),
+                                        gp);
     }
   }
 }
