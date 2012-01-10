@@ -64,4 +64,9 @@
          name="org.bedework:service=SynchConnConf"
          xmbean-dd="resource:xmdesc/bwsynchConnConf-xmbean.xml">
   </mbean>
+  
+  <mbean code="org.bedework.http.service.HttpOut"
+         name="org.bedework:service=HttpOut"
+         xmbean-dd="resource:xmdesc/bwHttpOut-xmbean.xml">
+  </mbean>
 </server>

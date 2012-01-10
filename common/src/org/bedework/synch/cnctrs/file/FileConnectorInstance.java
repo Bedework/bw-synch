@@ -35,7 +35,8 @@ import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 
-import org.apache.commons.httpclient.Header;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
 import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
@@ -142,7 +143,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         return true;
       }
 
-      Header etag = cl.getResponse().getResponseHeader("Etag");
+      String etag = cl.getResponse().getResponseHeaderValue("Etag");
       if (etag == null) {
         if (debug) {
           trace("Received null etag");
@@ -152,11 +153,11 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       }
 
       if (debug) {
-        trace("Received etag:" + etag.getValue() +
+        trace("Received etag:" + etag +
               ", ours=" + info.getChangeToken());
       }
 
-      return !info.getChangeToken().equals(etag.getValue());
+      return !info.getChangeToken().equals(etag);
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
@@ -283,8 +284,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     DavClient cl = null;
 
     try {
-      cl = new DavClient(info.getUri(),
-                         15 * 1000);
+      cl = new DavClient(15 * 1000);
 
       if (info.getPrincipalHref() != null) {
         cl.setCredentials(info.getPrincipalHref(),
@@ -304,18 +304,18 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    */
   private void getIcal() throws SynchException {
     try {
-      DavClient cl = getClient();
+      getClient();
 
       Header[] hdrs = null;
 
       if ((uidMap != null) && (info.getChangeToken() != null) &&
           (fetchedIcal != null)) {
         hdrs = new Header[] {
-          new Header("If-None-Match", info.getChangeToken())
+          new BasicHeader("If-None-Match", info.getChangeToken())
         };
       }
 
-      int rc = cl.sendRequest("GET", info.getUri(), hdrs);
+      int rc = client.sendRequest("GET", info.getUri(), hdrs);
       info.setLastRefreshStatus(String.valueOf(rc));
 
       if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
@@ -337,7 +337,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
       CalendarBuilder builder = new CalendarBuilder();
 
-      InputStream is = cl.getResponse().getContentStream();
+      InputStream is = client.getResponse().getContentStream();
 
       Calendar ical = builder.build(is);
 
@@ -404,9 +404,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
        * calendar.
        */
 
-      Header etag = cl.getResponse().getResponseHeader("Etag");
+      String etag = client.getResponse().getResponseHeaderValue("Etag");
       if (etag != null) {
-        info.setChangeToken(etag.getValue());
+        info.setChangeToken(etag);
       }
     } catch (SynchException se) {
       throw se;

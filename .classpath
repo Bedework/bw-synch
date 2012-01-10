@@ -12,8 +12,6 @@
 	<classpathentry kind="lib" path="lib/spring-context-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-beans-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/commons-httpclient-3.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/access"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/rpiutil"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/davutil"/>
@@ -26,5 +24,7 @@
 	<classpathentry kind="lib" path="lib/jboss-kernel-5.1.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/jboss-system-5.1.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/jboss-system-jmx-5.1.0.GA.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

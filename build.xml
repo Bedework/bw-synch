@@ -95,7 +95,7 @@
               value="org.bedework.appjar" />
     
     <getJar name="commons-codec" version="1.5" />
-    <getJar name="commons-httpclient" version="3.0" />
+  	<getJar name="httpcore" version="4.1.2" />
     <getJar name="log4j" version="1.2.8" />
     <getJar name="servletapi" version="2.4" />
     <getJar name="ical4j" version="head-20100601" />

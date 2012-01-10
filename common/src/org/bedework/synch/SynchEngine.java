@@ -166,7 +166,7 @@ public class SynchEngine extends TzGetter {
    *
    */
   private class NotificationInThread extends Thread {
-    boolean showedTrace;
+    long lastTrace;
 
     /**
      */
@@ -238,11 +238,17 @@ public class SynchEngine extends TzGetter {
           warn("Notification handler shutting down");
           break;
         } catch (Throwable t) {
-          if (!showedTrace) {
+          if (debug) {
             error(t);
-            showedTrace = true;
           } else {
-            error(t.getMessage());
+            // Try not to flood the log with error traces
+            long now = System.currentTimeMillis();
+            if ((now - lastTrace) > (30 * 1000)) {
+              error(t);
+              lastTrace = now;
+            } else {
+              error(t.getMessage());
+            }
           }
         }
       }

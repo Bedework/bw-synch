@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mbean PUBLIC "-//JBoss//DTD JBOSS XMBEAN 1.1//EN"
+   "http://www.jboss.org/j2ee/dtd/jboss_xmbean_1_1.dtd" [
+	<!ATTLIST interceptor
+	proxyName CDATA #IMPLIED
+>
+]>
+
+<mbean>
+  <description>
+    Display usage and set limits for outbound http. Note that a route is the
+    entire path including any proxies. A host is defined by scheme + host + port.
+  </description>
+  <class>org.bedework.http.service.HttpOut</class>
+  <constructor>
+    <description>The default constructor</description>
+    <name>HttpOut</name>
+  </constructor>
+
+  &defaultAttributes;
+
+  <attribute access="read-write" getMethod="getMaxConnections"
+             setMethod="setMaxConnections">
+    <description>Maximum allowable overall</description>
+    <name>MaxConnections</name>
+    <type>int</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getCurrentConnections" >
+    <description>current active</description>
+    <name>CurrentConnections</name>
+    <type>int</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getDefaultMaxPerRoute">
+    <description>Default max connections per route</description>
+    <name>DefaultMaxPerRoute</name>
+    <type>int</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getDefaultMaxPerHost">
+    <description>Default max connections per host</description>
+    <name>DefaultMaxPerHost</name>
+    <type>int</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getCreated">
+    <description>Total created pool entries</description>
+    <name>Created</name>
+    <type>long</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getDeleted">
+    <description>Total deleted pool entries</description>
+    <name>Deleted</name>
+    <type>long</type>
+  </attribute>
+
+  <attribute access="read-only" getMethod="getLimits" >
+    <description>Current limits for hosts and routes</description>
+    <name>Limits</name>
+    <type>java.util.List</type>
+  </attribute>
+
+  <!-- Operations -->
+
+  <operation>
+    <description>Get the named host limit.</description>
+    <name>getHostLimit</name>
+    <parameter>
+      <description>Host - scheme + hostname + port</description>
+      <name>host</name>
+      <type>java.lang.String</type>
+    </parameter>
+  </operation>
+
+  <operation>
+    <description>Set the named host limit.</description>
+    <name>setHostLimit</name>
+    <parameter>
+      <description>Host - scheme + hostname + port</description>
+      <name>host</name>
+      <type>java.lang.String</type>
+    </parameter>
+    <parameter>
+      <description>Limit</description>
+      <name>max</name>
+      <type>int</type>
+    </parameter>
+  </operation>
+
+  &defaultOperations;
+
+</mbean>
+
