@@ -8,7 +8,6 @@
 	<classpathentry kind="lib" path="lib/hibernate-3.3.1.ga.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate-annotations-3.4.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
-	<classpathentry kind="lib" path="lib/servletapi-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-context-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-beans-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
@@ -26,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/jboss-system-jmx-5.1.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-2.4.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

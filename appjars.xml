@@ -67,7 +67,7 @@
       
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
-              name="commons-codec" version="1.3"/>
+              name="commons-codec" version="1.5"/>
 
       <!-- ======================= httpclient jars ============================ -->
       

@@ -14,8 +14,6 @@
   <property name="org.bedework.project.synch"
             location="${project.home}" />
 
-  <property file="${project.home}/build.properties" />
-
   <property name="bedework.home"
             location="${project.home}/../bedework" />
 
@@ -25,12 +23,11 @@
 
   <deftasks/>
 
-  <projectDefs name="${org.bedework.package.name}"
+  <projectDefs name="synch engine"
                version="${org.bedework.synch.version}" 
                deployment-name="synch"
   />
 
-  <import file="${build.dir}/loadDeployConfig.xml"/>
   <import file="${build.dir}/buildTools/wsimport.xml"/>
 
   <import file="${project.home}/appjars.xml" />
@@ -51,25 +48,6 @@
 
   <target name="init">
     <projectInit/>
-    
-    <property name="org.bedework.project.bedework"
-              location="${project.home}/../bedework" />
-
-    <loadDeployConfig/>
-
-    <property name="org.bedework.temp.wars.home"
-              location="${dist.home}/temp/wars" />
-    
-    <if>
-      <not>
-        <isset property="org.bedework.global.context.roots" />
-      </not>
-      <then>
-        <tempfile property="org.bedework.global.context.roots"
-                  destdir="${org.bedework.temp.dir}"
-                  prefix="context-roots" suffix=".properties" />
-      </then>
-    </if>
 
     <property name="org.bedework.module.common.base"
               location="${project.home}/common" />
@@ -81,13 +59,13 @@
               location="${project.home}/service" />
 
     <property name="common.jar"
-              location="${dist.home}/${org.bedework.module.common.jar}-${project.version}.jar" />
+              location="${dist.home}/bw-synch-common-${project.version}.jar" />
 
     <property name="server.jar"
-              location="${dist.home}/${org.bedework.module.server.jar}-${project.version}.jar" />
+              location="${dist.home}/bw-synch-${project.version}.jar" />
 
     <property name="service.jar"
-              location="${dist.home}/${org.bedework.module.service.jar}-${project.version}.jar" />
+              location="${dist.home}/bw-synchsvc-${project.version}.jar" />
   </target>
   
   <target name="build-init" depends="init">
@@ -95,18 +73,17 @@
               value="org.bedework.appjar" />
     
     <getJar name="commons-codec" version="1.5" />
+    <getJar name="ejb3-persistence" version="3.4.0.GA" />
+    <getJar name="hibernate" version="3.3.1.ga" />
+    <getJar name="hibernate-annotations" version="3.4.0.GA" />
   	<getJar name="httpcore" version="4.1.2" />
-    <getJar name="log4j" version="1.2.8" />
-    <getJar name="servletapi" version="2.4" />
     <getJar name="ical4j" version="head-20100601" />
     <getJar name="jboss-j2se" version="5.1.0.GA" />
     <getJar name="jboss-kernel" version="5.1.0.GA" />
     <getJar name="jboss-system" version="5.1.0.GA" />
     <getJar name="jboss-system-jmx" version="5.1.0.GA" />
-
-    <getJar name="ejb3-persistence" version="3.4.0.GA" />
-    <getJar name="hibernate" version="3.3.1.ga" />
-    <getJar name="hibernate-annotations" version="3.4.0.GA" />
+    <getJar name="log4j" version="1.2.8" />
+    <getJar name="servlet-api" version="2.4" />
     <getJar name="spring-beans" version="3.0.5.RELEASE" />
     <getJar name="spring-context" version="3.0.5.RELEASE" />
     <getJar name="spring-core" version="3.0.5.RELEASE" />
@@ -134,6 +111,7 @@
   
   <target name="deploy-init" depends="init">
     <deployInit ear-name="bw-${ant.project.name}" />
+    
     <property name="org.bedework.extra.properties.dir"
               value="${org.bedework.configuration.defaults}" />
     
