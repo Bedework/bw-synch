@@ -126,6 +126,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
      */
 
     if (info.getChangeToken() == null) {
+      fetchedIcal = null; // Force refetch
       return true;
     }
 
@@ -140,6 +141,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
           trace("Unsuccessful response from server was " + rc);
         }
         info.setChangeToken(null);  // Force refresh next time
+        fetchedIcal = null; // Force refetch
         return true;
       }
 
@@ -157,7 +159,12 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
               ", ours=" + info.getChangeToken());
       }
 
-      return !info.getChangeToken().equals(etag);
+      if (info.getChangeToken().equals(etag)) {
+        return false;
+      }
+
+      fetchedIcal = null; // Force refetch
+      return true;
     } catch (SynchException se) {
       throw se;
     } catch (Throwable t) {
@@ -304,6 +311,10 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    */
   private void getIcal() throws SynchException {
     try {
+      if (fetchedIcal != null) {
+        return;
+      }
+
       getClient();
 
       Header[] hdrs = null;
