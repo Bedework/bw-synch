@@ -277,10 +277,16 @@ public class SynchDb implements Serializable {
    * @throws SynchException
    */
   public void delete(final Subscription sub) throws SynchException {
+    boolean opened = open();
+
     try {
       sess.delete(sub);
     } catch (HibException he) {
       throw new SynchException(he);
+    } finally {
+      if (opened) {
+        close();
+      }
     }
   }
 

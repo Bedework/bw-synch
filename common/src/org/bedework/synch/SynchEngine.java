@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.http.client.dav.DavClient;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
@@ -344,6 +345,9 @@ public class SynchEngine extends TzGetter {
       timezones.init(config.getSynchConfig().getTimezonesURI());
 
       tzgetter = this;
+
+      DavClient.setDefaultMaxPerHost(20);
+      DavClient.setDefaultMaxPerRoute(20);
 
       synchlingPool = new SynchlingPool();
       synchlingPool.start(this,

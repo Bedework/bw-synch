@@ -32,13 +32,15 @@
     <type>int</type>
   </attribute>
 
-  <attribute access="read-only" getMethod="getDefaultMaxPerRoute">
+  <attribute access="read-write" getMethod="getDefaultMaxPerRoute"
+             setMethod="setDefaultMaxPerRoute">
     <description>Default max connections per route</description>
     <name>DefaultMaxPerRoute</name>
     <type>int</type>
   </attribute>
 
-  <attribute access="read-only" getMethod="getDefaultMaxPerHost">
+  <attribute access="read-write" getMethod="getDefaultMaxPerHost"
+             setMethod="setDefaultMaxPerHost">
     <description>Default max connections per host</description>
     <name>DefaultMaxPerHost</name>
     <type>int</type>
