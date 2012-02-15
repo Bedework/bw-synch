@@ -38,14 +38,14 @@ import edu.rpi.cmt.calendar.XcalUtil;
 import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.ComponentSelectionType;
-import org.oasis_open.docs.ns.wscal.calws_soap.ErrorCodeType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.oasis_open.docs.ns.wscal.calws_soap.TargetDoesNotExistType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
+import org.oasis_open.docs.ws_calendar.ns.soap.ErrorCodeType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.TargetDoesNotExistType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
@@ -66,7 +66,6 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
-
 
 /** The synchling handles the processing of a single subscription when there is
  * some activity.

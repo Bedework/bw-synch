@@ -29,7 +29,7 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 

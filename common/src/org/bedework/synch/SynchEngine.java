@@ -38,7 +38,7 @@ import edu.rpi.sss.util.Util;
 import net.fortuna.ical4j.model.TimeZone;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import java.util.ArrayList;
 import java.util.Collection;

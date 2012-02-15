@@ -21,8 +21,8 @@ package org.bedework.synch.cnctrs.exchange.responses;
 import org.bedework.synch.exception.SynchException;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType.MessageXml;

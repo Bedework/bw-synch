@@ -37,11 +37,11 @@ import net.fortuna.ical4j.model.Calendar;
 
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;

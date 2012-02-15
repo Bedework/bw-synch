@@ -23,11 +23,11 @@ import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.exception.SynchException;
 
-import org.oasis_open.docs.ns.wscal.calws_soap.AddItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.FetchItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.UpdateItemType;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 

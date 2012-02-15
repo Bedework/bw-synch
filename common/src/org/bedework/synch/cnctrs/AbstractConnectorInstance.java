@@ -30,8 +30,8 @@ import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
 import org.apache.log4j.Logger;
-import org.oasis_open.docs.ns.wscal.calws_soap.BaseResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 /** Abstract connector instance to handle some trivia.
  *

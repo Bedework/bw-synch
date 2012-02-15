@@ -50,8 +50,8 @@ import org.bedework.synch.wsmessages.UnknownSubscriptionType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 
-import org.oasis_open.docs.ns.wscal.calws_soap.ErrorResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.ErrorResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import java.util.List;
 

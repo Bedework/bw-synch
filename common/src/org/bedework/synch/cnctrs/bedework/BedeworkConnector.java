@@ -37,9 +37,9 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 
-import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesResponseType;
-import org.oasis_open.docs.ns.wscal.calws_soap.GetPropertiesType;
-import org.oasis_open.docs.ns.wscal.calws_soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.GetPropertiesResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.GetPropertiesType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import java.util.List;
 
