@@ -22,19 +22,35 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.db.SynchConfig;
 import org.bedework.synch.exception.SynchException;
 
+import org.apache.geronimo.gbean.GBeanInfo;
+import org.apache.geronimo.gbean.GBeanInfoBuilder;
+import org.apache.geronimo.gbean.GBeanLifecycle;
 import org.apache.log4j.Logger;
-import org.jboss.system.ServiceMBeanSupport;
-
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 /**
  * @author douglm
  *
  */
-public class SynchConf extends ServiceMBeanSupport implements SynchConfMBean {
+public class SynchConf implements SynchConfMBean, GBeanLifecycle {
   private transient Logger log;
+
+  /** Geronimo gbean info
+   */
+  public static final GBeanInfo GBEAN_INFO;
+  static {
+    GBeanInfoBuilder infoB =
+        GBeanInfoBuilder.createStatic("Bedework-Synch", SynchConf.class);
+    infoB.addAttribute("synchlingPoolSize", "int", true);
+    infoB.addAttribute("synchlingPoolTimeout", "long", true);
+    infoB.addAttribute("missingTargetRetries", "int", true);
+    infoB.addAttribute("callbackURI", String.class, true);
+    infoB.addAttribute("timezonesURI", String.class, true);
+    infoB.addAttribute("keystore", String.class, true);
+    infoB.addAttribute("privKeys", String.class, true);
+    infoB.addAttribute("pubKeys", String.class, true);
+
+    GBEAN_INFO = infoB.getBeanInfo();
+  }
 
   /* ========================================================================
    * Conf properties
@@ -223,22 +239,42 @@ public class SynchConf extends ServiceMBeanSupport implements SynchConfMBean {
    * ======================================================================== */
 
   @Override
-  protected ObjectName getObjectName(final MBeanServer server,
-                                     final ObjectName name)
-      throws MalformedObjectNameException {
-    if (name == null) {
-      return OBJECT_NAME;
-    }
-
-    return name;
-   }
-
-  @Override
-  public void startService() throws Exception {
+  public void start() {
   }
 
   @Override
-  public void stopService() throws Exception {
+  public void stop() {
+  }
+
+  @Override
+  public boolean isStarted() {
+    return true;
+  }
+
+  /* ========================================================================
+   * Geronimo lifecycle methods
+   * ======================================================================== */
+
+  /**
+   * @return gbean info
+   */
+  public static GBeanInfo getGBeanInfo() {
+    return GBEAN_INFO;
+  }
+
+  @Override
+  public void doFail() {
+    stop();
+  }
+
+  @Override
+  public void doStart() throws Exception {
+    start();
+  }
+
+  @Override
+  public void doStop() throws Exception {
+    stop();
   }
 
   /* ====================================================================

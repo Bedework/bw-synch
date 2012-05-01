@@ -4,8 +4,6 @@
 	<classpathentry kind="src" path="server/src"/>
 	<classpathentry kind="src" path="common/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/ejb3-persistence-3.4.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/spring-context-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-beans-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/spring-core-3.0.5.RELEASE.jar"/>
@@ -17,13 +15,11 @@
 	<classpathentry kind="lib" path="/bwxml/dist/bw-exchangewsschema-3.8.jar"/>
 	<classpathentry kind="lib" path="/bwxml/dist/bw-synchwsschema-3.8.jar"/>
 	<classpathentry kind="lib" path="lib/ical4j-head-20100601.jar"/>
-	<classpathentry kind="lib" path="lib/jboss-j2se-5.1.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/jboss-kernel-5.1.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/jboss-system-5.1.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/jboss-system-jmx-5.1.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.6.9.Final.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-kernel-2.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-core-3.6.9.Final.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
 </classpath>

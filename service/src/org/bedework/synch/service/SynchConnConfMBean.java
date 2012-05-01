@@ -18,22 +18,13 @@
 */
 package org.bedework.synch.service;
 
-import org.jboss.mx.util.ObjectNameFactory;
-import org.jboss.system.ServiceMBean;
-
 import java.util.List;
-
-import javax.management.ObjectName;
 
 /** Configure a connector for the Bedework synch engine service
  *
  * @author douglm
  */
-public interface SynchConnConfMBean extends ServiceMBean {
-  /** The default object name */
-  ObjectName OBJECT_NAME =
-      ObjectNameFactory.create("org.bedework:service=SynchConnConf");
-
+public interface SynchConnConfMBean {
   /* ========================================================================
    * Status
    * ======================================================================== */
@@ -128,4 +119,24 @@ public interface SynchConnConfMBean extends ServiceMBean {
    * @param name    String
    */
   public void delete(String name);
+
+  /* ========================================================================
+   * Lifecycle
+   * ======================================================================== */
+
+  /** Lifecycle
+   *
+   */
+  public void start();
+
+  /** Lifecycle
+   *
+   */
+  public void stop();
+
+  /** Lifecycle
+   *
+   * @return true if started
+   */
+  public boolean isStarted();
 }

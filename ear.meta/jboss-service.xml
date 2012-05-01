@@ -56,17 +56,29 @@
   </mbean>
   
   <mbean code="org.bedework.synch.service.SynchConf"
-         name="org.bedework:service=SynchConf"
-         xmbean-dd="resource:xmdesc/bwsynchConf-xmbean.xml">
+         name="org.bedework:service=SynchConf">
+    <attribute name="SynchlingPoolSize" />
+    <attribute name="SynchlingPoolTimeout" />
+    <attribute name="MissingTargetRetries" />
+    <attribute name="CallbackURI" />
+    <attribute name="TimezonesURI" />
+    <attribute name="Keystore" />
+    <attribute name="PrivKeys" />
+    <attribute name="PubKeys" />
   </mbean>
   
   <mbean code="org.bedework.synch.service.SynchConnConf"
-         name="org.bedework:service=SynchConnConf"
-         xmbean-dd="resource:xmdesc/bwsynchConnConf-xmbean.xml">
+         name="org.bedework:service=SynchConnConf">
+    <attribute name="Status" />
+    <attribute name="ConnectorId" />
+    <attribute name="ConnectorNames" />
+    <attribute name="ClassName" />
+    <attribute name="ReadOnly" />
+    <attribute name="TrustLastmod" />
+    <attribute name="Properties" />
   </mbean>
   
   <mbean code="org.bedework.http.service.HttpOut"
-         name="org.bedework:service=HttpOut"
-         xmbean-dd="resource:xmdesc/bwHttpOut-xmbean.xml">
+         name="org.bedework:service=HttpOut">
   </mbean>
 </server>

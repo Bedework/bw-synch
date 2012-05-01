@@ -155,6 +155,12 @@
               libcache="${org.bedework.libcache.dir}"
               name="exchangews" version="2010"/>
  -->
+
+      <!-- ======================= Geronimo jars ========================== -->
+
+      <getJar lib="${org.bedework.temp.extrajars.dir}"
+              libcache="${org.bedework.libcache.dir}"
+              name="geronimo-kernel" version="2.2.1" />
     </sequential>
  </macrodef>
 </project>

@@ -69,46 +69,7 @@
   </target>
   
   <target name="build-init" depends="init">
-    <property name="org.bedework.getjar.property.prefix"
-              value="org.bedework.appjar" />
-    
-    <getJar name="commons-codec" version="1.5" />
-    <getJar name="ejb3-persistence" version="3.4.0.GA" />
-    <getJar name="hibernate" version="3.6.9.Final" />
-    <!--
-    <getJar name="hibernate-annotations" version="3.4.0.GA" />
-    -->
-  	<getJar name="httpcore" version="4.1.2" />
-    <getJar name="ical4j" version="head-20100601" />
-    <getJar name="jboss-j2se" version="5.1.0.GA" />
-    <getJar name="jboss-kernel" version="5.1.0.GA" />
-    <getJar name="jboss-system" version="5.1.0.GA" />
-    <getJar name="jboss-system-jmx" version="5.1.0.GA" />
-    <getJar name="log4j" version="1.2.8" />
-    <getJar name="servlet-api" version="2.4" />
-    <getJar name="spring-beans" version="3.0.5.RELEASE" />
-    <getJar name="spring-context" version="3.0.5.RELEASE" />
-    <getJar name="spring-core" version="3.0.5.RELEASE" />
-
-    <getJar name="bw-exchangewsschema" version="${org.bedework.bwxml.version}"
-            project="bwxml"
-            projecthome="${project.home}/../bwxml" />
-
-    <getJar name="bw-synchwsschema" version="${org.bedework.bwxml.version}"
-            project="bwxml"
-            projecthome="${project.home}/../bwxml" />
-    
-    <getJar name="bw-davio" version="${org.bedework.davutil.version}" 
-            project="davutil"
-            projecthome="${project.home}/../davutil" />
-    
-    <getJar name="rpiutil" version="${org.bedework.rpiutil.version}" 
-            project="rpiutil"
-            projecthome="${project.home}/../rpiutil" />
-
-    <getJar name="rpiaccess" version="${org.bedework.access.version}" 
-            project="access"
-            projecthome="${project.home}/../access" />
+    <resolveDependencies pomFile="pom.xml" />
   </target>
   
   <target name="deploy-init" depends="init">
@@ -119,7 +80,6 @@
     
     <property name="org.bedework.extra.properties"
               value="synch-config.xml" />
-    
   </target>
 
   <!-- ===================== build-source Target ===============================
@@ -129,12 +89,20 @@
   <target name="build-source" depends="build-init" >
     <build-jar module-base="${org.bedework.module.common.base}" 
                jar-file="${common.jar}" />
+    
+    <installJar dir="${org.bedework.module.common.base}" name="${common.jar}"/>
                
     <build-jar module-base="${org.bedework.module.server.base}" 
                jar-file="${server.jar}" />
+    
+    <installJar dir="${org.bedework.module.server.base}" name="${server.jar}"/>
 
     <build-jar module-base="${org.bedework.module.service.base}" 
                jar-file="${service.jar}" />
+    
+    <installJar dir="${org.bedework.module.service.base}" name="${service.jar}"/>
+    
+    <installPom dir="${project.home}"/>
     
     <build-jar-stats />
   </target>
@@ -172,38 +140,5 @@
     </forApp>
       
     <deployTerm />
-  </target>
-
-<!-- ==================== Javadoc Target ===============================
-     The "javadoc" target creates Javadoc API documentation for the Java
-     classes included in your application.  Normally, this is only required
-     when preparing a distribution release, but is available as a separate
-     target in case the developer wants to create Javadocs independently.
-     =================================================================== -->
-
-  <target name="javadoc" depends="init"
-          description="Create Javadoc API documentation">
-    <property name="destdir" location="${dist.home}/docs/api"/>
-    <mkdir dir="${destdir}"/>
-
-    <javadoc sourcepath="${org.bedework.module.common.base}/src:${org.bedework.module.service.base}/src:${org.bedework.module.server.base}/src:"
-           classpathref="compile.classpath"
-                destdir="${destdir}"
-           packagenames="org.bedework.*,
-                         edu.rpi.*"
-                 access="public"
-                 author="true"
-                version="true"
-          breakiterator="yes"
-            windowtitle="${project.name} ${project.version} API Documentation">
-      <doctitle><![CDATA[${project.name} ${project.version}<br/>API Documentation]]></doctitle>
-      <header><![CDATA[${project.name} ${project.version}<br/>API Documentation]]></header>
-      <link href="../../access/api" />
-      <link href="../../calendarapi/api" />
-      <link href="../../davutil/api" />
-      <link href="../../rpiutil/api" />
-      <link href="../../webdav/api" />
-      <link href="${env.JAVA_HOME}/docs/api" />
-    </javadoc>
   </target>
 </project>

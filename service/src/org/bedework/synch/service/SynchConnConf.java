@@ -24,23 +24,55 @@ import org.bedework.synch.db.SynchConfig;
 import org.bedework.synch.db.SynchProperty;
 import org.bedework.synch.exception.SynchException;
 
+import org.apache.geronimo.gbean.GBeanInfo;
+import org.apache.geronimo.gbean.GBeanInfoBuilder;
+import org.apache.geronimo.gbean.GBeanLifecycle;
+import org.apache.geronimo.gbean.GOperationInfo;
 import org.apache.log4j.Logger;
-import org.jboss.system.ServiceMBeanSupport;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 /**
  * @author douglm
  *
  */
-public class SynchConnConf extends ServiceMBeanSupport implements SynchConnConfMBean {
+public class SynchConnConf implements SynchConnConfMBean, GBeanLifecycle {
   private transient Logger log;
+
+  /** Geronimo gbean info
+   */
+  public static final GBeanInfo GBEAN_INFO;
+  private static final Class[] NO_ARGS = {};
+  static {
+    GBeanInfoBuilder infoB =
+        GBeanInfoBuilder.createStatic("Bedework-SynchConnConf", SynchConf.class);
+    infoB.addAttribute("status", String.class, false);
+    infoB.addAttribute("connectorId", String.class, false);
+    infoB.addAttribute("connectorNames", List.class, false);
+
+    infoB.addAttribute("className", String.class, true);
+    infoB.addAttribute("readOnly", "boolean", true);
+    infoB.addAttribute("trustLastmod", "boolean", true);
+    infoB.addAttribute("properties", String.class, true);
+
+    Class[] getConnectorPars = {String.class};
+
+    infoB.addOperation(new GOperationInfo("getConnector", getConnectorPars, ""));
+
+    Class[] addPropertyPars = {String.class, String.class};
+
+    infoB.addOperation(new GOperationInfo("addProperty", addPropertyPars, ""));
+
+    infoB.addOperation(new GOperationInfo("add", NO_ARGS, ""));
+
+    Class[] deletePars = {String.class};
+
+    infoB.addOperation(new GOperationInfo("delete", deletePars, null));
+
+    GBEAN_INFO = infoB.getBeanInfo();
+  }
 
   private String currentConn;
 
@@ -237,23 +269,43 @@ public class SynchConnConf extends ServiceMBeanSupport implements SynchConnConfM
    * ======================================================================== */
 
   @Override
-  protected ObjectName getObjectName(final MBeanServer server,
-                                     final ObjectName name)
-      throws MalformedObjectNameException {
-    if (name == null) {
-      return OBJECT_NAME;
-    }
-
-    return name;
-   }
-
-  @Override
-  public void startService() throws Exception {
+  public void start() {
     currentConf = new ConnectorConfig();
   }
 
   @Override
-  public void stopService() throws Exception {
+  public void stop() {
+  }
+
+  @Override
+  public boolean isStarted() {
+    return true;
+  }
+
+  /* ========================================================================
+   * Geronimo lifecycle methods
+   * ======================================================================== */
+
+  /**
+   * @return gbean info
+   */
+  public static GBeanInfo getGBeanInfo() {
+    return GBEAN_INFO;
+  }
+
+  @Override
+  public void doFail() {
+    stop();
+  }
+
+  @Override
+  public void doStart() throws Exception {
+    start();
+  }
+
+  @Override
+  public void doStop() throws Exception {
+    stop();
   }
 
   /* ====================================================================
