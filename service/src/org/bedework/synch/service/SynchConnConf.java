@@ -224,6 +224,21 @@ public class SynchConnConf implements SynchConnConfMBean, GBeanLifecycle {
   }
 
   @Override
+  public String setProperty(final String name, final String value) {
+    try {
+      if (currentConn == null) {
+        return "No current connector";
+      }
+
+      currentConf.setProperty(name, value);
+      update();
+      return "ok";
+    } catch (Throwable t) {
+      return "Exception: " + t.getLocalizedMessage();
+    }
+  }
+
+  @Override
   public void add() {
     if (updateAble) {
       status = "Cannot add";

@@ -76,7 +76,7 @@
   </operation>
 
   <operation>
-    <description>Add a property - name need not be unique.</description>
+    <description>Add a property.</description>
     <name>addProperty</name>
     <parameter>
       <description>Name of the property</description>
@@ -88,6 +88,22 @@
       <name>value</name>
       <type>java.lang.String</type>
     </parameter>
+  </operation>
+
+  <operation>
+    <description>Set a property.</description>
+    <name>setProperty</name>
+    <parameter>
+      <description>Name of the property</description>
+      <name>name</name>
+      <type>java.lang.String</type>
+    </parameter>
+    <parameter>
+      <description>Value of the property</description>
+      <name>value</name>
+      <type>java.lang.String</type>
+    </parameter>
+    <return-type>java.lang.String</return-type>
   </operation>
 
   <operation>

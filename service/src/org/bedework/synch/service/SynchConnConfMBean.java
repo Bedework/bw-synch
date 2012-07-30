@@ -109,6 +109,14 @@ public interface SynchConnConfMBean {
    */
   public void addProperty(String name, String value);
 
+  /** Set or add a property
+   *
+   * @param name
+   * @param value
+   * @return completion message
+   */
+  public String setProperty(String name, String value);
+
   /** Add the new connector config.
    *
    */
