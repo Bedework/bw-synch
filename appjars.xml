@@ -175,6 +175,10 @@
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
               name="spring-core" version="3.0.5.RELEASE" />
+
+      <getJar lib="${org.bedework.temp.extrajars.dir}"
+              libcache="${org.bedework.libcache.dir}"
+              name="spring-expression" version="3.0.5.RELEASE" />
     </sequential>
  </macrodef>
 </project>
