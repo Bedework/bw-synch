@@ -79,6 +79,6 @@
   </mbean>
   
   <mbean code="org.bedework.http.service.HttpOut"
-         name="org.bedework:service=HttpOut">
+         name="org.bedework:service=SynchHttpOut">
   </mbean>
 </server>

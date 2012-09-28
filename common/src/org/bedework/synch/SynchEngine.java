@@ -346,7 +346,7 @@ public class SynchEngine extends TzGetter {
 
       tzgetter = this;
 
-      DavClient.setDefaultMaxPerHost(20);
+      //DavClient.setDefaultMaxPerHost(20);
       DavClient.setDefaultMaxPerRoute(20);
 
       synchlingPool = new SynchlingPool();
