@@ -267,7 +267,7 @@ public abstract class MethodBase {
    * @param req        Servlet request object
    * @param resp       Servlet response object for bad status
    * @return Document  Parsed body or null for no body
-   * @exception WebdavException Some error occurred.
+   * @exception ConfigException Some error occurred.
    */
   protected Document parseContent(final HttpServletRequest req,
                                   final HttpServletResponse resp)
