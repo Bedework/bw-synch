@@ -267,11 +267,11 @@ public abstract class MethodBase {
    * @param req        Servlet request object
    * @param resp       Servlet response object for bad status
    * @return Document  Parsed body or null for no body
-   * @exception ConfigException Some error occurred.
+   * @exception SynchException Some error occurred.
    */
   protected Document parseContent(final HttpServletRequest req,
                                   final HttpServletResponse resp)
-      throws SynchException{
+      throws SynchException {
     int len = req.getContentLength();
     if (len == 0) {
       return null;
