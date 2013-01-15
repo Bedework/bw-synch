@@ -16,7 +16,7 @@
 	<classpathentry kind="lib" path="lib/hibernate-core-3.6.9.Final.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/bw-exchangewsschema-3.9.jar"/>
-	<classpathentry kind="lib" path="lib/bw-synchwsschema-3.9.jar"/>
+	<classpathentry kind="lib" path="lib/bw-synchwsschema-3.9.jar" sourcepath="/bwxml"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.2.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/davutil"/>
 	<classpathentry kind="output" path="bin/synch-trunk"/>
