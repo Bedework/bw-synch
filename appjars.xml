@@ -83,7 +83,7 @@
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
-              name="ical4j" version="head-20100601"/>
+              name="ical4j" version="1.0-BW-SNAPSHOT"/>
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"
               libcache="${org.bedework.libcache.dir}"
