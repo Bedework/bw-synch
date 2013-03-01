@@ -33,6 +33,7 @@ import edu.rpi.cmt.security.PwEncryptionIntf;
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.cmt.timezones.TimezonesImpl;
 import edu.rpi.sss.util.Util;
+import edu.rpi.sss.util.http.BasicHttpClient;
 
 import net.fortuna.ical4j.model.TimeZone;
 
@@ -346,7 +347,7 @@ public class SynchEngine extends TzGetter {
       tzgetter = this;
 
       //DavClient.setDefaultMaxPerHost(20);
-      //DavClient.setDefaultMaxPerRoute(20);
+      BasicHttpClient.setDefaultMaxPerRoute(20);
 
       synchlingPool = new SynchlingPool();
       synchlingPool.start(this,
