@@ -18,8 +18,6 @@
 */
 package org.bedework.synch.cnctrs.file;
 
-import org.bedework.http.client.DavioException;
-import org.bedework.http.client.dav.DavClient;
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
@@ -30,12 +28,14 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import edu.rpi.cmt.calendar.IcalToXcal;
 import edu.rpi.cmt.calendar.XcalUtil;
 import edu.rpi.sss.util.Util;
+import edu.rpi.sss.util.http.BasicHttpClient;
 import edu.rpi.sss.util.xml.tagdefs.XcalTags;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 
 import org.apache.http.Header;
+import org.apache.http.HttpException;
 import org.apache.http.message.BasicHeader;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
@@ -75,7 +75,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
   private FileSubscriptionInfo info;
 
-  private DavClient client;
+  private BasicHttpClient client;
 
   /* Only non-null if we actually fetched the data */
   private IcalendarType fetchedIcal;
@@ -130,7 +130,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       return true;
     }
 
-    DavClient cl = getClient();
+    BasicHttpClient cl = getClient();
 
     try {
       int rc = cl.sendRequest("HEAD", info.getUri(), null);
@@ -145,7 +145,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         return true;
       }
 
-      String etag = cl.getResponse().getResponseHeaderValue("Etag");
+      String etag = cl.getFirstHeaderValue("Etag");
       if (etag == null) {
         if (debug) {
           trace("Received null etag");
@@ -283,15 +283,15 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    *                   Private methods
    * ==================================================================== */
 
-  private DavClient getClient() throws SynchException {
+  private BasicHttpClient getClient() throws SynchException {
     if (client != null) {
       return client;
     }
 
-    DavClient cl = null;
+    BasicHttpClient cl = null;
 
     try {
-      cl = new DavClient(15 * 1000);
+      cl = new BasicHttpClient(15 * 1000);
 
       if (info.getPrincipalHref() != null) {
         cl.setCredentials(info.getPrincipalHref(),
@@ -301,8 +301,8 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       client = cl;
 
       return cl;
-    } catch (DavioException de) {
-      throw new SynchException(de);
+    } catch (HttpException he) {
+      throw new SynchException(he);
     }
   }
 
@@ -348,7 +348,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
       CalendarBuilder builder = new CalendarBuilder();
 
-      InputStream is = client.getResponse().getContentStream();
+      InputStream is = client.getResponseBodyAsStream();
 
       Calendar ical = builder.build(is);
 
@@ -415,7 +415,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
        * calendar.
        */
 
-      String etag = client.getResponse().getResponseHeaderValue("Etag");
+      String etag = client.getFirstHeaderValue("Etag");
       if (etag != null) {
         info.setChangeToken(etag);
       }
