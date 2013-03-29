@@ -85,6 +85,7 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
                                        final BaseResponseType resp,
                                        final Connector cnctr,
                                        final BaseSubscriptionInfo info) throws SynchException {
+    resp.setStatus(StatusType.OK);
     if (req.getEnd() != end) {
       return true;
     }
