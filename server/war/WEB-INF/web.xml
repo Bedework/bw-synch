@@ -8,15 +8,14 @@
   <display-name>Bedework synch callback server</display-name>
 
   <context-param>
-    <param-name>bwappname</param-name>
-    <param-value>@BW-APP-NAME@</param-value>
+    <param-name>configDir</param-name>
+    <param-value>@DATA_DIR@/synch/conf/</param-value>
   </context-param>
 
   <listener>
     <listener-class>edu.rpi.sss.util.jsp.SessionListener</listener-class>
   </listener>
-
-  <!-- Need this to flush a static table maintained by the servlet -->
+  <!-- A listener to register the jmx mbeans -->
   <listener>
     <listener-class>org.bedework.synch.web.SynchServlet</listener-class>
   </listener>

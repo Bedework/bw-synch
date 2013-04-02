@@ -16,40 +16,48 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.db;
+package org.bedework.synch.conf;
 
-import java.util.Set;
+import org.bedework.synch.db.IpAddrInfo;
+import org.bedework.synch.service.SynchConnConf;
+
+import edu.rpi.cmt.config.ConfigBase;
+
+import java.util.List;
 import java.util.SortedSet;
+
+import javax.xml.namespace.QName;
 
 /** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
-public class SynchConfig extends DbItem<SynchConfig> {
-  /* Size of synchling pool */
-  private int synchlingPoolSize;
+public class SynchConfig extends ConfigBase<SynchConfig> {
+  /** */
+  public final static QName confElement = new QName(ns, "synch-confinfo");
 
-  /* millisecs */
-  private long synchlingPoolTimeout;
+  private static final QName synchlingPoolSizeProperty = new QName(ns, "synchlingPoolSize");
 
-  /* How often we retry when a target is missing */
-  private int missingTargetRetries;
+  private static final QName synchlingPoolTimeoutProperty = new QName(ns, "synchlingPoolTimeout");
 
-  /* web service push callback uri - null for no service */
-  private String callbackURI;
+  private static final QName missingTargetRetriesProperty = new QName(ns, "missingTargetRetries");
 
-  /* Timezone server location */
-  private String timezonesURI;
+  private static final QName timezonesURIProperty = new QName(ns, "timezonesURI");
 
-  /* Path to keystore - null for use default */
-  private String keystore;
+  private static final QName callbackURIProperty = new QName(ns, "callbackURI");
 
-  /* Path to keystores  */
-  private String privKeys;
-  /* Path to keystores  */
-  private String pubKeys;
+  private static final QName keystoreProperty = new QName(ns, "keystore");
 
-  private Set<ConnectorConfig> connectors;
+  private static final QName privKeysProperty = new QName(ns, "privKeys");
+
+  private static final QName pubKeysProperty = new QName(ns, "pubKeys");
+
+  @Override
+  public QName getConfElement() {
+    return confElement;
+  }
+
+  private List<SynchConnConf> connectorConfs;
 
   private SortedSet<IpAddrInfo> ipInfo;
 
@@ -57,28 +65,28 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val current size of synchling pool
    */
   public void setSynchlingPoolSize(final int val) {
-    synchlingPoolSize = val;
+    setIntegerProperty(synchlingPoolSizeProperty, val);
   }
 
   /**
    * @return current size of synchling pool
    */
   public int getSynchlingPoolSize() {
-    return synchlingPoolSize;
+    return getIntegerPropertyValue(synchlingPoolSizeProperty);
   }
 
   /**
    * @param val timeout in millisecs
    */
   public void setSynchlingPoolTimeout(final long val) {
-    synchlingPoolTimeout = val;
+    setLongProperty(synchlingPoolTimeoutProperty, val);
   }
 
   /**
    * @return timeout in millisecs
    */
   public long getSynchlingPoolTimeout() {
-    return synchlingPoolTimeout;
+    return getLongPropertyValue(synchlingPoolTimeoutProperty);
   }
 
   /** How often we retry when a target is missing
@@ -86,14 +94,14 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val
    */
   public void setMissingTargetRetries(final int val) {
-    missingTargetRetries = val;
+    setIntegerProperty(missingTargetRetriesProperty, val);
   }
 
   /**
    * @return How often we retry when a target is missing
    */
   public int getMissingTargetRetries() {
-    return missingTargetRetries;
+    return getIntegerPropertyValue(missingTargetRetriesProperty);
   }
 
   /** web service push callback uri - null for no service
@@ -101,7 +109,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val    String
    */
   public void setCallbackURI(final String val) {
-    callbackURI = val;
+    setProperty(callbackURIProperty, val);
   }
 
   /** web service push callback uri - null for no service
@@ -109,7 +117,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @return String
    */
   public String getCallbackURI() {
-    return callbackURI;
+    return getPropertyValue(callbackURIProperty);
   }
 
   /** Timezone server location
@@ -117,7 +125,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val    String
    */
   public void setTimezonesURI(final String val) {
-    timezonesURI = val;
+    setProperty(timezonesURIProperty, val);
   }
 
   /** Timezone server location
@@ -125,7 +133,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @return String
    */
   public String getTimezonesURI() {
-    return timezonesURI;
+    return getPropertyValue(timezonesURIProperty);
   }
 
   /** Path to keystore - null for use default
@@ -133,7 +141,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val    String
    */
   public void setKeystore(final String val) {
-    keystore = val;
+    setProperty(keystoreProperty, val);
   }
 
   /** Path to keystore - null for use default
@@ -141,7 +149,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @return String
    */
   public String getKeystore() {
-    return keystore;
+    return getPropertyValue(keystoreProperty);
   }
 
   /**
@@ -149,7 +157,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val    String
    */
   public void setPrivKeys(final String val) {
-    privKeys = val;
+    setProperty(privKeysProperty, val);
   }
 
   /**
@@ -157,7 +165,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @return String
    */
   public String getPrivKeys() {
-    return privKeys;
+    return getPropertyValue(privKeysProperty);
   }
 
   /**
@@ -165,7 +173,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @param val    String
    */
   public void setPubKeys(final String val) {
-    pubKeys = val;
+    setProperty(pubKeysProperty, val);
   }
 
   /**
@@ -173,7 +181,7 @@ public class SynchConfig extends DbItem<SynchConfig> {
    * @return String
    */
   public String getPubKeys() {
-    return pubKeys;
+    return getPropertyValue(pubKeysProperty);
   }
 
   /**
@@ -194,33 +202,15 @@ public class SynchConfig extends DbItem<SynchConfig> {
    *
    * @param val
    */
-  public void setConnectors(final Set<ConnectorConfig> val) {
-    connectors = val;
+  public void setConnectorConfs(final List<SynchConnConf> val) {
+    connectorConfs = val;
   }
 
   /** Set<ConnectorConfig>
    *
    * @return map
    */
-  public Set<ConnectorConfig> getConnectors() {
-    return connectors;
-  }
-
-  /* ====================================================================
-   *                   Object methods
-   * We only allow one of these in teh db so any and all are equal.
-   * ==================================================================== */
-
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
-  @Override
-  public int compareTo(final SynchConfig o) {
-    return 0;
-  }
-
-  @Override
-  public int hashCode() {
-    return 4;
+  public List<SynchConnConf> getConnectorConfs() {
+    return connectorConfs;
   }
 }

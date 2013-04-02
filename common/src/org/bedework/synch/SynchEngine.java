@@ -21,14 +21,16 @@ package org.bedework.synch;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.cnctrs.ConnectorInstance;
-import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.db.Subscription;
-import org.bedework.synch.db.SynchConfig;
 import org.bedework.synch.db.SynchDb;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.service.SynchConnConf;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import edu.rpi.cmt.calendar.XcalUtil.TzGetter;
+import edu.rpi.cmt.jmx.ConfigHolder;
 import edu.rpi.cmt.security.PwEncryptionIntf;
 import edu.rpi.cmt.timezones.Timezones;
 import edu.rpi.cmt.timezones.TimezonesImpl;
@@ -118,7 +120,8 @@ public class SynchEngine extends TzGetter {
 
   private final boolean debug;
 
-  private static String appname = "Synch";
+  //private static String appname = "Synch";
+  static ConfigHolder<SynchConfig> cfgHolder;
 
   private transient PwEncryptionIntf pwEncrypt;
 
@@ -134,7 +137,7 @@ public class SynchEngine extends TzGetter {
 
   private boolean stopping;
 
-  private Configurator config;
+  //private Configurator config;
 
   private static Object getSyncherLock = new Object();
 
@@ -287,19 +290,31 @@ public class SynchEngine extends TzGetter {
     }
   }
 
-  /** Set before calling getSyncher
-   *
+  /**
    * @param val
    */
-  public static void setAppname(final String val) {
-    appname = val;
+  public static void setConfigHolder(final ConfigHolder<SynchConfig> val) {
+    cfgHolder = val;
   }
 
   /**
-   * @return appname
+   * @return current state of the configuration
    */
-  public static String getAppname() {
-    return appname;
+  public static SynchConfig getConfig() {
+    if (cfgHolder == null) {
+      return null;
+    }
+
+    return cfgHolder.getConfig();
+  }
+
+  /**
+   * @throws SynchException
+   */
+  public void updateConfig() throws SynchException {
+    if (cfgHolder != null) {
+      cfgHolder.putConfig();
+    }
   }
 
   /** Get a timezone object given the id. This will return transient objects
@@ -339,10 +354,9 @@ public class SynchEngine extends TzGetter {
       }
 
       db = new SynchDb();
-      config = new Configurator(db);
 
       timezones = new TimezonesImpl();
-      timezones.init(config.getSynchConfig().getTimezonesURI());
+      timezones.init(getConfig().getTimezonesURI());
 
       tzgetter = this;
 
@@ -351,32 +365,34 @@ public class SynchEngine extends TzGetter {
 
       synchlingPool = new SynchlingPool();
       synchlingPool.start(this,
-                          config.getSynchConfig().getSynchlingPoolSize(),
-                          config.getSynchConfig().getSynchlingPoolTimeout());
+                          getConfig().getSynchlingPoolSize(),
+                          getConfig().getSynchlingPoolTimeout());
 
       notificationInQueue = new ArrayBlockingQueue<Notification>(100);
 
       info("**************************************************");
       info("Starting synch");
-      info("      callback URI: " + config.getSynchConfig().getCallbackURI());
+      info("      callback URI: " + getConfig().getCallbackURI());
       info("**************************************************");
 
-      if (config.getSynchConfig().getKeystore() != null) {
-        System.setProperty("javax.net.ssl.trustStore", config.getSynchConfig().getKeystore());
+      if (getConfig().getKeystore() != null) {
+        System.setProperty("javax.net.ssl.trustStore", getConfig().getKeystore());
         System.setProperty("javax.net.ssl.trustStorePassword", "bedework");
       }
 
-      Set<ConnectorConfig> connectors = config.getSynchConfig().getConnectors();
-      String callbackUriBase = config.getSynchConfig().getCallbackURI();
+      List<SynchConnConf> connectorConfs = getConfig().getConnectorConfs();
+      String callbackUriBase = getConfig().getCallbackURI();
 
       /* Register the connectors and start them */
-      for (ConnectorConfig conf: connectors) {
+      for (SynchConnConf scc: connectorConfs) {
+        ConnectorConfig conf = scc.getConfig();
         String cnctrId = conf.getName();
         info("Register and start connector " + cnctrId);
 
         registerConnector(cnctrId, conf);
 
         Connector conn = getConnector(cnctrId);
+        scc.setConnector(conn);
 
         conn.start(cnctrId,
                    conf,
@@ -558,21 +574,6 @@ public class SynchEngine extends TzGetter {
   }
 
   /**
-   * @return config object
-   * @throws SynchException
-   */
-  public SynchConfig getConfig() throws SynchException {
-    return config.getSynchConfig();
-  }
-
-  /**
-   * @throws SynchException
-   */
-  public void updateConfig() throws SynchException {
-    config.updateSynchConfig();
-  }
-
-  /**
    * @param val
    * @return decrypted string
    * @throws SynchException
@@ -603,8 +604,8 @@ public class SynchEngine extends TzGetter {
       pwEncrypt = (PwEncryptionIntf)Util.getObject(pwEncryptClass,
                                                    PwEncryptionIntf.class);
 
-      pwEncrypt.init(config.getSynchConfig().getPrivKeys(),
-                     config.getSynchConfig().getPubKeys());
+      pwEncrypt.init(getConfig().getPrivKeys(),
+                     getConfig().getPubKeys());
 
       return pwEncrypt;
     } catch (SynchException se) {
@@ -759,7 +760,7 @@ public class SynchEngine extends TzGetter {
       return st;
     }
 
-    if (sub.getErrorCt() > config.getSynchConfig().getMissingTargetRetries()) {
+    if (sub.getErrorCt() > getConfig().getMissingTargetRetries()) {
       deleteSubscription(sub);
       info("Subscription deleted after missing target retries exhausted: " + sub);
     }

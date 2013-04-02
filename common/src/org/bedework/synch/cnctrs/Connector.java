@@ -22,7 +22,7 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.PropertiesInfo;
 import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
@@ -74,6 +74,11 @@ public interface Connector<C extends ConnectorInstance,
              ConnectorConfig conf,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
+
+  /**
+   * @return a useful status message
+   */
+  String getStatus();
 
   /**
    * @return true if we are the manager

@@ -115,14 +115,14 @@
         <version>${bedeworkRpiutilVersion}</version>
         <scope>provided</scope>
       </dependency>
-      
+      <!-- 
       <dependency>
         <groupId>org.bedework</groupId>
         <artifactId>bw-sysevents</artifactId>
         <version>${bedeworkSyseventsVersion}</version>
         <scope>provided</scope>
       </dependency>
-          
+ -->          
       <dependency>
         <groupId>org.bedework.bwxml</groupId>
         <artifactId>bw-exchangewsschema</artifactId>

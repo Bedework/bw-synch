@@ -25,7 +25,7 @@ import org.bedework.synch.SynchDefs.SynchKind;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.db.SubscriptionInfo;

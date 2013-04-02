@@ -24,7 +24,7 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.SynchPropertyInfo;
 import org.bedework.synch.cnctrs.AbstractConnector;
 import org.bedework.synch.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;

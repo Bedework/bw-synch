@@ -19,10 +19,11 @@
 package org.bedework.synch.cnctrs.file;
 
 import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
-import org.bedework.synch.db.ConnectorConfig;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
+
+import javax.xml.namespace.QName;
 
 /** File synch connector config
  *
@@ -31,7 +32,7 @@ import edu.rpi.sss.util.ToString;
 public class FileConnectorConfig
   extends ConnectorConfigWrapper<FileConnectorConfig> {
   /** Min polling interval - seconds */
-  private static final String propMinPoll = "minPoll";
+  private static final QName propMinPoll = new QName(ns, "minPoll");
 
   /**
    * @param conf
@@ -43,39 +44,24 @@ public class FileConnectorConfig
   /** Min poll - seconds
    *
    * @param val    int seconds
-   * @throws SynchException
    */
-  public void setMinPoll(final int val) throws SynchException {
-    setProperty(propMinPoll, String.valueOf(val));
+  public void setMinPoll(final int val) {
+    unwrap().setIntegerProperty(propMinPoll, val);
   }
 
   /** Min poll - seconds
    *
    * @return int seconds
-   * @throws SynchException
    */
-  public int getMinPoll() throws SynchException {
-    Integer i = getIntPropertyValue(propMinPoll);
-
-    if (i == null) {
-      return 60;
-    }
-
-    return i.intValue();
+  public int getMinPoll() {
+    return unwrap().getIntegerPropertyValue(propMinPoll);
   }
 
-  /** Add our stuff to the StringBuilder
-   *
-   * @param sb    StringBuilder for result
-   */
-  protected void toStringSegment(final ToString ts) {
-    super.toStringSegment(ts.getSb(), "  ");
+  @Override
+  public void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts);
 
-    try {
-      ts.append(propMinPoll, getMinPoll());
-    } catch (SynchException e) {
-      ts.append(e);
-    }
+    ts.append("propMinPoll", getMinPoll());
   }
 
   @Override

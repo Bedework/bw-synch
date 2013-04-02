@@ -20,8 +20,11 @@ package org.bedework.synch.web;
 
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.service.SynchConf;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 
+import edu.rpi.cmt.config.ConfigurationType;
+import edu.rpi.cmt.jmx.ConfBase;
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
 import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
@@ -35,6 +38,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +57,7 @@ import javax.xml.namespace.QName;
  * @version 1.0
  */
 public class SynchServlet extends HttpServlet
-        implements HttpSessionListener {
+        implements HttpSessionListener, ServletContextListener {
   protected boolean debug;
 
   protected boolean dumpContent;
@@ -442,6 +447,57 @@ public class SynchServlet extends HttpServlet
       }
     } catch (Throwable t) {
     }
+  }
+
+  /* -----------------------------------------------------------------------
+   *                         JMX support
+   */
+
+  class Configurator extends ConfBase {
+    SynchConf synchConf;
+
+    Configurator() {
+      super("org.bedework.synch:service=Synch");
+    }
+
+    @Override
+    public ConfigurationType getConfigObject() {
+      return synchConf.getConfigObject();
+    }
+
+    void start(final String configDir) {
+      try {
+        getManagementContext().start();
+
+        synchConf = new SynchConf(configDir);
+        register("synchConf", "synchConf", synchConf);
+        synchConf.loadConfig();
+        synchConf.start();
+      } catch (Throwable t){
+        t.printStackTrace();
+      }
+    }
+
+    void stop() {
+      try {
+        synchConf.stop();
+        getManagementContext().stop();
+      } catch (Throwable t){
+        t.printStackTrace();
+      }
+    }
+  }
+
+  private Configurator conf = new Configurator();
+
+  @Override
+  public void contextInitialized(final ServletContextEvent sce) {
+    conf.start(sce.getServletContext().getInitParameter("configDir"));
+  }
+
+  @Override
+  public void contextDestroyed(final ServletContextEvent sce) {
+    conf.stop();
   }
 
   /**

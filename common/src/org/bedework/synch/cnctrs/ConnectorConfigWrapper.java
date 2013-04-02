@@ -18,12 +18,12 @@
 */
 package org.bedework.synch.cnctrs;
 
-import org.bedework.synch.db.ConnectorConfig;
-import org.bedework.synch.db.ConnectorConfigI;
-import org.bedework.synch.db.SynchProperty;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfigI;
 
-import java.util.Set;
+import edu.rpi.cmt.config.ConfigBase;
+
+import javax.xml.namespace.QName;
 
 /** Common connector config properties
  *
@@ -32,7 +32,7 @@ import java.util.Set;
  * @param <T>
  */
 public class ConnectorConfigWrapper<T extends ConnectorConfigWrapper>
-      implements Comparable<T>, ConnectorConfigI {
+extends ConfigBase<T> implements Comparable<T>, ConnectorConfigI {
   ConnectorConfig conf;
 
   /**
@@ -47,6 +47,11 @@ public class ConnectorConfigWrapper<T extends ConnectorConfigWrapper>
    */
   public ConnectorConfig unwrap() {
     return conf;
+  }
+
+  @Override
+  public QName getConfElement() {
+    return conf.getConfElement();
   }
 
   /** Connector name - unique key
@@ -119,124 +124,6 @@ public class ConnectorConfigWrapper<T extends ConnectorConfigWrapper>
   @Override
   public boolean getTrustLastmod() {
     return conf.getTrustLastmod();
-  }
-
-  /* ====================================================================
-   *                   Property methods
-   * ==================================================================== */
-
-  /**
-   * @param val
-   */
-  @Override
-  public void setProperties(final Set<SynchProperty> val) {
-    conf.setProperties(val);
-  }
-
-  /**
-   * @return properties
-   */
-  @Override
-  public Set<SynchProperty> getProperties() {
-    return conf.getProperties();
-  }
-
-  /**
-   * @param name
-   * @return properties with given name
-   */
-  @Override
-  public Set<SynchProperty> getProperties(final String name) {
-    return conf.getProperties(name);
-  }
-
-  /** Remove all with given name
-   *
-   * @param name
-   */
-  @Override
-  public void removeProperties(final String name) {
-    conf.removeProperties(name);
-  }
-
-  /**
-   * @return int
-   */
-  @Override
-  public int getNumProperties() {
-    return conf.getNumProperties();
-  }
-
-  /**
-   * @param name
-   * @return property or null
-   */
-  @Override
-  public SynchProperty findProperty(final String name) {
-    return conf.findProperty(name);
-  }
-
-  @Override
-  public void setProperty(final String name,
-                          final String value) throws SynchException {
-    conf.setProperty(name, value);
-  }
-
-  @Override
-  public String getPropertyValue(final String name) throws SynchException {
-    return  conf.getPropertyValue(name);
-  }
-
-  @Override
-  public Integer getIntPropertyValue(final String name) throws SynchException {
-    return conf.getIntPropertyValue(name);
-  }
-
-  @Override
-  public Long getLongPropertyValue(final String name) throws SynchException {
-    return conf.getLongPropertyValue(name);
-  }
-
-  /**
-   * @param val
-   */
-  @Override
-  public void addProperty(final SynchProperty val) {
-    conf.addProperty(val);
-  }
-
-  /**
-   * @param val
-   * @return boolean
-   */
-  @Override
-  public boolean removeProperty(final SynchProperty val) {
-    return conf.removeProperty(val);
-  }
-
-  /**
-   * @return set of SynchProperty
-   */
-  @Override
-  public Set<SynchProperty> copyProperties() {
-    return conf.copyProperties();
-  }
-
-  /**
-   * @return set of SynchProperty
-   */
-  @Override
-  public Set<SynchProperty> cloneProperties() {
-    return conf.cloneProperties();
-  }
-
-  /** Add our stuff to the StringBuilder
-   *
-   * @param sb    StringBuilder for result
-   */
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
-    conf.toStringSegment(sb, indent);
   }
 
   /* ====================================================================

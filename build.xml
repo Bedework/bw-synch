@@ -55,17 +55,11 @@
     <property name="org.bedework.module.server.base" 
               location="${project.home}/server" />
 
-    <property name="org.bedework.module.service.base"
-              location="${project.home}/service" />
-
     <property name="common.jar"
               location="${dist.home}/bw-synch-common-${project.version}.jar" />
 
     <property name="server.jar"
               location="${dist.home}/bw-synch-${project.version}.jar" />
-
-    <property name="service.jar"
-              location="${dist.home}/bw-synchsvc-${project.version}.jar" />
   </target>
   
   <target name="build-init" depends="init">
@@ -96,11 +90,6 @@
                jar-file="${server.jar}" />
     
     <installJar dir="${org.bedework.module.server.base}" name="${server.jar}"/>
-
-    <build-jar module-base="${org.bedework.module.service.base}" 
-               jar-file="${service.jar}" />
-    
-    <installJar dir="${org.bedework.module.service.base}" name="${service.jar}"/>
     
     <installPom dir="${project.home}"/>
     

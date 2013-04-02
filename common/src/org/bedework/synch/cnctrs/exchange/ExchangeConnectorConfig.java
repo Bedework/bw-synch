@@ -19,10 +19,11 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
-import org.bedework.synch.db.ConnectorConfig;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
+
+import javax.xml.namespace.QName;
 
 /** Exchange synch connector config
 *
@@ -31,7 +32,7 @@ import edu.rpi.sss.util.ToString;
 public class ExchangeConnectorConfig
   extends ConnectorConfigWrapper<ExchangeConnectorConfig> {
   /** WSDL for remote service */
-  private static final String propExchangeWSDLURI = "exchangeWSDLURI";
+  private static final QName propExchangeWSDLURI = new QName(ns, "exchangeWSDLURI");
 
   /**
    * @param conf
@@ -43,33 +44,24 @@ public class ExchangeConnectorConfig
   /** Exchange web service WSDL uri
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setExchangeWSDLURI(final String val) throws SynchException {
-    setProperty(propExchangeWSDLURI, val);
+  public void setExchangeWSDLURI(final String val) {
+    unwrap().setProperty(propExchangeWSDLURI, val);
   }
 
   /** Exchange web service WSDL uri
    *
    * @return String
-   * @throws SynchException
    */
-  public String getExchangeWSDLURI() throws SynchException {
-    return getPropertyValue(propExchangeWSDLURI);
+  public String getExchangeWSDLURI() {
+    return unwrap().getPropertyValue(propExchangeWSDLURI);
   }
 
-  /** Add our stuff to the StringBuilder
-   *
-   * @param sb    StringBuilder for result
-   */
-  protected void toStringSegment(final ToString ts) {
-    super.toStringSegment(ts.getSb(), "  ");
+  @Override
+  public void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts);
 
-    try {
-      ts.append(propExchangeWSDLURI, getExchangeWSDLURI());
-    } catch (SynchException e) {
-      ts.append(e);
-    }
+    ts.append("propExchangeWSDLURI", getExchangeWSDLURI());
   }
 
   @Override

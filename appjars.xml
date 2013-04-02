@@ -24,11 +24,6 @@
               name="bw-synch" version="${org.bedework.synch.version}"
               projecthome="${project.home}" />
 
-      <getJar lib="${org.bedework.temp.extrajars.dir}"
-              libcache="${org.bedework.libcache.dir}"
-              name="bw-synchsvc" version="${org.bedework.synch.version}"
-              projecthome="${project.home}" />
-
       <!-- ======================= Schema jars ============================= -->
 
       <getJar lib="${org.bedework.temp.extrajars.dir}"

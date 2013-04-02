@@ -19,10 +19,11 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
-import org.bedework.synch.db.ConnectorConfig;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
+
+import javax.xml.namespace.QName;
 
 /** Bedework synch connector config
  *
@@ -31,13 +32,13 @@ import edu.rpi.sss.util.ToString;
 public class BedeworkConnectorConfig
     extends ConnectorConfigWrapper<BedeworkConnectorConfig> {
   /** WSDL for remote service */
-  private static final String propBwWSDLURI = "bwWSDLURI";
+  private static final QName propBwWSDLURI = new QName(ns, "bwWSDLURI");
 
   /** seconds before retry on failure  */
-  private static final String propRetryInterval = "retryInterval";
+  private static final QName propRetryInterval = new QName(ns, "retryInterval");
 
   /** seconds before we ping just to say we're still around  */
-  private static final String propKeepAliveInterval = "keepAliveInterval";
+  private static final QName propKeepAliveInterval = new QName(ns, "keepAliveInterval");
 
   /**
    * @param conf
@@ -49,83 +50,58 @@ public class BedeworkConnectorConfig
   /** bedework web service WSDL uri
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setBwWSDLURI(final String val) throws SynchException {
-    setProperty(propBwWSDLURI, val);
+  public void setBwWSDLURI(final String val) {
+    unwrap().setProperty(propBwWSDLURI, val);
   }
 
   /** Bedework web service WSDL uri
    *
    * @return String
-   * @throws SynchException
    */
-  public String getBwWSDLURI() throws SynchException {
-    return getPropertyValue(propBwWSDLURI);
+  public String getBwWSDLURI() {
+    return unwrap().getPropertyValue(propBwWSDLURI);
   }
 
   /** retryInterval - seconds
    *
    * @param val    int seconds
-   * @throws SynchException
    */
-  public void setRetryInterval(final int val) throws SynchException {
-    setProperty(propRetryInterval, String.valueOf(val));
+  public void setRetryInterval(final int val) {
+    unwrap().setIntegerProperty(propRetryInterval, val);
   }
 
   /** retryInterval - seconds
    *
    * @return int seconds
-   * @throws SynchException
    */
-  public int getRetryInterval() throws SynchException {
-    Integer i = getIntPropertyValue(propRetryInterval);
-
-    if (i == null) {
-      return 0;
-    }
-
-    return i.intValue();
+  public int getRetryInterval() {
+    return unwrap().getIntegerPropertyValue(propRetryInterval);
   }
 
   /** KeepAliveInterval - seconds
    *
    * @param val    int seconds
-   * @throws SynchException
    */
-  public void setKeepAliveInterval(final int val) throws SynchException {
-    setProperty(propKeepAliveInterval, String.valueOf(val));
+  public void setKeepAliveInterval(final int val) {
+    unwrap().setIntegerProperty(propKeepAliveInterval, val);
   }
 
   /** KeepAliveInterval - seconds
    *
    * @return int seconds
-   * @throws SynchException
    */
-  public int getKeepAliveInterval() throws SynchException {
-    Integer i = getIntPropertyValue(propKeepAliveInterval);
-
-    if (i == null) {
-      return 0;
-    }
-
-    return i.intValue();
+  public int getKeepAliveInterval() {
+    return unwrap().getIntegerPropertyValue(propKeepAliveInterval);
   }
 
-  /** Add our stuff to the StringBuilder
-   *
-   * @param ts    ToString for result
-   */
-  protected void toStringSegment(final ToString ts) {
-    super.toStringSegment(ts.getSb(), "  ");
+  @Override
+  public void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts);
 
-    try {
-      ts.append("bwWSDLURI", getBwWSDLURI()).
-        append("retryInterval", getRetryInterval()).
-        append("keepAliveInterval", getKeepAliveInterval());
-    } catch (SynchException e) {
-      ts.append(e);
-    }
+    ts.append("bwWSDLURI", getBwWSDLURI()).
+      append("retryInterval", getRetryInterval()).
+      append("keepAliveInterval", getKeepAliveInterval());
   }
 
   @Override

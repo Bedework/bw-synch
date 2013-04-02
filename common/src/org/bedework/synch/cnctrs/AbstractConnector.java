@@ -22,7 +22,7 @@ import org.bedework.synch.Notification;
 import org.bedework.synch.PropertiesInfo;
 import org.bedework.synch.SynchDefs;
 import org.bedework.synch.SynchEngine;
-import org.bedework.synch.db.ConnectorConfig;
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SynchRemoteService;
@@ -111,6 +111,33 @@ public abstract class AbstractConnector<T,
     this.callbackUri = callbackUri;
 
     debug = getLogger().isDebugEnabled();
+  }
+
+  @Override
+  public String getStatus() {
+    StringBuilder sb = new StringBuilder();
+
+    if (isManager()) {
+      sb.append("(Manager): ");
+    }
+
+    if (isStarted()) {
+      sb.append("Started: ");
+    }
+
+    if (isFailed()) {
+      sb.append("Failed: ");
+    }
+
+    if (isManager()) {
+      sb.append("(Manager): ");
+    }
+
+    if (isStopped()) {
+      sb.append("Stopped: ");
+    }
+
+    return sb.toString();
   }
 
   @Override
