@@ -18,6 +18,11 @@
 */
 package org.bedework.synch.service;
 
+import java.io.StringWriter;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.conf.ConnectorConfig;
 
@@ -31,11 +36,6 @@ import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.XmlEmit.NameSpace;
 import edu.rpi.sss.util.xml.tagdefs.BedeworkServerTags;
 
-import java.io.StringWriter;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 /**
  * @author douglm
  *
@@ -47,18 +47,16 @@ public class SynchConnConf extends ConfBase<ConnectorConfig> implements SynchCon
 
   private Connector connector;
 
-  //private String status;
-
   /**
-   * @param configDir
+   * @param configStore
    * @param serviceName
    * @param cname - connector name
    */
-  public SynchConnConf(final String configDir,
+  public SynchConnConf(final ConfigurationStore configStore,
                        final String serviceName,
                        final String cname) {
     super(serviceName);
-    setConfigDir(configDir);
+    setStore(configStore);
 
     this.cname = cname;
   }
@@ -109,7 +107,7 @@ public class SynchConnConf extends ConfBase<ConnectorConfig> implements SynchCon
   public void loadConfig() throws Throwable {
     /* Load up the config */
 
-    ConfigurationStore cfs = new ConfigurationFileStore(getConfigDir());
+    ConfigurationStore cfs = new ConfigurationFileStore(getConfigUri());
 
     cfg = getConfigInfo(cfs, getName(), ConnectorConfig.class);
 

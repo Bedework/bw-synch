@@ -18,19 +18,6 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.service.SynchConf;
-import org.bedework.synch.web.MethodBase.MethodInfo;
-
-import edu.rpi.cmt.config.ConfigurationType;
-import edu.rpi.cmt.jmx.ConfBase;
-import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
-import edu.rpi.sss.util.xml.XmlEmit;
-import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
-
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -48,6 +35,18 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import javax.xml.namespace.QName;
+
+import org.apache.log4j.Logger;
+import org.bedework.synch.SynchEngine;
+import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.service.SynchConf;
+import org.bedework.synch.web.MethodBase.MethodInfo;
+
+import edu.rpi.cmt.config.ConfigurationType;
+import edu.rpi.cmt.jmx.ConfBase;
+import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
+import edu.rpi.sss.util.xml.XmlEmit;
+import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
 
 /** WebDAV Servlet.
  * This abstract servlet handles the request/response nonsense and calls
@@ -465,11 +464,11 @@ public class SynchServlet extends HttpServlet
       return synchConf.getConfigObject();
     }
 
-    void start(final String configDir) {
+    void start() {
       try {
         getManagementContext().start();
 
-        synchConf = new SynchConf(configDir);
+        synchConf = new SynchConf();
         register("synchConf", "synchConf", synchConf);
         synchConf.loadConfig();
         synchConf.start();
@@ -492,7 +491,7 @@ public class SynchServlet extends HttpServlet
 
   @Override
   public void contextInitialized(final ServletContextEvent sce) {
-    conf.start(sce.getServletContext().getInitParameter("configDir"));
+    conf.start();
   }
 
   @Override
