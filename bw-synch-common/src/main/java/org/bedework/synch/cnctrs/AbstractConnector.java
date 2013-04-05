@@ -129,10 +129,6 @@ public abstract class AbstractConnector<T,
       sb.append("Failed: ");
     }
 
-    if (isManager()) {
-      sb.append("(Manager): ");
-    }
-
     if (isStopped()) {
       sb.append("Stopped: ");
     }
