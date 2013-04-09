@@ -18,23 +18,22 @@
 */
 package org.bedework.synch.service;
 
-import java.io.StringWriter;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.cmt.config.ConfigBase;
 import edu.rpi.cmt.config.ConfigurationElementType;
-import edu.rpi.cmt.config.ConfigurationFileStore;
 import edu.rpi.cmt.config.ConfigurationStore;
 import edu.rpi.cmt.config.ConfigurationType;
 import edu.rpi.cmt.jmx.ConfBase;
 import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.XmlEmit.NameSpace;
 import edu.rpi.sss.util.xml.tagdefs.BedeworkServerTags;
+
+import java.io.StringWriter;
+import java.util.List;
+
+import javax.xml.namespace.QName;
 
 /**
  * @author douglm
@@ -107,7 +106,7 @@ public class SynchConnConf extends ConfBase<ConnectorConfig> implements SynchCon
   public void loadConfig() throws Throwable {
     /* Load up the config */
 
-    ConfigurationStore cfs = new ConfigurationFileStore(getConfigUri());
+    ConfigurationStore cfs = getStore();
 
     cfg = getConfigInfo(cfs, getName(), ConnectorConfig.class);
 

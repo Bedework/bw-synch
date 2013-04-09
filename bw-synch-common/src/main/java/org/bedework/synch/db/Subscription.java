@@ -75,9 +75,9 @@ import java.util.UUID;
  */
 @SuppressWarnings("rawtypes")
 public class Subscription extends DbItem<Subscription> {
-  private String owner;
-
   private String subscriptionId;
+
+  private String owner;
 
   private String lastRefresh;
 

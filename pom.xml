@@ -58,7 +58,6 @@
 	<modules>
 		<module>bw-synch-common</module>
 		<module>bw-synch-war</module>
-		<module>bw-synch-ear-properties</module>
 		<module>bw-synch-ear</module>
 	</modules>
 

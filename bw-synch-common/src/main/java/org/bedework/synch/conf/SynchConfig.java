@@ -52,6 +52,8 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
 
   private static final QName pubKeysProperty = new QName(ns, "pubKeys");
 
+  private static final QName hibernateProperty = new QName(ns, "hibernateProperty");
+
   @Override
   public QName getConfElement() {
     return confElement;
@@ -182,6 +184,79 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    */
   public String getPubKeys() {
     return getPropertyValue(pubKeysProperty);
+  }
+
+  /** Add a hibernate property
+   *
+   * @param name
+   * @param val
+   */
+  public void addHibernateProperty(final String name,
+                                   final String val) {
+    addProperty(hibernateProperty, name + "=" + val);
+  }
+
+  /** Get a hibernate property
+   *
+   * @param val
+   * @return value or null
+   */
+  public String getHibernateProperty(final String val) {
+    List<String> ps = getHibernateProperties();
+
+    String key = val + "=";
+    for (String p: ps) {
+      if (p.startsWith(key)) {
+        return p.substring(key.length());
+      }
+    }
+
+    return null;
+  }
+
+  /** Remove a hibernate property
+   *
+   * @param name
+   */
+  public void removeHibernateProperty(final String name) {
+    try {
+      String v = getHibernateProperty(name);
+
+      if (v == null) {
+        return;
+      }
+
+      getConfig().removeProperty(hibernateProperty, name + "=" + v);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  /** Set a hibernate property
+   *
+   * @param name
+   * @param val
+   */
+  public void setHibernateProperty(final String name,
+                                   final String val) {
+    try {
+      removeHibernateProperty(name);
+      addHibernateProperty(name, val);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  /**
+   *
+   * @return String val
+   */
+  public List<String> getHibernateProperties() {
+    try {
+      return getConfig().getAll(hibernateProperty);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
   }
 
   /**

@@ -39,8 +39,6 @@ public class ConnectorConfig extends ConfigBase<ConnectorConfig> implements Conn
 
   private static final QName trustLastmodProperty = new QName(ns, "trustLastmod");
 
-  private static final QName synchProperty = new QName(ns, "synch-property");
-
   @Override
   public QName getConfElement() {
     return confElement;
