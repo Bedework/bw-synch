@@ -353,7 +353,7 @@ public class SynchEngine extends TzGetter {
         starting = true;
       }
 
-      db = new SynchDb();
+      db = new SynchDb(getConfig());
 
       timezones = new TimezonesImpl();
       timezones.init(getConfig().getTimezonesURI());

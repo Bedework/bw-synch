@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.db;
 
+import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.exception.SynchException;
 
 import edu.rpi.cmt.db.hibernate.HibException;
@@ -40,6 +41,8 @@ public class SynchDb implements Serializable {
 
   private final boolean debug;
 
+  private SynchConfig config;
+
   /** */
   protected boolean open;
 
@@ -51,10 +54,13 @@ public class SynchDb implements Serializable {
   protected HibSession sess;
 
   /**
+   * @param config
    *
    */
-  public SynchDb() {
+  public SynchDb(final SynchConfig config) {
     debug = getLogger().isDebugEnabled();
+
+    this.config = config;
   }
 
   /**
@@ -261,7 +267,7 @@ public class SynchDb implements Serializable {
       }
       sess = new HibSessionImpl();
       try {
-        sess.init(HibSessionFactory.getSessionFactory(), getLogger());
+        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()), getLogger());
       } catch (HibException he) {
         throw new SynchException(he);
       }
