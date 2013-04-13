@@ -2,7 +2,7 @@
 <server>
   <!--  guarantee separate classloader -->
   <loader-repository> 
-    org.bedework:archive=synch-service 
+    org.bedework:archive=carddav-service 
   </loader-repository> 
   
   <mbean code="edu.rpi.sss.util.http.service.HttpOut"

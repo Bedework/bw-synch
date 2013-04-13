@@ -106,9 +106,7 @@ public class SynchConnConf extends ConfBase<ConnectorConfig> implements SynchCon
   public void loadConfig() throws Throwable {
     /* Load up the config */
 
-    ConfigurationStore cfs = getStore();
-
-    cfg = getConfigInfo(cfs, getName(), ConnectorConfig.class);
+    cfg = getConfigInfo(getName(), ConnectorConfig.class);
 
     if (cfg == null) {
       throw new Exception("Unable to read configuration " + getName());
