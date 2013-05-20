@@ -18,41 +18,30 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
-
-import javax.xml.namespace.QName;
 
 /** Bedework synch connector config
  *
  * @author douglm
  */
-public class BedeworkConnectorConfig
-    extends ConnectorConfigWrapper<BedeworkConnectorConfig> {
+public class BedeworkConnectorConfig extends ConnectorConfig {
   /** WSDL for remote service */
-  private static final QName propBwWSDLURI = new QName(ns, "bwWSDLURI");
+  private String bwWSDLURI;
 
   /** seconds before retry on failure  */
-  private static final QName propRetryInterval = new QName(ns, "retryInterval");
+  private int retryInterval;
 
   /** seconds before we ping just to say we're still around  */
-  private static final QName propKeepAliveInterval = new QName(ns, "keepAliveInterval");
-
-  /**
-   * @param conf
-   */
-  public BedeworkConnectorConfig(final ConnectorConfig conf) {
-    super(conf);
-  }
+  private int keepAliveInterval;
 
   /** bedework web service WSDL uri
    *
    * @param val    String
    */
   public void setBwWSDLURI(final String val) {
-    unwrap().setProperty(propBwWSDLURI, val);
+    bwWSDLURI = val;
   }
 
   /** Bedework web service WSDL uri
@@ -60,7 +49,7 @@ public class BedeworkConnectorConfig
    * @return String
    */
   public String getBwWSDLURI() {
-    return unwrap().getPropertyValue(propBwWSDLURI);
+    return bwWSDLURI;
   }
 
   /** retryInterval - seconds
@@ -68,7 +57,7 @@ public class BedeworkConnectorConfig
    * @param val    int seconds
    */
   public void setRetryInterval(final int val) {
-    unwrap().setIntegerProperty(propRetryInterval, val);
+    retryInterval = val;
   }
 
   /** retryInterval - seconds
@@ -76,7 +65,7 @@ public class BedeworkConnectorConfig
    * @return int seconds
    */
   public int getRetryInterval() {
-    return unwrap().getIntegerPropertyValue(propRetryInterval);
+    return retryInterval;
   }
 
   /** KeepAliveInterval - seconds
@@ -84,7 +73,7 @@ public class BedeworkConnectorConfig
    * @param val    int seconds
    */
   public void setKeepAliveInterval(final int val) {
-    unwrap().setIntegerProperty(propKeepAliveInterval, val);
+    keepAliveInterval = val;
   }
 
   /** KeepAliveInterval - seconds
@@ -92,7 +81,7 @@ public class BedeworkConnectorConfig
    * @return int seconds
    */
   public int getKeepAliveInterval() {
-    return unwrap().getIntegerPropertyValue(propKeepAliveInterval);
+    return keepAliveInterval;
   }
 
   @Override

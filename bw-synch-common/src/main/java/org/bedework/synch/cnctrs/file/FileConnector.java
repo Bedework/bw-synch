@@ -43,7 +43,8 @@ import javax.servlet.http.HttpServletResponse;
 public class FileConnector
         extends AbstractConnector<FileConnector,
                                   FileConnectorInstance,
-                                  Notification> {
+                                  Notification,
+                                  FileConnectorConfig> {
 private static PropertiesInfo fPropInfo = new PropertiesInfo();
 
   static {
@@ -77,7 +78,7 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
                     final SynchEngine syncher) throws SynchException {
     super.start(connectorId, conf, callbackUri, syncher);
 
-    config = new FileConnectorConfig(conf);
+    config = (FileConnectorConfig)conf;
 
     stopped = false;
     running = true;
@@ -128,10 +129,10 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
 
     String rd = info.getRefreshDelay();
     if (rd == null) {
-      info.setRefreshDelay(String.valueOf(((FileConnectorConfig)config).getMinPoll() * 1000));
+      info.setRefreshDelay(String.valueOf(config.getMinPoll() * 1000));
     }
 
-    inst = new FileConnectorInstance((FileConnectorConfig)config,
+    inst = new FileConnectorInstance(config,
                                      this, sub, end, info);
     cinstMap.add(sub, end, inst);
 

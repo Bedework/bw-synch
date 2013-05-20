@@ -68,7 +68,8 @@ import javax.xml.bind.JAXBElement;
 public class SynchConnector
       extends AbstractConnector<SynchConnector,
                                 SynchConnectorInstance,
-                                Notification> {
+                                Notification,
+                                ConnectorConfig> {
   /**
    */
   public SynchConnector() {

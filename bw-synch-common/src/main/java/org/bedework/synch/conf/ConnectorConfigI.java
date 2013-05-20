@@ -24,29 +24,29 @@ package org.bedework.synch.conf;
  * @author douglm
  */
 public interface ConnectorConfigI {
-  /** Connector name - unique key
+  /** Connector class name
    *
    * @param val    String
    */
-  void setName(final String val);
-
-  /** Connector name - unique key
-   *
-   * @return String
-   */
-  String getName();
-
-  /** Class name
-   *
-   * @param val    String
-   */
-  void setClassName(final String val);
+  void setConnectorClassName(final String val);
 
   /** Class name
    *
    * @return String
    */
-  String getClassName();
+  String getConnectorClassName();
+
+  /** Mbean class name
+   *
+   * @param val    String
+   */
+  void setMbeanClassName(final String val);
+
+  /** Class name
+   *
+   * @return String
+   */
+  String getMbeanClassName();
 
   /** Read only?
    *

@@ -18,76 +18,70 @@
  */
 package org.bedework.synch.conf;
 
+import edu.rpi.cmt.config.ConfInfo;
 import edu.rpi.cmt.config.ConfigBase;
 import edu.rpi.sss.util.ToString;
-
-import javax.xml.namespace.QName;
 
 /** Common connector config properties
  *
  * @author douglm
  */
+@ConfInfo(elementName = "synch-connector")
 public class ConnectorConfig extends ConfigBase<ConnectorConfig> implements ConnectorConfigI  {
-  /** */
-  public final static QName confElement = new QName(ns, "synch-connector");
+  private String connectorClassName;
 
-  private static final QName nameProperty = new QName(ns, "name");
+  private String mbeanClassName;
 
-  private static final QName classNameProperty = new QName(ns, "className");
+  private boolean readOnly;
 
-  private static final QName readOnlyProperty = new QName(ns, "readOnly");
-
-  private static final QName trustLastmodProperty = new QName(ns, "trustLastmod");
+  private boolean trustLastmod;
 
   @Override
-  public QName getConfElement() {
-    return confElement;
+  public void setConnectorClassName(final String val) {
+    connectorClassName = val;
   }
 
   @Override
-  public void setName(final String val) {
-    setProperty(nameProperty, val);
+  public String getConnectorClassName() {
+    return connectorClassName;
   }
 
   @Override
-  public String getName() {
-    return getPropertyValue(nameProperty);
+  public void setMbeanClassName(final String val) {
+    mbeanClassName = val;
   }
 
   @Override
-  public void setClassName(final String val) {
-    setProperty(classNameProperty, val);
-  }
-
-  @Override
-  public String getClassName() {
-    return getPropertyValue(classNameProperty);
+  public String getMbeanClassName() {
+    return mbeanClassName;
   }
 
   @Override
   public void setReadOnly(final boolean val) {
-    setBooleanProperty(readOnlyProperty, val);
+    readOnly = val;
   }
 
   @Override
   public boolean getReadOnly() {
-    return getBooleanPropertyValue(readOnlyProperty);
+    return readOnly;
   }
 
   @Override
   public void setTrustLastmod(final boolean val) {
-    setBooleanProperty(trustLastmodProperty, val);
+    trustLastmod = val;
   }
 
   @Override
   public boolean getTrustLastmod() {
-    return getBooleanPropertyValue(trustLastmodProperty);
+    return trustLastmod;
   }
 
   @Override
   public void toStringSegment(final ToString ts) {
-    ts.append("name", getName());
-    ts.append("className", getClassName());
+    super.toStringSegment(ts);
+
+    ts.append("connectorClassName", getConnectorClassName());
+    ts.append("mbeanClassName", getMbeanClassName());
     ts.append("readOnly", getReadOnly());
     ts.append("trustLastmod", getTrustLastmod());
   }

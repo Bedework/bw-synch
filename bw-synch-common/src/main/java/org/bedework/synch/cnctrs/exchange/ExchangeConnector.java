@@ -54,7 +54,8 @@ import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusTyp
 public class ExchangeConnector
       extends AbstractConnector<ExchangeConnector,
                                 ExchangeConnectorInstance,
-                                ExchangeNotification> {
+                                ExchangeNotification,
+                                ExchangeConnectorConfig> {
   /* Information required from the user for an Exchange connection
    *
    * exchange-folder-id
@@ -99,11 +100,11 @@ public class ExchangeConnector
                     final SynchEngine syncher) throws SynchException {
     super.start(connectorId, conf, callbackUri, syncher);
 
-    config = new ExchangeConnectorConfig(conf);
+    config = (ExchangeConnectorConfig)conf;
 
     info("**************************************************");
     info("Starting exchange connector " + connectorId);
-    info(" Exchange WSDL URI: " + ((ExchangeConnectorConfig)config).getExchangeWSDLURI());
+    info(" Exchange WSDL URI: " + config.getExchangeWSDLURI());
     info("      callback URI: " + callbackUri);
     info("**************************************************");
 
@@ -154,7 +155,7 @@ public class ExchangeConnector
       info = new ExchangeSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new ExchangeConnectorInstance((ExchangeConnectorConfig)config,
+    inst = new ExchangeConnectorInstance(config,
                                          this, sub, end, info);
     cinstMap.add(sub, end, inst);
 

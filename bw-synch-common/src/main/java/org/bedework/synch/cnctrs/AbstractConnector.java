@@ -55,12 +55,14 @@ import javax.xml.soap.SOAPMessage;
  * @param <T> Connector subclass
  * @param <TI> Connector instance subclass
  * @param <TN> Notification subclass
+ * @param <Tconf> Configuration class
  */
 public abstract class AbstractConnector<T,
                                         TI extends AbstractConnectorInstance,
-                                        TN extends Notification> implements Connector<TI,
+                                        TN extends Notification,
+                                        Tconf extends ConnectorConfig> implements Connector<TI,
                                                  TN> {
-  protected ConnectorConfigWrapper config;
+  protected Tconf config;
 
   protected String callbackUri;
 

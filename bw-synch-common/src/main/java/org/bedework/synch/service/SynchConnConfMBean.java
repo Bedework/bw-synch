@@ -18,13 +18,14 @@
 */
 package org.bedework.synch.service;
 
+import edu.rpi.cmt.jmx.ConfBaseMBean;
 import edu.rpi.cmt.jmx.MBeanInfo;
 
 /** Configure a connector for the Bedework synch engine service
  *
  * @author douglm
  */
-public interface SynchConnConfMBean {
+public interface SynchConnConfMBean extends ConfBaseMBean {
   /* ========================================================================
    * Status
    * ======================================================================== */
@@ -34,13 +35,6 @@ public interface SynchConnConfMBean {
    */
   String getStatus();
 
-  /** Connector name
-   *
-   * @return String
-   */
-  @MBeanInfo("Connector name")
-  String getName();
-
   /* ========================================================================
    * Config properties
    * ======================================================================== */
@@ -49,13 +43,27 @@ public interface SynchConnConfMBean {
    *
    * @param val    String
    */
-  void setClassName(final String val);
+  void setConnectorClassName(final String val);
 
   /** Class name
    *
    * @return String
    */
-  String getClassName();
+  @MBeanInfo("The connector class.")
+  String getConnectorClassName();
+
+  /** Mbean class name
+   *
+   * @param val    String
+   */
+  void setMbeanClassName(final String val);
+
+  /** Class name
+   *
+   * @return String
+   */
+  @MBeanInfo("The mbean class.")
+  String getMbeanClassName();
 
   /** Read only?
    *
@@ -67,6 +75,7 @@ public interface SynchConnConfMBean {
    *
    * @return int seconds
    */
+  @MBeanInfo("Is connector read-only.")
   boolean getReadOnly();
 
   /** Can we trust the lastmod from this connector?
@@ -79,56 +88,10 @@ public interface SynchConnConfMBean {
    *
    * @return boolean
    */
+  @MBeanInfo("Can we trust the lastmod from this connector?")
   boolean getTrustLastmod();
-
-  /** Set of properties
-   *
-   * @return String
-   */
-  String getProperties();
 
   /* ========================================================================
    * Operations
    * ======================================================================== */
-
-  /** Add a property
-   *
-   * @param name
-   * @param value
-   */
-  public void addProperty(String name, String value);
-
-  /** Set or add a property
-   *
-   * @param name
-   * @param value
-   * @return completion message
-   */
-  public String setProperty(String name, String value);
-
-  /** Remove a property
-   *
-   * @param name
-   */
-  public void removeProperty(String name);
-
-  /* ========================================================================
-   * Lifecycle
-   * ======================================================================== */
-
-  /** Lifecycle
-   *
-   */
-  public void start();
-
-  /** Lifecycle
-   *
-   */
-  public void stop();
-
-  /** Lifecycle
-   *
-   * @return true if started
-   */
-  public boolean isStarted();
 }

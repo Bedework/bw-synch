@@ -194,6 +194,18 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("Status of the database schema build.")
   public List<String> schemaStatus();
 
+  /**
+   * @param value
+   */
+  @MBeanInfo("Set the hibernate dialect")
+  void setHibernateDialect(@MBeanInfo("value: a valid hibernate dialect class") final String value);
+
+  /**
+   * @return Completion messages
+   */
+  @MBeanInfo("Get the hibernate dialect")
+  String getHibernateDialect();
+
   /** List the hibernate properties
    *
    * @return properties

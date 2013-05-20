@@ -18,35 +18,24 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
-
-import javax.xml.namespace.QName;
 
 /** Exchange synch connector config
 *
 * @author douglm
 */
-public class ExchangeConnectorConfig
-  extends ConnectorConfigWrapper<ExchangeConnectorConfig> {
+public class ExchangeConnectorConfig extends ConnectorConfig {
   /** WSDL for remote service */
-  private static final QName propExchangeWSDLURI = new QName(ns, "exchangeWSDLURI");
-
-  /**
-   * @param conf
-   */
-  public ExchangeConnectorConfig(final ConnectorConfig conf) {
-    super(conf);
-  }
+  private String exchangeWSDLURI;
 
   /** Exchange web service WSDL uri
    *
    * @param val    String
    */
   public void setExchangeWSDLURI(final String val) {
-    unwrap().setProperty(propExchangeWSDLURI, val);
+    exchangeWSDLURI = val;
   }
 
   /** Exchange web service WSDL uri
@@ -54,7 +43,7 @@ public class ExchangeConnectorConfig
    * @return String
    */
   public String getExchangeWSDLURI() {
-    return unwrap().getPropertyValue(propExchangeWSDLURI);
+    return exchangeWSDLURI;
   }
 
   @Override

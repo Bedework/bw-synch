@@ -18,35 +18,24 @@
 */
 package org.bedework.synch.cnctrs.file;
 
-import org.bedework.synch.cnctrs.ConnectorConfigWrapper;
 import org.bedework.synch.conf.ConnectorConfig;
 
 import edu.rpi.sss.util.ToString;
-
-import javax.xml.namespace.QName;
 
 /** File synch connector config
  *
  * @author douglm
  */
-public class FileConnectorConfig
-  extends ConnectorConfigWrapper<FileConnectorConfig> {
+public class FileConnectorConfig extends ConnectorConfig {
   /** Min polling interval - seconds */
-  private static final QName propMinPoll = new QName(ns, "minPoll");
-
-  /**
-   * @param conf
-   */
-  public FileConnectorConfig(final ConnectorConfig conf) {
-    super(conf);
-  }
+  private int minPoll;
 
   /** Min poll - seconds
    *
    * @param val    int seconds
    */
   public void setMinPoll(final int val) {
-    unwrap().setIntegerProperty(propMinPoll, val);
+    minPoll = val;
   }
 
   /** Min poll - seconds
@@ -54,14 +43,14 @@ public class FileConnectorConfig
    * @return int seconds
    */
   public int getMinPoll() {
-    return unwrap().getIntegerPropertyValue(propMinPoll);
+    return minPoll;
   }
 
   @Override
   public void toStringSegment(final ToString ts) {
     super.toStringSegment(ts);
 
-    ts.append("propMinPoll", getMinPoll());
+    ts.append("minPoll", getMinPoll());
   }
 
   @Override

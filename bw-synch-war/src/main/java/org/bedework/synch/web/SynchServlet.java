@@ -23,7 +23,6 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.service.SynchConf;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 
-import edu.rpi.cmt.config.ConfigurationType;
 import edu.rpi.cmt.jmx.ConfBase;
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
 import edu.rpi.sss.util.xml.XmlEmit;
@@ -458,11 +457,6 @@ public class SynchServlet extends HttpServlet
 
     Configurator() {
       super("org.bedework.synch:service=Synch");
-    }
-
-    @Override
-    public ConfigurationType getConfigObject() {
-      return synchConf.getConfigObject();
     }
 
     void start() {

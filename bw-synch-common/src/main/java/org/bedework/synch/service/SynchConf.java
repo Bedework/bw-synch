@@ -20,10 +20,10 @@ package org.bedework.synch.service;
 
 import org.bedework.synch.Stat;
 import org.bedework.synch.SynchEngine;
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 
 import edu.rpi.cmt.config.ConfigurationStore;
-import edu.rpi.cmt.config.ConfigurationType;
 import edu.rpi.cmt.jmx.ConfBase;
 import edu.rpi.cmt.jmx.ConfigHolder;
 import edu.rpi.cmt.jmx.InfoLines;
@@ -167,11 +167,6 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     setPathSuffix("conf");
 
     SynchEngine.setConfigHolder(this);
-  }
-
-  @Override
-  public ConfigurationType getConfigObject() {
-    return getConfig().getConfig();
   }
 
   /* ========================================================================
@@ -385,6 +380,16 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   }
 
   @Override
+  public void setHibernateDialect(final String value) {
+    getConfig().setHibernateDialect(value);
+  }
+
+  @Override
+  public String getHibernateDialect() {
+    return getConfig().getHibernateDialect();
+  }
+
+  @Override
   public String listHibernateProperties() {
     StringBuilder res = new StringBuilder();
 
@@ -490,36 +495,15 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     try {
       /* Load up the config */
 
-      ConfigurationStore cs = getStore();
+      String res = loadOnlyConfig(SynchConfig.class);
 
-      List<String> configNames = cs.getConfigs();
-
-      if (configNames.isEmpty()) {
-        error("No configuration on path " + cs.getLocation());
-        return "No configuration on path " + cs.getLocation();
+      if (res != null) {
+        return res;
       }
-
-      if (configNames.size() != 1) {
-        error("1 and only 1 configuration allowed");
-        return "1 and only 1 configuration allowed";
-      }
-
-      String configName = configNames.iterator().next();
-
-      cfg = getConfigInfo(cs, configName, SynchConfig.class);
-
-      if (cfg == null) {
-        error("Unable to read configuration");
-        return "Unable to read configuration";
-      }
-
-      setConfigName(configName);
-
-      saveConfig(); // Just to ensure we have it for next time
 
       /* Load up the connectors */
 
-      cs = cs.getStore("connectors");
+      ConfigurationStore cs = getStore().getStore("connectors");
 
       connectorNames = cs.getConfigs();
 
@@ -529,10 +513,29 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
       for (String cn: connectorNames) {
         ObjectName objectName = createObjectName("connector", cn);
 
-        SynchConnConf scc = new SynchConnConf(cs,
-                                              objectName.toString(), cn);
+        /* Read the config so we can get the mbean class name. */
 
-        scc.loadConfig();
+        ConnectorConfig connCfg = (ConnectorConfig)cs.getConfig(cn);
+
+        if (connCfg == null) {
+          error("Unable to read connector configuration " + cn);
+          continue;
+        }
+
+        String mbeanClassName = connCfg.getMbeanClassName();
+
+        if (connCfg.getMbeanClassName() == null) {
+          error("Must set the mbean class name for connector " + cn);
+          error("Falling back to base class for " + cn);
+
+          mbeanClassName = SynchConnConf.class.getCanonicalName();
+        }
+
+        @SuppressWarnings("unchecked")
+        SynchConnConf<ConnectorConfig> scc = (SynchConnConf<ConnectorConfig>)makeObject(mbeanClassName);
+        scc.init(cs, objectName.toString(), connCfg);
+
+        scc.saveConfig();
         sccs.add(scc);
         register("connector", cn, scc);
       }

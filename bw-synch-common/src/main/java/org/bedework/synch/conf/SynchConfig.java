@@ -21,74 +21,72 @@ package org.bedework.synch.conf;
 import org.bedework.synch.db.IpAddrInfo;
 import org.bedework.synch.service.SynchConnConf;
 
-import edu.rpi.cmt.config.ConfigBase;
+import edu.rpi.cmt.config.ConfInfo;
+import edu.rpi.cmt.config.HibernateConfigBase;
 
 import java.util.List;
 import java.util.SortedSet;
-
-import javax.xml.namespace.QName;
 
 /** This class defines the various properties we need for the synch engine
  *
  * @author Mike Douglass
  */
-public class SynchConfig extends ConfigBase<SynchConfig> {
-  /** */
-  public final static QName confElement = new QName(ns, "synch-confinfo");
+@ConfInfo(elementName = "synch-confinfo")
+public class SynchConfig extends HibernateConfigBase<SynchConfig> {
+  /* Size of synchling pool */
+  private int synchlingPoolSize;
 
-  private static final QName synchlingPoolSizeProperty = new QName(ns, "synchlingPoolSize");
+  /* millisecs */
+  private long synchlingPoolTimeout;
 
-  private static final QName synchlingPoolTimeoutProperty = new QName(ns, "synchlingPoolTimeout");
+  /* How often we retry when a target is missing */
+  private int missingTargetRetries;
 
-  private static final QName missingTargetRetriesProperty = new QName(ns, "missingTargetRetries");
+  /* web service push callback uri - null for no service */
+  private String callbackURI;
 
-  private static final QName timezonesURIProperty = new QName(ns, "timezonesURI");
+  /* Timezone server location */
+  private String timezonesURI;
 
-  private static final QName callbackURIProperty = new QName(ns, "callbackURI");
+  /* Path to keystore - null for use default */
+  private String keystore;
 
-  private static final QName keystoreProperty = new QName(ns, "keystore");
-
-  private static final QName privKeysProperty = new QName(ns, "privKeys");
-
-  private static final QName pubKeysProperty = new QName(ns, "pubKeys");
-
-  private static final QName hibernateProperty = new QName(ns, "hibernateProperty");
-
-  @Override
-  public QName getConfElement() {
-    return confElement;
-  }
+  /* Path to keystores  */
+  private String privKeys;
+  /* Path to keystores  */
+  private String pubKeys;
 
   private List<SynchConnConf> connectorConfs;
 
   private SortedSet<IpAddrInfo> ipInfo;
 
+
   /**
    * @param val current size of synchling pool
    */
   public void setSynchlingPoolSize(final int val) {
-    setIntegerProperty(synchlingPoolSizeProperty, val);
+    synchlingPoolSize = val;
   }
 
   /**
    * @return current size of synchling pool
    */
   public int getSynchlingPoolSize() {
-    return getIntegerPropertyValue(synchlingPoolSizeProperty);
+    return synchlingPoolSize;
   }
 
   /**
    * @param val timeout in millisecs
    */
   public void setSynchlingPoolTimeout(final long val) {
-    setLongProperty(synchlingPoolTimeoutProperty, val);
+    synchlingPoolTimeout = val;
   }
 
   /**
    * @return timeout in millisecs
    */
   public long getSynchlingPoolTimeout() {
-    return getLongPropertyValue(synchlingPoolTimeoutProperty);
+    return synchlingPoolTimeout;
   }
 
   /** How often we retry when a target is missing
@@ -96,14 +94,14 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val
    */
   public void setMissingTargetRetries(final int val) {
-    setIntegerProperty(missingTargetRetriesProperty, val);
+    missingTargetRetries = val;
   }
 
   /**
    * @return How often we retry when a target is missing
    */
   public int getMissingTargetRetries() {
-    return getIntegerPropertyValue(missingTargetRetriesProperty);
+    return missingTargetRetries;
   }
 
   /** web service push callback uri - null for no service
@@ -111,7 +109,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val    String
    */
   public void setCallbackURI(final String val) {
-    setProperty(callbackURIProperty, val);
+    callbackURI = val;
   }
 
   /** web service push callback uri - null for no service
@@ -119,7 +117,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @return String
    */
   public String getCallbackURI() {
-    return getPropertyValue(callbackURIProperty);
+    return callbackURI;
   }
 
   /** Timezone server location
@@ -127,7 +125,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val    String
    */
   public void setTimezonesURI(final String val) {
-    setProperty(timezonesURIProperty, val);
+    timezonesURI = val;
   }
 
   /** Timezone server location
@@ -135,7 +133,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @return String
    */
   public String getTimezonesURI() {
-    return getPropertyValue(timezonesURIProperty);
+    return timezonesURI;
   }
 
   /** Path to keystore - null for use default
@@ -143,7 +141,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val    String
    */
   public void setKeystore(final String val) {
-    setProperty(keystoreProperty, val);
+    keystore = val;
   }
 
   /** Path to keystore - null for use default
@@ -151,7 +149,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @return String
    */
   public String getKeystore() {
-    return getPropertyValue(keystoreProperty);
+    return keystore;
   }
 
   /**
@@ -159,7 +157,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val    String
    */
   public void setPrivKeys(final String val) {
-    setProperty(privKeysProperty, val);
+    privKeys = val;
   }
 
   /**
@@ -167,7 +165,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @return String
    */
   public String getPrivKeys() {
-    return getPropertyValue(privKeysProperty);
+    return privKeys;
   }
 
   /**
@@ -175,7 +173,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @param val    String
    */
   public void setPubKeys(final String val) {
-    setProperty(pubKeysProperty, val);
+    pubKeys = val;
   }
 
   /**
@@ -183,80 +181,7 @@ public class SynchConfig extends ConfigBase<SynchConfig> {
    * @return String
    */
   public String getPubKeys() {
-    return getPropertyValue(pubKeysProperty);
-  }
-
-  /** Add a hibernate property
-   *
-   * @param name
-   * @param val
-   */
-  public void addHibernateProperty(final String name,
-                                   final String val) {
-    addProperty(hibernateProperty, name + "=" + val);
-  }
-
-  /** Get a hibernate property
-   *
-   * @param val
-   * @return value or null
-   */
-  public String getHibernateProperty(final String val) {
-    List<String> ps = getHibernateProperties();
-
-    String key = val + "=";
-    for (String p: ps) {
-      if (p.startsWith(key)) {
-        return p.substring(key.length());
-      }
-    }
-
-    return null;
-  }
-
-  /** Remove a hibernate property
-   *
-   * @param name
-   */
-  public void removeHibernateProperty(final String name) {
-    try {
-      String v = getHibernateProperty(name);
-
-      if (v == null) {
-        return;
-      }
-
-      getConfig().removeProperty(hibernateProperty, name + "=" + v);
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
-    }
-  }
-
-  /** Set a hibernate property
-   *
-   * @param name
-   * @param val
-   */
-  public void setHibernateProperty(final String name,
-                                   final String val) {
-    try {
-      removeHibernateProperty(name);
-      addHibernateProperty(name, val);
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
-    }
-  }
-
-  /**
-   *
-   * @return String val
-   */
-  public List<String> getHibernateProperties() {
-    try {
-      return getConfig().getAll(hibernateProperty);
-    } catch (Throwable t) {
-      throw new RuntimeException(t);
-    }
+    return pubKeys;
   }
 
   /**

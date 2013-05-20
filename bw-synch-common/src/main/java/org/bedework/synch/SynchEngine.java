@@ -385,7 +385,7 @@ public class SynchEngine extends TzGetter {
 
       /* Register the connectors and start them */
       for (SynchConnConf scc: connectorConfs) {
-        ConnectorConfig conf = scc.getConfig();
+        ConnectorConfig conf = (ConnectorConfig)scc.getConfig();
         String cnctrId = conf.getName();
         info("Register and start connector " + cnctrId);
 
@@ -708,7 +708,7 @@ public class SynchEngine extends TzGetter {
   private void registerConnector(final String id,
                                  final ConnectorConfig conf) throws SynchException {
     try {
-      Class cl = Class.forName(conf.getClassName());
+      Class cl = Class.forName(conf.getConnectorClassName());
 
       if (connectorMap.containsKey(id)) {
         throw new SynchException("Connector " + id + " already registered");

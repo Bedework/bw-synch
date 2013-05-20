@@ -53,7 +53,8 @@ import javax.servlet.http.HttpServletResponse;
 public class BedeworkConnector
       extends AbstractConnector<BedeworkConnector,
                                 BedeworkConnectorInstance,
-                                Notification> {
+                                Notification,
+                                BedeworkConnectorConfig> {
   private static PropertiesInfo bwPropInfo = new PropertiesInfo();
 
   static {
@@ -141,9 +142,9 @@ public class BedeworkConnector
           long waitTime;
 
           if (remoteToken == null) {
-            waitTime = ((BedeworkConnectorConfig)config).getRetryInterval() * 1000;
+            waitTime = config.getRetryInterval() * 1000;
           } else {
-            waitTime = ((BedeworkConnectorConfig)config).getKeepAliveInterval() * 1000;
+            waitTime = config.getKeepAliveInterval() * 1000;
           }
 
           synchronized (o) {
@@ -167,7 +168,7 @@ public class BedeworkConnector
                     final SynchEngine syncher) throws SynchException {
     super.start(connectorId, conf, callbackUri, syncher);
 
-    config = new BedeworkConnectorConfig(conf);
+    config = (BedeworkConnectorConfig)conf;
 
     if (pinger == null) {
       pinger = new PingThread(connectorId, this);
@@ -219,7 +220,7 @@ public class BedeworkConnector
       info = new BedeworkSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new BedeworkConnectorInstance((BedeworkConnectorConfig)config,
+    inst = new BedeworkConnectorInstance(config,
                                          this, sub, end, info);
     cinstMap.add(sub, end, inst);
 
@@ -257,7 +258,7 @@ public class BedeworkConnector
    * ==================================================================== */
 
   SynchRemoteServicePortType getPort() throws SynchException {
-    return getPort(((BedeworkConnectorConfig)config).getBwWSDLURI());
+    return getPort(config.getBwWSDLURI());
   }
 
   SynchIdTokenType getIdToken(final String principal) throws SynchException {
