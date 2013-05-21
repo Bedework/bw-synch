@@ -45,6 +45,7 @@ public class SynchConnConf<X extends ConnectorConfig> extends ConfBase<X>
                    final X cfg) {
     setServiceName(serviceName);
     setStore(configStore);
+    setConfigName(cfg.getName());
 
     this.cfg = cfg;
   }

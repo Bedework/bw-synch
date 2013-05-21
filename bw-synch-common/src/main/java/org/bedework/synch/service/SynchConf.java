@@ -43,8 +43,6 @@ import javax.management.ObjectName;
  *
  */
 public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, ConfigHolder<SynchConfig> {
-  private static SynchConfig cfg;
-
   /* Name of the property holding the location of the config data */
   private static final String datauriPname = "org.bedework.synch.datauri";
 
