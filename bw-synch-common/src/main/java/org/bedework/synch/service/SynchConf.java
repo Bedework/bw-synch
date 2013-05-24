@@ -44,7 +44,7 @@ import javax.management.ObjectName;
  */
 public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, ConfigHolder<SynchConfig> {
   /* Name of the property holding the location of the config data */
-  private static final String datauriPname = "org.bedework.synch.datauri";
+  private static final String confuriPname = "org.bedework.synch.confuri";
 
   List<String> connectorNames;
 
@@ -161,7 +161,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
    */
   public SynchConf() {
     super("org.bedework.synch:service=SynchConf");
-    setConfigPname(datauriPname);
+    setConfigPname(confuriPname);
     setPathSuffix("conf");
 
     SynchEngine.setConfigHolder(this);
