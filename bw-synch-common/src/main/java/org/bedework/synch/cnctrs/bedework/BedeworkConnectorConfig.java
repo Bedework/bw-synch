@@ -20,12 +20,14 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.conf.ConnectorConfig;
 
+import edu.rpi.cmt.config.ConfInfo;
 import edu.rpi.sss.util.ToString;
 
 /** Bedework synch connector config
  *
  * @author douglm
  */
+@ConfInfo(elementName = "synch-connector")
 public class BedeworkConnectorConfig extends ConnectorConfig {
   /** WSDL for remote service */
   private String bwWSDLURI;
