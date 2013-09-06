@@ -24,6 +24,7 @@ import org.bedework.synch.service.SynchConf;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 
 import edu.rpi.cmt.jmx.ConfBase;
+import edu.rpi.sss.util.http.service.HttpOut;
 import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
 import edu.rpi.sss.util.xml.XmlEmit;
 import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
@@ -36,6 +37,7 @@ import java.io.Writer;
 import java.util.Enumeration;
 import java.util.HashMap;
 
+import javax.management.ObjectName;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -467,6 +469,13 @@ public class SynchServlet extends HttpServlet
         register("synchConf", "synchConf", synchConf);
         synchConf.loadConfig();
         synchConf.start();
+
+      /* ------------- Http properties -------------------- */
+        HttpOut ho = new HttpOut("org.bedework.synch.confuri",
+                                 "org.bedework.synch",
+                                 "httpConfig");
+        register(new ObjectName(ho.getServiceName()), ho);
+        ho.loadConfig();
       } catch (Throwable t){
         t.printStackTrace();
       }
