@@ -18,8 +18,8 @@
 */
 package org.bedework.synch.service;
 
-import edu.rpi.cmt.jmx.ConfBaseMBean;
-import edu.rpi.cmt.jmx.MBeanInfo;
+import org.bedework.util.jmx.ConfBaseMBean;
+import org.bedework.util.jmx.MBeanInfo;
 
 /** Configure a connector for the Bedework synch engine service
  *

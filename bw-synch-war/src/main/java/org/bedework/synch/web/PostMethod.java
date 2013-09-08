@@ -21,8 +21,7 @@ package org.bedework.synch.web;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.exception.SynchException;
-
-import edu.rpi.sss.util.Util;
+import org.bedework.util.misc.Util;
 
 import java.util.List;
 

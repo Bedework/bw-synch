@@ -25,10 +25,19 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
+import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.xml.tagdefs.XcalTags;
 
-import edu.rpi.cmt.calendar.XcalUtil;
-import edu.rpi.sss.util.xml.tagdefs.XcalTags;
-
+import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
+import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
+import ietf.params.xml.ns.icalendar_2.BaseComponentType;
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
+import ietf.params.xml.ns.icalendar_2.ObjectFactory;
+import ietf.params.xml.ns.icalendar_2.UidPropType;
+import ietf.params.xml.ns.icalendar_2.VcalendarType;
+import ietf.params.xml.ns.icalendar_2.VeventType;
+import ietf.params.xml.ns.icalendar_2.VtodoType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AllpropType;
@@ -46,17 +55,6 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 import org.oasis_open.docs.ws_calendar.ns.soap.TextMatchType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
-
-import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
-import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
-import ietf.params.xml.ns.icalendar_2.BaseComponentType;
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
-import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
-import ietf.params.xml.ns.icalendar_2.ObjectFactory;
-import ietf.params.xml.ns.icalendar_2.UidPropType;
-import ietf.params.xml.ns.icalendar_2.VcalendarType;
-import ietf.params.xml.ns.icalendar_2.VeventType;
-import ietf.params.xml.ns.icalendar_2.VtodoType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,7 +223,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     BaseComponentType comp = comps.get(0).getValue();
 
     UidPropType uid = (UidPropType)XcalUtil.findProperty(comp,
-                                             XcalTags.uid);
+                                                         XcalTags.uid);
 
     LastModifiedPropType lastmod = (LastModifiedPropType)XcalUtil.findProperty(comp,
                                                          XcalTags.lastModified);

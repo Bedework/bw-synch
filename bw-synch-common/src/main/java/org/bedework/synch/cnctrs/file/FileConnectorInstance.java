@@ -24,24 +24,11 @@ import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
-
-import edu.rpi.cmt.calendar.IcalToXcal;
-import edu.rpi.cmt.calendar.XcalUtil;
-import edu.rpi.sss.util.Util;
-import edu.rpi.sss.util.http.BasicHttpClient;
-import edu.rpi.sss.util.xml.tagdefs.XcalTags;
-
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.model.Calendar;
-
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.message.BasicHeader;
-import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
+import org.bedework.util.calendar.IcalToXcal;
+import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.http.BasicHttpClient;
+import org.bedework.util.misc.Util;
+import org.bedework.util.xml.tagdefs.XcalTags;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
@@ -54,6 +41,16 @@ import ietf.params.xml.ns.icalendar_2.ProdidPropType;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VersionPropType;
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.model.Calendar;
+import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.message.BasicHeader;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -377,8 +374,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
         for (JAXBElement<? extends BaseComponentType> comp:
              vcal.getComponents().getBaseComponent()) {
-          UidPropType uidProp = (UidPropType)XcalUtil.findProperty(comp.getValue(),
-                                                                   XcalTags.uid);
+          UidPropType uidProp = (UidPropType)XcalUtil.findProperty(
+                  comp.getValue(),
+                  XcalTags.uid);
 
           if (uidProp == null) {
             // Should flag as an error

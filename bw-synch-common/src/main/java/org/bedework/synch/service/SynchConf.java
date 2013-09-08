@@ -23,10 +23,10 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 
-import edu.rpi.cmt.config.ConfigurationStore;
-import edu.rpi.cmt.jmx.ConfBase;
-import edu.rpi.cmt.jmx.ConfigHolder;
-import edu.rpi.cmt.jmx.InfoLines;
+import org.bedework.util.config.ConfigurationStore;
+import org.bedework.util.jmx.ConfBase;
+import org.bedework.util.jmx.ConfigHolder;
+import org.bedework.util.jmx.InfoLines;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;

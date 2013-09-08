@@ -21,8 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.db.SerializableProperties;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchPropertyInfoType;
-
-import edu.rpi.sss.util.ToString;
+import org.bedework.util.misc.ToString;
 
 import java.util.ArrayList;
 import java.util.List;

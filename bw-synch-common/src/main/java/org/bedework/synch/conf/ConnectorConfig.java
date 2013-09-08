@@ -18,9 +18,9 @@
  */
 package org.bedework.synch.conf;
 
-import edu.rpi.cmt.config.ConfInfo;
-import edu.rpi.cmt.config.ConfigBase;
-import edu.rpi.sss.util.ToString;
+import org.bedework.util.config.ConfInfo;
+import org.bedework.util.config.ConfigBase;
+import org.bedework.util.misc.ToString;
 
 /** Common connector config properties
  *

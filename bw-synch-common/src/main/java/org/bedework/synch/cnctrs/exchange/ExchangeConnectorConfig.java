@@ -19,9 +19,8 @@
 package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.conf.ConnectorConfig;
-
-import edu.rpi.cmt.config.ConfInfo;
-import edu.rpi.sss.util.ToString;
+import org.bedework.util.config.ConfInfo;
+import org.bedework.util.misc.ToString;
 
 /** Exchange synch connector config
 *

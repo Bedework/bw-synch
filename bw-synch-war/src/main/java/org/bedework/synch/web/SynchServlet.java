@@ -22,12 +22,11 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.service.SynchConf;
 import org.bedework.synch.web.MethodBase.MethodInfo;
-
-import edu.rpi.cmt.jmx.ConfBase;
-import edu.rpi.sss.util.http.service.HttpOut;
-import edu.rpi.sss.util.servlets.io.CharArrayWrappedResponse;
-import edu.rpi.sss.util.xml.XmlEmit;
-import edu.rpi.sss.util.xml.tagdefs.WebdavTags;
+import org.bedework.util.http.service.HttpOut;
+import org.bedework.util.jmx.ConfBase;
+import org.bedework.util.servlet.io.CharArrayWrappedResponse;
+import org.bedework.util.xml.XmlEmit;
+import org.bedework.util.xml.tagdefs.WebdavTags;
 
 import org.apache.log4j.Logger;
 

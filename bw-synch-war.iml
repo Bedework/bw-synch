@@ -24,8 +24,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="bw-synch-common" scope="PROVIDED" />
-    <orderEntry type="module" module-name="bw-util" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-calendar" scope="PROVIDED" />
     <orderEntry type="module" module-name="bw-ws-icalendar" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-misc" scope="PROVIDED" />
     <orderEntry type="module" module-name="bw-ws-tzsvr" scope="PROVIDED" />
     <orderEntry type="module" module-name="bw-ws-calws-soap" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-core:2.1.1" level="project" />
@@ -54,6 +55,14 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: log4j:log4j:1.2.15" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.mail:mail:1.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.activation:activation:1.1" level="project" />
+    <orderEntry type="module" module-name="bw-util-xml" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-config" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-hibernate" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-http" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-jmx" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-security" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-timezones" scope="PROVIDED" />
+    <orderEntry type="module" module-name="bw-util-caching" scope="PROVIDED" />
     <orderEntry type="module" module-name="bw-access" scope="PROVIDED" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.2" level="project" />
     <orderEntry type="module" module-name="bw-ws-synchws" scope="PROVIDED" />
@@ -70,6 +79,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.hibernate:hibernate-commons-annotations:3.2.0.Final" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.transaction:jta:1.1" level="project" />
+    <orderEntry type="module" module-name="bw-util-servlet" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: dom4j:dom4j:1.6.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.6.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.5" level="project" />

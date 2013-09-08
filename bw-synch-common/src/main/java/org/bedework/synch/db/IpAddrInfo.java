@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.db;
 
-import edu.rpi.sss.util.ToString;
+import org.bedework.util.misc.ToString;
 
 /** Let us block or allow addresses.
  *

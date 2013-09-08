@@ -20,11 +20,10 @@ package org.bedework.synch.db;
 
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.exception.SynchException;
-
-import edu.rpi.cmt.db.hibernate.HibException;
-import edu.rpi.cmt.db.hibernate.HibSession;
-import edu.rpi.cmt.db.hibernate.HibSessionFactory;
-import edu.rpi.cmt.db.hibernate.HibSessionImpl;
+import org.bedework.util.hibernate.HibException;
+import org.bedework.util.hibernate.HibSession;
+import org.bedework.util.hibernate.HibSessionFactory;
+import org.bedework.util.hibernate.HibSessionImpl;
 
 import org.apache.log4j.Logger;
 
@@ -267,7 +266,8 @@ public class SynchDb implements Serializable {
       }
       sess = new HibSessionImpl();
       try {
-        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()), getLogger());
+        sess.init(HibSessionFactory.getSessionFactory(
+                config.getHibernateProperties()), getLogger());
       } catch (HibException he) {
         throw new SynchException(he);
       }

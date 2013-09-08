@@ -28,17 +28,15 @@ import org.bedework.synch.db.SynchDb;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.service.SynchConnConf;
 import org.bedework.synch.wsmessages.SynchEndType;
-
-import edu.rpi.cmt.calendar.XcalUtil.TzGetter;
-import edu.rpi.cmt.jmx.ConfigHolder;
-import edu.rpi.cmt.security.PwEncryptionIntf;
-import edu.rpi.cmt.timezones.Timezones;
-import edu.rpi.cmt.timezones.TimezonesImpl;
-import edu.rpi.sss.util.Util;
-import edu.rpi.sss.util.http.BasicHttpClient;
+import org.bedework.util.calendar.XcalUtil.TzGetter;
+import org.bedework.util.http.BasicHttpClient;
+import org.bedework.util.jmx.ConfigHolder;
+import org.bedework.util.misc.Util;
+import org.bedework.util.security.PwEncryptionIntf;
+import org.bedework.util.timezones.Timezones;
+import org.bedework.util.timezones.TimezonesImpl;
 
 import net.fortuna.ical4j.model.TimeZone;
-
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
@@ -263,7 +261,6 @@ public class SynchEngine extends TzGetter {
 
   /** Constructor
    *
-   * @param exintf
    */
   private SynchEngine() throws SynchException {
     debug = getLogger().isDebugEnabled();
@@ -598,7 +595,7 @@ public class SynchEngine extends TzGetter {
     }
 
     try {
-      String pwEncryptClass = "edu.rpi.cmt.security.PwEncryptionDefault";
+      String pwEncryptClass = "org.bedework.util.security.PwEncryptionDefault";
       //String pwEncryptClass = getSysparsHandler().get().getPwEncryptClass();
 
       pwEncrypt = (PwEncryptionIntf)Util.getObject(pwEncryptClass,

@@ -8,7 +8,7 @@
   <display-name>Bedework synch callback server</display-name>
 
   <listener>
-    <listener-class>edu.rpi.sss.util.jsp.SessionListener</listener-class>
+    <listener-class>org.bedework.util.struts.SessionListener</listener-class>
   </listener>
   <!-- A listener to register the jmx mbeans -->
   <listener>
@@ -40,7 +40,7 @@
     <session-timeout>1</session-timeout>
   </session-config>
 
-  <!-- JDBC DataSources (java:comp/env/jdbc) 
+  <!-- JDBC DataSources (java:comp/env/jdbc)
   <resource-ref>
     <description>The calendar DS</description>
     <res-ref-name>jdbc/cardDB</res-ref-name>

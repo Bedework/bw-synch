@@ -33,19 +33,8 @@ import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
-
-import edu.rpi.cmt.calendar.XcalUtil;
-import edu.rpi.cmt.calendar.diff.XmlIcalCompare;
-
-import org.apache.log4j.Logger;
-import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
-import org.oasis_open.docs.ws_calendar.ns.soap.ErrorCodeType;
-import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
-import org.oasis_open.docs.ws_calendar.ns.soap.TargetDoesNotExistType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
+import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.calendar.diff.XmlIcalCompare;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
@@ -57,6 +46,15 @@ import ietf.params.xml.ns.icalendar_2.MethodPropType;
 import ietf.params.xml.ns.icalendar_2.OrganizerPropType;
 import ietf.params.xml.ns.icalendar_2.ValarmType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
+import org.apache.log4j.Logger;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
+import org.oasis_open.docs.ws_calendar.ns.soap.ErrorCodeType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
+import org.oasis_open.docs.ws_calendar.ns.soap.TargetDoesNotExistType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
