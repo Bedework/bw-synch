@@ -20,7 +20,7 @@ package org.bedework.synch.intf;
 
 /** Definitions for synch classes
  *
- *   @author Mike Douglass   douglm  rpi.edu
+ *   @author Mike Douglass   douglm  bedework.edu
  */
 public interface Defs {
   /* ========================================================================

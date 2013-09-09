@@ -28,7 +28,7 @@ import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType
 
 /** Base request class.
  *
- *   @author Mike Douglass   douglm rpi.edu
+ *   @author Mike Douglass   douglm bedework.edu
  *
  * @param <T>
  */

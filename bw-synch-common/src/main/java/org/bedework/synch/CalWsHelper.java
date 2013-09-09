@@ -40,7 +40,7 @@ import javax.xml.transform.stream.StreamSource;
 
 /** Help for CalWS
  *
- *   @author Mike Douglass   douglm rpi.edu
+ *   @author Mike Douglass   douglm bedework.edu
  */
 public class CalWsHelper {
   protected transient Logger log;

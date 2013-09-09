@@ -29,7 +29,7 @@ import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType
 
 /** Get the items from a folder.
  *
- *   @author Mike Douglass   douglm rpi.edu
+ *   @author Mike Douglass   douglm bedework.edu
  */
 public class FindItemsRequest extends BaseRequest<FindItemType> {
   /** Get enough information out of Exchange to allowus to figure out what we

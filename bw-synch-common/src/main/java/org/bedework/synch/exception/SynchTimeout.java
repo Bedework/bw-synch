@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
 
 /** Forbidden exception thrown by synch classes
  *
- *   @author Mike Douglass   douglm@rpi.edu
+ *   @author Mike Douglass   douglm@bedework.edu
  */
 public class SynchTimeout extends SynchException {
   /** Constructor

@@ -20,7 +20,7 @@ package org.bedework.synch;
 
 /** Some definitions for the synch service
  *
- *   @author Mike Douglass   douglm@rpi.edu
+ *   @author Mike Douglass   douglm@bedework.edu
  */
 public interface SynchDefs {
   /** and does it tell us when something changes or do we have to ask?

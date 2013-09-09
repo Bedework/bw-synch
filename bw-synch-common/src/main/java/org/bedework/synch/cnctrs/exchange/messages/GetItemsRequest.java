@@ -29,7 +29,7 @@ import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfBaseIt
 
 /** Get items by id.
  *
- *   @author Mike Douglass   douglm rpi.edu
+ *   @author Mike Douglass   douglm bedework.edu
  */
 public class GetItemsRequest extends BaseRequest<GetItemType> {
   /**

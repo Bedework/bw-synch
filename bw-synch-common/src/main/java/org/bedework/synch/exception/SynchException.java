@@ -25,7 +25,7 @@ import javax.xml.namespace.QName;
 
 /** Base exception thrown by exchange synch classes
  *
- *   @author Mike Douglass   douglm@rpi.edu
+ *   @author Mike Douglass   douglm@bedework.edu
  */
 public class SynchException extends Throwable {
   /** > 0 if set

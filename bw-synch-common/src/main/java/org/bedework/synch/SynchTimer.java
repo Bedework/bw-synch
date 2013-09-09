@@ -38,7 +38,7 @@ import java.util.TimerTask;
  * generally the polled kind but other subscriptions may be made to wait before
  * retrying failed operations.
  *
- *   @author Mike Douglass   douglm   rpi.edu
+ *   @author Mike Douglass   douglm   bedework.edu
  */
 public class SynchTimer {
   private boolean debug;

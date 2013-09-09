@@ -29,7 +29,7 @@ import com.microsoft.schemas.exchange.services._2006.types.TargetFolderIdType;
 
 /** Get the items from a folder.
  *
- *   @author Mike Douglass   douglm rpi.edu
+ *   @author Mike Douglass   douglm bedework.edu
  */
 public class SyncFolderItemsRequest extends BaseRequest<SyncFolderItemsType> {
   /**
