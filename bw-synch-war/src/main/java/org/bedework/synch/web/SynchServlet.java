@@ -460,6 +460,11 @@ public class SynchServlet extends HttpServlet
       super("org.bedework.synch:service=Synch");
     }
 
+    @Override
+    public String loadConfig() {
+      return null;
+    }
+
     void start() {
       try {
         getManagementContext().start();

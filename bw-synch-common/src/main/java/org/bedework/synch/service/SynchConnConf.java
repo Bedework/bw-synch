@@ -50,6 +50,11 @@ public class SynchConnConf<X extends ConnectorConfig> extends ConfBase<X>
     this.cfg = cfg;
   }
 
+  @Override
+  public String loadConfig() {
+    return null;
+  }
+
   /** Embed the connector
    *
    * @param val
