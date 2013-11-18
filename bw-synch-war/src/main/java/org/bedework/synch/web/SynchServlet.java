@@ -465,7 +465,8 @@ public class SynchServlet extends HttpServlet
       return null;
     }
 
-    void start() {
+    @Override
+    public void start() {
       try {
         getManagementContext().start();
 
@@ -485,7 +486,8 @@ public class SynchServlet extends HttpServlet
       }
     }
 
-    void stop() {
+    @Override
+    public void stop() {
       try {
         synchConf.stop();
         getManagementContext().stop();
