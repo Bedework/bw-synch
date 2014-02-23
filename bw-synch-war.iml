@@ -18,7 +18,7 @@
     <output-test url="file://$MODULE_DIR$/bw-synch-war/target/test-classes" />
     <content url="file://$MODULE_DIR$/bw-synch-war">
       <sourceFolder url="file://$MODULE_DIR$/bw-synch-war/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/bw-synch-war/src/main/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/bw-synch-war/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/bw-synch-war/target" />
     </content>
     <orderEntry type="inheritedJdk" />
