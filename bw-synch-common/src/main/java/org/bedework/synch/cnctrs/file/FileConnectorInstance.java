@@ -314,13 +314,12 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
       getClient();
 
-      Header[] hdrs = null;
+      List<Header> hdrs = null;
 
       if ((uidMap != null) && (info.getChangeToken() != null) &&
           (fetchedIcal != null)) {
-        hdrs = new Header[] {
-          new BasicHeader("If-None-Match", info.getChangeToken())
-        };
+        hdrs = new ArrayList<>(1);
+        hdrs.add(new BasicHeader("If-None-Match", info.getChangeToken()));
       }
 
       int rc = client.sendRequest("GET", info.getUri(), hdrs);
