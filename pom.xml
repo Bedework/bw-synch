@@ -48,8 +48,8 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/Bedework/bw-synch.git</connection>
-		<developerConnection>scm:git:git://github.com/Bedework/bw-synch.git</developerConnection>
+		<connection>scm:git:git@github.com:Bedework/bw-synch.git</connection>
+		<developerConnection>scm:git:git@github.com:Bedework/bw-synch.git</developerConnection>
 		<url>https://github.com/Bedework/bw-synch</url>
 	</scm>
 
