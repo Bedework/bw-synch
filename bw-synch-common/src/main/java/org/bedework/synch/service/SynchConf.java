@@ -533,7 +533,6 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         SynchConnConf<ConnectorConfig> scc = (SynchConnConf<ConnectorConfig>)makeObject(mbeanClassName);
         scc.init(cs, objectName.toString(), connCfg);
 
-        scc.saveConfig();
         sccs.add(scc);
         register("connector", cn, scc);
       }
