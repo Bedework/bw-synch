@@ -26,6 +26,7 @@ import org.bedework.util.misc.Util;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 import java.util.Properties;
 
 /** Serializable form of information for a connection to a system via a
@@ -56,9 +57,25 @@ public class SerializableProperties<T> implements Comparable<T> {
       return;
     }
 
-    for (SynchPropertyType prop: props.getProperty()) {
+    for (final SynchPropertyType prop: props.getProperty()) {
       setProperty(prop.getName(), prop.getValue());
     }
+  }
+
+  public ArrayOfSynchProperties getAllSynchProperties() throws SynchException {
+    loadProperties();
+
+    final ArrayOfSynchProperties asp = new ArrayOfSynchProperties();
+    final List<SynchPropertyType> l = asp.getProperty();
+
+    for (final String s: properties.stringPropertyNames()) {
+      final SynchPropertyType prop = new SynchPropertyType();
+      prop.setName(s);
+      prop.setValue(properties.getProperty(s));
+      l.add(prop);
+    }
+
+    return asp;
   }
 
   /**
@@ -75,7 +92,7 @@ public class SerializableProperties<T> implements Comparable<T> {
   public String getSynchProperties() throws SynchException {
     if (changed) {
       try {
-        Writer wtr = new StringWriter();
+        final Writer wtr = new StringWriter();
 
         properties.store(wtr, null);
         synchProperties = wtr.toString();
@@ -130,7 +147,7 @@ public class SerializableProperties<T> implements Comparable<T> {
       if (getSynchProperties() != null) {
           properties.load(new StringReader(getSynchProperties()));
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -170,6 +187,7 @@ public class SerializableProperties<T> implements Comparable<T> {
 
     return properties.getProperty(name);
   }
+
   protected void toStringSegment(final StringBuilder sb,
                                  final String indent) {
     try {

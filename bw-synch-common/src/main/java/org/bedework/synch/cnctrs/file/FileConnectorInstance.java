@@ -189,6 +189,11 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       cnctr.getSyncher().updateSubscription(sub);
     }
 
+    if (uidMap == null) {
+      // Possibly the wrong check. We get this if we're unable to fetch the data
+      return sii;
+    }
+
     for (MapEntry me: uidMap.values()) {
       sii.items.add(new ItemInfo(me.uid, me.lastMod,
                                  null));  // lastSynch
@@ -322,7 +327,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         hdrs.add(new BasicHeader("If-None-Match", info.getChangeToken()));
       }
 
-      int rc = client.sendRequest("GET", info.getUri(), hdrs);
+      final int rc = client.sendRequest("GET", info.getUri(), hdrs);
       info.setLastRefreshStatus(String.valueOf(rc));
 
       if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
@@ -334,7 +339,6 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       }
 
       if (rc != HttpServletResponse.SC_OK) {
-        info.setLastRefreshStatus(String.valueOf(rc));
         if (debug) {
           trace("Unsuccessful response from server was " + rc);
         }
@@ -342,27 +346,27 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         return;
       }
 
-      CalendarBuilder builder = new CalendarBuilder();
+      final CalendarBuilder builder = new CalendarBuilder();
 
-      InputStream is = client.getResponseBodyAsStream();
+      final InputStream is = client.getResponseBodyAsStream();
 
-      Calendar ical = builder.build(is);
+      final Calendar ical = builder.build(is);
 
       /* Convert each entity to XML */
 
       fetchedIcal = IcalToXcal.fromIcal(ical, null);
 
-      uidMap = new HashMap<String, MapEntry>();
+      uidMap = new HashMap<>();
 
       prodid = null;
 
-      for (VcalendarType vcal: fetchedIcal.getVcalendar()) {
+      for (final VcalendarType vcal: fetchedIcal.getVcalendar()) {
         /* Extract the prodid from the converted calendar - we use it when we
          * generate a new icalendar for each entity.
          */
         if ((prodid == null) &&
             (vcal.getProperties() != null)) {
-          for (JAXBElement<? extends BasePropertyType> pel:
+          for (final JAXBElement<? extends BasePropertyType> pel:
             vcal.getProperties().getBasePropertyOrTzid()) {
             if (pel.getValue() instanceof ProdidPropType) {
               prodid = ((ProdidPropType)pel.getValue()).getText();
@@ -371,9 +375,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
           }
         }
 
-        for (JAXBElement<? extends BaseComponentType> comp:
+        for (final JAXBElement<? extends BaseComponentType> comp:
              vcal.getComponents().getBaseComponent()) {
-          UidPropType uidProp = (UidPropType)XcalUtil.findProperty(
+          final UidPropType uidProp = (UidPropType)XcalUtil.findProperty(
                   comp.getValue(),
                   XcalTags.uid);
 
@@ -382,7 +386,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
             continue;
           }
 
-          String uid = uidProp.getText();
+          final String uid = uidProp.getText();
 
           MapEntry me = uidMap.get(uid);
 
@@ -392,8 +396,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
             uidMap.put(uidProp.getText(), me);
           }
 
-          LastModifiedPropType lm = (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
-                                                                                XcalTags.lastModified);
+          final LastModifiedPropType lm =
+                  (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
+                                                              XcalTags.lastModified);
 
           String lastmod= null;
           if (lm != null) {
@@ -412,13 +417,13 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
        * calendar.
        */
 
-      String etag = client.getFirstHeaderValue("Etag");
+      final String etag = client.getFirstHeaderValue("Etag");
       if (etag != null) {
         info.setChangeToken(etag);
       }
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     } finally {
       try {

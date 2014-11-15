@@ -24,8 +24,10 @@ import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.db.Subscription;
+import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
+import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
 import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
@@ -56,6 +58,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.TargetDoesNotExistType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -366,13 +369,13 @@ public class Synchling {
   }
 
   /**
-   * @param note
+   * @param note the notification
    * @return status
    * @throws SynchException
    */
   private StatusType subStatus(final Notification note,
                                final NotificationItem ni) throws SynchException {
-    Subscription sub = note.getSub();
+    final Subscription sub = note.getSub();
     if (sub == null){
       return StatusType.ERROR;
     }
@@ -386,11 +389,20 @@ public class Synchling {
 
     /* See if it's OK by the connector instances */
 
-    ConnectorInstance cinst = syncher.getConnectorInstance(sub,
+    final ConnectorInstance cinst = syncher.getConnectorInstance(sub,
                                                            SynchEndType.A);
 
-    SubscriptionStatusRequestType ssreq = ni.getSubStatusReq();
-    SubscriptionStatusResponseType ssr = ni.getSubStatusResponse();
+    final SubscriptionStatusRequestType ssreq = ni.getSubStatusReq();
+    final SubscriptionStatusResponseType ssr = ni.getSubStatusResponse();
+
+    ssr.setSubscriptionId(sub.getSubscriptionId());
+    ssr.setPrincipalHref(sub.getOwner());
+    ssr.setDirection(sub.getDirection());
+    ssr.setLastRefresh(sub.getLastRefresh());
+    ssr.setErrorCt(new BigInteger(String.valueOf(sub.getErrorCt())));
+
+    ssr.setEndAConnector(getConnectorInfo(sub.getEndAConnectorInfo()));
+    ssr.setEndBConnector(getConnectorInfo(sub.getEndBConnectorInfo()));
 
     if (!cinst.validateActiveSubInfo(ssreq, ssr,
                                      cinst.getConnector(),
@@ -399,6 +411,16 @@ public class Synchling {
     }
 
     return StatusType.OK;
+  }
+
+  private ConnectorInfoType getConnectorInfo(final SubscriptionConnectorInfo sci) throws SynchException {
+    final ConnectorInfoType ci = new ConnectorInfoType();
+
+    ci.setConnectorId(sci.getConnectorId());
+
+    ci.setProperties(sci.getAllSynchProperties());
+
+    return ci;
   }
 
   private static class SynchInfo {
