@@ -28,7 +28,7 @@ import org.bedework.synch.exception.SynchException;
  * @author Mike Douglass
  */
 public class BaseSubscriptionInfo {
-  private SubscriptionConnectorInfo info;
+  private final SubscriptionConnectorInfo info;
 
   /* properties saved by connector instance */
 
@@ -41,6 +41,9 @@ public class BaseSubscriptionInfo {
    * http etag.
    */
   public static final String propnameChangeToken = "ctoken";
+
+  /** Opaque data for this connection */
+  public static final String propnameOpaqueData = "opaque-data";
 
   /** A principal - possibly an href or an account */
   public static final String propnamePrincipal = "principal";
@@ -76,7 +79,7 @@ public class BaseSubscriptionInfo {
     public long deleted;
 
     /** Deserialize
-     * @param val
+     * @param val - serialized counts
      * @return cts
      */
     public static CrudCts fromString(final String val) {
@@ -96,7 +99,7 @@ public class BaseSubscriptionInfo {
         cc.created = Long.valueOf(cts[0]);
         cc.updated = Long.valueOf(cts[1]);
         cc.deleted = Long.valueOf(cts[2]);
-      } catch (Throwable t) {
+      } catch (final Throwable ignored) {
       }
 
       return cc;
@@ -170,6 +173,24 @@ public class BaseSubscriptionInfo {
    */
   public String getPassword() throws SynchException {
     return info.getProperty(propnamePassword);
+  }
+
+  /** Opaque data for the connection
+   *
+   * @param val    String
+   * @throws SynchException
+   */
+  public void setOpaqueData(final String val) throws SynchException {
+    info.setProperty(propnameOpaqueData, val);
+  }
+
+  /** Opaque data for the connection
+   *
+   * @return String
+   * @throws SynchException
+   */
+  public String getOpaqueData() throws SynchException {
+    return info.getProperty(propnameOpaqueData);
   }
 
   /** ChangeToken

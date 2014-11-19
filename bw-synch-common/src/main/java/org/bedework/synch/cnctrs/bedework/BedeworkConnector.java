@@ -261,16 +261,18 @@ public class BedeworkConnector
     return getPort(config.getBwWSDLURI());
   }
 
-  SynchIdTokenType getIdToken(final String principal) throws SynchException {
+  SynchIdTokenType getIdToken(final String principal,
+                              final String opaqueData) throws SynchException {
     if (remoteToken == null) {
       throw new SynchException(SynchException.connectorNotStarted);
     }
 
-    SynchIdTokenType idToken = new SynchIdTokenType();
+    final SynchIdTokenType idToken = new SynchIdTokenType();
 
     idToken.setPrincipalHref(principal);
     idToken.setSubscribeUrl(callbackUri);
     idToken.setSynchToken(remoteToken);
+    idToken.setOpaqueData(opaqueData);
 
     return idToken;
   }

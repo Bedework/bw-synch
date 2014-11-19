@@ -246,17 +246,17 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
    */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
-    CalendarQueryType cq = new CalendarQueryType();
+    final CalendarQueryType cq = new CalendarQueryType();
 
-    ObjectFactory of = cnctr.getIcalObjectFactory();
+    final ObjectFactory of = cnctr.getIcalObjectFactory();
 
     cq.setHref(info.getUri());
     cq.setAllprop(new AllpropType());
 
-    FilterType fltr = new FilterType();
+    final FilterType fltr = new FilterType();
     cq.setFilter(fltr);
 
-    CompFilterType cf = new CompFilterType();
+    final CompFilterType cf = new CompFilterType();
     cf.setVcalendar(new VcalendarType());
 
     fltr.setCompFilter(cf);
@@ -265,7 +265,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
      * We need better expressions.
      */
 
-    CompFilterType cfev = new CompFilterType();
+    final CompFilterType cfev = new CompFilterType();
     cf.getCompFilter().add(cfev);
     cfev.setBaseComponent(of.createVevent(new VeventType()));
 
@@ -279,19 +279,19 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       cfev.setTimeRange(tr);
     }*/
 
-    PropFilterType pr = new PropFilterType();
+    final PropFilterType pr = new PropFilterType();
     pr.setBaseProperty(of.createUid(new UidPropType()));
 
-    TextMatchType tm = new TextMatchType();
+    final TextMatchType tm = new TextMatchType();
     tm.setValue(uid);
 
     pr.setTextMatch(tm);
 
     cfev.getPropFilter().add(pr);
 
-    CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(), cq);
+    final CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(), cq);
 
-    FetchItemResponseType fir = new FetchItemResponseType();
+    final FetchItemResponseType fir = new FetchItemResponseType();
 
     fir.setStatus(cqr.getStatus());
 
@@ -301,7 +301,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       return fir;
     }
 
-    List<MultistatResponseElementType> mres = cqr.getResponse();
+    final List<MultistatResponseElementType> mres = cqr.getResponse();
     if (mres.size() == 0) {
       fir.setStatus(StatusType.NOT_FOUND);
       return fir;
@@ -313,7 +313,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       return fir;
     }
 
-    MultistatResponseElementType mre = mres.get(0);
+    final MultistatResponseElementType mre = mres.get(0);
     fir.setHref(mre.getHref());
     fir.setChangeToken(mre.getChangeToken());
 
@@ -325,7 +325,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       return fir;
     }
 
-    PropstatType pstat = mre.getPropstat().get(0);
+    final PropstatType pstat = mre.getPropstat().get(0);
     if (pstat.getStatus() != StatusType.OK) {
       fir.setStatus(pstat.getStatus());
       fir.setErrorResponse(pstat.getErrorResponse());
@@ -339,7 +339,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       return fir;
     }
 
-    CalendarDataResponseType cdr = pstat.getProp().get(0).getCalendarData();
+    final CalendarDataResponseType cdr = pstat.getProp().get(0).getCalendarData();
 
     if ((cdr == null) || (cdr.getIcalendar() == null)) {
       fir.setStatus(StatusType.NOT_FOUND);
@@ -355,9 +355,9 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
     // XXX this should be a search for multiple uids - need to reimplement caldav search
 
-    List<FetchItemResponseType> firs = new ArrayList<FetchItemResponseType>();
+    final List<FetchItemResponseType> firs = new ArrayList<FetchItemResponseType>();
 
-    for (String uid: uids) {
+    for (final String uid: uids) {
       firs.add(fetchItem(uid));
     }
 
@@ -374,6 +374,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
    * ==================================================================== */
 
   SynchIdTokenType getIdToken() throws SynchException {
-    return cnctr.getIdToken(info.getPrincipalHref());
+    return cnctr.getIdToken(info.getPrincipalHref(),
+                            info.getOpaqueData());
   }
 }
