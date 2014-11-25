@@ -42,7 +42,9 @@ import ietf.params.xml.ns.icalendar_2.UidPropType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VersionPropType;
 import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.UnfoldingReader;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.util.CompatibilityHints;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.message.BasicHeader;
@@ -53,6 +55,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -347,10 +350,14 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       }
 
       final CalendarBuilder builder = new CalendarBuilder();
+      CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_UNFOLDING,
+                                        true);
 
       final InputStream is = client.getResponseBodyAsStream();
 
-      final Calendar ical = builder.build(is);
+      final UnfoldingReader ufrdr =
+              new UnfoldingReader(new InputStreamReader(is), true);
+      final Calendar ical = builder.build(ufrdr);
 
       /* Convert each entity to XML */
 
