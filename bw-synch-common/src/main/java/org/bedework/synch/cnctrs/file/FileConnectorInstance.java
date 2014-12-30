@@ -352,6 +352,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       final CalendarBuilder builder = new CalendarBuilder();
       CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_UNFOLDING,
                                         true);
+      /* Allow unrecognized properties - we'll probably ignore them */
+      CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING,
+                                        true);
 
       final InputStream is = client.getResponseBodyAsStream();
 
