@@ -326,7 +326,7 @@ public class BedeworkConnector
 
       gp.setHref("/");
 
-      sysInfo = getPort().getProperties(getIdToken(null),
+      sysInfo = getPort().getProperties(getIdToken(null, null),
                                         gp);
     }
   }
