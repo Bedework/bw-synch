@@ -37,10 +37,9 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-
 /** Help for CalWS
  *
- *   @author Mike Douglass   douglm bedework.edu
+ *   @author Mike Douglass   douglm rpi.edu
  */
 public class CalWsHelper {
   protected transient Logger log;
@@ -49,7 +48,7 @@ public class CalWsHelper {
 
   /** Trace a calws SOAP message
    *
-   * @param o
+   * @param o the unmarshalled SOAP message
    * @throws Throwable
    */
   public void traceSoap(final Object o) throws Throwable {
@@ -80,8 +79,8 @@ public class CalWsHelper {
   }
 
   /**
-   * @param o
-   * @param jaxbContextPath
+   * @param o the unmarshalled SOAP message
+   * @param jaxbContextPath context for the message
    * @return SOAPMessage
    * @throws Throwable
    */

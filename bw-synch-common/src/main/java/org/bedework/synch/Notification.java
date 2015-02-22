@@ -63,10 +63,10 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   private SynchEndType end;
 
-  private List<NI> notifications = new ArrayList<NI>();
+  private List<NI> notifications = new ArrayList<>();
 
   /** Create a notification for a subscription
-   * @param sub
+   * @param sub subscription
    */
   public Notification(final Subscription sub) {
     this.sub = sub;
@@ -76,7 +76,8 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /** Create a notification for an unsubscribe
-   * @param subscriptionId
+   *
+   * @param subscriptionId id to unsubscribe
    */
   public Notification(final String subscriptionId) {
     this.subscriptionId = subscriptionId;
@@ -84,8 +85,8 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   /** Create object with a single notification.
    *
-   * @param sub
-   * @param end
+   * @param sub subscription
+   * @param end which end
    */
   public Notification(final Subscription sub,
                       final SynchEndType end) {
@@ -95,9 +96,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   /** Create object with a single notification.
    *
-   * @param sub
-   * @param end
-   * @param notificationItem
+   * @param sub subscription
+   * @param end which end
+   * @param notificationItem the notification
    */
   public Notification(final Subscription sub,
                       final SynchEndType end,
@@ -108,8 +109,8 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   /** Create a new subscription object
    *
-   * @param sub
-   * @param response
+   * @param sub subscription
+   * @param response and the response
    */
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
@@ -120,9 +121,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   /** Create a new unsubscription object
    *
-   * @param sub
-   * @param request
-   * @param response
+   * @param sub subscription
+   * @param request unsubscribe
+   * @param response and the response
    */
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
@@ -134,9 +135,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   /** Create a new subscription status object
    *
-   * @param sub
-   * @param request
-   * @param response
+   * @param sub subscription
+   * @param request for status
+   * @param response and the response
    */
   @SuppressWarnings("unchecked")
   public Notification(final Subscription sub,
@@ -147,7 +148,7 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /**
-   * @param action
+   * @param action for notification
    */
   @SuppressWarnings("unchecked")
   public Notification(final NotificationItem.ActionType action) {
@@ -184,7 +185,7 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /**
-   * @param val
+   * @param val notification
    */
   public void addNotificationItem(final NI val) {
     notifications.add(val);
@@ -244,7 +245,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for an action.
      *
-     * @param action
+     * @param action for notification
      */
     public NotificationItem(final ActionType action) {
       this.action = action;
@@ -252,7 +253,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for an action.
      *
-     * @param action
+     * @param action for notification
      * @param ical - the entity if available
      * @param uid - Uid for the entity if entity not available
      */
@@ -266,7 +267,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for a new subscription.
      *
-     * @param subResponse
+     * @param subResponse to the subscribe
      */
     public NotificationItem(final SubscribeResponseType subResponse) {
       action = ActionType.NewSubscription;
@@ -275,8 +276,8 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for unsubscribe.
      *
-     * @param unsubRequest
-     * @param unsubResponse
+     * @param unsubRequest to unsubscribe
+     * @param unsubResponse to the unsubscribe
      */
     public NotificationItem(final UnsubscribeRequestType unsubRequest,
                             final UnsubscribeResponseType unsubResponse) {
@@ -287,8 +288,8 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     /** Create a notification item for status.
      *
-     * @param subStatusReq
-     * @param subStatusResponse
+     * @param subStatusReq for status
+     * @param subStatusResponse to the status request
      */
     public NotificationItem(final SubscriptionStatusRequestType subStatusReq,
                             final SubscriptionStatusResponseType subStatusResponse) {

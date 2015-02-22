@@ -82,7 +82,7 @@ public class Synchling {
 
   protected transient Logger log;
 
-  private static volatile Object synchlingIdLock = new Object();
+  private static final Object synchlingIdLock = new Object();
 
   private static long lastSynchlingId;
 
@@ -100,7 +100,7 @@ public class Synchling {
 
   /** Constructor
    *
-   * @param syncher
+   * @param syncher the synch engine
    * @throws SynchException
    */
   public Synchling(final SynchEngine syncher) throws SynchException {
@@ -122,7 +122,7 @@ public class Synchling {
   }
 
   /**
-   * @param note
+   * @param note notification
    * @return OK for all handled fine. ERROR - discard. WARN - retry.
    * @throws SynchException
    */
@@ -322,7 +322,7 @@ public class Synchling {
    * ==================================================================== */
 
   /**
-   * @param note
+   * @param note the notification
    * @return status
    * @throws SynchException
    */
@@ -439,11 +439,12 @@ public class Synchling {
     public SynchEndType deleteFrom = SynchEndType.NONE;
 
     /** both ends changed since last synch */
+    @SuppressWarnings("UnusedDeclaration")
     public boolean conflict;
 
     /** Constructor
      *
-     * @param itemInfo
+     * @param itemInfo the item info
      */
     public SynchInfo(final ItemInfo itemInfo) {
       this.itemInfo = itemInfo;
@@ -451,13 +452,11 @@ public class Synchling {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("SynchInfo{");
+      ToString ts = new ToString(this);
 
-      sb.append(itemInfo);
+      ts.append(itemInfo);
 
-      sb.append("}");
-
-      return sb.toString();
+      return ts.toString();
     }
   }
 
@@ -472,7 +471,7 @@ public class Synchling {
     CrudCts lastCts;
     CrudCts totalCts;
 
-    Map<String, Object> stripMap = new HashMap<String, Object>();
+    Map<String, Object> stripMap = new HashMap<>();
 
     // True if our target is missing.
     boolean missingTarget;
@@ -582,7 +581,7 @@ public class Synchling {
 
       /* updateInfo is a list of changes we need to apply to one or both ends
        */
-      List<SynchInfo> updateInfo = new ArrayList<SynchInfo>();
+      List<SynchInfo> updateInfo = new ArrayList<>();
 
       /* First see what we need to transfer from A to B */
       if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
@@ -611,7 +610,7 @@ public class Synchling {
       }
 
       if (updateInfo.size() > 0) {
-        Holder<List<SynchInfo>> unprocessedRes = new Holder<List<SynchInfo>>();
+        Holder<List<SynchInfo>> unprocessedRes = new Holder<>();
 
         /* Now update end A from end B.
          */
@@ -699,9 +698,7 @@ public class Synchling {
         if (debug) {
           trace("No need to update end " + toInfo.end + ": uid:" + fromIi.uid);
         }
-      }
-
-      if (debug) {
+      } else if (debug) {
         trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
       }
 
@@ -732,13 +729,13 @@ public class Synchling {
   }
 
   /**
-   * @param rinfo
+   * @param rinfo resynchinfo
    * @return map or null for error
    * @throws SynchException
    */
   private Map<String, ItemInfo> getItemsMap(final ResynchInfo rinfo) throws SynchException {
     /* Items is a table built from the endB calendar */
-    Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
+    Map<String, ItemInfo> items = new HashMap<>();
 
     SynchItemsInfo sii = rinfo.inst.getItemsInfo();
     if (sii.getStatus() != StatusType.OK) {
@@ -768,11 +765,11 @@ public class Synchling {
 
   /** Do the adds and updates for the end specified by toInfo.
    *
-   * @param note
-   * @param updateInfo
-   * @param unprocessedRes
-   * @param fromInfo
-   * @param toInfo
+   * @param note the notification
+   * @param updateInfo list of synchinfo
+   * @param unprocessedRes holder of list of unprocessed
+   * @param fromInfo resynch info
+   * @param toInfo resynch info
    * @return true if there are unprocessed entries for this end
    * @throws SynchException
    */
@@ -782,11 +779,11 @@ public class Synchling {
                                  final ResynchInfo fromInfo,
                                  final ResynchInfo toInfo) throws SynchException {
     boolean callAgain = false;
-    List<SynchInfo> unProcessed = new ArrayList<SynchInfo>();
+    List<SynchInfo> unProcessed = new ArrayList<>();
     unprocessedRes.value = unProcessed;
 
-    List<String> uids = new ArrayList<String>();
-    List<SynchInfo> sis = new ArrayList<SynchInfo>();
+    List<String> uids = new ArrayList<>();
+    List<SynchInfo> sis = new ArrayList<>();
 
     int i = 0;
     /* First make a batch of items to fetch */
@@ -1013,17 +1010,19 @@ public class Synchling {
   }
 
   /**
-   * @param note
-   * @param updateInfo
-   * @param toInfo
+   * @param note the notification
+   * @param updateInfo list of update info
+   * @param toInfo resynch info
    * @throws SynchException
    */
-  private void processDeletes(final Notification note,
+  private void processDeletes(@SuppressWarnings("UnusedParameters")
+                              final Notification note,
                               final List<SynchInfo> updateInfo,
                               final ResynchInfo toInfo) throws SynchException {
     for (SynchInfo si: updateInfo) {
       // Add to unprocessed if it's not one of ours
       if (si.deleteFrom != toInfo.end) {
+        //noinspection UnnecessaryContinue
         continue;
       }
 
@@ -1061,6 +1060,7 @@ public class Synchling {
     return 0;
   }
 
+  @SuppressWarnings("UnusedParameters")
   private boolean checkAccess(final Subscription sub) throws SynchException {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
@@ -1077,7 +1077,7 @@ public class Synchling {
     }
 
     /* Make up diff lists - use a map to make them unique */
-    Map<String, Object> skipMap = new HashMap<String, Object>();
+    Map<String, Object> skipMap = new HashMap<>();
 
     /* First the defaults */
     addSkips(skipMap, XmlIcalCompare.defaultSkipList);
@@ -1088,7 +1088,7 @@ public class Synchling {
     addSkips(skipMap, sub.getEndAConn().getSkipList());
     addSkips(skipMap, sub.getEndBConn().getSkipList());
 
-    List<Object> skipList = new ArrayList<Object>(skipMap.values());
+    List<Object> skipList = new ArrayList<>(skipMap.values());
 
     diffSubid = sub.getSubscriptionId();
     diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
@@ -1099,8 +1099,8 @@ public class Synchling {
    * either end. This depends upon the global subscription properties. These are
    * also properties we ignore when comparing entries.
    *
-   * @param stripMap
-   * @param sub
+   * @param stripMap the map
+   * @param sub the subscription
    * @throws SynchException
    */
   private static void makeStripMap(final Map<String, Object> stripMap,

@@ -29,7 +29,7 @@ import org.bedework.synch.exception.SynchException;
  */
 public class BedeworkSubscriptionInfo extends BaseSubscriptionInfo {
   /**
-   * @param info
+   * @param info the subscription connector info
    * @throws SynchException
    */
   public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {

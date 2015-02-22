@@ -94,9 +94,6 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     return info;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#changed()
-   */
   @Override
   public boolean changed() throws SynchException {
     /* This implementation needs to at least check the change token for the
@@ -105,11 +102,11 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#getItemsInfo()
-   */
   @Override
   public SynchItemsInfo getItemsInfo() throws SynchException {
+    /* Build a calendar query to fetch all the items in the referenced
+     * collection
+     */
     CalendarQueryType cq = new CalendarQueryType();
 
     ObjectFactory of = cnctr.getIcalObjectFactory();
@@ -127,7 +124,14 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     ArrayOfComponents aovcc = new ArrayOfComponents();
     vcal.setComponents(aovcc);
 
-    /* Build the properties we want */
+    /* Build the properties we want
+     * uid: to identify the component
+     * lastMod: we can trust that for bedework
+     *
+     * We want the same properties for tasks or events.
+     *
+     * TODO add match on any component
+    */
 
     ArrayOfProperties aop = new ArrayOfProperties();
 
@@ -171,11 +175,13 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     cf.getCompFilter().add(cfent);
     cfent.setBaseComponent(of.createVtodo(new VtodoType()));
 
+    /* Execute the query */
+
     CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(),
                                                                   cq);
 
     SynchItemsInfo sii = new SynchItemsInfo();
-    sii.items = new ArrayList<ItemInfo>();
+    sii.items = new ArrayList<>();
     sii.setStatus(StatusType.OK);
 
     if (cqr.getStatus() != StatusType.OK) {
@@ -186,6 +192,8 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
       return sii;
     }
 
+    /* Go through each element in the response '
+     */
     List<MultistatResponseElementType> responses = cqr.getResponse();
 
     for (MultistatResponseElementType mre: responses) {
@@ -241,9 +249,6 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     return cnctr.getPort().addItem(getIdToken(), ai);
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.cnctrs.ConnectorInstance#fetchItem(java.lang.String)
-   */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
     final CalendarQueryType cq = new CalendarQueryType();
@@ -355,7 +360,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
     // XXX this should be a search for multiple uids - need to reimplement caldav search
 
-    final List<FetchItemResponseType> firs = new ArrayList<FetchItemResponseType>();
+    final List<FetchItemResponseType> firs = new ArrayList<>();
 
     for (final String uid: uids) {
       firs.add(fetchItem(uid));

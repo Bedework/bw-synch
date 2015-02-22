@@ -83,13 +83,13 @@ public class BaseSubscriptionInfo {
      * @return cts
      */
     public static CrudCts fromString(final String val) {
-      CrudCts cc = new CrudCts();
+      final CrudCts cc = new CrudCts();
 
       if (val == null) {
         return cc;
       }
 
-      String[] cts = val.split(",");
+      final String[] cts = val.split(",");
 
       if (cts.length != 3) {
         return cc;
@@ -107,13 +107,12 @@ public class BaseSubscriptionInfo {
 
     @Override
     public String toString() {
-      return new StringBuilder().append(created).append(",").
-          append(deleted).append(",").append(updated).toString();
+      return String.valueOf(created) + "," + deleted + "," + updated;
     }
   }
 
   /**
-   * @param info
+   * @param info subscription connector info
    * @throws SynchException
    */
   public BaseSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
@@ -212,7 +211,7 @@ public class BaseSubscriptionInfo {
   }
 
   /** HTTP status or other appropriate value
-   * @param val
+   * @param val status
    * @throws SynchException
    */
   public void setLastRefreshStatus(final String val) throws SynchException {
@@ -228,7 +227,7 @@ public class BaseSubscriptionInfo {
   }
 
   /**
-   * @param val
+   * @param val crud counts
    * @throws SynchException
    */
   public void setLastCrudCts(final CrudCts val) throws SynchException {
@@ -253,7 +252,7 @@ public class BaseSubscriptionInfo {
   }
 
   /**
-   * @param val
+   * @param val crud counts
    * @throws SynchException
    */
   public void setTotalCrudCts(final CrudCts val) throws SynchException {
@@ -279,7 +278,7 @@ public class BaseSubscriptionInfo {
 
   /** Refresh delay - millisecs
    *
-   * @param val
+   * @param val millisecs
    * @throws SynchException
    */
   public void setRefreshDelay(final String val) throws SynchException {
@@ -296,7 +295,7 @@ public class BaseSubscriptionInfo {
   }
 
   /** set arbitrary named property
-   * @param name
+   * @param name of property
    * @param val - String property value
    * @throws SynchException
    */
@@ -305,7 +304,7 @@ public class BaseSubscriptionInfo {
   }
 
   /** Get arbitrary named property
-   * @param name
+   * @param name of property
    * @return String property value
    * @throws SynchException
    */
@@ -317,35 +316,21 @@ public class BaseSubscriptionInfo {
    *                   Convenience methods
    * ==================================================================== */
 
-  protected void toStringSegment(final StringBuilder sb,
-                              final String indent) {
+  protected void toStringSegment(final ToString ts) {
     try {
-      sb.append(",\n");
-      sb.append(indent);
-      sb.append("uri = ");
-      sb.append(getUri());
-      sb.append(",\n");
-      sb.append(indent);
-      sb.append("principalHref = ");
-      sb.append(getPrincipalHref());
-      sb.append(", password = ");
-      sb.append(getPassword());
-      sb.append(", etag = ");
-      sb.append(getChangeToken());
-      sb.append(",\n");
-      sb.append(indent);
-      sb.append("lastRefreshStatus = ");
-      sb.append(getLastRefreshStatus());
-      sb.append("\n");
-      sb.append(indent);
-      sb.append("lastCrudCts = ");
-      sb.append(getLastCrudCts());
-      sb.append("totalCrudCts = ");
-      sb.append(getTotalCrudCts());
-      sb.append(", refreshDelay = ");
-      sb.append(getRefreshDelay());
+      ts.append("uri", getUri());
+      ts.newLine();
+      ts.append("principalHref", getPrincipalHref());
+      ts.append("password", getPassword());
+      ts.append("etag", getChangeToken());
+      ts.newLine();
+      ts.append("lastRefreshStatus", getLastRefreshStatus());
+      ts.newLine();
+      ts.append("lastCrudCts", getLastCrudCts());
+      ts.append("totalCrudCts", getTotalCrudCts());
+      ts.append("refreshDelay", getRefreshDelay());
     } catch (Throwable t) {
-      sb.append(t.getMessage());
+      ts.append(t.getMessage());
     }
   }
 
@@ -355,11 +340,10 @@ public class BaseSubscriptionInfo {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    ToString ts = new ToString(this);
 
-    toStringSegment(sb, "  ");
+    toStringSegment(ts);
 
-    sb.append("}");
-    return sb.toString();
+    return ts.toString();
   }
 }
