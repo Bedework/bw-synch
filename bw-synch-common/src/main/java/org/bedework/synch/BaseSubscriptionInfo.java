@@ -20,6 +20,10 @@ package org.bedework.synch;
 
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.util.misc.ToString;
+import org.bedework.util.misc.Util;
+
+import java.util.List;
 
 /** Provides an internal deserialized view of the subscription info for one
  * end. A number of common methods are provided here and it is assumed that
@@ -64,6 +68,12 @@ public class BaseSubscriptionInfo {
 
   /** The numbers created, updated, deleted this subscription */
   public static final String propnameTotalCrudCts = "totalCrudCt";
+
+  /** Comma separatd list of input filter property classes */
+  public static final String propnameInputFilterClasses = "inFilterClasses";
+
+  /** Comma separatd list of output filter property classes */
+  public static final String propnameOutputFilterClasses = "outFilterClasses";
 
   /** maintain some counts
    */
@@ -312,9 +322,67 @@ public class BaseSubscriptionInfo {
     return info.getProperty(name);
   }
 
+  /**
+   * @param classes ordered list of class names
+   * @throws SynchException
+   */
+  public void setInFilterClasses(List<String> classes) throws SynchException {
+    info.setProperty(propnameInputFilterClasses, asString(classes));
+  }
+
+  /**
+   * @return ordered list of class names
+   * @throws SynchException
+   */
+  public List<String> getInFilterClasses() throws SynchException {
+    try {
+      return Util.getList(info.getProperty(
+                                  propnameInputFilterClasses),
+                          false);
+    } catch (final Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
+  /**
+   * @param classes ordered list of class names
+   * @throws SynchException
+   */
+  public void setOutFilterClasses(List<String> classes) throws SynchException {
+    info.setProperty(propnameOutputFilterClasses, asString(classes));
+  }
+
+  /**
+   * @return ordered list of class names
+   * @throws SynchException
+   */
+  public List<String> getOutFilterClasses() throws SynchException {
+    try {
+      return Util.getList(info.getProperty(
+                                  propnameOutputFilterClasses),
+                          false);
+    } catch (final Throwable t) {
+      throw new SynchException(t);
+    }
+  }
+
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
+
+  private String asString(List<String> vals) {
+    final StringBuilder sb = new StringBuilder();
+    String delim = "";
+
+    for (final String s: vals) {
+      sb.append(delim);
+      sb.append(s);
+
+      delim = ",";
+    }
+
+    return sb.toString();
+  }
 
   protected void toStringSegment(final ToString ts) {
     try {

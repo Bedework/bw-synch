@@ -450,6 +450,10 @@ public class Subscription extends DbItem<Subscription> {
     try {
       Date dt = new DtStamp(getLastRefresh()).getDate();
 
+      if (dt.before(new Date())) {
+        dt = new Date();
+      }
+
       return new Date(dt.getTime() + ((getErrorCt() + 1) * refreshDelay()));
     } catch (Throwable t) {
       throw new SynchException(t);

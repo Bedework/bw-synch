@@ -38,7 +38,7 @@ import java.util.TimerTask;
  * generally the polled kind but other subscriptions may be made to wait before
  * retrying failed operations.
  *
- *   @author Mike Douglass   douglm   bedework.edu
+ *   @author Mike Douglass   douglm   rpi.edu
  */
 public class SynchTimer {
   private boolean debug;
@@ -76,7 +76,7 @@ public class SynchTimer {
 
       NotificationItem ni = new NotificationItem(ActionType.FullSynch,
                                                  null, null);
-      Notification<NotificationItem> note = new Notification<NotificationItem>(
+      Notification<NotificationItem> note = new Notification<>(
           sub, SynchEndType.NONE, ni);
 
       try {
@@ -93,13 +93,13 @@ public class SynchTimer {
 
   Timer timer;
 
-  private Map<String, SynchTask> waiting = new HashMap<String, SynchTask>();
+  private final Map<String, SynchTask> waiting = new HashMap<>();
 
   private long maxWaitingCt;
 
   /** Start the SynchTimer
    *
-   * @param syncher
+   * @param syncher the synch engine
    */
   public SynchTimer(final SynchEngine syncher){
     this.syncher = syncher;
@@ -123,8 +123,8 @@ public class SynchTimer {
 
   /** Schedule a subscription for the given time
    *
-   * @param sub
-   * @param when
+   * @param sub the subscription
+   * @param when to process it
    * @throws SynchException
    */
   public void schedule(final Subscription sub,
@@ -139,10 +139,11 @@ public class SynchTimer {
 
   /** Schedule a subscription after the given delay
    *
-   * @param sub
+   * @param sub the subscription
    * @param delay - delay in milliseconds before subscription is processed.
    * @throws SynchException
    */
+  @SuppressWarnings("UnusedDeclaration")
   public void schedule(final Subscription sub,
                        final long delay) throws SynchException {
     SynchTask st = new SynchTask(sub);
@@ -168,7 +169,7 @@ public class SynchTimer {
    * @return List of Stat
    */
   public List<Stat> getStats() {
-    List<Stat> stats = new ArrayList<Stat>();
+    List<Stat> stats = new ArrayList<>();
 
     stats.add(new Stat("waiting", getWaitingCt()));
     stats.add(new Stat("max waiting", getMaxWaitingCt()));

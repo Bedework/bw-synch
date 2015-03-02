@@ -20,7 +20,7 @@ package org.bedework.synch.db;
 
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
-
+import org.bedework.util.misc.ToString;
 
 /** Serializable form of information about the whole subscription.
  *
@@ -35,6 +35,11 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
 
   /** Strip out scheduling properties if true */
   public static final String propnameSchedulingProcessing = "scheduling-processing";
+
+  /** Turn locations and contacts into x-properties.
+   * The receiving end may reinstate them as real curated values
+   */
+  public static final String propnameXlocXcontacts = "xlocxcontacts";
 
   /* ====================================================================
    *                   Convenience methods
@@ -76,6 +81,24 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
     return CalProcessingType.fromValue(getProperty(propnameSchedulingProcessing));
   }
 
+  /** Processing of locations and contacts - boolean
+   *
+   * @param val true to enable processing of locations and contacts
+   * @throws SynchException
+   */
+  public void setXlocXcontact(final boolean val) throws SynchException {
+    setProperty(propnameXlocXcontacts, String.valueOf(val));
+  }
+
+  /** Processing of locations and contacts - boolean
+   *
+   * @return boolean
+   * @throws SynchException
+   */
+  public boolean getXlocXcontact() throws SynchException {
+    return Boolean.valueOf(getProperty(propnameXlocXcontacts));
+  }
+
   /* ====================================================================
    *                   Object methods
    * ==================================================================== */
@@ -96,12 +119,11 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
   @Override
   public String toString() {
     try {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+      ToString ts = new ToString(this);
 
-      super.toStringSegment(sb, "  ");
+      super.toStringSegment(ts);
 
-      sb.append("}");
-      return sb.toString();
+      return ts.toString();
     } catch (Throwable t) {
       throw new RuntimeException(t);
     }

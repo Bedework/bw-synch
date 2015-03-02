@@ -21,6 +21,7 @@ package org.bedework.synch.db;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
 import org.bedework.synch.wsmessages.SynchPropertyType;
+import org.bedework.util.misc.ToString;
 import org.bedework.util.misc.Util;
 
 import java.io.StringReader;
@@ -145,7 +146,7 @@ public class SerializableProperties<T> implements Comparable<T> {
       }
 
       if (getSynchProperties() != null) {
-          properties.load(new StringReader(getSynchProperties()));
+        properties.load(new StringReader(getSynchProperties()));
       }
     } catch (final Throwable t) {
       throw new SynchException(t);
@@ -188,12 +189,10 @@ public class SerializableProperties<T> implements Comparable<T> {
     return properties.getProperty(name);
   }
 
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
+  protected void toStringSegment(final ToString ts) {
     try {
       if (getSynchProperties() != null) {
-        sb.append(", synchProperties = ");
-        sb.append(getSynchProperties());
+        ts.append("synchProperties", getSynchProperties());
       }
     } catch (Throwable t) {
       throw new RuntimeException(t);
@@ -249,12 +248,11 @@ public class SerializableProperties<T> implements Comparable<T> {
   @Override
   public String toString() {
     try {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+      ToString ts = new ToString(this);
 
-      toStringSegment(sb, "");
+      toStringSegment(ts);
 
-      sb.append("}");
-      return sb.toString();
+      return ts.toString();
     } catch (Throwable t) {
       throw new RuntimeException(t);
     }

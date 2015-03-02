@@ -133,11 +133,6 @@ public class ExchangeConnector
   }
 
   @Override
-  public List<Object> getSkipList() {
-    return null;
-  }
-
-  @Override
   public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
                                                         final SynchEndType end) throws SynchException {
     ExchangeConnectorInstance inst = cinstMap.find(sub, end);

@@ -18,7 +18,14 @@
 */
 package org.bedework.synch.db;
 
+import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.filters.DefaultFilter;
+import org.bedework.synch.filters.Filter;
+import org.bedework.synch.filters.XlocXContactFilter;
+import org.bedework.util.misc.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
 
 /** Serializable form of information for a connection to a system via a
  * connector - a connector id and the serialized properties.
@@ -33,6 +40,54 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
    */
   public void setConnectorId(final String val) {
     connectorId = val;
+  }
+
+  /**
+   * @param sub the subscription
+   * @return Ordered list of filters
+   * @throws SynchException
+   */
+  public List<Filter> getInputFilters(final Subscription sub) throws SynchException {
+    // TODO - build list from properties
+    List<Filter> filters = new ArrayList<>();
+
+    Filter f = new DefaultFilter();
+    f.init(sub);
+
+    filters.add(f);
+
+    if (sub.getInfo().getXlocXcontact()) {
+      f = new XlocXContactFilter();
+      f.init(sub);
+
+      filters.add(f);
+    }
+
+    return filters;
+  }
+
+  /**
+   * @param sub the subscription
+   * @return Ordered list of filters
+   * @throws SynchException
+   */
+  public List<Filter> getOutputFilters(final Subscription sub) throws SynchException {
+    // TODO - build list from properties
+    List<Filter> filters = new ArrayList<>();
+
+    Filter f = new DefaultFilter();
+    f.init(sub);
+
+    filters.add(f);
+
+    if (sub.getInfo().getXlocXcontact()) {
+      f = new XlocXContactFilter();
+      f.init(sub);
+
+      filters.add(f);
+    }
+
+    return filters;
   }
 
   /**
@@ -80,15 +135,13 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
   @Override
   public String toString() {
     try {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+      ToString ts = new ToString(this);
 
-      sb.append("connectorId= ");
-      sb.append(getConnectorId());
+      ts.append("connectorId", getConnectorId());
 
-      super.toStringSegment(sb, "  ");
+      super.toStringSegment(ts);
 
-      sb.append("}");
-      return sb.toString();
+      return ts.toString();
     } catch (Throwable t) {
       throw new RuntimeException(t);
     }
