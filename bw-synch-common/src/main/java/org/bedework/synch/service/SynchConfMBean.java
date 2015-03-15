@@ -140,6 +140,19 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("List the connector names.")
   List<String> getConnectorNames();
 
+  /**
+   *
+   * @param val true if this instance only handles subscriptions
+   */
+  void setSubscriptionsOnly(final boolean val);
+
+  /**
+   *
+   * @return true if this instance only handles subscriptions
+   */
+  @MBeanInfo("True if this instance only handles subscriptions.")
+  boolean getSubscriptionsOnly();
+
   /** Get the current stats
    *
    * @return List of Stat
@@ -151,25 +164,25 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val
    */
-  public void setExport(boolean val);
+  void setExport(boolean val);
 
   /**
    * @return true for export schema
    */
   @MBeanInfo("Export (write) schema to database?")
-  public boolean getExport();
+  boolean getExport();
 
   /** Output file name - full path
    *
    * @param val
    */
-  public void setSchemaOutFile(String val);
+  void setSchemaOutFile(String val);
 
   /**
    * @return Output file name - full path
    */
   @MBeanInfo("Full path of schema output file")
-  public String getSchemaOutFile();
+  String getSchemaOutFile();
 
   /* ========================================================================
    * Operations

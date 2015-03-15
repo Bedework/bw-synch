@@ -125,6 +125,13 @@ public class Synchling {
 
       switch (ni.getAction()) {
       case FullSynch:
+        if (syncher.subscriptionsOnly()) {
+          if (debug) {
+            trace("Skipping: subscriptions only");
+          }
+          continue;
+        }
+
         st = reSynch(note);
         if (st != StatusType.OK) {
           return st;
@@ -133,7 +140,15 @@ public class Synchling {
 
       case CopiedEvent:
         break;
+
       case CreatedEvent:
+        if (syncher.subscriptionsOnly()) {
+          if (debug) {
+            trace("Skipping: subscriptions only");
+          }
+          continue;
+        }
+
         st = addItem(note, ni);
         if (st != StatusType.OK) {
           return st;
@@ -142,7 +157,15 @@ public class Synchling {
 
       case DeletedEvent:
         break;
+
       case ModifiedEvent:
+        if (syncher.subscriptionsOnly()) {
+          if (debug) {
+            trace("Skipping: subscriptions only");
+          }
+          continue;
+        }
+
         st = updateItem(note, ni);
         if (st != StatusType.OK) {
           return st;

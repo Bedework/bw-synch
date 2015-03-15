@@ -127,7 +127,7 @@ public class SynchEngine extends TzGetter {
    * for which we get change messages from the remote system(s).
    */
   private final Map<String, Subscription> activeSubs =
-      new HashMap<String, Subscription>();
+      new HashMap<>();
 
   private boolean starting;
 
@@ -156,7 +156,7 @@ public class SynchEngine extends TzGetter {
 
   private SynchDb db;
 
-  private Map<String, Connector> connectorMap = new HashMap<String, Connector>();
+  private Map<String, Connector> connectorMap = new HashMap<>();
 
   /* Some counts */
 
@@ -324,14 +324,22 @@ public class SynchEngine extends TzGetter {
    @Override
   public TimeZone getTz(final String id) throws Throwable {
      return getSyncher().timezones.getTimeZone(id);
-   }
+  }
 
-   /**
-    * @return a getter for timezones
-    */
-   public static TzGetter getTzGetter() {
-     return tzgetter;
-   }
+  /**
+   * @return a getter for timezones
+   */
+  public static TzGetter getTzGetter() {
+    return tzgetter;
+  }
+
+  /**
+   * @return true if this instance is only handling subscriptions
+   * @throws SynchException
+   */
+  public boolean subscriptionsOnly() throws SynchException {
+    return getConfig().getSubscriptionsOnly();
+  }
 
   /** Start synch process.
    *
@@ -365,7 +373,7 @@ public class SynchEngine extends TzGetter {
                           getConfig().getSynchlingPoolSize(),
                           getConfig().getSynchlingPoolTimeout());
 
-      notificationInQueue = new ArrayBlockingQueue<Notification>(100);
+      notificationInQueue = new ArrayBlockingQueue<>(100);
 
       info("**************************************************");
       info("Starting synch");

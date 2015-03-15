@@ -337,6 +337,16 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   }
 
   @Override
+  public void setSubscriptionsOnly(final boolean val) {
+    getConfig().setSubscriptionsOnly(val);
+  }
+
+  @Override
+  public boolean getSubscriptionsOnly() {
+    return getConfig().getSubscriptionsOnly();
+  }
+
+  @Override
   public List<Stat> getStats() {
     if (syncher == null) {
       return new ArrayList<Stat>();

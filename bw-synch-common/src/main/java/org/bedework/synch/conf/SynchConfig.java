@@ -60,6 +60,7 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
 
   private SortedSet<IpAddrInfo> ipInfo;
 
+  private boolean subscriptionsOnly;
 
   /**
    * @param val current size of synchling pool
@@ -212,5 +213,21 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
    */
   public List<SynchConnConf> getConnectorConfs() {
     return connectorConfs;
+  }
+
+  /**
+   *
+   * @param val true if this instance only handles subscriptions
+   */
+  public void setSubscriptionsOnly(final boolean val) {
+    subscriptionsOnly = val;
+  }
+
+  /**
+   *
+   * @return true if this instance only handles subscriptions
+   */
+  public boolean getSubscriptionsOnly() {
+    return subscriptionsOnly;
   }
 }
