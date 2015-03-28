@@ -23,10 +23,8 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.util.xml.tagdefs.XcalTags;
 
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;
-import ietf.params.xml.ns.icalendar_2.LocationPropType;
-import ietf.params.xml.ns.icalendar_2.TextPropertyType;
-import ietf.params.xml.ns.icalendar_2.XBwContactPropType;
-import ietf.params.xml.ns.icalendar_2.XBwLocationPropType;
+import ietf.params.xml.ns.icalendar_2.CategoriesPropType;
+import ietf.params.xml.ns.icalendar_2.XBwCategoriesPropType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ import javax.xml.bind.JAXBElement;
  * @author douglm
  *
  */
-public class XlocXContactFilter extends PropRenameFilter {
+public class XCategoryFilter extends PropRenameFilter {
   private static final List<RenameElement> renameList =
           new ArrayList<>();
 
@@ -50,12 +48,9 @@ public class XlocXContactFilter extends PropRenameFilter {
       return;
     }
 
-    renameList.add(new RenameElement(XcalTags.location,
-                                     XcalTags.xBedeworkLocation,
-                                     XBwLocationPropType.class));
-    renameList.add(new RenameElement(XcalTags.contact,
-                                     XcalTags.xBedeworkContact,
-                                     XBwContactPropType.class));
+    renameList.add(new RenameElement(XcalTags.categories,
+                                     XcalTags.xBedeworkCategories,
+                                     XBwCategoriesPropType.class));
   }
 
   @Override
@@ -66,17 +61,12 @@ public class XlocXContactFilter extends PropRenameFilter {
   @Override
   protected BasePropertyType getNewProperty(final RenameElement rl,
                                             final JAXBElement<? extends BasePropertyType> el) {
-    final TextPropertyType tp = (TextPropertyType)el.getValue();
-    final TextPropertyType x;
-    if (el.getValue() instanceof LocationPropType) {
-      x = icalOf.createXBwLocationPropType();
-    } else {
-      x = icalOf.createXBwContactPropType();
-    }
+    final CategoriesPropType c = (CategoriesPropType)el.getValue();
+    final XBwCategoriesPropType xc = icalOf.createXBwCategoriesPropType();
 
-    x.setText(tp.getText());
-    x.setParameters(tp.getParameters());
+    xc.getText().addAll(c.getText());
+    xc.setParameters(c.getParameters());
 
-    return x;
+    return xc;
   }
 }

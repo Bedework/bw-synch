@@ -21,6 +21,7 @@ package org.bedework.synch.db;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.filters.DefaultFilter;
 import org.bedework.synch.filters.Filter;
+import org.bedework.synch.filters.XCategoryFilter;
 import org.bedework.synch.filters.XlocXContactFilter;
 import org.bedework.util.misc.ToString;
 
@@ -49,7 +50,7 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
    */
   public List<Filter> getInputFilters(final Subscription sub) throws SynchException {
     // TODO - build list from properties
-    List<Filter> filters = new ArrayList<>();
+    final List<Filter> filters = new ArrayList<>();
 
     Filter f = new DefaultFilter();
     f.init(sub);
@@ -58,6 +59,13 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
 
     if (sub.getInfo().getXlocXcontact()) {
       f = new XlocXContactFilter();
+      f.init(sub);
+
+      filters.add(f);
+    }
+
+    if (sub.getInfo().getXlocXcategories()) {
+      f = new XCategoryFilter();
       f.init(sub);
 
       filters.add(f);
@@ -73,7 +81,7 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
    */
   public List<Filter> getOutputFilters(final Subscription sub) throws SynchException {
     // TODO - build list from properties
-    List<Filter> filters = new ArrayList<>();
+    final List<Filter> filters = new ArrayList<>();
 
     Filter f = new DefaultFilter();
     f.init(sub);
@@ -82,6 +90,13 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
 
     if (sub.getInfo().getXlocXcontact()) {
       f = new XlocXContactFilter();
+      f.init(sub);
+
+      filters.add(f);
+    }
+
+    if (sub.getInfo().getXlocXcategories()) {
+      f = new XCategoryFilter();
       f.init(sub);
 
       filters.add(f);
@@ -109,7 +124,7 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
   public int hashCode() {
     try {
       return getConnectorId().hashCode() * super.hashCode();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -121,13 +136,13 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
     }
 
     try {
-      int res = getConnectorId().compareTo(that.getConnectorId());
+      final int res = getConnectorId().compareTo(that.getConnectorId());
       if (res != 0) {
         return res;
       }
 
       return super.compareTo(that);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -135,14 +150,14 @@ public class SubscriptionConnectorInfo extends SerializableProperties<Subscripti
   @Override
   public String toString() {
     try {
-      ToString ts = new ToString(this);
+      final ToString ts = new ToString(this);
 
       ts.append("connectorId", getConnectorId());
 
       super.toStringSegment(ts);
 
       return ts.toString();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }

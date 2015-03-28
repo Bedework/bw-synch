@@ -385,18 +385,18 @@ public class SynchEngine extends TzGetter {
         System.setProperty("javax.net.ssl.trustStorePassword", "bedework");
       }
 
-      List<SynchConnConf> connectorConfs = getConfig().getConnectorConfs();
-      String callbackUriBase = getConfig().getCallbackURI();
+      final List<SynchConnConf> connectorConfs = getConfig().getConnectorConfs();
+      final String callbackUriBase = getConfig().getCallbackURI();
 
       /* Register the connectors and start them */
-      for (SynchConnConf scc: connectorConfs) {
-        ConnectorConfig conf = (ConnectorConfig)scc.getConfig();
-        String cnctrId = conf.getName();
+      for (final SynchConnConf scc: connectorConfs) {
+        final ConnectorConfig conf = (ConnectorConfig)scc.getConfig();
+        final String cnctrId = conf.getName();
         info("Register and start connector " + cnctrId);
 
         registerConnector(cnctrId, conf);
 
-        Connector conn = getConnector(cnctrId);
+        final Connector conn = getConnector(cnctrId);
         scc.setConnector(conn);
 
         conn.start(cnctrId,
@@ -437,7 +437,7 @@ public class SynchEngine extends TzGetter {
             trace("startList has " + startList.size() + " subscriptions");
           }
 
-          for (Subscription sub: startList) {
+          for (final Subscription sub: startList) {
             setConnectors(sub);
 
             reschedule(sub);
@@ -511,7 +511,7 @@ public class SynchEngine extends TzGetter {
    * @return stats for synch service bean
    */
   public List<Stat> getStats() {
-    List<Stat> stats = new ArrayList<Stat>();
+    final List<Stat> stats = new ArrayList<>();
 
     stats.addAll(synchlingPool.getStats());
     stats.addAll(synchTimer.getStats());
@@ -751,17 +751,15 @@ public class SynchEngine extends TzGetter {
         }
       }
     }
-
-    return;
   }
 
   @SuppressWarnings("unchecked")
   private StatusType handleNotification(final Synchling sl,
                                         final Notification note) throws SynchException {
-    StatusType st = sl.handleNotification(note);
+    final StatusType st = sl.handleNotification(note);
 
-    Subscription sub = note.getSub();
-    if (!sub.getMissingTarget()) {
+    final Subscription sub = note.getSub();
+    if (sub.getDeleted() || !sub.getMissingTarget()) {
       return st;
     }
 

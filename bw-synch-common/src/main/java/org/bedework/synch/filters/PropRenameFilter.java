@@ -43,9 +43,9 @@ import javax.xml.namespace.QName;
  */
 public abstract class PropRenameFilter extends AbstractFilter {
   protected static class RenameElement {
-    private QName from;
-    private QName to;
-    private Class<? extends BasePropertyType> toClass;
+    private final QName from;
+    private final QName to;
+    private final Class<? extends BasePropertyType> toClass;
 
     public RenameElement(final QName from,
                          final QName to,
@@ -70,9 +70,12 @@ public abstract class PropRenameFilter extends AbstractFilter {
 
   protected abstract List<RenameElement> getRenameList();
 
+  protected abstract BasePropertyType getNewProperty(final RenameElement rl,
+                                                     JAXBElement<? extends BasePropertyType> el);
+
   @Override
   public IcalendarType doFilter(final IcalendarType val) throws SynchException {
-    for (VcalendarType vcal: val.getVcalendar()) {
+    for (final VcalendarType vcal: val.getVcalendar()) {
       doRename(vcal);
     }
 
@@ -81,27 +84,27 @@ public abstract class PropRenameFilter extends AbstractFilter {
 
   private void doRename(final BaseComponentType val) throws SynchException {
     try {
-      ArrayOfComponents comps = val.getComponents();
+      final ArrayOfComponents comps = val.getComponents();
 
       if (comps == null) {
         return;
       }
 
-      for (JAXBElement jaxbCcomp: comps.getBaseComponent()) {
-        BaseComponentType jcomp = (BaseComponentType)jaxbCcomp
-                .getValue();
+      for (final JAXBElement jaxbCcomp: comps.getBaseComponent()) {
+        final BaseComponentType jcomp =
+                (BaseComponentType)jaxbCcomp.getValue();
 
         doRenameProps(jcomp);
       }
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
   private void doRenameProps(final BaseComponentType val) throws SynchException {
-    ArrayOfProperties props = val.getProperties();
+    final ArrayOfProperties props = val.getProperties();
 
     if (props == null) {
       return;
@@ -112,7 +115,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
 
     int i = 0;
 
-    List<JAXBElement<? extends BasePropertyType>> jprops =
+    final List<JAXBElement<? extends BasePropertyType>> jprops =
             props.getBasePropertyOrTzid();
 
     buildRenames:
@@ -121,7 +124,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
               jprops.get(i);
 
       for (final RenameElement rl: getRenameList()) {
-        if (jprop.getName().equals(rl.from)) {
+        if (jprop.getName().equals(rl.getFrom())) {
           renameProps.add(jprop);
           jprops.remove(i);
           continue buildRenames;
@@ -134,12 +137,12 @@ public abstract class PropRenameFilter extends AbstractFilter {
     doRename:
     for (final JAXBElement<? extends BasePropertyType> el: renameProps) {
       for (final RenameElement rl: getRenameList()) {
-        if (el.getName().equals(rl.from)) {
+        if (el.getName().equals(rl.getFrom())) {
           //noinspection unchecked
           jprops.add(new JAXBElement<>(rl.getTo(),
                                        (Class<BasePropertyType>)rl.getToClass(),
                                        el.getScope(),
-                                       el.getValue()));
+                                       getNewProperty(rl, el)));
           continue doRename;
         }
       }

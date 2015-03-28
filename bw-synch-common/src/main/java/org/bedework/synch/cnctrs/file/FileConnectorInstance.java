@@ -330,7 +330,9 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         hdrs.add(new BasicHeader("If-None-Match", info.getChangeToken()));
       }
 
-      final int rc = client.sendRequest("GET", info.getUri(), hdrs);
+      final int rc = client.sendRequest("GET",
+                                        info.getUri(),
+                                        hdrs);
       info.setLastRefreshStatus(String.valueOf(rc));
 
       if (rc == HttpServletResponse.SC_NOT_MODIFIED) {

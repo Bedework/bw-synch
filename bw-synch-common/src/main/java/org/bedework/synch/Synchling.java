@@ -558,7 +558,7 @@ public class Synchling {
   }
 
   private StatusType reSynch(final Notification note) throws SynchException {
-    Subscription sub = note.getSub();
+    final Subscription sub = note.getSub();
 
     try {
       /* The action here depends on which way we are synching.
@@ -670,7 +670,7 @@ public class Synchling {
       }
 
       if (updateInfo.size() > 0) {
-        Holder<List<SynchInfo>> unprocessedRes = new Holder<>();
+        final Holder<List<SynchInfo>> unprocessedRes = new Holder<>();
 
         /* Now update end A from end B.
          */
@@ -846,17 +846,17 @@ public class Synchling {
                                  final ResynchInfo fromInfo,
                                  final ResynchInfo toInfo) throws SynchException {
     boolean callAgain = false;
-    List<SynchInfo> unProcessed = new ArrayList<>();
+    final List<SynchInfo> unProcessed = new ArrayList<>();
     unprocessedRes.value = unProcessed;
 
-    List<String> uids = new ArrayList<>();
-    List<SynchInfo> sis = new ArrayList<>();
+    final List<String> uids = new ArrayList<>();
+    final List<SynchInfo> sis = new ArrayList<>();
 
     int i = 0;
     /* First make a batch of items to fetch */
 
     while (i < updateInfo.size()) {
-      SynchInfo si = updateInfo.get(i);
+      final SynchInfo si = updateInfo.get(i);
       i++;
 
       // Add to unprocessed if it's not one of ours
@@ -894,11 +894,11 @@ public class Synchling {
      *
      */
 
-    List<FetchItemResponseType> firs = fromInfo.inst.fetchItems(uids);
+    final List<FetchItemResponseType> firs = fromInfo.inst.fetchItems(uids);
 
-    Iterator<SynchInfo> siit = sis.iterator();
-    for (FetchItemResponseType fir: firs) {
-      SynchInfo si = siit.next();
+    final Iterator<SynchInfo> siit = sis.iterator();
+    for (final FetchItemResponseType fir: firs) {
+      final SynchInfo si = siit.next();
 
       if (si.addTo == toInfo.end) {
         IcalendarType filtered = Filters.doFilters(fir.getIcalendar(),
@@ -908,7 +908,7 @@ public class Synchling {
           filtered = Filters.doFilters(filtered,
                                        toInfo.getOutFilters());
         }
-        AddItemResponseType air = toInfo.inst.addItem(filtered);
+        final AddItemResponseType air = toInfo.inst.addItem(filtered);
 
         toInfo.lastCts.created++;
         toInfo.totalCts.created++;
@@ -923,7 +923,7 @@ public class Synchling {
 
       if (si.updateEnd == toInfo.end) {
         // Update the instance
-        FetchItemResponseType toFir = toInfo.inst.fetchItem(si.itemInfo.uid);
+        final FetchItemResponseType toFir = toInfo.inst.fetchItem(si.itemInfo.uid);
 
         if (toFir.getStatus() != StatusType.OK) {
           warn("Unable to fetch destination entity for update: message was " +
@@ -931,10 +931,27 @@ public class Synchling {
           continue;
         }
 
-        ComponentSelectionType cst = getDiffer(note,
-                                               fromInfo,
-                                               toInfo).diff(fir.getIcalendar(),
-                                                          toFir.getIcalendar());
+        IcalendarType filtered = Filters.doFilters(fir.getIcalendar(),
+                                                   fromInfo.getInFilters());
+
+        if (filtered != null) {
+          filtered = Filters.doFilters(filtered,
+                                       toInfo.getOutFilters());
+        }
+
+        if (filtered == null) {
+          if (debug) {
+            trace("Filter removed everything for " + si.itemInfo.uid);
+          }
+
+          continue;
+        }
+
+        final ComponentSelectionType cst =
+                getDiffer(note,
+                          fromInfo,
+                          toInfo).diff(filtered,
+                                       toFir.getIcalendar());
 
         if (cst == null) {
           if (debug) {
@@ -948,13 +965,13 @@ public class Synchling {
           trace("Update needed for " + si.itemInfo.uid);
         }
 
-        UpdateItemType ui = new UpdateItemType();
+        final UpdateItemType ui = new UpdateItemType();
 
         ui.setHref(toFir.getHref());
         ui.setChangeToken(toFir.getChangeToken());
         ui.getSelect().add(cst);
 
-        UpdateItemResponseType uir = toInfo.inst.updateItem(ui);
+        final UpdateItemResponseType uir = toInfo.inst.updateItem(ui);
 
         if (uir.getStatus() != StatusType.OK) {
           warn("Unable to update destination entity");

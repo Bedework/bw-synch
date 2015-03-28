@@ -57,6 +57,9 @@ public abstract class AbstractFilter implements Filter {
     debug = getLogger().isDebugEnabled();
   }
 
+  protected final static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+          new ietf.params.xml.ns.icalendar_2.ObjectFactory();
+
   /** Initialise the filter.
    *
    * @param sub the subscription
