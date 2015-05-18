@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.exchange;
 import org.bedework.synch.BaseSubscriptionInfo;
 import org.bedework.synch.db.SubscriptionConnectorInfo;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.util.misc.ToString;
 
 /** The deserialized information for an Exchange connection.
  *
@@ -107,21 +108,16 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
    * ==================================================================== */
 
   @Override
-  protected void toStringSegment(final StringBuilder sb,
-                              final String indent) {
-    super.toStringSegment(sb, indent);
+  protected void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts);
 
     try {
-      sb.append(",\n");
-      sb.append(indent);
-      sb.append("exchangeCalendar = ");
-      sb.append(getExchangeCalendar());
-      sb.append(", exchangeSubscriptionId = ");
-      sb.append(getExchangeSubscriptionId());
-      sb.append(", exchangeWatermark = ");
-      sb.append(getExchangeWatermark());
+      ts.newLine();
+      ts.append("exchangeCalendar", getExchangeCalendar());
+      ts.append(", exchangeSubscriptionId", getExchangeSubscriptionId());
+      ts.append(", exchangeWatermark", getExchangeWatermark());
     } catch (Throwable t) {
-      sb.append(t.getMessage());
+      ts.append(t.getMessage());
     }
   }
 }

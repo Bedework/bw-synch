@@ -40,7 +40,7 @@ public class SynchDb implements Serializable {
 
   private final boolean debug;
 
-  private SynchConfig config;
+  private final SynchConfig config;
 
   /** */
   protected boolean open;
@@ -53,7 +53,7 @@ public class SynchDb implements Serializable {
   protected HibSession sess;
 
   /**
-   * @param config
+   * @param config the configuration
    *
    */
   public SynchDb(final SynchConfig config) {
@@ -89,15 +89,15 @@ public class SynchDb implements Serializable {
   public void close() throws SynchException {
     try {
       endTransaction();
-    } catch (SynchException wde) {
+    } catch (final SynchException wde) {
       try {
         rollbackTransaction();
-      } catch (SynchException wde1) {}
+      } catch (final SynchException wde1) {}
       throw wde;
     } finally {
       try {
         closeSession();
-      } catch (SynchException wde1) {}
+      } catch (final SynchException wde1) {}
       open = false;
     }
   }
@@ -106,25 +106,27 @@ public class SynchDb implements Serializable {
    *                   Subscription Object methods
    * ==================================================================== */
 
+  private static final String getAllQuery =
+          "from " + Subscription.class.getName();
+
   /**
    * @return list of subscriptions
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
   public List<Subscription> getAll() throws SynchException {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append("from ");
-    sb.append(Subscription.class.getName());
-
     try {
-      sess.createQuery(sb.toString());
+      sess.createQuery(getAllQuery);
 
       return sess.getList();
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
+
+  private static final String getSubQuery =
+          "from " + Subscription.class.getName() +
+                  " sub where sub.subscriptionId=:subid";
 
   /** The synch engine generates a unique subscription id
    * for each subscription. This is used as a key for each subscription.
@@ -135,42 +137,34 @@ public class SynchDb implements Serializable {
    */
   public Subscription get(final String id) throws SynchException {
     try {
-      StringBuilder sb = new StringBuilder();
-
-      sb.append("from ");
-      sb.append(Subscription.class.getName());
-      sb.append(" sub where sub.subscriptionId=:subid");
-
-      sess.createQuery(sb.toString());
+      sess.createQuery(getSubQuery);
       sess.setString("subid", id);
 
       return (Subscription)sess.getUnique();
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
 
+  private static final String findSubQuery =
+          "from " + Subscription.class.getName() +
+                  " sub where sub.endAConnectorInfo.connectorId=:aconnid" +
+                  " and sub.endAConnectorInfo.synchProperties=:aconnprops" +
+                  " and sub.endBConnectorInfo.connectorId=:bconnid" +
+                  " and sub.endBConnectorInfo.synchProperties=:bconnprops" +
+                  " and sub.direction=:dir" +
+                  " and sub.master=:mstr";
+
   /** Find any subscription that matches this one. There can only be one with
    * the same endpoints
    *
-   * @param sub
+   * @param sub subscription
    * @return matching subscriptions
    * @throws SynchException
    */
   public Subscription find(final Subscription sub) throws SynchException {
     try {
-      StringBuilder sb = new StringBuilder();
-
-      sb.append("from ");
-      sb.append(Subscription.class.getName());
-      sb.append(" sub where sub.endAConnectorInfo.connectorId=:aconnid");
-      sb.append(" and sub.endAConnectorInfo.synchProperties=:aconnprops");
-      sb.append(" and sub.endBConnectorInfo.connectorId=:bconnid");
-      sb.append(" and sub.endBConnectorInfo.synchProperties=:bconnprops");
-      sb.append(" and sub.direction=:dir");
-      sb.append(" and sub.master=:mstr");
-
-      sess.createQuery(sb.toString());
+      sess.createQuery(findSubQuery);
       sess.setString("aconnid",
                      sub.getEndAConnectorInfo().getConnectorId());
       sess.setString("aconnprops",
@@ -185,48 +179,48 @@ public class SynchDb implements Serializable {
                      sub.getMaster().name());
 
       return (Subscription)sess.getUnique();
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
 
   /** Add the subscription.
    *
-   * @param sub
+   * @param sub subscription
    * @throws SynchException
    */
   public void add(final Subscription sub) throws SynchException {
     try {
       sess.save(sub);
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
 
   /** Update the persisted state of the subscription.
    *
-   * @param sub
+   * @param sub subscription
    * @throws SynchException
    */
   public void update(final Subscription sub) throws SynchException {
     try {
       sess.update(sub);
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
 
   /** Delete the subscription.
    *
-   * @param sub
+   * @param sub subscription
    * @throws SynchException
    */
   public void delete(final Subscription sub) throws SynchException {
-    boolean opened = open();
+    final boolean opened = open();
 
     try {
       sess.delete(sub);
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     } finally {
       if (opened) {
@@ -266,8 +260,7 @@ public class SynchDb implements Serializable {
       }
       sess = new HibSessionImpl();
       try {
-        sess.init(HibSessionFactory.getSessionFactory(
-                config.getHibernateProperties()), getLogger());
+        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()), getLogger());
       } catch (HibException he) {
         throw new SynchException(he);
       }

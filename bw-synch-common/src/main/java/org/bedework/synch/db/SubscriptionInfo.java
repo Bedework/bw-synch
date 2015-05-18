@@ -41,6 +41,11 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
    */
   public static final String propnameXlocXcontacts = "xlocxcontacts";
 
+  /** Turn categories into x-properties.
+   * The receiving end may reinstate them as real curated values
+   */
+  public static final String propnameXcategories = "xcategories";
+
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
@@ -97,6 +102,24 @@ public class SubscriptionInfo extends SerializableProperties<SubscriptionInfo> {
    */
   public boolean getXlocXcontact() throws SynchException {
     return Boolean.valueOf(getProperty(propnameXlocXcontacts));
+  }
+
+  /** Processing of categories - boolean
+   *
+   * @param val true to enable processing of categories
+   * @throws SynchException
+   */
+  public void setXlocXcategories(final boolean val) throws SynchException {
+    setProperty(propnameXcategories, String.valueOf(val));
+  }
+
+  /** Processing of categories - boolean
+   *
+   * @return boolean
+   * @throws SynchException
+   */
+  public boolean getXlocXcategories() throws SynchException {
+    return Boolean.valueOf(getProperty(propnameXcategories));
   }
 
   /* ====================================================================
