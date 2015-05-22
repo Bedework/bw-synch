@@ -947,11 +947,15 @@ public class Synchling {
           continue;
         }
 
+        IcalendarType toFiltered =
+                Filters.doFilters(toFir.getIcalendar(),
+                                  toInfo.getInFilters());
+
         final ComponentSelectionType cst =
                 getDiffer(note,
                           fromInfo,
                           toInfo).diff(filtered,
-                                       toFir.getIcalendar());
+                                       toFiltered);
 
         if (cst == null) {
           if (debug) {

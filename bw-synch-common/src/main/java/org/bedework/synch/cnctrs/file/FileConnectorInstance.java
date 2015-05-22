@@ -366,7 +366,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
 
       /* Convert each entity to XML */
 
-      fetchedIcal = IcalToXcal.fromIcal(ical, null);
+      fetchedIcal = IcalToXcal.fromIcal(ical, null, true);
 
       uidMap = new HashMap<>();
 
