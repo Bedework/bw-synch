@@ -67,11 +67,11 @@ import javax.xml.bind.JAXBElement;
  */
 public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   @SuppressWarnings("unused")
-  private BedeworkConnectorConfig config;
+  private final BedeworkConnectorConfig config;
 
   private final BedeworkConnector cnctr;
 
-  private BedeworkSubscriptionInfo info;
+  private final BedeworkSubscriptionInfo info;
 
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
@@ -107,9 +107,9 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
     /* Build a calendar query to fetch all the items in the referenced
      * collection
      */
-    CalendarQueryType cq = new CalendarQueryType();
+    final CalendarQueryType cq = new CalendarQueryType();
 
-    ObjectFactory of = cnctr.getIcalObjectFactory();
+    final ObjectFactory of = cnctr.getIcalObjectFactory();
 
     cq.setHref(info.getUri());
 
@@ -118,10 +118,10 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
      */
 
     cq.setIcalendar(new IcalendarType());
-    VcalendarType vcal = new VcalendarType();
+    final VcalendarType vcal = new VcalendarType();
     cq.getIcalendar().getVcalendar().add(vcal);
 
-    ArrayOfComponents aovcc = new ArrayOfComponents();
+    final ArrayOfComponents aovcc = new ArrayOfComponents();
     vcal.setComponents(aovcc);
 
     /* Build the properties we want
