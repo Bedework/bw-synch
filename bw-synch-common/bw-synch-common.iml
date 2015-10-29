@@ -11,11 +11,12 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="bw-util-calendar" />
-    <orderEntry type="module" module-name="bw-ws-icalendar" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ws-icalendar:4.0.3" level="project" />
     <orderEntry type="module" module-name="bw-util-xml" />
-    <orderEntry type="module" module-name="bw-ws-tzsvr" />
-    <orderEntry type="module" module-name="bw-ws-calws-soap" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ws-tzsvr:4.0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ws-calws-soap:4.0.3" level="project" />
     <orderEntry type="library" name="Maven: jtidy:jtidy:4aug2000r7-dev" level="project" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ical4j-cl:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.3.1" level="project" />
     <orderEntry type="module" module-name="bw-util-config" />
@@ -33,8 +34,8 @@
     <orderEntry type="module" module-name="bw-util-caching" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.3.1" level="project" />
     <orderEntry type="module" module-name="bw-access" />
-    <orderEntry type="module" module-name="bw-ws-synchws" />
-    <orderEntry type="module" module-name="bw-ws-exchangews" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ws-synchws:4.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-ws-exchangews:4.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-core:3.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-asm:3.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.1.1" level="project" />
