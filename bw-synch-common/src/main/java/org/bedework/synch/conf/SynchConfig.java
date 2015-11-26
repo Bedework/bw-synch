@@ -211,11 +211,16 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
    *
    * @return map
    */
+  @ConfInfo(dontSave = true)
   public List<SynchConnConf> getConnectorConfs() {
     return connectorConfs;
   }
 
-  /**
+  /** This flag alllows us to run  synch engine on multiple machines.
+   * For the moment only one of those instances should handle the
+   * actual synch process. All others shoudl have this flag set to
+   * true so that they only handle the creation and deletion of
+   * subscriptions.
    *
    * @param val true if this instance only handles subscriptions
    */
