@@ -27,6 +27,9 @@ import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.ConfigHolder;
 import org.bedework.util.jmx.InfoLines;
 
+import org.hibernate.boot.registry.BootstrapServiceRegistry;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
@@ -91,14 +94,23 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         } else {
           targets.add(TargetType.SCRIPT);
         }
-        
-        long millis = System.currentTimeMillis() - startTime;
-        long seconds = millis / 1000;
-        long minutes = seconds / 60;
-        seconds -= (minutes * 60);
+
+        Properties prop = getHibConfiguration().getProperties();
+
+        final BootstrapServiceRegistry bsr = new BootstrapServiceRegistryBuilder().build();
+        final StandardServiceRegistryBuilder ssrBuilder = new StandardServiceRegistryBuilder(bsr);
+
+        ssrBuilder.applySettings(prop);
+
+        se.execute(targets, SchemaExport.Action.BOTH, null,
+                   ssrBuilder.getBootstrapServiceRegistry());
+
+        final long millis = System.currentTimeMillis() - startTime;
+        final long seconds = millis / 1000;
+        final long minutes = seconds / 60;
 
         infoLines.addLn("Elapsed time: " + minutes + ":" +
-                        twoDigits(seconds));
+                        twoDigits(seconds - (minutes * 60)));
       } catch (final Throwable t) {
         error(t);
         infoLines.exceptionMsg(t);
