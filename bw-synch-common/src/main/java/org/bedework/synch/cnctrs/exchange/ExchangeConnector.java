@@ -29,9 +29,14 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
-
+import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
+import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
+import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
+import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import java.util.List;
 
@@ -39,13 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-
-import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
-import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 
 /** The synch processor connector for connections to Exchange.
  *

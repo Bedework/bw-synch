@@ -45,6 +45,8 @@ import org.oasis_open.docs.ws_calendar.ns.soap.CalendarDataResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.CalendarQueryResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.CalendarQueryType;
 import org.oasis_open.docs.ws_calendar.ns.soap.CompFilterType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FilterType;
 import org.oasis_open.docs.ws_calendar.ns.soap.MultistatResponseElementType;
@@ -133,12 +135,12 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
      * TODO add match on any component
     */
 
-    ArrayOfProperties aop = new ArrayOfProperties();
+    final ArrayOfProperties aop = new ArrayOfProperties();
 
-    UidPropType propUid = new UidPropType();
+    final UidPropType propUid = new UidPropType();
     aop.getBasePropertyOrTzid().add(of.createUid(propUid));
 
-    LastModifiedPropType propLastMod = new LastModifiedPropType();
+    final LastModifiedPropType propLastMod = new LastModifiedPropType();
     aop.getBasePropertyOrTzid().add(of.createLastModified(propLastMod));
 
     BaseComponentType comp = new VeventType();
@@ -153,10 +155,10 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     /* Now build a filter which returns all the types we want.
      */
-    FilterType fltr = new FilterType();
+    final FilterType fltr = new FilterType();
     cq.setFilter(fltr);
 
-    CompFilterType cf = new CompFilterType();
+    final CompFilterType cf = new CompFilterType();
     //vc.setComponents(new ArrayOfVcalendarContainedComponents());
     cf.setVcalendar(new VcalendarType());
 
@@ -177,10 +179,11 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     /* Execute the query */
 
-    CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(),
-                                                                  cq);
+    final CalendarQueryResponseType cqr =
+            cnctr.getPort().calendarQuery(getIdToken(),
+                                          cq);
 
-    SynchItemsInfo sii = new SynchItemsInfo();
+    final SynchItemsInfo sii = new SynchItemsInfo();
     sii.items = new ArrayList<>();
     sii.setStatus(StatusType.OK);
 
@@ -194,22 +197,22 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     /* Go through each element in the response '
      */
-    List<MultistatResponseElementType> responses = cqr.getResponse();
+    final List<MultistatResponseElementType> responses = cqr.getResponse();
 
-    for (MultistatResponseElementType mre: responses) {
-      List<PropstatType> pss = mre.getPropstat();
+    for (final MultistatResponseElementType mre: responses) {
+      final List<PropstatType> pss = mre.getPropstat();
 
-      for (PropstatType ps: pss) {
+      for (final PropstatType ps: pss) {
         if (ps.getStatus() != StatusType.OK) {
           continue;
         }
 
-        for (MultistatusPropElementType prop: ps.getProp()) {
+        for (final MultistatusPropElementType prop: ps.getProp()) {
           if (prop.getCalendarData() == null) {
             continue;
           }
 
-          CalendarDataResponseType cd = prop.getCalendarData();
+          final CalendarDataResponseType cd = prop.getCalendarData();
 
           if (cd.getIcalendar() == null) {
             continue;
@@ -372,6 +375,30 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
   @Override
   public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
     return cnctr.getPort().updateItem(getIdToken(), updates);
+  }
+
+  @Override
+  public DeleteItemResponseType deleteItem(final String uid)
+          throws SynchException {
+    /* At the moment have to fetch it just to get the href */
+
+    final FetchItemResponseType fresp = fetchItem(uid);
+    if (debug) {
+      trace("deleteItem: status=" + fresp.getStatus() +
+                    " msg=" + fresp.getMessage());
+    }
+
+    if (fresp.getStatus() != StatusType.OK) {
+      final DeleteItemResponseType dirt = new DeleteItemResponseType();
+
+      dirt.setStatus(fresp.getStatus());
+      return dirt;
+    }
+
+    final DeleteItemType dit = new DeleteItemType();
+    dit.setHref(fresp.getHref());
+
+    return cnctr.getPort().deleteItem(getIdToken(), dit);
   }
 
   /* ====================================================================

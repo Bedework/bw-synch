@@ -44,6 +44,7 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.ErrorCodeType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
@@ -591,14 +592,15 @@ public class Synchling {
        * last synched.
        */
 
-      boolean bothWays = sub.getDirection() == SynchDirectionType.BOTH_WAYS;
+      final boolean bothWays =
+              sub.getDirection() == SynchDirectionType.BOTH_WAYS;
 
-      ResynchInfo ainfo = new ResynchInfo(sub,
-                                          SynchEndType.A,
-                                          syncher);
-      ResynchInfo binfo = new ResynchInfo(sub,
-                                          SynchEndType.B,
-                                          syncher);
+      final ResynchInfo ainfo = new ResynchInfo(sub,
+                                                SynchEndType.A,
+                                                syncher);
+      final ResynchInfo binfo = new ResynchInfo(sub,
+                                                SynchEndType.B,
+                                                syncher);
 
       boolean aChanged = false;
       boolean bChanged = false;
@@ -663,7 +665,7 @@ public class Synchling {
 
       if (debug) {
         trace("---------------- update set ----------------");
-        for (SynchInfo si: updateInfo) {
+        for (final SynchInfo si: updateInfo) {
           trace(si.toString());
         }
         trace("---------------- end update set ----------------");
@@ -726,10 +728,10 @@ public class Synchling {
   private void getResynchs(final List<SynchInfo> updateInfo,
                            final ResynchInfo fromInfo,
                            final ResynchInfo toInfo) throws SynchException {
-    boolean useLastmods = fromInfo.trustLastmod && toInfo.trustLastmod;
+    final boolean useLastmods = fromInfo.trustLastmod && toInfo.trustLastmod;
 
-    for (ItemInfo fromIi: fromInfo.items.values()) {
-      ItemInfo toIi = toInfo.items.get(fromIi.uid);
+    for (final ItemInfo fromIi: fromInfo.items.values()) {
+      final ItemInfo toIi = toInfo.items.get(fromIi.uid);
 
       if (toIi == null) {
         /* It's not in the to list - add to list to fetch from the from end */
@@ -737,7 +739,7 @@ public class Synchling {
           trace("Need to add to end " + toInfo.end + ": uid:" + fromIi.uid);
         }
 
-        SynchInfo si = new SynchInfo(fromIi);
+        final SynchInfo si = new SynchInfo(fromIi);
         si.addTo = toInfo.end;
         updateInfo.add(si);
         continue;
@@ -762,7 +764,7 @@ public class Synchling {
         trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
       }
 
-      SynchInfo si = new SynchInfo(fromIi);
+      final SynchInfo si = new SynchInfo(fromIi);
 
       si.updateEnd = toInfo.end;
       updateInfo.add(si);
@@ -771,12 +773,12 @@ public class Synchling {
 
   private void checkDeletes(final List<SynchInfo> updateInfo,
                             final ResynchInfo toInfo) throws SynchException {
-    for (ItemInfo ii: toInfo.items.values()) {
+    for (final ItemInfo ii: toInfo.items.values()) {
       if (ii.seen) {
         continue;
       }
 
-      SynchInfo si = new SynchInfo(ii);
+      final SynchInfo si = new SynchInfo(ii);
       /* If the lastmod is later than the last synch and this is 2 way then
        * this one got added after we synched. Add it to end B.
        *
@@ -801,14 +803,14 @@ public class Synchling {
    */
   private Map<String, ItemInfo> getItemsMap(final ResynchInfo rinfo) throws SynchException {
     /* Items is a table built from the target calendar */
-    Map<String, ItemInfo> items = new HashMap<>();
+    final Map<String, ItemInfo> items = new HashMap<>();
 
-    SynchItemsInfo sii = rinfo.inst.getItemsInfo();
+    final SynchItemsInfo sii = rinfo.inst.getItemsInfo();
     if (sii.getStatus() != StatusType.OK) {
       if ((sii.getErrorResponse() != null) &&
           (sii.getErrorResponse().getError() != null)) {
         // More information
-        ErrorCodeType ecode = sii.getErrorResponse().getError().getValue();
+        final ErrorCodeType ecode = sii.getErrorResponse().getError().getValue();
         if (ecode instanceof TargetDoesNotExistType) {
           // The target we are addressing is no longer available.
           rinfo.missingTarget = true;
@@ -818,7 +820,7 @@ public class Synchling {
       return null;
     }
 
-    for (ItemInfo ii: sii.items) {
+    for (final ItemInfo ii: sii.items) {
       if (debug) {
         trace(ii.toString());
       }
@@ -947,7 +949,7 @@ public class Synchling {
           continue;
         }
 
-        IcalendarType toFiltered =
+        final IcalendarType toFiltered =
                 Filters.doFilters(toFir.getIcalendar(),
                                   toInfo.getInFilters());
 
@@ -1004,14 +1006,14 @@ public class Synchling {
                               final Notification note,
                               final List<SynchInfo> updateInfo,
                               final ResynchInfo toInfo) throws SynchException {
-    for (SynchInfo si: updateInfo) {
+    for (final SynchInfo si: updateInfo) {
       // Add to unprocessed if it's not one of ours
       if (si.deleteFrom != toInfo.end) {
         //noinspection UnnecessaryContinue
         continue;
       }
 
-      //DeleteItemResponseType dir = toInfo.inst.deleteItems(si.itemInfo.uid);
+      DeleteItemResponseType dir = toInfo.inst.deleteItem(si.itemInfo.uid);
     }
   }
 
@@ -1022,8 +1024,8 @@ public class Synchling {
     }
 
     for (int i = 0; i < 16; i++) {
-      char cal = calLmod.charAt(i);
-      char ex = exLmod.charAt(exi);
+      final char cal = calLmod.charAt(i);
+      final char ex = exLmod.charAt(exi);
 
       if (cal < ex) {
         return -1;

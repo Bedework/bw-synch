@@ -21,17 +21,16 @@ package org.bedework.synch.cnctrs.exchange.responses;
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
 import org.bedework.synch.exception.SynchException;
 
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
 import com.microsoft.schemas.exchange.services._2006.types.FindItemParentType;
 import com.microsoft.schemas.exchange.services._2006.types.FolderIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ItemType;
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** Response from Exchange after FindItem request.
  *

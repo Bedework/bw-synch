@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
 
 /** Base exception thrown by synch classes
  *
- *   @author Mike Douglass   douglm bedework.edu
+ *   @author Mike Douglass   douglm rpi.edu
  */
 public class SynchBadRequest extends SynchException {
   /** Constructor

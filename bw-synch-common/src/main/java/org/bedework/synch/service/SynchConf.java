@@ -22,7 +22,6 @@ import org.bedework.synch.Stat;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
-
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.ConfigHolder;
@@ -30,9 +29,11 @@ import org.bedework.util.jmx.InfoLines;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -71,13 +72,9 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
       try {
         infoLines.addLn("Started export of schema");
 
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
 
-        SchemaExport se = new SchemaExport(getHibConfiguration());
-
-//      if (getDelimiter() != null) {
-//        se.setDelimiter(getDelimiter());
-//      }
+        final SchemaExport se = new SchemaExport();
 
         se.setFormat(true);       // getFormat());
         se.setHaltOnError(false); // getHaltOnError());
@@ -87,11 +84,14 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         Make sure it refers to a non-existant file */
         //se.setImportFile("not-a-file.sql");
 
-        se.execute(false, // script - causes write to System.out if true
-                   getExport(),
-                   false,   // drop
-                   true);   //   getCreate());
+        final EnumSet<TargetType> targets = EnumSet.noneOf(TargetType.class );
 
+        if (export) {
+          targets.add(TargetType.DATABASE);
+        } else {
+          targets.add(TargetType.SCRIPT);
+        }
+        
         long millis = System.currentTimeMillis() - startTime;
         long seconds = millis / 1000;
         long minutes = seconds / 60;
@@ -99,7 +99,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
         infoLines.addLn("Elapsed time: " + minutes + ":" +
                         twoDigits(seconds));
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         error(t);
         infoLines.exceptionMsg(t);
       } finally {

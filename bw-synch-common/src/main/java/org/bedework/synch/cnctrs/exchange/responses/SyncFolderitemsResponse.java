@@ -20,10 +20,6 @@ package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.exception.SynchException;
 
-import java.util.List;
-
-import javax.xml.bind.JAXBElement;
-
 import com.microsoft.schemas.exchange.services._2006.messages.SyncFolderItemsResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseObjectChangedEventType;
@@ -33,6 +29,10 @@ import com.microsoft.schemas.exchange.services._2006.types.ModifiedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.MovedCopiedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.SyncFolderItemsChangesType;
 import com.microsoft.schemas.exchange.services._2006.types.SyncFolderItemsCreateOrUpdateType;
+
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
 
 /** Notification from Exchange.
  *

@@ -20,7 +20,6 @@ package org.bedework.synch.filters;
 
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
-
 import org.bedework.util.calendar.XcalUtil;
 import org.bedework.util.misc.Util;
 

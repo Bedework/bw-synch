@@ -30,7 +30,7 @@ import com.microsoft.schemas.exchange.services._2006.types.PushSubscriptionReque
 
 /** Build a subscription request.
  *
- *   @author Mike Douglass   douglm bedework.edu
+ *   @author Mike Douglass   douglm rpi.edu
  */
 public class SubscribeRequest extends BaseRequest<SubscribeType> {
   private NonEmptyArrayOfBaseFolderIdsType folders;

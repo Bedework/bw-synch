@@ -25,14 +25,15 @@ import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
+import org.bedework.util.misc.ToString;
 
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
-
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
@@ -174,20 +175,16 @@ public interface ConnectorInstance {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("ItemInfo{");
+      final ToString ts = new ToString(this);
 
-      sb.append("uid=");
-      sb.append(uid);
+      ts.append("uid", uid);
 
-      sb.append(",\n   lastMod=");
-      sb.append(lastMod);
+      ts.append("lastMod", lastMod);
 
-      sb.append(",\n   lastSynch=");
-      sb.append(lastSynch);
+      ts.append("lastSynch", lastSynch);
 
-      sb.append("}");
 
-      return sb.toString();
+      return ts.toString();
     }
   }
 
@@ -233,13 +230,19 @@ public interface ConnectorInstance {
    */
   List<FetchItemResponseType> fetchItems(List<String> uids) throws SynchException;
 
-  /** Update a calendar component. The updates component has the change token
-   * href, and the component selection fields set.
+  /** Update a calendar component.
    *
-   * @param fir - the currrent state of the entity we are updating.
-   * @param updates
+   * @param updates has the change token, href, and the component selection fields set.
    * @return response
    * @throws SynchException
    */
   UpdateItemResponseType updateItem(UpdateItemType updates) throws SynchException;
+
+  /** Delete a calendar component.
+   *
+   * @param uid - of the component to delete.
+   * @return response
+   * @throws SynchException
+   */
+  DeleteItemResponseType deleteItem(String uid) throws SynchException;
 }

@@ -19,7 +19,6 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.service.SynchConnConfMBean;
-
 import org.bedework.util.jmx.MBeanInfo;
 
 /** Configure a file connector for the Bedework synch engine service

@@ -18,8 +18,6 @@
 */
 package org.bedework.synch.cnctrs.exchange.messages;
 
-import java.util.List;
-
 import com.microsoft.schemas.exchange.services._2006.messages.GetItemType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyTypeResponseType;
@@ -27,9 +25,11 @@ import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType
 import com.microsoft.schemas.exchange.services._2006.types.ItemResponseShapeType;
 import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfBaseItemIdsType;
 
+import java.util.List;
+
 /** Get items by id.
  *
- *   @author Mike Douglass   douglm bedework.edu
+ *   @author Mike Douglass   douglm rpi.edu
  */
 public class GetItemsRequest extends BaseRequest<GetItemType> {
   /**

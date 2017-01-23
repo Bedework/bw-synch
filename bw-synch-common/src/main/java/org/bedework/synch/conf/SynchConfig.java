@@ -20,7 +20,6 @@ package org.bedework.synch.conf;
 
 import org.bedework.synch.db.IpAddrInfo;
 import org.bedework.synch.service.SynchConnConf;
-
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.HibernateConfigBase;
 

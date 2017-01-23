@@ -18,17 +18,17 @@
 */
 package org.bedework.synch.cnctrs.exchange.messages;
 
-import javax.xml.bind.JAXBElement;
-
 import com.microsoft.schemas.exchange.services._2006.types.BasePathToElementType;
 import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfPathsToElementType;
 import com.microsoft.schemas.exchange.services._2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType;
 
+import javax.xml.bind.JAXBElement;
+
 
 /** Base request class.
  *
- *   @author Mike Douglass   douglm bedework.edu
+ *   @author Mike Douglass   douglm rpi.edu
  *
  * @param <T>
  */

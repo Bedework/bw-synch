@@ -31,24 +31,6 @@ import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
-
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
-
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Holder;
-
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeWebService;
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
@@ -68,6 +50,23 @@ import com.microsoft.schemas.exchange.services._2006.types.ItemType;
 import com.microsoft.schemas.exchange.services._2006.types.MailboxCultureType;
 import com.microsoft.schemas.exchange.services._2006.types.RequestServerVersion;
 import com.microsoft.schemas.exchange.services._2006.types.ServerVersionInfo;
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
+
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
 
 /** Calls from exchange synch processor to the service.
  *
@@ -293,6 +292,12 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
 
   @Override
   public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+    return null;
+  }
+
+  @Override
+  public DeleteItemResponseType deleteItem(final String uid)
+          throws SynchException {
     return null;
   }
 

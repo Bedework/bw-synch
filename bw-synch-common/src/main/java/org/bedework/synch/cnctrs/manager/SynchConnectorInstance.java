@@ -23,13 +23,13 @@ import org.bedework.synch.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.exception.SynchException;
 
+import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
-
-import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
 import java.util.List;
 
@@ -89,5 +89,11 @@ public class SynchConnectorInstance extends AbstractConnectorInstance {
   @Override
   public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
     throw new SynchException("Uncallable");
+  }
+
+  @Override
+  public DeleteItemResponseType deleteItem(final String uid)
+          throws SynchException {
+    return null;
   }
 }

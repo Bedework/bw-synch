@@ -22,11 +22,6 @@ import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.exception.SynchException;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBElement;
-
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseObjectChangedEventType;
@@ -35,6 +30,11 @@ import com.microsoft.schemas.exchange.services._2006.types.ItemIdType;
 import com.microsoft.schemas.exchange.services._2006.types.ModifiedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.MovedCopiedEventType;
 import com.microsoft.schemas.exchange.services._2006.types.NotificationType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
 
 /** Notification from Exchange.
  *

@@ -22,8 +22,14 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.intf.Defs;
 
-import org.apache.log4j.Logger;
-
+import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
+import com.microsoft.schemas.exchange.services._2006.types.BodyType;
+import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
+import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
+import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfAttendeesType;
+import com.microsoft.schemas.exchange.services._2006.types.ResponseTypeType;
+import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
+import com.microsoft.schemas.exchange.services._2006.types.TimeZoneDefinitionType;
 import ietf.params.xml.ns.icalendar_2.ActionPropType;
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfParameters;
@@ -59,21 +65,13 @@ import ietf.params.xml.ns.icalendar_2.VjournalType;
 import ietf.params.xml.ns.icalendar_2.VtodoType;
 import ietf.params.xml.ns.icalendar_2.XBedeworkExsynchLastmodPropType;
 import ietf.params.xml.ns.icalendar_2.XMicrosoftCdoBusystatusPropType;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.TimeZone;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-
-import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
-import com.microsoft.schemas.exchange.services._2006.types.BodyType;
-import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
-import com.microsoft.schemas.exchange.services._2006.types.EmailAddressType;
-import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfAttendeesType;
-import com.microsoft.schemas.exchange.services._2006.types.ResponseTypeType;
-import com.microsoft.schemas.exchange.services._2006.types.SingleRecipientType;
-import com.microsoft.schemas.exchange.services._2006.types.TimeZoneDefinitionType;
 
 /** This class manages conversions to and from Xml ICalendar to Exchange.
 *

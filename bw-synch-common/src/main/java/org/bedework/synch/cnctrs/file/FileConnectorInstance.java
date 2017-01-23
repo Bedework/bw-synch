@@ -49,6 +49,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.message.BasicHeader;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
+import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
@@ -116,9 +117,6 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     return info;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#changed()
-   */
   @Override
   public boolean changed() throws SynchException {
     /* This implementation needs to at least check the change token for the
@@ -172,21 +170,21 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     } finally {
       try {
         client.release();
-      } catch (Throwable t) {
+      } catch (final Throwable ignored) {
       }
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#getItemsInfo()
-   */
   @Override
   public SynchItemsInfo getItemsInfo() throws SynchException {
-    SynchItemsInfo sii = new SynchItemsInfo();
+    final SynchItemsInfo sii = new SynchItemsInfo();
     sii.items = new ArrayList<ItemInfo>();
     sii.setStatus(StatusType.OK);
 
-    getIcal();
+    if (!getIcal()) {
+      sii.setStatus(StatusType.ERROR);
+      return sii;
+    }
 
     if (sub.changed()) {
       cnctr.getSyncher().updateSubscription(sub);
@@ -197,7 +195,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       return sii;
     }
 
-    for (MapEntry me: uidMap.values()) {
+    for (final MapEntry me: uidMap.values()) {
       sii.items.add(new ItemInfo(me.uid, me.lastMod,
                                  null));  // lastSynch
     }
@@ -214,20 +212,20 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     throw new SynchException("Unimplemented");
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.cnctrs.ConnectorInstance#fetchItem(java.lang.String)
-   */
   @Override
   public FetchItemResponseType fetchItem(final String uid) throws SynchException {
-    getIcal();
+    final FetchItemResponseType fir = new FetchItemResponseType();
+
+    if (!getIcal()) {
+      fir.setStatus(StatusType.ERROR);
+      return fir;
+    }
 
     if (sub.changed()) {
       cnctr.getSyncher().updateSubscription(sub);
     }
 
     MapEntry me = uidMap.get(uid);
-
-    FetchItemResponseType fir = new FetchItemResponseType();
 
     if (me == null) {
       fir.setStatus(StatusType.NOT_FOUND);
@@ -284,6 +282,12 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     throw new SynchException("Unimplemented");
   }
 
+  @Override
+  public DeleteItemResponseType deleteItem(final String uid)
+          throws SynchException {
+    return null;
+  }
+
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
@@ -312,12 +316,13 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
   }
 
   /* Fetch the iCalendar for the subscription. If it fails set the status and
-   * return null. Unchanged data will return null with no status change.
+   * return false. Unchanged data will return true with no status change.
+   *
    */
-  private void getIcal() throws SynchException {
+  private boolean getIcal() throws SynchException {
     try {
       if (fetchedIcal != null) {
-        return;
+        return true;
       }
 
       getClient();
@@ -340,15 +345,16 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
         if (debug) {
           trace("data unchanged");
         }
-        return;
+        return true;
       }
 
       if (rc != HttpServletResponse.SC_OK) {
         if (debug) {
           trace("Unsuccessful response from server was " + rc);
         }
+        info.setLastRefreshStatus(String.valueOf(rc));
         info.setChangeToken(null);  // Force refresh next time
-        return;
+        return false;
       }
 
       final CalendarBuilder builder = new CalendarBuilder();
@@ -433,6 +439,8 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       if (etag != null) {
         info.setChangeToken(etag);
       }
+
+      return true;
     } catch (final SynchException se) {
       throw se;
     } catch (final Throwable t) {

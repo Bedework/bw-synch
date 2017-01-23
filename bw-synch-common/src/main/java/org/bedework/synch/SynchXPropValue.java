@@ -29,7 +29,7 @@ import java.util.Properties;
 /** We encode a number of values as a single x-property by Base 64 encoding
  * the result of the Properties store method
  *
- *   @author Mike Douglass   douglm@bedework.edu
+ *   @author Mike Douglass   douglm@rpi.edu
  */
 public class SynchXPropValue extends Properties {
   /**

@@ -19,7 +19,6 @@
 package org.bedework.synch.service;
 
 import org.bedework.synch.Stat;
-
 import org.bedework.util.jmx.ConfBaseMBean;
 import org.bedework.util.jmx.MBeanInfo;
 
