@@ -23,20 +23,15 @@ import org.bedework.synch.SynchEngine;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.util.config.ConfigurationStore;
+import org.bedework.util.hibernate.HibConfig;
+import org.bedework.util.hibernate.SchemaThread;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.ConfigHolder;
 import org.bedework.util.jmx.InfoLines;
 
-import org.hibernate.boot.registry.BootstrapServiceRegistry;
-import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.schema.TargetType;
 
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -63,65 +58,22 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
   private Configuration hibCfg;
 
-  private class SchemaThread extends Thread {
-    InfoLines infoLines = new InfoLines();
+  private class SchemaBuilder extends SchemaThread {
 
-    SchemaThread() {
-      super("BuildSchema");
+    SchemaBuilder(final String outFile,
+                  final boolean export,
+                  final Properties hibConfig) {
+      super(outFile, export, hibConfig);
     }
 
     @Override
-    public void run() {
-      try {
-        infoLines.addLn("Started export of schema");
-
-        final long startTime = System.currentTimeMillis();
-
-        final SchemaExport se = new SchemaExport();
-
-        se.setFormat(true);       // getFormat());
-        se.setHaltOnError(false); // getHaltOnError());
-        se.setOutputFile(getSchemaOutFile());
-        /* There appears to be a bug in the hibernate code. Everybody initialises
-        this to /import.sql. Set to null causes an NPE
-        Make sure it refers to a non-existant file */
-        //se.setImportFile("not-a-file.sql");
-
-        final EnumSet<TargetType> targets = EnumSet.noneOf(TargetType.class );
-
-        if (export) {
-          targets.add(TargetType.DATABASE);
-        } else {
-          targets.add(TargetType.SCRIPT);
-        }
-
-        Properties prop = getHibConfiguration().getProperties();
-
-        final BootstrapServiceRegistry bsr = new BootstrapServiceRegistryBuilder().build();
-        final StandardServiceRegistryBuilder ssrBuilder = new StandardServiceRegistryBuilder(bsr);
-
-        ssrBuilder.applySettings(prop);
-
-        se.execute(targets, SchemaExport.Action.BOTH, null,
-                   ssrBuilder.getBootstrapServiceRegistry());
-
-        final long millis = System.currentTimeMillis() - startTime;
-        final long seconds = millis / 1000;
-        final long minutes = seconds / 60;
-
-        infoLines.addLn("Elapsed time: " + minutes + ":" +
-                        twoDigits(seconds - (minutes * 60)));
-      } catch (final Throwable t) {
-        error(t);
-        infoLines.exceptionMsg(t);
-      } finally {
-        infoLines.addLn("Schema build completed");
-        export = false;
-      }
+    public void completed(final String status) {
+      setExport(false);
+      info("Schema build completed with status " + status);
     }
   }
 
-  private SchemaThread buildSchema = new SchemaThread();
+  private SchemaBuilder buildSchema;
 
   private class ProcessorThread extends Thread {
     boolean showedTrace;
@@ -155,11 +107,11 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         if (running) {
           // Wait a bit before restarting
           try {
-            Object o = new Object();
+            final Object o = new Object();
             synchronized (o) {
               o.wait (10 * 1000);
             }
-          } catch (Throwable t) {
+          } catch (final Throwable t) {
             error(t.getMessage());
           }
         }
@@ -374,12 +326,16 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   @Override
   public String schema() {
     try {
-//      buildSchema = new SchemaThread();
+      final HibConfig hc = new HibConfig(getConfig());
+
+      buildSchema = new SchemaBuilder(getSchemaOutFile(),
+                                      getExport(),
+                                      hc.getHibConfiguration().getProperties());
 
       buildSchema.start();
 
       return "OK";
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error(t);
 
       return "Exception: " + t.getLocalizedMessage();
@@ -389,7 +345,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   @Override
   public synchronized List<String> schemaStatus() {
     if (buildSchema == null) {
-      InfoLines infoLines = new InfoLines();
+      final InfoLines infoLines = new InfoLines();
 
       infoLines.addLn("Schema build has not been started");
 
@@ -583,45 +539,6 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
-
-  private synchronized Configuration getHibConfiguration() {
-    if (hibCfg == null) {
-      try {
-        hibCfg = new Configuration();
-
-        StringBuilder sb = new StringBuilder();
-
-        List<String> ps = getConfig().getHibernateProperties();
-
-        for (String p: ps) {
-          sb.append(p);
-          sb.append("\n");
-        }
-
-        Properties hprops = new Properties();
-        hprops.load(new StringReader(sb.toString()));
-
-        hibCfg.addProperties(hprops).configure();
-      } catch (Throwable t) {
-        // Always bad.
-        error(t);
-      }
-    }
-
-    return hibCfg;
-  }
-
-  /**
-   * @param val
-   * @return 2 digit val
-   */
-  private static String twoDigits(final long val) {
-    if (val < 10) {
-      return "0" + val;
-    }
-
-    return String.valueOf(val);
-  }
 
   /* ====================================================================
    *                   Protected methods
