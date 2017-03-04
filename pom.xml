@@ -15,14 +15,21 @@
 		<!-- Bedework Versions -->
 		<bedework.releases.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.releases.repo.url>
 		<bedework.snapshots.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.snapshots.repo.url>
-		<bw-ws.version>4.0.1-SNAPSHOT</bw-ws.version>
-		<bw-util.version>4.0.11-SNAPSHOT</bw-util.version>
-		<bw-access.version>4.0.1-SNAPSHOT</bw-access.version>
+		<bw-ws.version>4.0.4-SNAPSHOT</bw-ws.version>
+		<bw-util.version>4.0.12-SNAPSHOT</bw-util.version>
+		<bw-access.version>4.0.2-SNAPSHOT</bw-access.version>
 		<!-- Third Party Library Versions -->
 		<spring.version>3.0.5.RELEASE</spring.version>
 		<commons-codec.version>1.5</commons-codec.version>
 		<servlet-api.version>2.5</servlet-api.version>
-		<ical4j.version>1.1-BW-SNAPSHOT</ical4j.version>
+    <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
+    <ical4j.artifactId>ical4j</ical4j.artifactId>
+    <ical4j.version>2.0.3</ical4j.version>
+    <!--
+    <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
+    <ical4j.artifactId>ical4j</ical4j.artifactId>
+    <ical4j.version>1.1.4</ical4j.version>
+    -->
 		<apache-http.version>4.2.2</apache-http.version>
 		<hibernate.version>5.2.5.Final</hibernate.version>
     <hibernate-ehcache.version>5.2.5.Final</hibernate-ehcache.version>
@@ -144,8 +151,8 @@
 				<version>${spring.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.fortuna.ical4j</groupId>
-				<artifactId>ical4j</artifactId>
+        <groupId>${ical4j.groupId}</groupId>
+        <artifactId>${ical4j.artifactId}</artifactId>
 				<version>${ical4j.version}</version>
 			</dependency>
 			<dependency>

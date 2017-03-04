@@ -41,8 +41,8 @@
 		</dependency>
 		<!-- Third Party Libraries -->
 		<dependency>
-			<groupId>net.fortuna.ical4j</groupId>
-			<artifactId>ical4j</artifactId>
+      <groupId>${ical4j.groupId}</groupId>
+      <artifactId>${ical4j.artifactId}</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
