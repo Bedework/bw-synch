@@ -68,6 +68,11 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
     @Override
     public void completed(final String status) {
+      if (status.equals(SchemaThread.statusDone)) {
+        SynchConf.this.setStatus(ConfBase.statusDone);
+      } else {
+        SynchConf.this.setStatus(ConfBase.statusFailed);
+      }
       setExport(false);
       info("Schema build completed with status " + status);
     }
@@ -331,6 +336,8 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
       buildSchema = new SchemaBuilder(getSchemaOutFile(),
                                       getExport(),
                                       hc.getHibConfiguration().getProperties());
+
+      setStatus(statusStopped);
 
       buildSchema.start();
 
