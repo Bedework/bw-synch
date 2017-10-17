@@ -471,7 +471,7 @@ public class SynchServlet extends HttpServlet
         getManagementContext().start();
 
         synchConf = new SynchConf();
-        register("synchConf", "synchConf", synchConf);
+        register(new ObjectName(synchConf.getServiceName()), synchConf);
         synchConf.loadConfig();
         synchConf.start();
 
