@@ -28,8 +28,8 @@ import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
+import org.bedework.util.misc.Logged;
 
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
@@ -37,11 +37,8 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
  *
  * @author Mike Douglass
  */
-public abstract class AbstractConnectorInstance implements ConnectorInstance {
-  private transient Logger log;
-
-  protected boolean debug;
-
+public abstract class AbstractConnectorInstance extends Logged
+        implements ConnectorInstance {
   protected Subscription sub;
 
   protected SynchEndType end;
@@ -54,21 +51,13 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
     this.sub = sub;
     this.end = end;
     this.baseInfo = baseInfo;
-
-    debug = getLogger().isDebugEnabled();
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#open()
-   */
   @Override
   public BaseResponseType open() throws SynchException {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.cnctrs.ConnectorInstance#subscribe(org.bedework.synch.wsmessages.SubscribeResponseType)
-   */
   @Override
   public boolean subscribe(final SubscribeResponseType sr) throws SynchException {
     return validateSubInfo(sr, getConnector(), getSubInfo());
@@ -169,34 +158,4 @@ public abstract class AbstractConnectorInstance implements ConnectorInstance {
   }
    *
    */
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
 }

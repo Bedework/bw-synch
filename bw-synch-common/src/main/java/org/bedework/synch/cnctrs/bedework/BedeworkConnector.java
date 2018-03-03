@@ -109,7 +109,7 @@ public class BedeworkConnector
     public void run() {
       while (!conn.isStopped()) {
         if (debug) {
-          trace("About to call service - token = " + remoteToken);
+          debug("About to call service - token = " + remoteToken);
         }
         /* First see if we need to reinitialize or ping */
 
@@ -134,7 +134,7 @@ public class BedeworkConnector
         // Wait a bit before trying again
 
         if (debug) {
-          trace("About to pause - token = " + remoteToken);
+          debug("About to pause - token = " + remoteToken);
         }
 
         try {
@@ -165,7 +165,7 @@ public class BedeworkConnector
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
+                    final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
 
     config = (BedeworkConnectorConfig)conf;

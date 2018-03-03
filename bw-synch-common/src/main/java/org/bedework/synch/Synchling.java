@@ -38,10 +38,10 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.calendar.diff.XmlIcalCompare;
+import org.bedework.util.misc.Logged;
 import org.bedework.util.misc.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
 import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
@@ -70,11 +70,7 @@ import javax.xml.ws.Holder;
  *
  * @author Mike Douglass
  */
-public class Synchling {
-  private boolean debug;
-
-  protected transient Logger log;
-
+public class Synchling extends Logged {
   private static final Object synchlingIdLock = new Object();
 
   private static long lastSynchlingId;
@@ -94,11 +90,8 @@ public class Synchling {
   /** Constructor
    *
    * @param syncher the synch engine
-   * @throws SynchException
    */
-  public Synchling(final SynchEngine syncher) throws SynchException {
-    debug = getLogger().isDebugEnabled();
-
+  public Synchling(final SynchEngine syncher) {
     this.syncher = syncher;
 
     synchronized (synchlingIdLock) {
@@ -128,7 +121,7 @@ public class Synchling {
       case FullSynch:
         if (syncher.subscriptionsOnly()) {
           if (debug) {
-            trace("Skipping: subscriptions only");
+            debug("Skipping: subscriptions only");
           }
           continue;
         }
@@ -145,7 +138,7 @@ public class Synchling {
       case CreatedEvent:
         if (syncher.subscriptionsOnly()) {
           if (debug) {
-            trace("Skipping: subscriptions only");
+            debug("Skipping: subscriptions only");
           }
           continue;
         }
@@ -162,7 +155,7 @@ public class Synchling {
       case ModifiedEvent:
         if (syncher.subscriptionsOnly()) {
           if (debug) {
-            trace("Skipping: subscriptions only");
+            debug("Skipping: subscriptions only");
           }
           continue;
         }
@@ -188,10 +181,10 @@ public class Synchling {
 
         ni.getSubResponse().setSubscriptionId(note.getSubscriptionId());
 
-        /* Now put it on the queue for a refresh */
+        /* Now put it on the queue for first population */
         syncher.setConnectors(note.getSub());
 
-        syncher.reschedule(note.getSub());
+        syncher.reschedule(note.getSub(), true);
 
         continue;
 
@@ -225,7 +218,7 @@ public class Synchling {
   private StatusType subscribe(final Notification note,
                          final NotificationItem ni) throws SynchException {
     if (debug) {
-      trace("new subscription " + note.getSub());
+      debug("new subscription " + note.getSub());
     }
 
     syncher.setConnectors(note.getSub());
@@ -256,7 +249,7 @@ public class Synchling {
 
     if (ical == null) {
       if (debug) {
-        trace("No item found");
+        debug("No item found");
       }
 
       return StatusType.ERROR;
@@ -264,7 +257,7 @@ public class Synchling {
 
     AddItemResponseType air = getOtherCinst(note).addItem(ical);
     if (debug) {
-      trace("Add: status=" + air.getStatus() +
+      debug("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
     }
 
@@ -277,7 +270,7 @@ public class Synchling {
 
     if (ical == null) {
       if (debug) {
-        trace("No item found");
+        debug("No item found");
       }
 
       return StatusType.ERROR;
@@ -287,7 +280,7 @@ public class Synchling {
 
     FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
     if (debug) {
-      trace("Update: status=" + fresp.getStatus() +
+      debug("Update: status=" + fresp.getStatus() +
             " msg=" + fresp.getMessage());
     }
 
@@ -321,7 +314,7 @@ public class Synchling {
 
     if (cst == null) {
       if (debug) {
-        trace("No update needed for " + ni.getUid());
+        debug("No update needed for " + ni.getUid());
       }
 
       return StatusType.OK;
@@ -335,7 +328,7 @@ public class Synchling {
 
     UpdateItemResponseType uir = cinst.updateItem(ui);
     if (debug) {
-      trace("Update: status=" + uir.getStatus() +
+      debug("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
     }
     return uir.getStatus();
@@ -385,13 +378,17 @@ public class Synchling {
     UnsubscribeResponseType usr = ni.getUnsubResponse();
 
     if (!cinst.unsubscribe(usreq, usr)) {
-      return usr.getStatus();
+      warn("Unsubscribe end " + SynchEndType.A +
+                   " returned false for " + sub);
+      //return usr.getStatus();
     }
 
     cinst = syncher.getConnectorInstance(note.getSub(),
                                          SynchEndType.B);
     if (!cinst.unsubscribe(usreq, usr)) {
-      return usr.getStatus();
+      warn("Unsubscribe end " + SynchEndType.B +
+                   " returned false for " + sub);
+      //return usr.getStatus();
     }
 
     // Unsubscribe request - call connector instance to carry out any required
@@ -399,7 +396,15 @@ public class Synchling {
     sub.setOutstandingSubscription(null);
     sub.setDeleted(true);
 
+    if (debug) {
+      debug("Attempt to delete " + sub);
+    }
+
     syncher.deleteSubscription(sub);
+
+    if (debug) {
+      debug("Deleted");
+    }
 
     return StatusType.OK;
   }
@@ -664,11 +669,11 @@ public class Synchling {
       }
 
       if (debug) {
-        trace("---------------- update set ----------------");
+        debug("---------------- update set ----------------");
         for (final SynchInfo si: updateInfo) {
-          trace(si.toString());
+          debug(si.toString());
         }
-        trace("---------------- end update set ----------------");
+        debug("---------------- end update set ----------------");
       }
 
       if (updateInfo.size() > 0) {
@@ -721,7 +726,7 @@ public class Synchling {
     } finally {
       sub.updateLastRefresh();
       syncher.updateSubscription(sub);
-      syncher.reschedule(sub);
+      syncher.reschedule(sub, false);
     }
   }
 
@@ -736,7 +741,7 @@ public class Synchling {
       if (toIi == null) {
         /* It's not in the to list - add to list to fetch from the from end */
         if (debug) {
-          trace("Need to add to end " + toInfo.end + ": uid:" + fromIi.uid);
+          debug("Need to add to end " + toInfo.end + ": uid:" + fromIi.uid);
         }
 
         final SynchInfo si = new SynchInfo(fromIi);
@@ -758,10 +763,10 @@ public class Synchling {
 
       if (!update) {
         if (debug) {
-          trace("No need to update end " + toInfo.end + ": uid:" + fromIi.uid);
+          debug("No need to update end " + toInfo.end + ": uid:" + fromIi.uid);
         }
       } else if (debug) {
-        trace("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
+        debug("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
       }
 
       final SynchInfo si = new SynchInfo(fromIi);
@@ -822,7 +827,7 @@ public class Synchling {
 
     for (final ItemInfo ii: sii.items) {
       if (debug) {
-        trace(ii.toString());
+        debug(ii.toString());
       }
 
       ii.seen = false;
@@ -916,7 +921,7 @@ public class Synchling {
         toInfo.totalCts.created++;
 
         if (debug) {
-          trace("Add: status=" + air.getStatus() +
+          debug("Add: status=" + air.getStatus() +
                 " msg=" + air.getMessage());
         }
 
@@ -943,7 +948,7 @@ public class Synchling {
 
         if (filtered == null) {
           if (debug) {
-            trace("Filter removed everything for " + si.itemInfo.uid);
+            debug("Filter removed everything for " + si.itemInfo.uid);
           }
 
           continue;
@@ -961,14 +966,14 @@ public class Synchling {
 
         if (cst == null) {
           if (debug) {
-            trace("No update needed for " + si.itemInfo.uid);
+            debug("No update needed for " + si.itemInfo.uid);
           }
 
           continue;
         }
 
         if (debug) {
-          trace("Update needed for " + si.itemInfo.uid);
+          debug("Update needed for " + si.itemInfo.uid);
         }
 
         final UpdateItemType ui = new UpdateItemType();
@@ -1076,30 +1081,5 @@ public class Synchling {
     diffSubid = sub.getSubscriptionId();
     diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
     return diff;
-  }
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  private void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  private void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  @SuppressWarnings("unused")
-  private void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  private void info(final String msg) {
-    getLogger().info(msg);
   }
 }

@@ -21,6 +21,7 @@ package org.bedework.synch.filters;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.misc.Logged;
 import org.bedework.util.misc.Util;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
@@ -29,7 +30,6 @@ import ietf.params.xml.ns.icalendar_2.BaseComponentType;
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
-import org.apache.log4j.Logger;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,11 +43,7 @@ import javax.xml.bind.JAXBElement;
  * @author douglm
  *
  */
-public abstract class AbstractFilter implements Filter {
-  private boolean debug;
-
-  protected transient Logger log;
-
+public abstract class AbstractFilter extends Logged implements Filter {
   protected Subscription sub;
 
   protected Map<String, Object> stripMap;
@@ -217,33 +213,5 @@ public abstract class AbstractFilter implements Filter {
   protected void addSkip(final Map<String, Object> skipMap,
                          final Object o) {
     skipMap.put(o.getClass().getCanonicalName(), o);
-  }
-
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  @SuppressWarnings("unused")
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  @SuppressWarnings("unused")
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  @SuppressWarnings("unused")
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  @SuppressWarnings("unused")
-  protected void info(final String msg) {
-    getLogger().info(msg);
   }
 }

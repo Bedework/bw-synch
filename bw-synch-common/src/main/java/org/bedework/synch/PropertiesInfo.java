@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class PropertiesInfo {
   private List<SynchPropertyInfo> propInfo =
-      new ArrayList<SynchPropertyInfo>();
+      new ArrayList<>();
 
   /* ====================================================================
    *                   Some common properties

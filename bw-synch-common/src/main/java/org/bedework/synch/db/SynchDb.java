@@ -24,8 +24,7 @@ import org.bedework.util.hibernate.HibException;
 import org.bedework.util.hibernate.HibSession;
 import org.bedework.util.hibernate.HibSessionFactory;
 import org.bedework.util.hibernate.HibSessionImpl;
-
-import org.apache.log4j.Logger;
+import org.bedework.util.misc.Logged;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -35,11 +34,7 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public class SynchDb implements Serializable {
-  private transient Logger log;
-
-  private final boolean debug;
-
+public class SynchDb extends Logged implements Serializable {
   private final SynchConfig config;
 
   /** */
@@ -57,8 +52,6 @@ public class SynchDb implements Serializable {
    *
    */
   public SynchDb(final SynchConfig config) {
-    debug = getLogger().isDebugEnabled();
-
     this.config = config;
   }
 
@@ -256,15 +249,15 @@ public class SynchDb implements Serializable {
 
     if (sess == null) {
       if (debug) {
-        trace("New hibernate session for " + objTimestamp);
+        debug("New hibernate session for " + objTimestamp);
       }
       sess = new HibSessionImpl();
       try {
-        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()), getLogger());
+        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()));
       } catch (HibException he) {
         throw new SynchException(he);
       }
-      trace("Open session for " + objTimestamp);
+      debug("Open session for " + objTimestamp);
     }
 
     beginTransaction();
@@ -273,13 +266,13 @@ public class SynchDb implements Serializable {
   protected synchronized void closeSession() throws SynchException {
     if (!isOpen()) {
       if (debug) {
-        trace("Close for " + objTimestamp + " closed session");
+        debug("Close for " + objTimestamp + " closed session");
       }
       return;
     }
 
     if (debug) {
-      trace("Close for " + objTimestamp);
+      debug("Close for " + objTimestamp);
     }
 
     try {
@@ -310,7 +303,7 @@ public class SynchDb implements Serializable {
     checkOpen();
 
     if (debug) {
-      trace("Begin transaction for " + objTimestamp);
+      debug("Begin transaction for " + objTimestamp);
     }
     try {
       sess.beginTransaction();
@@ -323,7 +316,7 @@ public class SynchDb implements Serializable {
     checkOpen();
 
     if (debug) {
-      trace("End transaction for " + objTimestamp);
+      debug("End transaction for " + objTimestamp);
     }
 
     try {
@@ -343,38 +336,6 @@ public class SynchDb implements Serializable {
       throw new SynchException(he);
     } finally {
     }
-  }
-
-  /**
-   * @return Logger
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  /**
-   * @param t
-   */
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  /**
-   * @param msg
-   */
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /**
-   * @param msg
-   */
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
   }
 
   /* ====================================================================

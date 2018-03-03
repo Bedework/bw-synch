@@ -40,7 +40,7 @@ public class PostMethod extends MethodBase {
   public void doMethod(final HttpServletRequest req,
                        final HttpServletResponse resp) throws SynchException {
     try {
-      List<String> resourceUri = getResourceUri(req);
+      final List<String> resourceUri = getResourceUri(req);
 
       if (Util.isEmpty(resourceUri)) {
         throw new SynchException("Bad resource url - no connector specified");
@@ -48,22 +48,22 @@ public class PostMethod extends MethodBase {
 
       /* Find a connector to handle the incoming request.
        */
-      Connector conn = syncher.getConnector(resourceUri.get(0));
+      final Connector conn = syncher.getConnector(resourceUri.get(0));
 
       if (conn == null) {
         throw new SynchException("Bad resource url - unknown connector specified");
       }
 
       resourceUri.remove(0);
-      NotificationBatch notes = conn.handleCallback(req, resp, resourceUri);
+      final NotificationBatch notes = conn.handleCallback(req, resp, resourceUri);
 
       if (notes != null) {
         syncher.handleNotifications(notes);
         conn.respondCallback(resp, notes);
       }
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }

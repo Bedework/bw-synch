@@ -25,6 +25,7 @@ import org.bedework.synch.cnctrs.ConnectorInstance;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchMasterType;
+import org.bedework.util.misc.ToString;
 
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.property.DtStamp;
@@ -462,52 +463,30 @@ public class Subscription extends DbItem<Subscription> {
 
   /** Add our stuff to the StringBuilder
    *
-   * @param sb    StringBuilder for result
+   * @param ts    ToString builder for result
    */
-  protected void toStringSegment(final StringBuilder sb,
-                                 final String indent) {
-    sb.append("id = ");
-    sb.append(getId());
-    sb.append(", seq = ");
-    sb.append(getSeq());
+  protected ToString toStringSegment(final ToString ts) {
+    return super.toStringSegment(ts)
+                .newLine()
+                .append("subscriptionId", getSubscriptionId())
+                .append("lastRefresh", getLastRefresh())
 
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("subscriptionId = ");
-    sb.append(getSubscriptionId());
+                .newLine()
+                .append("errorCt", getErrorCt())
+                .append("missingTarget", getMissingTarget())
 
-    sb.append(", lastRefresh = ");
-    sb.append(getLastRefresh());
+                .newLine()
+                .append("endAConnectorInfo", getEndAConnectorInfo())
 
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("errorCt = ");
-    sb.append(getErrorCt());
-    sb.append(", missingTarget = ");
-    sb.append(getMissingTarget());
+                .newLine()
+                .append("endBConnectorInfo", getEndBConnectorInfo())
 
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("endAConnectorInfo = ");
-    sb.append(getEndAConnectorInfo());
+                .newLine()
+                .append("info", getInfo())
 
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("endBConnectorInfo = ");
-    sb.append(getEndBConnectorInfo());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("info = ");
-    sb.append(getInfo());
-
-    sb.append(",\n");
-    sb.append(indent);
-    sb.append("direction = ");
-    sb.append(getDirection());
-
-    sb.append(", master = ");
-    sb.append(getMaster());
+                .newLine()
+                .append("direction", getDirection())
+                .append("master", getMaster());
   }
 
   /* ====================================================================
@@ -520,9 +499,6 @@ public class Subscription extends DbItem<Subscription> {
     return getSubscriptionId().hashCode();
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
   @Override
   public int compareTo(final Subscription that) {
     if (this == that) {
@@ -534,20 +510,14 @@ public class Subscription extends DbItem<Subscription> {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    final ToString ts = new ToString(this);
 
-    super.toStringSegment(sb);
-
-    toStringSegment(sb, "  ");
+    toStringSegment(ts);
 
     if (getOutstandingSubscription() != null) {
-      sb.append(", \n  OustandingSubscription{");
-
-      toStringSegment(sb, "    ");
-      sb.append("  }");
+      ts.append("OustandingSubscription", getOutstandingSubscription());
     }
 
-    sb.append("}");
-    return sb.toString();
+    return ts.toString();
   }
 }

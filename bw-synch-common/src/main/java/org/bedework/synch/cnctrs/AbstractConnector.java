@@ -27,8 +27,8 @@ import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
+import org.bedework.util.misc.Logged;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import java.io.OutputStream;
@@ -60,22 +60,18 @@ import javax.xml.soap.SOAPMessage;
 public abstract class AbstractConnector<T,
                                         TI extends AbstractConnectorInstance,
                                         TN extends Notification,
-                                        Tconf extends ConnectorConfig> implements Connector<TI,
-                                                 TN> {
+                                        Tconf extends ConnectorConfig>
+        extends Logged implements Connector<TI, TN> {
   protected Tconf config;
 
   protected String callbackUri;
 
   private String connectorId;
 
-  private transient Logger log;
-
   private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
       new ietf.params.xml.ns.icalendar_2.ObjectFactory();
 
   protected SynchEngine syncher;
-
-  protected boolean debug;
 
   protected boolean running;
 
@@ -107,7 +103,7 @@ public abstract class AbstractConnector<T,
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
+                    final SynchEngine syncher) {
     this.connectorId = connectorId;
     this.syncher = syncher;
     this.callbackUri = callbackUri;
@@ -264,36 +260,6 @@ public abstract class AbstractConnector<T,
     } catch(Throwable t) {
       throw new SynchException(t);
     }
-  }
-
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
   }
 
   /* ====================================================================

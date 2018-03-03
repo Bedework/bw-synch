@@ -116,8 +116,8 @@ public class IpAddrInfo extends DbItem<IpAddrInfo> {
   }
 
   protected ToString toStringSegment(final ToString ts) {
-    super.toStringSegment(ts.getSb());
-    ts.append("order=", getOrder());
+    super.toStringSegment(ts);
+    ts.append("order", getOrder());
     ts.append("addr", getAddr());
     ts.append("block", getBlock());
 
@@ -126,7 +126,7 @@ public class IpAddrInfo extends DbItem<IpAddrInfo> {
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 

@@ -96,7 +96,7 @@ public class BedeworkConnectorConfig extends ConnectorConfig {
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 

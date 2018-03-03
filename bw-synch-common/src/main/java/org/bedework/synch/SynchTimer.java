@@ -23,8 +23,7 @@ import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.db.Subscription;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
-
-import org.apache.log4j.Logger;
+import org.bedework.util.misc.Logged;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,12 +39,8 @@ import java.util.TimerTask;
  *
  *   @author Mike Douglass   douglm   rpi.edu
  */
-public class SynchTimer {
-  private boolean debug;
-
-  protected transient Logger log;
-
-  private SynchEngine syncher;
+public class SynchTimer extends Logged {
+  private final SynchEngine syncher;
 
   /** This is the class that goes into a wait. The run method MUST only take  a
    * short period or it will hang the timer. Usually it will allocate a synchling
@@ -53,7 +48,7 @@ public class SynchTimer {
    *
    */
   class SynchTask extends TimerTask {
-    private Subscription sub;
+    private final Subscription sub;
 
     SynchTask(final Subscription sub) {
       this.sub = sub;
@@ -71,17 +66,18 @@ public class SynchTimer {
       }
 
       if (debug){
-        trace("About to send resynch notification for " + sub.getSubscriptionId());
+        debug("About to send resynch notification for " + sub.getSubscriptionId());
       }
 
-      NotificationItem ni = new NotificationItem(ActionType.FullSynch,
-                                                 null, null);
-      Notification<NotificationItem> note = new Notification<>(
+      final NotificationItem ni =
+              new NotificationItem(ActionType.FullSynch,
+                                   null, null);
+      final Notification<NotificationItem> note = new Notification<>(
           sub, SynchEndType.NONE, ni);
 
       try {
         syncher.handleNotification(note);
-      } catch (SynchException se) {
+      } catch (final SynchException se) {
         if (debug) {
           error(se);
         } else {
@@ -125,28 +121,31 @@ public class SynchTimer {
    *
    * @param sub the subscription
    * @param when to process it
-   * @throws SynchException
    */
   public void schedule(final Subscription sub,
-                       final Date when) throws SynchException {
+                       final Date when) {
+    Date whenToResched = when;
     if (debug){
-      trace("reschedule " + sub.getSubscriptionId() + " for " + when);
+      debug("reschedule " + sub.getSubscriptionId() + " for " + when);
     }
 
-    SynchTask st = new SynchTask(sub);
-    timer.schedule(st, when);
+    if (when == null) {
+      whenToResched = new Date(System.currentTimeMillis() + 10 * 60 * 1000);
+    }
+
+    final SynchTask st = new SynchTask(sub);
+    timer.schedule(st, whenToResched);
   }
 
   /** Schedule a subscription after the given delay
    *
    * @param sub the subscription
    * @param delay - delay in milliseconds before subscription is processed.
-   * @throws SynchException
    */
   @SuppressWarnings("UnusedDeclaration")
   public void schedule(final Subscription sub,
-                       final long delay) throws SynchException {
-    SynchTask st = new SynchTask(sub);
+                       final long delay) {
+    final SynchTask st = new SynchTask(sub);
     timer.schedule(st, delay);
   }
 
@@ -169,41 +168,11 @@ public class SynchTimer {
    * @return List of Stat
    */
   public List<Stat> getStats() {
-    List<Stat> stats = new ArrayList<>();
+    final List<Stat> stats = new ArrayList<>();
 
     stats.add(new Stat("waiting", getWaitingCt()));
     stats.add(new Stat("max waiting", getMaxWaitingCt()));
 
     return stats;
-  }
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  private void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  @SuppressWarnings("unused")
-  private void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  private void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  private void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  @SuppressWarnings("unused")
-  private void info(final String msg) {
-    getLogger().info(msg);
   }
 }

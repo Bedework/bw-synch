@@ -18,6 +18,8 @@
 */
 package org.bedework.synch.db;
 
+import org.bedework.util.misc.ToString;
+
 import java.io.Serializable;
 
 
@@ -83,13 +85,13 @@ public class DbItem<T> implements Comparable<T>, Serializable {
 
   /** Add our stuff to the StringBuilder
    *
-   * @param sb    StringBuilder for result
+   * @param ts    ToString builder for result
    */
-  protected void toStringSegment(final StringBuilder sb) {
-    sb.append("id = ");
-    sb.append(getId());
-    sb.append(", seq = ");
-    sb.append(getSeq());
+  protected ToString toStringSegment(final ToString ts) {
+    ts.append("id", getId());
+    ts.append("seq", getSeq());
+
+    return ts;
   }
 
   /* ====================================================================

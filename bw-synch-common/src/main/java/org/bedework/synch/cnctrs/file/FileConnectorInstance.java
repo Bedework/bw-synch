@@ -87,7 +87,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
    */
   private static class MapEntry {
     List<JAXBElement<? extends BaseComponentType>> comps =
-        new ArrayList<JAXBElement<? extends BaseComponentType>>();
+        new ArrayList<>();
     String lastMod;
     String uid;
   }
@@ -136,7 +136,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       if (rc != HttpServletResponse.SC_OK) {
         info.setLastRefreshStatus(String.valueOf(rc));
         if (debug) {
-          trace("Unsuccessful response from server was " + rc);
+          debug("Unsuccessful response from server was " + rc);
         }
         info.setChangeToken(null);  // Force refresh next time
         fetchedIcal = null; // Force refetch
@@ -146,14 +146,14 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       String etag = cl.getFirstHeaderValue("Etag");
       if (etag == null) {
         if (debug) {
-          trace("Received null etag");
+          debug("Received null etag");
         }
 
         return false;
       }
 
       if (debug) {
-        trace("Received etag:" + etag +
+        debug("Received etag:" + etag +
               ", ours=" + info.getChangeToken());
       }
 
@@ -178,7 +178,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
   @Override
   public SynchItemsInfo getItemsInfo() throws SynchException {
     final SynchItemsInfo sii = new SynchItemsInfo();
-    sii.items = new ArrayList<ItemInfo>();
+    sii.items = new ArrayList<>();
     sii.setStatus(StatusType.OK);
 
     if (!getIcal()) {
@@ -251,7 +251,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     vers.setText("2.0");
     pl.add(of.createVersion(vers));
 
-    ArrayOfComponents aoc = new ArrayOfComponents();
+    final ArrayOfComponents aoc = new ArrayOfComponents();
     vcal.setComponents(aoc);
 
     aoc.getBaseComponent().addAll(me.comps);
@@ -264,7 +264,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
   public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
     // XXX this should be a search for multiple uids - need to reimplement caldav search
 
-    List<FetchItemResponseType> firs = new ArrayList<FetchItemResponseType>();
+    List<FetchItemResponseType> firs = new ArrayList<>();
 
     for (String uid: uids) {
       firs.add(fetchItem(uid));
@@ -297,7 +297,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       return client;
     }
 
-    BasicHttpClient cl = null;
+    BasicHttpClient cl;
 
     try {
       cl = new BasicHttpClient(15 * 1000);
@@ -343,14 +343,14 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
       if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
         // Data unchanged.
         if (debug) {
-          trace("data unchanged");
+          debug("data unchanged");
         }
         return true;
       }
 
       if (rc != HttpServletResponse.SC_OK) {
         if (debug) {
-          trace("Unsuccessful response from server was " + rc);
+          debug("Unsuccessful response from server was " + rc);
         }
         info.setLastRefreshStatus(String.valueOf(rc));
         info.setChangeToken(null);  // Force refresh next time
@@ -448,7 +448,7 @@ public class FileConnectorInstance extends AbstractConnectorInstance {
     } finally {
       try {
         client.release();
-      } catch (Throwable t) {
+      } catch (final Throwable ignored) {
       }
     }
   }

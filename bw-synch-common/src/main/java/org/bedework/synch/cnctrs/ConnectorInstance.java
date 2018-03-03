@@ -188,7 +188,8 @@ public interface ConnectorInstance {
     }
   }
 
-  /**
+  /** Status OK and no items is end of batch. batched set true means
+   * keep calling until no more items.
    */
   public class SynchItemsInfo extends BaseResponseType {
     /** the items.

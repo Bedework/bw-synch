@@ -31,17 +31,18 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.XcalUtil.TzGetter;
 import org.bedework.util.http.BasicHttpClient;
 import org.bedework.util.jmx.ConfigHolder;
+import org.bedework.util.misc.Logged;
 import org.bedework.util.misc.Util;
 import org.bedework.util.security.PwEncryptionIntf;
 import org.bedework.util.timezones.Timezones;
 import org.bedework.util.timezones.TimezonesImpl;
 
 import net.fortuna.ical4j.model.TimeZone;
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,11 +114,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Mike Douglass
  */
-public class SynchEngine extends TzGetter {
-  protected transient Logger log;
-
-  private final boolean debug;
-
+public class SynchEngine extends Logged implements TzGetter {
   //private static String appname = "Synch";
   static ConfigHolder<SynchConfig> cfgHolder;
 
@@ -180,7 +177,7 @@ public class SynchEngine extends TzGetter {
     public void run() {
       while (true) {
         if (debug) {
-          trace("About to wait for notification");
+          debug("About to wait for notification");
         }
 
         try {
@@ -190,14 +187,14 @@ public class SynchEngine extends TzGetter {
           }
 
           if (debug) {
-            trace("Received notification");
+            debug("Received notification");
           }
 
           if ((note.getSub() != null) && note.getSub().getDeleted()) {
             // Drop it
 
             if (debug) {
-              trace("Dropping deleted notification");
+              debug("Dropping deleted notification");
             }
 
             continue;
@@ -263,8 +260,6 @@ public class SynchEngine extends TzGetter {
    *
    */
   private SynchEngine() throws SynchException {
-    debug = getLogger().isDebugEnabled();
-
     System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
                        String.valueOf(debug));
   }
@@ -335,9 +330,8 @@ public class SynchEngine extends TzGetter {
 
   /**
    * @return true if this instance is only handling subscriptions
-   * @throws SynchException
    */
-  public boolean subscriptionsOnly() throws SynchException {
+  public boolean subscriptionsOnly() {
     return getConfig().getSubscriptionsOnly();
   }
 
@@ -434,13 +428,13 @@ public class SynchEngine extends TzGetter {
         startup:
         while (starting) {
           if (debug) {
-            trace("startList has " + startList.size() + " subscriptions");
+            debug("startList has " + startList.size() + " subscriptions");
           }
 
           for (final Subscription sub: startList) {
             setConnectors(sub);
 
-            reschedule(sub);
+            reschedule(sub, false);
           }
 
           synchronized (this) {
@@ -482,16 +476,23 @@ public class SynchEngine extends TzGetter {
 
   /** Reschedule a subscription for updates.
    *
-   * @param sub
-   * @throws SynchException
+   * @param sub the subscription
+   * @param newSub true for new subscription
    */
-  public void reschedule(final Subscription sub) throws SynchException {
+  public void reschedule(final Subscription sub,
+                         final boolean newSub) {
     if (debug) {
-      trace("reschedule subscription " + sub);
+      debug("reschedule subscription " + sub);
     }
 
     if (sub.polling()) {
-      synchTimer.schedule(sub, sub.nextRefresh());
+      Date when = null;
+      try {
+        when = sub.nextRefresh();
+      } catch (final Throwable t) {
+        error(t);
+      }
+      synchTimer.schedule(sub, when);
       return;
     }
 
@@ -846,37 +847,5 @@ public class SynchEngine extends TzGetter {
         db.close();
       }
     }
-  }
-
-  /* ====================================================================
-   *                        private methods
-   * ==================================================================== */
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  private void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  private void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  private void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  private void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  private void info(final String msg) {
-    getLogger().info(msg);
   }
 }

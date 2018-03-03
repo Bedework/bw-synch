@@ -23,7 +23,6 @@ import org.bedework.synch.service.SynchConnConf;
 /**
  * @author douglm
  *
- * @param <X>
  */
 public class FileConnConf extends SynchConnConf<FileConnectorConfig>
     implements FileConnConfMBean {

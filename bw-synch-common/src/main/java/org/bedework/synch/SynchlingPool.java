@@ -18,11 +18,10 @@
 */
 package org.bedework.synch;
 
-
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.exception.SynchTimeout;
-
-import org.apache.log4j.Logger;
+import org.bedework.util.misc.Logged;
+import org.bedework.util.misc.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author Mike Douglass
  *
  */
-public class SynchlingPool {
-  protected transient Logger log;
-
+public class SynchlingPool extends Logged {
   private SynchEngine syncher;
 
   private ArrayBlockingQueue<Synchling> pool;
@@ -58,11 +55,10 @@ public class SynchlingPool {
    * @param syncher
    * @param size
    * @param timeout - millisecs
-   * @throws SynchException
    */
   public void start(final SynchEngine syncher,
                     final int size,
-                    final long timeout) throws SynchException {
+                    final long timeout) {
     this.syncher = syncher;
     this.timeout = timeout;
     resize(size);
@@ -101,9 +97,8 @@ public class SynchlingPool {
   /** Resize the pool
    *
    * @param size
-   * @throws SynchException
    */
-  public void resize(final int size) throws SynchException {
+  public void resize(final int size) {
     ArrayBlockingQueue<Synchling> oldPool = getPool();
     pool = new ArrayBlockingQueue<Synchling>(size);
     int oldSize = 0;
@@ -253,7 +248,7 @@ public class SynchlingPool {
    * @return List of Stat
    */
   public List<Stat> getStats() {
-    List<Stat> stats = new ArrayList<Stat>();
+    final List<Stat> stats = new ArrayList<Stat>();
 
     stats.add(new Stat("synchling get timeout", getTimeout()));
     stats.add(new Stat("synchling active", getActiveCt()));
@@ -268,48 +263,16 @@ public class SynchlingPool {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    final ToString ts = new ToString(this);
 
-    sb.append("timeout=");
-    sb.append(getTimeout());
-
-    sb.append(", gets=");
-    sb.append(getGets());
-
-    sb.append("\n,     waitTimes=");
-    sb.append(getWaitTimes());
-
-    sb.append(", getSynchlingFailures=");
-    sb.append(getGetSynchlingFailures());
-
-    sb.append("\n,     currentMaxSize=");
-    sb.append(getCurrentMaxSize());
-
-    sb.append(", currentAvailable=");
-    sb.append(getCurrentAvailable());
-
-    sb.append("}");
-
-    return sb.toString();
-  }
-
-  /* ====================================================================
-   *                        private methods
-   * ==================================================================== */
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  private void info(final String msg) {
-    getLogger().info(msg);
-  }
-
-  private void warn(final String msg) {
-    getLogger().warn(msg);
+    return ts.append("timeout", getTimeout())
+             .append("gets", getGets())
+             .newLine()
+             .append("waitTimes", getWaitTimes())
+             .append("getSynchlingFailures", getGetSynchlingFailures())
+             .newLine()
+             .append("currentMaxSize", getCurrentMaxSize())
+             .append("currentAvailable", getCurrentAvailable())
+             .toString();
   }
 }

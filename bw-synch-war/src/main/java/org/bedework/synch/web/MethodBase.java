@@ -20,8 +20,8 @@ package org.bedework.synch.web;
 
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
+import org.bedework.util.misc.Logged;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 
 import java.net.URLDecoder;
@@ -37,12 +37,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /** Base class for all webdav servlet methods.
  */
-public abstract class MethodBase {
-  protected boolean debug;
-
+public abstract class MethodBase extends Logged {
   protected boolean dumpContent;
-
-  protected transient Logger log;
 
   protected SynchEngine syncher;
 
@@ -54,17 +50,17 @@ public abstract class MethodBase {
 
   /** Called at each request
    *
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   public abstract void init() throws SynchException;
 
-  private SimpleDateFormat httpDateFormatter =
+  private final SimpleDateFormat httpDateFormatter =
       new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
 
   /**
    * @param req
    * @param resp
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   public abstract void doMethod(HttpServletRequest req,
                                 HttpServletResponse resp)
@@ -73,13 +69,13 @@ public abstract class MethodBase {
   /** Allow servlet to create method.
    */
   public static class MethodInfo {
-    private Class<? extends MethodBase> methodClass;
+    private final Class<? extends MethodBase> methodClass;
 
-    private boolean requiresAuth;
+    private final boolean requiresAuth;
 
     /**
-     * @param methodClass
-     * @param requiresAuth
+     * @param methodClass class
+     * @param requiresAuth true if method requires authentication
      */
     public MethodInfo(final Class<? extends MethodBase> methodClass,
                       final boolean requiresAuth) {
@@ -109,14 +105,12 @@ public abstract class MethodBase {
    *
    * @param syncher
    * @param dumpContent
-   * @throws SynchException
+   * @throws SynchException on init failure
    */
   public void init(final SynchEngine syncher,
                    final boolean dumpContent) throws SynchException {
     this.syncher = syncher;
     this.dumpContent = dumpContent;
-
-    debug = getLogger().isDebugEnabled();
 //    xml = syncher.getXmlEmit();
 
     // content = null;
@@ -144,10 +138,8 @@ public abstract class MethodBase {
    *
    * @param req      Servlet request object
    * @return List    Path elements of fixed up uri
-   * @throws SynchException
    */
-  public List<String> getResourceUri(final HttpServletRequest req)
-      throws SynchException {
+  public List<String> getResourceUri(final HttpServletRequest req) {
     String uri = req.getServletPath();
 
     if ((uri == null) || (uri.length() == 0)) {
@@ -164,10 +156,9 @@ public abstract class MethodBase {
    * Other than the backslash thing why not use URI?
    *
    * @param path      String path to be fixed
-   * @return String[]   fixed path broken into elements
-   * @throws SynchException
+   * @return fixed path broken into elements or null for bad or missing path
    */
-  public static List<String> fixPath(final String path) throws SynchException {
+  public static List<String> fixPath(final String path) {
     if (path == null) {
       return null;
     }
@@ -176,32 +167,32 @@ public abstract class MethodBase {
     try {
       decoded = URLDecoder.decode(path, "UTF8");
     } catch (Throwable t) {
-      throw new SynchException("bad path: " + path);
+      return null; // bad path
     }
 
     if (decoded == null) {
       return (null);
     }
 
-    /** Make any backslashes into forward slashes.
+    /* Make any backslashes into forward slashes.
      */
     if (decoded.indexOf('\\') >= 0) {
       decoded = decoded.replace('\\', '/');
     }
 
-    /** Ensure a leading '/'
+    /* Ensure a leading '/'
      */
     if (!decoded.startsWith("/")) {
       decoded = "/" + decoded;
     }
 
-    /** Remove all instances of '//'.
+    /* Remove all instances of '//'.
      */
     while (decoded.indexOf("//") >= 0) {
       decoded = decoded.replaceAll("//", "/");
     }
 
-    /** Somewhere we may have /./ or /../
+    /* Somewhere we may have /./ or /../
      */
 
     StringTokenizer st = new StringTokenizer(decoded, "/");
@@ -309,45 +300,6 @@ public abstract class MethodBase {
     synchronized (httpDateFormatter) {
       return httpDateFormatter.format(val) + "GMT";
     }
-  }
-
-  /** ===================================================================
-   *                   Logging methods
-   *  =================================================================== */
-
-  /**
-   * @return Logger
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  protected void debugMsg(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  protected void logIt(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
   }
 }
 

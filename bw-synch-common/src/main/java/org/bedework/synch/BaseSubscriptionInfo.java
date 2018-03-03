@@ -58,6 +58,12 @@ public class BaseSubscriptionInfo {
   /** Refresh period for polling subscriptions (millisecs) */
   public static final String propnameRefreshDelay = "refreshDelay";
 
+  /** Allow only public entities */
+  public static final String propnameOrgSyncPublicOnly = "orgsync-publicOnly";
+
+  /** Location key name for matching */
+  public static final String propnameLocKey = "locKey";
+
   /** A string value that provides information about the last refresh for this
    * end of the subscription
    */
@@ -72,7 +78,7 @@ public class BaseSubscriptionInfo {
   /** Comma separatd list of input filter property classes */
   public static final String propnameInputFilterClasses = "inFilterClasses";
 
-  /** Comma separatd list of output filter property classes */
+  /** Comma separated list of output filter property classes */
   public static final String propnameOutputFilterClasses = "outFilterClasses";
 
   /** maintain some counts
@@ -408,7 +414,7 @@ public class BaseSubscriptionInfo {
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 

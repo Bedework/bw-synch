@@ -80,7 +80,7 @@ public class SynchConnector
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
+                    final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
 
     stopped = false;
@@ -271,7 +271,7 @@ public class SynchConnector
     }
 
     if (debug) {
-      trace("Handle subscribe " +  sub);
+      debug("Handle subscribe " +  sub);
     }
 
     /* Look for a subscription that matches the 2 end points */
@@ -295,7 +295,7 @@ public class SynchConnector
   private Notification unsubscribe(final HttpServletResponse resp,
                            final UnsubscribeRequestType u) throws SynchException {
     if (debug) {
-      trace("Handle unsubscribe " +  u.getSubscriptionId());
+      debug("Handle unsubscribe " +  u.getSubscriptionId());
     }
 
     UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
@@ -303,6 +303,9 @@ public class SynchConnector
     Subscription sub = checkAsr(u);
 
     if (sub == null) {
+      if (debug) {
+        warn("No subscription found for " +  u.getSubscriptionId());
+      }
       // No subscription or error - nothing to do
       usr.setStatus(StatusType.ERROR);
       usr.setErrorResponse(new ErrorResponseType());
@@ -317,7 +320,7 @@ public class SynchConnector
   private Notification subStatus(final HttpServletResponse resp,
                            final SubscriptionStatusRequestType ss) throws SynchException {
     if (debug) {
-      trace("Handle status " +  ss.getSubscriptionId());
+      debug("Handle status " +  ss.getSubscriptionId());
     }
 
     SubscriptionStatusResponseType ssr = of.createSubscriptionStatusResponseType();

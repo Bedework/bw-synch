@@ -123,7 +123,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
                               getServerVersionInfoHolder());
 
       if (debug) {
-        trace(subscribeResult.toString());
+        debug(subscribeResult.toString());
       }
 
       List<JAXBElement<? extends ResponseMessageType>> rms =
@@ -190,7 +190,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
       BaseResponseType br = new ExchangeResponse(srm);
 
       if (debug) {
-        trace(br.toString());
+        debug(br.toString());
       }
 
       return br;
@@ -260,7 +260,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
                                                      true);
 
       if (debug) {
-        trace(resp.toString());
+        debug(resp.toString());
       }
 
       for (SynchInfo si: resp.getSynchInfo()) {
@@ -440,7 +440,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
         IcalendarType ical = icalConverter.toXml((CalendarItemType)item);
         if (debug) {
           // serialize and print
-          //trace(comp.toString());
+          //debug(comp.toString());
         }
 
         items.add(ical);

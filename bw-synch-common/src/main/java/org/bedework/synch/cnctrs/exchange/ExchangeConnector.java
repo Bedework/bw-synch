@@ -95,7 +95,7 @@ public class ExchangeConnector
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
+                    final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
 
     config = (ExchangeConnectorConfig)conf;

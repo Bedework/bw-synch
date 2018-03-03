@@ -384,7 +384,7 @@ public class BedeworkConnectorInstance extends AbstractConnectorInstance {
 
     final FetchItemResponseType fresp = fetchItem(uid);
     if (debug) {
-      trace("deleteItem: status=" + fresp.getStatus() +
+      debug("deleteItem: status=" + fresp.getStatus() +
                     " msg=" + fresp.getMessage());
     }
 

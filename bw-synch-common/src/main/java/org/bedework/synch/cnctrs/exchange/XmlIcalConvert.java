@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.exchange;
 import org.bedework.synch.SynchEngine;
 import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.intf.Defs;
+import org.bedework.util.misc.Logged;
 
 import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
@@ -65,7 +66,6 @@ import ietf.params.xml.ns.icalendar_2.VjournalType;
 import ietf.params.xml.ns.icalendar_2.VtodoType;
 import ietf.params.xml.ns.icalendar_2.XBedeworkExsynchLastmodPropType;
 import ietf.params.xml.ns.icalendar_2.XMicrosoftCdoBusystatusPropType;
-import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -77,11 +77,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 *
 * @author Mike Douglass
 */
-public class XmlIcalConvert implements Defs {
-  protected transient Logger log;
-
-  private boolean debug;
-
+public class XmlIcalConvert extends Logged implements Defs {
   private final ObjectFactory xcalOF = new ObjectFactory();
 
   /**
@@ -169,7 +165,7 @@ public class XmlIcalConvert implements Defs {
      */
     String extzid = cal.getTimeZone();
     if (debug) {
-      trace("exchange tzid=" + extzid);
+      debug("exchange tzid=" + extzid);
     }
 
     /* Tz service will map the id for us */
@@ -218,7 +214,7 @@ public class XmlIcalConvert implements Defs {
     */
     /* ======================= cal:DateTimeStamp ============================ */
     if (debug) {
-      trace("dtstamp=" + cal.getDateTimeStamp().toXMLFormat());
+      debug("dtstamp=" + cal.getDateTimeStamp().toXMLFormat());
     }
 
     /* ==================== cal:LegacyFreeBusyStatus ======================== */
@@ -364,7 +360,7 @@ public class XmlIcalConvert implements Defs {
     /* ======================== item:MimeContent ============================ */
     /* ========================= item:ItemId ================================ */
     if (debug) {
-      trace("id: id=" + cal.getItemId().getId() +
+      debug("id: id=" + cal.getItemId().getId() +
             " ckey=" + cal.getItemId().getChangeKey());
     }
 
@@ -741,29 +737,4 @@ public class XmlIcalConvert implements Defs {
       throw new SynchException(t);
     }
   }
-
-  private Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  private void trace(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  /*
-  private void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  private void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  private void info(final String msg) {
-    getLogger().info(msg);
-  }*/
 }

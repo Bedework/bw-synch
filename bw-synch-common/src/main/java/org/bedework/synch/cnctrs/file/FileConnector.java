@@ -63,7 +63,7 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
   }
 
   private ConnectorInstanceMap<FileConnectorInstance> cinstMap =
-      new ConnectorInstanceMap<FileConnectorInstance>();
+      new ConnectorInstanceMap<>();
 
   /**
    */
@@ -75,7 +75,7 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
   public void start(final String connectorId,
                     final ConnectorConfig conf,
                     final String callbackUri,
-                    final SynchEngine syncher) throws SynchException {
+                    final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
 
     config = (FileConnectorConfig)conf;

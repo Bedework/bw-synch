@@ -40,7 +40,7 @@
     <session-timeout>1</session-timeout>
   </session-config>
 
-  <!-- JDBC DataSources (java:comp/env/jdbc)
+  <!-- JDBC DataSources (java:comp/env/jdbc) 
   <resource-ref>
     <description>The calendar DS</description>
     <res-ref-name>jdbc/cardDB</res-ref-name>

@@ -166,7 +166,7 @@ public interface Connector<C extends ConnectorInstance,
    * @param <N>
    */
   static class NotificationBatch<N extends Notification> {
-    private List<N> notifications = new ArrayList<N>();
+    private List<N> notifications = new ArrayList<>();
 
     private StatusType status;
     private String message;
