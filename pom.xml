@@ -15,7 +15,7 @@
 		<!-- Bedework Versions -->
 		<bedework.releases.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.releases.repo.url>
 		<bedework.snapshots.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.snapshots.repo.url>
-		<bw-ws.version>4.0.4-SNAPSHOT</bw-ws.version>
+		<bw-ws.version>4.0.5-SNAPSHOT</bw-ws.version>
 		<bw-util.version>4.0.17-SNAPSHOT</bw-util.version>
 		<bw-access.version>4.0.2-SNAPSHOT</bw-access.version>
 		<!-- Third Party Library Versions -->
@@ -24,13 +24,14 @@
 		<servlet-api.version>2.5</servlet-api.version>
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
     <ical4j.artifactId>ical4j</ical4j.artifactId>
-    <ical4j.version>2.0.3</ical4j.version>
+    <ical4j.version>2.0.6</ical4j.version>
     <!--
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
     <ical4j.artifactId>ical4j</ical4j.artifactId>
     <ical4j.version>1.1.4</ical4j.version>
     -->
-		<apache-http.version>4.2.2</apache-http.version>
+    <http-client.version>4.5.3</http-client.version>
+    <http-core.version>4.4.8</http-core.version>
 		<hibernate.version>5.2.5.Final</hibernate.version>
     <hibernate-ehcache.version>5.2.5.Final</hibernate-ehcache.version>
 		<ehcache.version>2.10.3</ehcache.version>
@@ -152,6 +153,11 @@
         <version>${bw-util.version}</version>
       </dependency>
 			<!-- Bedework: Web Services -->
+      <dependency>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-ws-icalendar</artifactId>
+        <version>${bw-ws.version}</version>
+      </dependency>
 			<dependency>
 				<groupId>org.bedework</groupId>
 				<artifactId>bw-ws-synchws</artifactId>
@@ -183,11 +189,16 @@
         <artifactId>${ical4j.artifactId}</artifactId>
 				<version>${ical4j.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpcore</artifactId>
-				<version>${apache-http.version}</version>
-			</dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${http-client.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${http-core.version}</version>
+      </dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
@@ -286,8 +297,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven.compiler.plugin.version}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<showDeprecation>false</showDeprecation>
 					<showWarnings>false</showWarnings>
 				</configuration>

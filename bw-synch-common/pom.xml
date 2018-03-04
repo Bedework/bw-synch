@@ -50,6 +50,10 @@
 			<artifactId>bw-access</artifactId>
 		</dependency>
     <!-- Bedework: Web Services -->
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-ws-icalendar</artifactId>
+    </dependency>
 		<dependency>
 			<groupId>org.bedework</groupId>
 			<artifactId>bw-ws-synchws</artifactId>
@@ -85,10 +89,14 @@
         </exclusion>
       </exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
