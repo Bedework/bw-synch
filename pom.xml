@@ -16,7 +16,7 @@
 		<bedework.releases.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.releases.repo.url>
 		<bedework.snapshots.repo.url>scp://dev.bedework.org/data/repository/maven/maven2</bedework.snapshots.repo.url>
 		<bw-ws.version>4.0.4-SNAPSHOT</bw-ws.version>
-		<bw-util.version>4.0.12-SNAPSHOT</bw-util.version>
+		<bw-util.version>4.0.17-SNAPSHOT</bw-util.version>
 		<bw-access.version>4.0.2-SNAPSHOT</bw-access.version>
 		<!-- Third Party Library Versions -->
 		<spring.version>3.0.5.RELEASE</spring.version>
@@ -68,6 +68,34 @@
 		<module>bw-synch-war</module>
 		<module>bw-synch-ear</module>
 	</modules>
+
+  <developers>
+    <developer>
+      <name>Mike Douglass</name>
+      <organization>
+        Spherical Cow Group
+      </organization>
+      <organizationUrl>http://sphericalcowgroup.com/</organizationUrl>
+    </developer>
+    <developer>
+      <name>Arlen Johnson</name>
+      <organization>
+        Spherical Cow Group
+      </organization>
+      <organizationUrl>http://sphericalcowgroup.com/</organizationUrl>
+    </developer>
+  </developers>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
@@ -243,59 +271,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<repositories>
-		<repository>
-			<id>jboss.repository</id>
-			<name>JBoss Public Repository Group</name>
-			<url>http://repository.jboss.org/nexus/content/groups/developer/</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<!-- Only needed for JBoss 5 dependencies. We should remove this when we
-			move Bedework off of JBoss 5. -->
-		<repository>
-			<id>jboss-deprecated</id>
-			<name>JBoss Deprecated Repository</name>
-			<url>http://repository.jboss.org/nexus/content/repositories/deprecated</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>bedework.repository</id>
-			<name>Bedework Maven Repository</name>
-			<url>http://repository.bedework.org/maven2/</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<repository>
-			<id>bedework-releases-repository</id>
-			<name>Bedework Releases Repository</name>
-			<url>${bedework.releases.repo.url}</url>
-		</repository>
-		<snapshotRepository>
-			<id>bedework-snapshots-repository</id>
-			<name>Bedework Snapshots Repository</name>
-			<url>${bedework.snapshots.repo.url}</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<build>
 		<extensions>
 			<extension>
@@ -333,6 +308,35 @@
 					</execution>
 				</executions>
 			</plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <useReleaseProfile>false</useReleaseProfile>
+          <releaseProfiles>release</releaseProfiles>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <additionalparam>-Xdoclint:none</additionalparam>
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+        </configuration>
+      </plugin>
 		</plugins>
 	</build>
 
