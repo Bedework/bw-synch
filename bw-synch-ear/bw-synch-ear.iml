@@ -29,9 +29,9 @@
     <orderEntry type="module" module-name="bw-util-security" />
     <orderEntry type="module" module-name="bw-util-servlet" />
     <orderEntry type="module" module-name="bw-util-timezones" />
-    <orderEntry type="module" module-name="bw-ws-icalendar" />
-    <orderEntry type="module" module-name="bw-ws-synchws" />
-    <orderEntry type="module" module-name="bw-ws-exchangews" />
+    <orderEntry type="module" module-name="bw-xml-icalendar" />
+    <orderEntry type="module" module-name="bw-xml-synchws" />
+    <orderEntry type="module" module-name="bw-xml-exchangews" />
     <orderEntry type="library" name="Maven: org.bedework.ical4j:ical4j:2.0.6" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-ehcache:5.2.5.Final" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ehcache:ehcache:2.10.3" level="project" />

@@ -31,12 +31,12 @@
 		<!-- Bedework: Web Services -->
 		<dependency>
 			<groupId>org.bedework</groupId>
-			<artifactId>bw-ws-synchws</artifactId>
+			<artifactId>bw-xml-synchws</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bedework</groupId>
-			<artifactId>bw-ws-exchangews</artifactId>
+			<artifactId>bw-xml-exchangews</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Third Party Libraries -->

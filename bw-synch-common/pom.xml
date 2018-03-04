@@ -52,15 +52,15 @@
     <!-- Bedework: Web Services -->
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-ws-icalendar</artifactId>
+      <artifactId>bw-xml-icalendar</artifactId>
     </dependency>
 		<dependency>
 			<groupId>org.bedework</groupId>
-			<artifactId>bw-ws-synchws</artifactId>
+			<artifactId>bw-xml-synchws</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.bedework</groupId>
-			<artifactId>bw-ws-exchangews</artifactId>
+			<artifactId>bw-xml-exchangews</artifactId>
 		</dependency>
 		<!-- Third Party Libraries -->
 		<dependency>
