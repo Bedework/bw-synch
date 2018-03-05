@@ -12,67 +12,6 @@
 	<packaging>war</packaging>
 	<name>bw-synch-war</name>
 
-	<dependencies>
-		<!-- Internal Project Dependencies -->
-		<dependency>
-      <groupId>${project.groupId}</groupId>
-			<artifactId>bw-synch-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<!-- Bedework: Util -->
-		<dependency>
-			<groupId>org.bedework</groupId>
-			<artifactId>bw-util-misc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.bedework</groupId>
-			<artifactId>bw-util-servlet</artifactId>
-		</dependency>
-		<!-- Bedework: Web Services -->
-		<dependency>
-			<groupId>org.bedework</groupId>
-			<artifactId>bw-xml-synchws</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bedework</groupId>
-			<artifactId>bw-xml-exchangews</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Third Party Libraries -->
-		<dependency>
-      <groupId>${ical4j.groupId}</groupId>
-      <artifactId>${ical4j.artifactId}</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Test Dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
