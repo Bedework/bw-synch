@@ -248,7 +248,7 @@
         <version>${bw-util.version}</version>
         <executions>
           <execution>
-            <phase>deploy</phase>
+            <phase>install</phase>
             <goals>
               <goal>bw-deploy</goal>
             </goals>
