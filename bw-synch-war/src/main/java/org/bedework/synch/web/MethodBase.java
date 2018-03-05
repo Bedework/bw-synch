@@ -58,8 +58,8 @@ public abstract class MethodBase extends Logged {
       new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
 
   /**
-   * @param req
-   * @param resp
+   * @param req http request
+   * @param resp http response
    * @throws SynchException on fatal error
    */
   public abstract void doMethod(HttpServletRequest req,
@@ -96,6 +96,7 @@ public abstract class MethodBase extends Logged {
      *
      * @return boolean true if authentication required.
      */
+    @SuppressWarnings("unused")
     public boolean getRequiresAuth() {
       return requiresAuth;
     }
@@ -103,8 +104,8 @@ public abstract class MethodBase extends Logged {
 
   /** Called at each request
    *
-   * @param syncher
-   * @param dumpContent
+   * @param syncher the synch engine
+   * @param dumpContent true for debug dums of content
    * @throws SynchException on init failure
    */
   public void init(final SynchEngine syncher,
@@ -166,7 +167,7 @@ public abstract class MethodBase extends Logged {
     String decoded;
     try {
       decoded = URLDecoder.decode(path, "UTF8");
-    } catch (Throwable t) {
+    } catch (final Throwable ignored) {
       return null; // bad path
     }
 
@@ -188,22 +189,25 @@ public abstract class MethodBase extends Logged {
 
     /* Remove all instances of '//'.
      */
-    while (decoded.indexOf("//") >= 0) {
+    while (decoded.contains("//")) {
       decoded = decoded.replaceAll("//", "/");
     }
 
     /* Somewhere we may have /./ or /../
      */
 
-    StringTokenizer st = new StringTokenizer(decoded, "/");
+    final StringTokenizer st = new StringTokenizer(decoded, "/");
 
-    ArrayList<String> al = new ArrayList<String>();
+    final ArrayList<String> al = new ArrayList<>();
     while (st.hasMoreTokens()) {
-      String s = st.nextToken();
+      final String s = st.nextToken();
 
       if (s.equals(".")) {
         // ignore
-      } else if (s.equals("..")) {
+        continue;
+      }
+
+      if (s.equals("..")) {
         // Back up 1
         if (al.size() == 0) {
           // back too far
@@ -236,6 +240,7 @@ public abstract class MethodBase extends Logged {
   }
   */
 
+  @SuppressWarnings("unused")
   protected void addHeaders(final HttpServletResponse resp) throws SynchException {
     // This probably needs changes
 /*
@@ -260,16 +265,17 @@ public abstract class MethodBase extends Logged {
    * @return Document  Parsed body or null for no body
    * @exception SynchException Some error occurred.
    */
+  @SuppressWarnings("unused")
   protected Document parseContent(final HttpServletRequest req,
                                   final HttpServletResponse resp)
       throws SynchException {
-    int len = req.getContentLength();
+    final int len = req.getContentLength();
     if (len == 0) {
       return null;
     }
 
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
 
       //DocumentBuilder builder = factory.newDocumentBuilder();
@@ -286,12 +292,13 @@ public abstract class MethodBase extends Logged {
 //    } catch (SAXException e) {
   //    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     //  throw new SynchException(HttpServletResponse.SC_BAD_REQUEST);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       throw new SynchException(t);
     }
   }
 
+  @SuppressWarnings("unused")
   protected String formatHTTPDate(final Timestamp val) {
     if (val == null) {
       return null;
