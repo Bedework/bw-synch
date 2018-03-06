@@ -21,6 +21,7 @@
     <orderEntry type="module" module-name="bw-synch-web" />
     <orderEntry type="module" module-name="bw-synch-war" />
     <orderEntry type="module" module-name="bw-access" />
+    <orderEntry type="module" module-name="bw-util-caching" />
     <orderEntry type="module" module-name="bw-util-calendar" />
     <orderEntry type="module" module-name="bw-util-config" />
     <orderEntry type="module" module-name="bw-util-hibernate" />
@@ -30,6 +31,7 @@
     <orderEntry type="module" module-name="bw-util-security" />
     <orderEntry type="module" module-name="bw-util-servlet" />
     <orderEntry type="module" module-name="bw-util-timezones" />
+    <orderEntry type="module" module-name="bw-util-xml" />
     <orderEntry type="module" module-name="bw-xml-icalendar" />
     <orderEntry type="module" module-name="bw-xml-synchws" />
     <orderEntry type="module" module-name="bw-xml-exchangews" />
