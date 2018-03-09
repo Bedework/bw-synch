@@ -79,8 +79,7 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-calendar</artifactId>
-      <version>${bw-util.version}</version>
+      <artifactId>bw-util2-calendar</artifactId>
       <exclusions>
         <exclusion>
           <groupId>*</groupId>
