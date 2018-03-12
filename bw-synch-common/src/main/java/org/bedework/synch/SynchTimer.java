@@ -18,10 +18,12 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.Notification.NotificationItem;
-import org.bedework.synch.Notification.NotificationItem.ActionType;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Notification;
+import org.bedework.synch.shared.Notification.NotificationItem;
+import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
+import org.bedework.synch.shared.Stat;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.misc.Logged;
 
@@ -75,15 +77,7 @@ public class SynchTimer extends Logged {
       final Notification<NotificationItem> note = new Notification<>(
           sub, SynchEndType.NONE, ni);
 
-      try {
-        syncher.handleNotification(note);
-      } catch (final SynchException se) {
-        if (debug) {
-          error(se);
-        } else {
-          error(se.getMessage());
-        }
-      }
+      syncher.handleNotification(note);
     }
   }
 

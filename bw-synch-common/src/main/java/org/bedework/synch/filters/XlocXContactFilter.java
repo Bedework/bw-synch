@@ -18,8 +18,8 @@
 */
 package org.bedework.synch.filters;
 
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.xml.tagdefs.XcalTags;
 
 import ietf.params.xml.ns.icalendar_2.BasePropertyType;

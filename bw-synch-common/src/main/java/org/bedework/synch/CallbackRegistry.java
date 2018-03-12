@@ -18,8 +18,8 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import java.util.HashMap;

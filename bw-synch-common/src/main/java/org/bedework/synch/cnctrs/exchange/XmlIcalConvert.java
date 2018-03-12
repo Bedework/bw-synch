@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.exception.SynchException;
 import org.bedework.synch.intf.Defs;
+import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.calendar.XcalUtil.TzGetter;
 import org.bedework.util.misc.Logged;
 
 import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
@@ -80,6 +80,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class XmlIcalConvert extends Logged implements Defs {
   private final ObjectFactory xcalOF = new ObjectFactory();
 
+  private final TzGetter tzGetter;
+
   /**
    */
   public enum ItemType {
@@ -99,6 +101,10 @@ public class XmlIcalConvert extends Logged implements Defs {
     DistList,
     /** */
     StickyNote
+  }
+
+  public XmlIcalConvert(final TzGetter tzGetter) {
+    this.tzGetter = tzGetter;
   }
 
   /**
@@ -592,8 +598,8 @@ public class XmlIcalConvert extends Logged implements Defs {
    * @return tz stuff
    * @throws SynchException
    */
-  public static TzStuff getTz(final TimeZoneDefinitionType tzdef,
-                              final String extzid) throws SynchException {
+  public TzStuff getTz(final TimeZoneDefinitionType tzdef,
+                       final String extzid) throws SynchException {
     try {
       TzStuff t = new TzStuff();
 
@@ -602,13 +608,13 @@ public class XmlIcalConvert extends Logged implements Defs {
         if ((extzid != null) && (extzid.equals(t.id))) {
           t.id = null;
         } else {
-          t.tz = SynchEngine.getTzGetter().getTz(t.id);
+          t.tz = tzGetter.getTz(t.id);
           return t;
         }
       }
 
       if (extzid != null) {
-        t.tz = SynchEngine.getTzGetter().getTz(extzid);
+        t.tz = tzGetter.getTz(extzid);
       }
 
       return t;

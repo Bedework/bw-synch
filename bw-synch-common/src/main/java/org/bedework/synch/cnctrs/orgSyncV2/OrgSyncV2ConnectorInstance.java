@@ -18,11 +18,11 @@
 */
 package org.bedework.synch.cnctrs.orgSyncV2;
 
-import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.XcalUtil;
 import org.bedework.util.http.Headers;

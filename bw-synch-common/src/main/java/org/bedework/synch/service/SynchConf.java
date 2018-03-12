@@ -18,10 +18,11 @@
 */
 package org.bedework.synch.service;
 
-import org.bedework.synch.Stat;
-import org.bedework.synch.SynchEngine;
+import org.bedework.synch.shared.Stat;
+import org.bedework.synch.SynchEngineImpl;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
+import org.bedework.synch.shared.SynchEngine;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.hibernate.HibConfig;
 import org.bedework.util.hibernate.SchemaThread;
@@ -97,7 +98,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
           if (syncher == null) {
             // Starting the service
 
-            syncher = SynchEngine.getSyncher();
+            syncher = SynchEngineImpl.getSyncher();
             syncher.start();
           }
         } catch (Throwable t) {
@@ -133,7 +134,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     setConfigPname(confuriPname);
     setPathSuffix("conf");
 
-    SynchEngine.setConfigHolder(this);
+    SynchEngineImpl.setConfigHolder(this);
   }
 
   /* ========================================================================

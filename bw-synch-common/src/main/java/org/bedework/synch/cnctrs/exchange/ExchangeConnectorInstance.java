@@ -18,17 +18,17 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.cnctrs.Connector;
 import org.bedework.synch.cnctrs.exchange.messages.FindItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.GetItemsRequest;
 import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ExchangeServicePortType;
@@ -79,7 +79,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
 
   private ExchangeSubscriptionInfo info;
 
-  private final XmlIcalConvert icalConverter = new XmlIcalConvert();
+  private final XmlIcalConvert icalConverter;
 
   ExchangeConnectorInstance(final ExchangeConnectorConfig config,
                             final ExchangeConnector cnctr,
@@ -90,6 +90,7 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
     this.config = config;
     this.cnctr = cnctr;
     this.info = info;
+    icalConverter = new XmlIcalConvert(cnctr.getSyncher().getTzGetter());
   }
 
   @Override
@@ -257,7 +258,8 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
       FindItemResponseMessageType firm = (FindItemResponseMessageType)jaxbrm.getValue();
 
       FinditemsResponse resp = new FinditemsResponse(firm,
-                                                     true);
+                                                     true,
+                                                     cnctr.getSyncher().getTzGetter());
 
       if (debug) {
         debug(resp.toString());

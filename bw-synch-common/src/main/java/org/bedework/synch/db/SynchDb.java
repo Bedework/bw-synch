@@ -19,7 +19,8 @@
 package org.bedework.synch.db;
 
 import org.bedework.synch.conf.SynchConfig;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.hibernate.HibException;
 import org.bedework.util.hibernate.HibSession;
 import org.bedework.util.hibernate.HibSessionFactory;
@@ -100,7 +101,7 @@ public class SynchDb extends Logged implements Serializable {
    * ==================================================================== */
 
   private static final String getAllQuery =
-          "from " + Subscription.class.getName();
+          "from " + SubscriptionImpl.class.getName();
 
   /**
    * @return list of subscriptions
@@ -118,7 +119,7 @@ public class SynchDb extends Logged implements Serializable {
   }
 
   private static final String getSubQuery =
-          "from " + Subscription.class.getName() +
+          "from " + SubscriptionImpl.class.getName() +
                   " sub where sub.subscriptionId=:subid";
 
   /** The synch engine generates a unique subscription id
@@ -140,7 +141,7 @@ public class SynchDb extends Logged implements Serializable {
   }
 
   private static final String findSubQuery =
-          "from " + Subscription.class.getName() +
+          "from " + SubscriptionImpl.class.getName() +
                   " sub where sub.endAConnectorInfo.connectorId=:aconnid" +
                   " and sub.endAConnectorInfo.synchProperties=:aconnprops" +
                   " and sub.endBConnectorInfo.connectorId=:bconnid" +

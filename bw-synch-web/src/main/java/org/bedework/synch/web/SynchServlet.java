@@ -18,9 +18,10 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.SynchEngineImpl;
 import org.bedework.synch.service.SynchConf;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 import org.bedework.util.http.service.HttpOut;
 import org.bedework.util.jmx.ConfBase;
@@ -104,7 +105,7 @@ public class SynchServlet extends HttpServlet
 
       tryWait(req, true);
 
-      syncher = SynchEngine.getSyncher();
+      syncher = SynchEngineImpl.getSyncher();
 
       if (req.getCharacterEncoding() == null) {
         req.setCharacterEncoding("UTF-8");

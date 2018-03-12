@@ -76,7 +76,7 @@
 
     <!-- Subscriptions cache
         -->
-    <cache name="bwsynch.org.bedework.synch.db.Subscription"
+    <cache name="bwsynch.org.bedework.synch.db.SubscriptionImpl"
         maxElementsInMemory="1000"
         eternal="false"
         timeToIdleSeconds="300"

@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.db.SubscriptionConnectorInfo;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
+import org.bedework.synch.shared.SubscriptionConnectorInfo;
+import org.bedework.synch.shared.exception.SynchException;
 
 /** Stores information about one end of a subscription for connector.
  *

@@ -18,15 +18,15 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.PropertiesInfo;
-import org.bedework.synch.SynchDefs.SynchKind;
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.SynchPropertyInfo;
-import org.bedework.synch.cnctrs.AbstractConnector;
-import org.bedework.synch.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.conf.ConnectorConfig;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.PropertiesInfo;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.SynchDefs.SynchKind;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.SynchPropertyInfo;
+import org.bedework.synch.shared.cnctrs.AbstractConnector;
+import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
+import org.bedework.synch.shared.conf.ConnectorConfigI;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
@@ -93,7 +93,7 @@ public class ExchangeConnector
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfig conf,
+                    final ConnectorConfigI conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);

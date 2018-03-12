@@ -19,7 +19,8 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.calendar.XcalUtil;
 
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
@@ -141,14 +142,15 @@ public class FinditemsResponse extends ExchangeResponse {
    * @throws SynchException
    */
   public FinditemsResponse(final FindItemResponseMessageType firm,
-                           final boolean synchInfoOnly) throws SynchException {
+                           final boolean synchInfoOnly,
+                           final XcalUtil.TzGetter tzGetter) throws SynchException {
     super(firm);
 
     FindItemParentType rf = firm.getRootFolder();
 
     includesLastItemInRange = rf.isIncludesLastItemInRange();
 
-    XmlIcalConvert cnv = new XmlIcalConvert();
+    XmlIcalConvert cnv = new XmlIcalConvert(tzGetter);
 
     for (ItemType item: rf.getItems().getItemOrMessageOrCalendarItem()) {
       if (!(item instanceof CalendarItemType)) {

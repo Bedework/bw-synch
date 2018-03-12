@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.service;
 
-import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.shared.cnctrs.Connector;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.jmx.ConfBase;

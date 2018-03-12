@@ -18,7 +18,7 @@
     <param name="enumClassname">org.bedework.synch.wsmessages.SynchMasterType</param>
   </typedef>
 
-  <class name="org.bedework.synch.db.Subscription"
+  <class name="org.bedework.synch.db.SubscriptionImpl"
          table="bwsynch_subs" >
     <cache usage="read-write"/>
 
@@ -47,7 +47,7 @@
               type="true_false" not-null="true" />
 
     <component name="endAConnectorInfo"
-               class="org.bedework.synch.db.SubscriptionConnectorInfo" >
+               class="org.bedework.synch.shared.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_a"
                 type="string" length="100" />
       <property name="synchProperties" column="bwsyn_conn_props_a"
@@ -55,7 +55,7 @@
     </component>
 
     <component name="endBConnectorInfo"
-               class="org.bedework.synch.db.SubscriptionConnectorInfo" >
+               class="org.bedework.synch.shared.SubscriptionConnectorInfo" >
       <property name="connectorId" column="bwsyn_connectorid_b"
                 type="string" length="100" />
       <property name="synchProperties" column="bwsyn_conn_props_b"
@@ -63,7 +63,7 @@
     </component>
 
     <component name="info"
-               class="org.bedework.synch.db.SubscriptionInfo" >
+               class="org.bedework.synch.shared.SubscriptionInfo" >
       <property name="synchProperties" column="bwsyn_props"
                 type="string" length="3000" />
     </component>

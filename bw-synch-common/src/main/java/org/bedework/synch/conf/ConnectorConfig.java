@@ -18,6 +18,7 @@
  */
 package org.bedework.synch.conf;
 
+import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.ConfigBase;
 import org.bedework.util.misc.ToString;
@@ -27,7 +28,8 @@ import org.bedework.util.misc.ToString;
  * @author douglm
  */
 @ConfInfo(elementName = "synch-connector")
-public class ConnectorConfig extends ConfigBase<ConnectorConfig> implements ConnectorConfigI  {
+public class ConnectorConfig extends ConfigBase<ConnectorConfig> implements
+        ConnectorConfigI {
   private String connectorClassName;
 
   private String mbeanClassName;

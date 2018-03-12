@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.Notification;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Notification;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
@@ -29,7 +29,7 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
  *
  */
 public class ExchangeNotification extends
-              Notification<ExchangeNotification.NotificationItem> {
+        Notification<ExchangeNotification.NotificationItem> {
   private ExchangeNotificationMessage enm;
 
   /**

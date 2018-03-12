@@ -18,18 +18,22 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
-import org.bedework.synch.Notification;
-import org.bedework.synch.Notification.NotificationItem;
-import org.bedework.synch.Notification.NotificationItem.ActionType;
-import org.bedework.synch.SynchDefs.SynchKind;
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.cnctrs.AbstractConnector;
-import org.bedework.synch.cnctrs.Connector;
+import org.bedework.synch.SubscriptionConnectorInfoImpl;
+import org.bedework.synch.SubscriptionInfoImpl;
 import org.bedework.synch.conf.ConnectorConfig;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.db.SubscriptionConnectorInfo;
-import org.bedework.synch.db.SubscriptionInfo;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.db.SubscriptionImpl;
+import org.bedework.synch.shared.Notification;
+import org.bedework.synch.shared.Notification.NotificationItem;
+import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.SubscriptionConnectorInfo;
+import org.bedework.synch.shared.SubscriptionInfo;
+import org.bedework.synch.shared.SynchDefs.SynchKind;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.cnctrs.AbstractConnector;
+import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.conf.ConnectorConfigI;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
 import org.bedework.synch.wsmessages.ArrayOfSynchConnectorInfo;
@@ -78,7 +82,7 @@ public class SynchConnector
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfig conf,
+                    final ConnectorConfigI conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
@@ -252,7 +256,7 @@ public class SynchConnector
 
   private Notification subscribe(final HttpServletResponse resp,
                                  final SubscribeRequestType sr) throws SynchException {
-    Subscription sub = new Subscription(null);
+    Subscription sub = new SubscriptionImpl(null);
 
     sub.setOwner(sr.getPrincipalHref());
     sub.setDirection(sr.getDirection());
@@ -262,7 +266,7 @@ public class SynchConnector
 
     ArrayOfSynchProperties info = sr.getInfo();
     if (info != null) {
-      SubscriptionInfo sinfo = new SubscriptionInfo();
+      SubscriptionInfo sinfo = new SubscriptionInfoImpl();
 
       for (SynchPropertyType sp: info.getProperty()) {
         sinfo.setProperty(sp.getName(), sp.getValue());
@@ -276,7 +280,7 @@ public class SynchConnector
 
     /* Look for a subscription that matches the 2 end points */
 
-    Subscription s = syncher.find(sub);
+    final Subscription s = syncher.find(sub);
 
     SubscribeResponseType sresp = of.createSubscribeResponseType();
 
@@ -359,7 +363,8 @@ public class SynchConnector
   }
 
   private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
-    SubscriptionConnectorInfo subCinfo = new SubscriptionConnectorInfo();
+    final SubscriptionConnectorInfo subCinfo =
+            new SubscriptionConnectorInfoImpl();
 
     subCinfo.setConnectorId(cinfo.getConnectorId());
 
@@ -367,7 +372,7 @@ public class SynchConnector
       return subCinfo;
     }
 
-    for (SynchPropertyType sp: cinfo.getProperties().getProperty()) {
+    for (final SynchPropertyType sp: cinfo.getProperties().getProperty()) {
       subCinfo.setProperty(sp.getName(), sp.getValue());
     }
 

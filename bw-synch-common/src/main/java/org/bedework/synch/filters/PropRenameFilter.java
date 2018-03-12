@@ -18,7 +18,8 @@
 */
 package org.bedework.synch.filters;
 
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.synch.shared.filters.AbstractFilter;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
 import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;

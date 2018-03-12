@@ -18,7 +18,7 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.exception.SynchException;
 
 import org.apache.commons.codec.binary.Base64;
 

@@ -18,8 +18,8 @@
 */
 package org.bedework.synch.web;
 
-import org.bedework.synch.SynchEngine;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.misc.Logged;
 
 import org.w3c.dom.Document;

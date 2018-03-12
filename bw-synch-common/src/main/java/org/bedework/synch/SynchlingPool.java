@@ -18,8 +18,10 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.exception.SynchTimeout;
+import org.bedework.synch.shared.Stat;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.synch.shared.exception.SynchTimeout;
 import org.bedework.util.misc.Logged;
 import org.bedework.util.misc.ToString;
 

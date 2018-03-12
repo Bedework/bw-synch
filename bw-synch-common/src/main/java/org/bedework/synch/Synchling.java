@@ -18,17 +18,19 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.BaseSubscriptionInfo.CrudCts;
-import org.bedework.synch.Notification.NotificationItem;
-import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.cnctrs.ConnectorInstance;
-import org.bedework.synch.cnctrs.ConnectorInstance.ItemInfo;
-import org.bedework.synch.cnctrs.ConnectorInstance.SynchItemsInfo;
-import org.bedework.synch.db.Subscription;
-import org.bedework.synch.db.SubscriptionConnectorInfo;
-import org.bedework.synch.exception.SynchException;
-import org.bedework.synch.filters.Filter;
+import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
+import org.bedework.synch.shared.filters.Filter;
 import org.bedework.synch.filters.Filters;
+import org.bedework.synch.shared.Notification;
+import org.bedework.synch.shared.Notification.NotificationItem;
+import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.SubscriptionConnectorInfo;
+import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.cnctrs.ConnectorInstance;
+import org.bedework.synch.shared.cnctrs.ConnectorInstance.ItemInfo;
+import org.bedework.synch.shared.cnctrs.ConnectorInstance.SynchItemsInfo;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
@@ -1079,7 +1081,7 @@ public class Synchling extends Logged {
     Filters.addDifferSkipItems(skipList, toInfo.getOutFilters());
 
     diffSubid = sub.getSubscriptionId();
-    diff = new XmlIcalCompare(skipList, SynchEngine.getTzGetter());
+    diff = new XmlIcalCompare(skipList, syncher.getTzGetter());
     return diff;
   }
 }

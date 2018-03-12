@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.orgSyncV2;
 
-import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.db.SubscriptionConnectorInfo;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
+import org.bedework.synch.shared.SubscriptionConnectorInfo;
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.misc.ToString;
 
 /** Represents connection information for an orgsync v2 connector instance.

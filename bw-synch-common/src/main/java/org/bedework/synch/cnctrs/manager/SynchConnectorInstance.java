@@ -18,10 +18,10 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
-import org.bedework.synch.BaseSubscriptionInfo;
-import org.bedework.synch.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.cnctrs.Connector;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
+import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.exception.SynchException;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;

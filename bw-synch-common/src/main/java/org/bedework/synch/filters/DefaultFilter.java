@@ -18,7 +18,8 @@
 */
 package org.bedework.synch.filters;
 
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.synch.shared.filters.AbstractFilter;
 import org.bedework.synch.wsmessages.CalProcessingType;
 
 import ietf.params.xml.ns.icalendar_2.AttendeePropType;

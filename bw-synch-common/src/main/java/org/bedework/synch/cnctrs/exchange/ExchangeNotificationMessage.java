@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.exchange;
 
-import org.bedework.synch.Notification.NotificationItem.ActionType;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
-import org.bedework.synch.exception.SynchException;
+import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
+import org.bedework.synch.shared.exception.SynchException;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
