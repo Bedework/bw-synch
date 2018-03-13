@@ -30,11 +30,6 @@ import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /** The synch processor connector for subscriptions to orgsync.
  *
  * @author Mike Douglass
@@ -43,7 +38,8 @@ public class OrgSyncV2Connector
         extends AbstractConnector<OrgSyncV2Connector,
                                   OrgSyncV2ConnectorInstance,
                                   Notification,
-                                  OrgSyncV2ConnectorConfig> {
+                                  OrgSyncV2ConnectorConfig,
+                                  OrgSyncV2SubscriptionInfo> {
   private final static PropertiesInfo propInfo = new PropertiesInfo();
 
   static {
@@ -69,8 +65,6 @@ public class OrgSyncV2Connector
   private final ConnectorInstanceMap<OrgSyncV2ConnectorInstance> cinstMap =
       new ConnectorInstanceMap<>();
 
-  private boolean failed;
-
   /**
    */
   public OrgSyncV2Connector() {
@@ -94,45 +88,14 @@ public class OrgSyncV2Connector
     running = true;
   }
 
-  public boolean isFailed() {
-    return failed;
-  }
-
-  @Override
-  public boolean isManager() {
-    return false;
-  }
-
   @Override
   public SynchKind getKind() {
     return SynchKind.poll;
   }
 
   @Override
-  public boolean isReadOnly() {
-    return config.getReadOnly();
-  }
-
-  @Override
-  public boolean getTrustLastmod() {
-    return config.getTrustLastmod();
-  }
-
-  @Override
-  public List<Object> getSkipList() {
-    return null;
-  }
-
-  @Override
-  public OrgSyncV2ConnectorInstance getConnectorInstance(final Subscription sub,
-                                                         final SynchEndType end) throws SynchException {
-    OrgSyncV2ConnectorInstance inst = cinstMap.find(sub, end);
-
-    if (inst != null) {
-      return inst;
-    }
-
-    //debug = getLogger().isDebugEnabled();
+  public OrgSyncV2ConnectorInstance makeInstance(final Subscription sub,
+                                            final SynchEndType end) throws SynchException {
     final OrgSyncV2SubscriptionInfo info;
 
     if (end == SynchEndType.A) {
@@ -141,38 +104,8 @@ public class OrgSyncV2Connector
       info = new OrgSyncV2SubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    final String rd = info.getRefreshDelay();
-    if (rd == null) {
-      info.setRefreshDelay(String.valueOf(config.getMinPoll() * 1000));
-    }
-
-    inst = new OrgSyncV2ConnectorInstance(config,
-                                          this, sub, end, info);
-    cinstMap.add(sub, end, inst);
-
-    return inst;
-  }
-
-  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
-  }
-
-  @Override
-  public BedeworkNotificationBatch handleCallback(
-          final HttpServletRequest req,
-          final HttpServletResponse resp,
-          final List<String> resourceUri) throws SynchException {
-    return null;
-  }
-
-  @Override
-  public void respondCallback(final HttpServletResponse resp,
-                              final NotificationBatch<Notification> notifications)
-                                                    throws SynchException {
-  }
-
-  @Override
-  public void stop() throws SynchException {
-    running = false;
+    return new OrgSyncV2ConnectorInstance(config,
+                                     this, sub, end, info);
   }
 
   /* ====================================================================

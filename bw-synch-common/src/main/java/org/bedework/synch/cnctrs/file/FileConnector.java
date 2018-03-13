@@ -30,21 +30,17 @@ import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /** The synch processor connector for subscriptions to files.
  *
  * @author Mike Douglass
  */
 public class FileConnector
         extends AbstractConnector<FileConnector,
-                                  FileConnectorInstance,
-                                  Notification,
-                                  FileConnectorConfig> {
-private static PropertiesInfo fPropInfo = new PropertiesInfo();
+        FileConnectorInstance,
+        Notification,
+        FileConnectorConfig,
+        FileSubscriptionInfo> {
+  private static final PropertiesInfo fPropInfo = new PropertiesInfo();
 
   static {
     fPropInfo.requiredUri(null);
@@ -76,14 +72,6 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
-
-    stopped = false;
-    running = true;
-  }
-
-  @Override
-  public boolean isManager() {
-    return false;
   }
 
   @Override
@@ -92,31 +80,9 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
   }
 
   @Override
-  public boolean isReadOnly() {
-    return config.getReadOnly();
-  }
-
-  @Override
-  public boolean getTrustLastmod() {
-    return config.getTrustLastmod();
-  }
-
-  @Override
-  public List<Object> getSkipList() {
-    return null;
-  }
-
-  @Override
-  public FileConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEndType end) throws SynchException {
-    FileConnectorInstance inst = cinstMap.find(sub, end);
-
-    if (inst != null) {
-      return inst;
-    }
-
-    //debug = getLogger().isDebugEnabled();
-    FileSubscriptionInfo info;
+  public FileConnectorInstance makeInstance(final Subscription sub,
+                                            final SynchEndType end) throws SynchException {
+    final FileSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
       info = new FileSubscriptionInfo(sub.getEndAConnectorInfo());
@@ -124,37 +90,8 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
       info = new FileSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    String rd = info.getRefreshDelay();
-    if (rd == null) {
-      info.setRefreshDelay(String.valueOf(config.getMinPoll() * 1000));
-    }
-
-    inst = new FileConnectorInstance(config,
-                                     this, sub, end, info);
-    cinstMap.add(sub, end, inst);
-
-    return inst;
-  }
-
-  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
-  }
-
-  @Override
-  public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
-                                     final HttpServletResponse resp,
-                                     final List<String> resourceUri) throws SynchException {
-    return null;
-  }
-
-  @Override
-  public void respondCallback(final HttpServletResponse resp,
-                              final NotificationBatch<Notification> notifications)
-                                                    throws SynchException {
-  }
-
-  @Override
-  public void stop() throws SynchException {
-    running = false;
+    return new FileConnectorInstance(config,
+                                         this, sub, end, info);
   }
 
   /* ====================================================================

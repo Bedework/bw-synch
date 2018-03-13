@@ -52,7 +52,8 @@ public class ExchangeConnector
       extends AbstractConnector<ExchangeConnector,
                                 ExchangeConnectorInstance,
                                 ExchangeNotification,
-                                ExchangeConnectorConfig> {
+                                ExchangeConnectorConfig,
+                                ExchangeSubscriptionInfo> {
   /* Information required from the user for an Exchange connection
    *
    * exchange-folder-id
@@ -108,36 +109,14 @@ public class ExchangeConnector
   }
 
   @Override
-  public boolean isManager() {
-    return false;
-  }
-
-  @Override
   public SynchKind getKind() {
     return SynchKind.notify;
   }
 
   @Override
-  public boolean isReadOnly() {
-    return config.getReadOnly();
-  }
-
-  @Override
-  public boolean getTrustLastmod() {
-    return config.getTrustLastmod();
-  }
-
-  @Override
-  public ExchangeConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEndType end) throws SynchException {
-    ExchangeConnectorInstance inst = cinstMap.find(sub, end);
-
-    if (inst != null) {
-      return inst;
-    }
-
-    //debug = getLogger().isDebugEnabled();
-    ExchangeSubscriptionInfo info;
+  public ExchangeConnectorInstance makeInstance(final Subscription sub,
+                                                final SynchEndType end) throws SynchException {
+    final ExchangeSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
       info = new ExchangeSubscriptionInfo(sub.getEndAConnectorInfo());
@@ -145,11 +124,8 @@ public class ExchangeConnector
       info = new ExchangeSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new ExchangeConnectorInstance(config,
+    return new ExchangeConnectorInstance(config,
                                          this, sub, end, info);
-    cinstMap.add(sub, end, inst);
-
-    return inst;
   }
 
   class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
@@ -238,11 +214,6 @@ public class ExchangeConnector
     } catch(Throwable t) {
       throw new SynchException(t);
     }
-  }
-
-  @Override
-  public void stop() throws SynchException {
-    running = false;
   }
 
   /* ====================================================================

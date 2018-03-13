@@ -18,13 +18,16 @@
 */
 package org.bedework.synch.shared.cnctrs;
 
+import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.PropertiesInfo;
+import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SynchDefs;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ObjectFactory;
+import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 import org.bedework.util.misc.Logged;
@@ -36,6 +39,7 @@ import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
@@ -60,7 +64,8 @@ import javax.xml.soap.SOAPMessage;
 public abstract class AbstractConnector<T,
                                         TI extends AbstractConnectorInstance,
                                         TN extends Notification,
-                                        Tconf extends ConnectorConfigI>
+                                        Tconf extends ConnectorConfigI,
+                                        InfoT extends BaseSubscriptionInfo>
         extends Logged implements Connector<TI, TN, Tconf> {
   protected Tconf config;
 
@@ -68,7 +73,7 @@ public abstract class AbstractConnector<T,
 
   private String connectorId;
 
-  private static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
+  private static final ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
       new ietf.params.xml.ns.icalendar_2.ObjectFactory();
 
   protected SynchEngine syncher;
@@ -76,6 +81,8 @@ public abstract class AbstractConnector<T,
   protected boolean running;
 
   protected boolean stopped;
+
+  protected boolean failed;
 
   // Are these thread safe?
   protected ObjectFactory of = new ObjectFactory();
@@ -91,6 +98,9 @@ public abstract class AbstractConnector<T,
       this.propInfo = propInfo;
     }
   }
+
+  private final ConnectorInstanceMap<TI> cinstMap =
+          new ConnectorInstanceMap<>();
 
   /**
    * @return the connector id
@@ -109,12 +119,13 @@ public abstract class AbstractConnector<T,
     this.callbackUri = callbackUri;
     this.config = conf;
 
-    debug = getLogger().isDebugEnabled();
+    stopped = false;
+    running = true;
   }
 
   @Override
   public String getStatus() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
 
     if (isManager()) {
       sb.append("(Manager): ");
@@ -142,12 +153,27 @@ public abstract class AbstractConnector<T,
 
   @Override
   public boolean isFailed() {
-    return false;
+    return failed;
   }
 
   @Override
   public boolean isStopped() {
     return stopped;
+  }
+
+  @Override
+  public boolean isManager() {
+    return false;
+  }
+
+  @Override
+  public boolean isReadOnly() {
+    return config.getReadOnly();
+  }
+
+  @Override
+  public boolean getTrustLastmod() {
+    return config.getTrustLastmod();
   }
 
   @Override
@@ -183,6 +209,45 @@ public abstract class AbstractConnector<T,
   @Override
   public void stop() throws SynchException {
     running = false;
+  }
+
+  public abstract TI makeInstance(final Subscription sub,
+                                  final SynchEndType end) throws SynchException;
+
+  @Override
+  public TI getConnectorInstance(final Subscription sub,
+                                 final SynchEndType end) throws SynchException {
+    if (!running) {
+      return null;
+    }
+
+    TI inst = cinstMap.find(sub, end);
+
+    if (inst != null) {
+      return inst;
+    }
+
+    inst = makeInstance(sub, end);
+
+    cinstMap.add(sub, end, inst);
+
+    return inst;
+  }
+
+  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
+  }
+
+  @Override
+  public NotificationBatch<TN> handleCallback(final HttpServletRequest req,
+                                                  final HttpServletResponse resp,
+                                                  final List<String> resourceUri) throws SynchException {
+    return null;
+  }
+
+  @Override
+  public void respondCallback(final HttpServletResponse resp,
+                              final NotificationBatch<TN> notifications)
+          throws SynchException {
   }
 
   /* ====================================================================

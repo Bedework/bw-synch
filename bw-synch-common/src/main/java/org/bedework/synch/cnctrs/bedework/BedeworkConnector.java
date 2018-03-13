@@ -25,7 +25,6 @@ import org.bedework.synch.shared.SubscriptionInfo;
 import org.bedework.synch.shared.SynchDefs.SynchKind;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
-import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.synch.wsmessages.KeepAliveNotificationType;
@@ -40,11 +39,6 @@ import org.oasis_open.docs.ws_calendar.ns.soap.GetPropertiesResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.GetPropertiesType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /** The synch processor connector for connections to bedework.
  *
  * @author Mike Douglass
@@ -53,7 +47,8 @@ public class BedeworkConnector
       extends AbstractConnector<BedeworkConnector,
                                 BedeworkConnectorInstance,
                                 Notification,
-                                BedeworkConnectorConfig> {
+                                BedeworkConnectorConfig,
+                                BedeworkSubscriptionInfo> {
   private static PropertiesInfo bwPropInfo = new PropertiesInfo();
 
   static {
@@ -74,9 +69,6 @@ public class BedeworkConnector
   private String remoteToken;
 
   private GetPropertiesResponseType sysInfo;
-
-  private ConnectorInstanceMap<BedeworkConnectorInstance> cinstMap =
-      new ConnectorInstanceMap<BedeworkConnectorInstance>();
 
   /**
    */
@@ -171,14 +163,6 @@ public class BedeworkConnector
       pinger = new PingThread(connectorId, this);
       pinger.start();
     }
-
-    stopped = false;
-    running = true;
-  }
-
-  @Override
-  public boolean isManager() {
-    return false;
   }
 
   @Override
@@ -187,29 +171,9 @@ public class BedeworkConnector
   }
 
   @Override
-  public boolean isReadOnly() {
-    return config.getReadOnly();
-  }
-
-  @Override
-  public boolean getTrustLastmod() {
-    return config.getTrustLastmod();
-  }
-
-  @Override
-  public BedeworkConnectorInstance getConnectorInstance(final Subscription sub,
-                                                        final SynchEndType end) throws SynchException {
-    if (!running) {
-      return null;
-    }
-
-    BedeworkConnectorInstance inst = cinstMap.find(sub, end);
-
-    if (inst != null) {
-      return inst;
-    }
-
-    BedeworkSubscriptionInfo info;
+  public BedeworkConnectorInstance makeInstance(final Subscription sub,
+                                                final SynchEndType end) throws SynchException {
+    final BedeworkSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
       info = new BedeworkSubscriptionInfo(sub.getEndAConnectorInfo());
@@ -217,27 +181,8 @@ public class BedeworkConnector
       info = new BedeworkSubscriptionInfo(sub.getEndBConnectorInfo());
     }
 
-    inst = new BedeworkConnectorInstance(config,
+    return new BedeworkConnectorInstance(config,
                                          this, sub, end, info);
-    cinstMap.add(sub, end, inst);
-
-    return inst;
-  }
-
-  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
-  }
-
-  @Override
-  public BedeworkNotificationBatch handleCallback(final HttpServletRequest req,
-                                     final HttpServletResponse resp,
-                                     final List<String> resourceUri) throws SynchException {
-    return null;
-  }
-
-  @Override
-  public void respondCallback(final HttpServletResponse resp,
-                              final NotificationBatch<Notification> notifications)
-                                                    throws SynchException {
   }
 
   @Override

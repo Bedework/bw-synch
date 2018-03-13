@@ -22,6 +22,7 @@ import org.bedework.synch.SubscriptionConnectorInfoImpl;
 import org.bedework.synch.SubscriptionInfoImpl;
 import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.db.SubscriptionImpl;
+import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Notification.NotificationItem;
 import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
@@ -72,7 +73,8 @@ public class SynchConnector
       extends AbstractConnector<SynchConnector,
                                 SynchConnectorInstance,
                                 Notification,
-                                ConnectorConfig> {
+                                ConnectorConfig,
+                                 BaseSubscriptionInfo> {
   /**
    */
   public SynchConnector() {
@@ -111,8 +113,8 @@ public class SynchConnector
   }
 
   @Override
-  public SynchConnectorInstance getConnectorInstance(final Subscription sub,
-                                                     final SynchEndType end) throws SynchException {
+  public SynchConnectorInstance makeInstance(final Subscription sub,
+                                             final SynchEndType end) throws SynchException {
     return null;
   }
 
