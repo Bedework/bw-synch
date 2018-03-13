@@ -43,7 +43,7 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public interface ConnectorInstance {
+public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
   /** Do whatever is required to set up a subscription to the end point for this
    * connector instance. This is a one time call when a new subscription is
    * created and allows the connector instance to validate the information.
@@ -106,7 +106,7 @@ public interface ConnectorInstance {
    * @return the info for the subscription this instance is handling.
    * @throws SynchException
    */
-  BaseSubscriptionInfo getSubInfo() throws SynchException;
+  InfoT getSubInfo() throws SynchException;
 
   /** Called before a resynch takes place to determine if the end point has
    * changed and needs resynch. Only the source end of a subscription will be

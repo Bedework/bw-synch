@@ -27,7 +27,6 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.SynchPropertyInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
 import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
@@ -80,12 +79,10 @@ public class OrgSyncV2Connector
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfigI conf,
+                    final OrgSyncV2ConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
-
-    config = (OrgSyncV2ConnectorConfig)conf;
 
     if (config.getUidPrefix() == null) {
       error("Must supply uid prefix in config");

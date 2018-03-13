@@ -61,7 +61,7 @@ public abstract class AbstractConnector<T,
                                         TI extends AbstractConnectorInstance,
                                         TN extends Notification,
                                         Tconf extends ConnectorConfigI>
-        extends Logged implements Connector<TI, TN> {
+        extends Logged implements Connector<TI, TN, Tconf> {
   protected Tconf config;
 
   protected String callbackUri;
@@ -101,12 +101,13 @@ public abstract class AbstractConnector<T,
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfigI conf,
+                    final Tconf conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     this.connectorId = connectorId;
     this.syncher = syncher;
     this.callbackUri = callbackUri;
+    this.config = conf;
 
     debug = getLogger().isDebugEnabled();
   }

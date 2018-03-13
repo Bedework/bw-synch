@@ -26,7 +26,6 @@ import org.bedework.synch.shared.SynchDefs.SynchKind;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
 import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.synch.wsmessages.KeepAliveNotificationType;
@@ -163,12 +162,10 @@ public class BedeworkConnector
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfigI conf,
+                    final BedeworkConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
-
-    config = (BedeworkConnectorConfig)conf;
 
     if (pinger == null) {
       pinger = new PingThread(connectorId, this);

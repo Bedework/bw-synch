@@ -52,7 +52,8 @@ import javax.servlet.http.HttpServletResponse;
  * @param <N>
  */
 public interface Connector<C extends ConnectorInstance,
-                           N extends Notification> {
+                           N extends Notification,
+                           Tconf extends ConnectorConfigI> {
   /** Start the connector. A response of null means no synch available.
    *
    * <p>The callback url is unique to the connector. It will be used as a path
@@ -71,7 +72,7 @@ public interface Connector<C extends ConnectorInstance,
    * @throws SynchException
    */
   void start(String connectorId,
-             ConnectorConfigI conf,
+             Tconf conf,
              String callbackUri,
              SynchEngine syncher) throws SynchException;
 

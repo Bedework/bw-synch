@@ -32,7 +32,6 @@ import org.bedework.synch.shared.SynchDefs.SynchKind;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
 import org.bedework.synch.shared.cnctrs.Connector;
-import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
@@ -82,7 +81,7 @@ public class SynchConnector
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfigI conf,
+                    final ConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);

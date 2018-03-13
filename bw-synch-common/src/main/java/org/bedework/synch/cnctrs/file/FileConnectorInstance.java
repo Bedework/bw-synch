@@ -18,438 +18,104 @@
 */
 package org.bedework.synch.cnctrs.file;
 
-import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Subscription;
-import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.cnctrs.BaseConnectorInstance;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.IcalToXcal;
-import org.bedework.util.calendar.XcalUtil;
-import org.bedework.util.http.BasicHttpClient;
-import org.bedework.util.misc.Util;
-import org.bedework.util.xml.tagdefs.XcalTags;
 
-import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
-import ietf.params.xml.ns.icalendar_2.ArrayOfProperties;
-import ietf.params.xml.ns.icalendar_2.BaseComponentType;
-import ietf.params.xml.ns.icalendar_2.BasePropertyType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
-import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
-import ietf.params.xml.ns.icalendar_2.ObjectFactory;
-import ietf.params.xml.ns.icalendar_2.ProdidPropType;
-import ietf.params.xml.ns.icalendar_2.UidPropType;
-import ietf.params.xml.ns.icalendar_2.VcalendarType;
-import ietf.params.xml.ns.icalendar_2.VersionPropType;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.UnfoldingReader;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.util.CompatibilityHints;
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.message.BasicHeader;
-import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
+import org.apache.http.client.utils.URIBuilder;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBElement;
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 /** Handles file synch interactions.
  *
  * @author Mike Douglass
  */
-public class FileConnectorInstance extends AbstractConnectorInstance {
-  private FileConnectorConfig config;
-
-  private final FileConnector cnctr;
-
-  private FileSubscriptionInfo info;
-
-  private BasicHttpClient client;
-
-  /* Only non-null if we actually fetched the data */
-  private IcalendarType fetchedIcal;
-  private String prodid;
-
-  /* Each entry in the map is the set of entities - master + overrides
-   * for a single uid along with some extracted data
-   */
-  private static class MapEntry {
-    List<JAXBElement<? extends BaseComponentType>> comps =
-        new ArrayList<>();
-    String lastMod;
-    String uid;
-  }
-
-  private Map<String, MapEntry> uidMap;
-
-  private ObjectFactory of = new ObjectFactory();
-
+public class FileConnectorInstance
+        extends BaseConnectorInstance<FileConnector,
+                                      FileSubscriptionInfo,
+                                      FileConnectorConfig> {
   FileConnectorInstance(final FileConnectorConfig config,
                         final FileConnector cnctr,
                         final Subscription sub,
                         final SynchEndType end,
                         final FileSubscriptionInfo info) {
-    super(sub, end, info);
-    this.config = config;
-    this.cnctr = cnctr;
-    this.info = info;
-  }
-
-  @Override
-  public Connector getConnector() {
-    return cnctr;
-  }
-
-  @Override
-  public BaseSubscriptionInfo getSubInfo() {
-    return info;
+    super(sub, end, info, cnctr, config);
   }
 
   @Override
   public boolean changed() throws SynchException {
-    /* This implementation needs to at least check the change token for the
-     * collection and match it against the stored token.
-     */
-
-    if (info.getChangeToken() == null) {
-      fetchedIcal = null; // Force refetch
-      return true;
-    }
-
-    BasicHttpClient cl = getClient();
-
-    try {
-      int rc = cl.sendRequest("HEAD", info.getUri(), null);
-
-      if (rc != HttpServletResponse.SC_OK) {
-        info.setLastRefreshStatus(String.valueOf(rc));
-        if (debug) {
-          debug("Unsuccessful response from server was " + rc);
-        }
-        info.setChangeToken(null);  // Force refresh next time
-        fetchedIcal = null; // Force refetch
-        return true;
-      }
-
-      String etag = cl.getFirstHeaderValue("Etag");
-      if (etag == null) {
-        if (debug) {
-          debug("Received null etag");
-        }
-
-        return false;
-      }
-
-      if (debug) {
-        debug("Received etag:" + etag +
-              ", ours=" + info.getChangeToken());
-      }
-
-      if (info.getChangeToken().equals(etag)) {
-        return false;
-      }
-
-      fetchedIcal = null; // Force refetch
-      return true;
-    } catch (SynchException se) {
-      throw se;
-    } catch (Throwable t) {
-      throw new SynchException(t);
-    } finally {
-      try {
-        client.release();
-      } catch (final Throwable ignored) {
-      }
-    }
-  }
-
-  @Override
-  public SynchItemsInfo getItemsInfo() throws SynchException {
-    final SynchItemsInfo sii = new SynchItemsInfo();
-    sii.items = new ArrayList<>();
-    sii.setStatus(StatusType.OK);
-
-    if (!getIcal()) {
-      sii.setStatus(StatusType.ERROR);
-      return sii;
-    }
-
-    if (sub.changed()) {
-      cnctr.getSyncher().updateSubscription(sub);
-    }
-
-    if (uidMap == null) {
-      // Possibly the wrong check. We get this if we're unable to fetch the data
-      return sii;
-    }
-
-    for (final MapEntry me: uidMap.values()) {
-      sii.items.add(new ItemInfo(me.uid, me.lastMod,
-                                 null));  // lastSynch
-    }
-
-    return sii;
-  }
-
-  @Override
-  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
-    if (config.getReadOnly()) {
-      throw new SynchException("Immutable");
-    }
-
-    throw new SynchException("Unimplemented");
-  }
-
-  @Override
-  public FetchItemResponseType fetchItem(final String uid) throws SynchException {
-    final FetchItemResponseType fir = new FetchItemResponseType();
-
-    if (!getIcal()) {
-      fir.setStatus(StatusType.ERROR);
-      return fir;
-    }
-
-    if (sub.changed()) {
-      cnctr.getSyncher().updateSubscription(sub);
-    }
-
-    MapEntry me = uidMap.get(uid);
-
-    if (me == null) {
-      fir.setStatus(StatusType.NOT_FOUND);
-      return fir;
-    }
-
-    fir.setHref(info.getUri() + "#" + uid);
-    fir.setChangeToken(info.getChangeToken());
-
-    IcalendarType ical = new IcalendarType();
-    VcalendarType vcal = new VcalendarType();
-
-    ical.getVcalendar().add(vcal);
-
-    vcal.setProperties(new ArrayOfProperties());
-    List<JAXBElement<? extends BasePropertyType>> pl = vcal.getProperties().getBasePropertyOrTzid();
-
-    ProdidPropType prod = new ProdidPropType();
-    prod.setText(prodid);
-    pl.add(of.createProdid(prod));
-
-    VersionPropType vers = new VersionPropType();
-    vers.setText("2.0");
-    pl.add(of.createVersion(vers));
-
-    final ArrayOfComponents aoc = new ArrayOfComponents();
-    vcal.setComponents(aoc);
-
-    aoc.getBaseComponent().addAll(me.comps);
-    fir.setIcalendar(ical);
-
-    return fir;
-  }
-
-  @Override
-  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
-    // XXX this should be a search for multiple uids - need to reimplement caldav search
-
-    List<FetchItemResponseType> firs = new ArrayList<>();
-
-    for (String uid: uids) {
-      firs.add(fetchItem(uid));
-    }
-
-    return firs;
-  }
-
-  @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
-    if (config.getReadOnly()) {
-      throw new SynchException("Immutable");
-    }
-
-    throw new SynchException("Unimplemented");
-  }
-
-  @Override
-  public DeleteItemResponseType deleteItem(final String uid)
-          throws SynchException {
-    return null;
+    return changed(true, "calendar/text");
   }
 
   /* ====================================================================
-   *                   Private methods
+   *                   BaseConnectorInstance methods
    * ==================================================================== */
 
-  private BasicHttpClient getClient() throws SynchException {
-    if (client != null) {
-      return client;
-    }
-
-    BasicHttpClient cl;
-
+  @Override
+  public URI getUri() throws SynchException {
     try {
-      cl = new BasicHttpClient(15 * 1000);
+      //Get yesterdays date
+      final LocalDate yesterday = LocalDate.now().minus(1, ChronoUnit.DAYS);
+      final String yesterdayStr =
+              yesterday.format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-      if (info.getPrincipalHref() != null) {
-        cl.setCredentials(info.getPrincipalHref(),
-                          cnctr.getSyncher().decrypt(info.getPassword()));
-      }
-
-      client = cl;
-
-      return cl;
-    } catch (HttpException he) {
-      throw new SynchException(he);
+      final URI infoUri = new URI(info.getUri());
+      return new URIBuilder()
+              .setScheme(infoUri.getScheme())
+              .setHost(infoUri.getHost())
+              .setPort(infoUri.getPort())
+              .setPath(infoUri.getPath())
+              .build();
+    } catch (final SynchException se) {
+      throw se;
+    } catch (final Throwable t) {
+      throw new SynchException(t);
     }
   }
 
-  /* Fetch the iCalendar for the subscription. If it fails set the status and
-   * return false. Unchanged data will return true with no status change.
-   *
-   */
-  private boolean getIcal() throws SynchException {
+  public IcalendarType makeXcal(final InputStream is) throws SynchException {
     try {
-      if (fetchedIcal != null) {
-        return true;
-      }
-
-      getClient();
-
-      List<Header> hdrs = null;
-
-      if ((uidMap != null) && (info.getChangeToken() != null) &&
-          (fetchedIcal != null)) {
-        hdrs = new ArrayList<>(1);
-        hdrs.add(new BasicHeader("If-None-Match", info.getChangeToken()));
-      }
-
-      final int rc = client.sendRequest("GET",
-                                        info.getUri(),
-                                        hdrs);
-      info.setLastRefreshStatus(String.valueOf(rc));
-
-      if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
-        // Data unchanged.
-        if (debug) {
-          debug("data unchanged");
-        }
-        return true;
-      }
-
-      if (rc != HttpServletResponse.SC_OK) {
-        if (debug) {
-          debug("Unsuccessful response from server was " + rc);
-        }
-        info.setLastRefreshStatus(String.valueOf(rc));
-        info.setChangeToken(null);  // Force refresh next time
-        return false;
-      }
-
       final CalendarBuilder builder = new CalendarBuilder();
-      CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_UNFOLDING,
-                                        true);
-      /* Allow unrecognized properties - we'll probably ignore them */
-      CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING,
-                                        true);
-
-      final InputStream is = client.getResponseBodyAsStream();
+      CompatibilityHints.setHintEnabled(
+              CompatibilityHints.KEY_RELAXED_UNFOLDING,
+              true);
+        /* Allow unrecognized properties - we'll probably ignore them */
+      CompatibilityHints
+              .setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING,
+                              true);
 
       final UnfoldingReader ufrdr =
               new UnfoldingReader(new InputStreamReader(is), true);
       final Calendar ical = builder.build(ufrdr);
 
-      /* Convert each entity to XML */
+        /* Convert each entity to XML */
 
-      fetchedIcal = IcalToXcal.fromIcal(ical, null, true);
-
-      uidMap = new HashMap<>();
-
-      prodid = null;
-
-      for (final VcalendarType vcal: fetchedIcal.getVcalendar()) {
-        /* Extract the prodid from the converted calendar - we use it when we
-         * generate a new icalendar for each entity.
-         */
-        if ((prodid == null) &&
-            (vcal.getProperties() != null)) {
-          for (final JAXBElement<? extends BasePropertyType> pel:
-            vcal.getProperties().getBasePropertyOrTzid()) {
-            if (pel.getValue() instanceof ProdidPropType) {
-              prodid = ((ProdidPropType)pel.getValue()).getText();
-              break;
-            }
-          }
-        }
-
-        for (final JAXBElement<? extends BaseComponentType> comp:
-             vcal.getComponents().getBaseComponent()) {
-          final UidPropType uidProp = (UidPropType)XcalUtil.findProperty(
-                  comp.getValue(),
-                  XcalTags.uid);
-
-          if (uidProp == null) {
-            // Should flag as an error
-            continue;
-          }
-
-          final String uid = uidProp.getText();
-
-          MapEntry me = uidMap.get(uid);
-
-          if (me == null) {
-            me = new MapEntry();
-            me.uid = uid;
-            uidMap.put(uidProp.getText(), me);
-          }
-
-          final LastModifiedPropType lm =
-                  (LastModifiedPropType)XcalUtil.findProperty(comp.getValue(),
-                                                              XcalTags.lastModified);
-
-          String lastmod= null;
-          if (lm != null) {
-            lastmod = lm.getUtcDateTime().toXMLFormat();
-          }
-
-          if (Util.cmpObjval(me.lastMod, lastmod) < 0) {
-            me.lastMod = lastmod;
-          }
-
-          me.comps.add(comp);
-        }
-      }
-
-      /* Looks like we translated ok. Save any etag and delete everything in the
-       * calendar.
-       */
-
-      final String etag = client.getFirstHeaderValue("Etag");
-      if (etag != null) {
-        info.setChangeToken(etag);
-      }
-
-      return true;
+      return IcalToXcal.fromIcal(ical, null, true);
     } catch (final SynchException se) {
       throw se;
     } catch (final Throwable t) {
       throw new SynchException(t);
-    } finally {
-      try {
-        client.release();
-      } catch (final Throwable ignored) {
-      }
     }
   }
+
+  @Override
+  public boolean getIcal() throws SynchException {
+    return getIcal("text/calendar");
+  }
+
+  /* ====================================================================
+   *                   Private methods
+   * ==================================================================== */
 }

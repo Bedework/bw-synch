@@ -18,10 +18,8 @@
 */
 package org.bedework.synch.cnctrs.bedework;
 
-import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.shared.cnctrs.Connector;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchIdTokenType;
@@ -67,33 +65,16 @@ import javax.xml.bind.JAXBElement;
  *
  * @author Mike Douglass
  */
-public class BedeworkConnectorInstance extends AbstractConnectorInstance {
-  @SuppressWarnings("unused")
-  private final BedeworkConnectorConfig config;
-
-  private final BedeworkConnector cnctr;
-
-  private final BedeworkSubscriptionInfo info;
-
+public class BedeworkConnectorInstance
+        extends AbstractConnectorInstance<BedeworkConnector,
+        BedeworkSubscriptionInfo,
+        BedeworkConnectorConfig> {
   BedeworkConnectorInstance(final BedeworkConnectorConfig config,
                             final BedeworkConnector cnctr,
                             final Subscription sub,
                             final SynchEndType end,
                             final BedeworkSubscriptionInfo info) {
-    super(sub, end, info);
-    this.config = config;
-    this.cnctr = cnctr;
-    this.info = info;
-  }
-
-  @Override
-  public Connector getConnector() {
-    return cnctr;
-  }
-
-  @Override
-  public BaseSubscriptionInfo getSubInfo() {
-    return info;
+    super(sub, end, info, cnctr, config);
   }
 
   @Override

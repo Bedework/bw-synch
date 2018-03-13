@@ -18,9 +18,9 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
+import org.bedework.synch.conf.ConnectorConfig;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.shared.cnctrs.Connector;
 import org.bedework.synch.shared.exception.SynchException;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
@@ -37,18 +37,11 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public class SynchConnectorInstance extends AbstractConnectorInstance {
-  private SynchConnector cnctr;
-
+public class SynchConnectorInstance
+        extends AbstractConnectorInstance<SynchConnector,
+        BaseSubscriptionInfo, ConnectorConfig> {
   SynchConnectorInstance(final SynchConnector cnctr){
-    super(null, null, null);
-
-    this.cnctr = cnctr;
-  }
-
-  @Override
-  public Connector getConnector() {
-    return cnctr;
+    super(null, null, null, cnctr, null);
   }
 
   @Override

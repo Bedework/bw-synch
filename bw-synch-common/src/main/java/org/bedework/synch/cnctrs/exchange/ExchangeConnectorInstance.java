@@ -24,10 +24,8 @@ import org.bedework.synch.cnctrs.exchange.messages.SubscribeRequest;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse;
 import org.bedework.synch.cnctrs.exchange.responses.FinditemsResponse.SynchInfo;
-import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
-import org.bedework.synch.shared.cnctrs.Connector;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
@@ -72,13 +70,10 @@ import javax.xml.ws.Holder;
  *
  * @author Mike Douglass
  */
-public class ExchangeConnectorInstance extends AbstractConnectorInstance {
-  private ExchangeConnectorConfig config;
-
-  private ExchangeConnector cnctr;
-
-  private ExchangeSubscriptionInfo info;
-
+public class ExchangeConnectorInstance
+        extends AbstractConnectorInstance<ExchangeConnector,
+        ExchangeSubscriptionInfo,
+        ExchangeConnectorConfig> {
   private final XmlIcalConvert icalConverter;
 
   ExchangeConnectorInstance(final ExchangeConnectorConfig config,
@@ -86,21 +81,8 @@ public class ExchangeConnectorInstance extends AbstractConnectorInstance {
                             final Subscription sub,
                             final SynchEndType end,
                             final ExchangeSubscriptionInfo info) {
-    super(sub, end, info);
-    this.config = config;
-    this.cnctr = cnctr;
-    this.info = info;
+    super(sub, end, info, cnctr, config);
     icalConverter = new XmlIcalConvert(cnctr.getSyncher().getTzGetter());
-  }
-
-  @Override
-  public Connector getConnector() {
-    return cnctr;
-  }
-
-  @Override
-  public BaseSubscriptionInfo getSubInfo() {
-    return info;
   }
 
   @Override

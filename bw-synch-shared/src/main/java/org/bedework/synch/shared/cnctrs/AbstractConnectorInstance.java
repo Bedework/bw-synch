@@ -21,6 +21,7 @@ package org.bedework.synch.shared.cnctrs;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.shared.Subscription;
+import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
@@ -29,6 +30,13 @@ import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.misc.Logged;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
@@ -36,20 +44,42 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
  *
  * @author Mike Douglass
  */
-public abstract class AbstractConnectorInstance extends Logged
-        implements ConnectorInstance {
+public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector,
+        InfoT extends BaseSubscriptionInfo,
+        ConfigT extends ConnectorConfigI>
+        extends Logged
+        implements ConnectorInstance<InfoT> {
   protected Subscription sub;
 
   protected SynchEndType end;
 
-  protected BaseSubscriptionInfo baseInfo;
+  protected InfoT info;
+
+  protected final CnctrT cnctr;
+
+  protected final ConfigT config;
+
+  private CloseableHttpClient client;
 
   protected AbstractConnectorInstance(final Subscription sub,
                                       final SynchEndType end,
-                                      final BaseSubscriptionInfo baseInfo) {
+                                      final InfoT info,
+                                      final CnctrT cnctr,
+                                      final ConfigT config) {
     this.sub = sub;
     this.end = end;
-    this.baseInfo = baseInfo;
+    this.info = info;
+    this.cnctr = cnctr;
+    this.config = config;
+  }
+
+  public Connector getConnector() {
+    return cnctr;
+  }
+
+  @Override
+  public InfoT getSubInfo() {
+    return info;
   }
 
   @Override
@@ -94,7 +124,7 @@ public abstract class AbstractConnectorInstance extends Logged
    */
   @Override
   public void setLastCrudCts(final CrudCts val) throws SynchException {
-    baseInfo.setLastCrudCts(val);
+    info.setLastCrudCts(val);
   }
 
   /**
@@ -103,7 +133,7 @@ public abstract class AbstractConnectorInstance extends Logged
    */
   @Override
   public CrudCts getLastCrudCts() throws SynchException {
-    return baseInfo.getLastCrudCts();
+    return info.getLastCrudCts();
   }
 
   /**
@@ -112,7 +142,7 @@ public abstract class AbstractConnectorInstance extends Logged
    */
   @Override
   public void setTotalCrudCts(final CrudCts val) throws SynchException {
-    baseInfo.setTotalCrudCts(val);
+    info.setTotalCrudCts(val);
   }
 
   /**
@@ -121,7 +151,7 @@ public abstract class AbstractConnectorInstance extends Logged
    */
   @Override
   public CrudCts getTotalCrudCts() throws SynchException {
-    return baseInfo.getTotalCrudCts();
+    return info.getTotalCrudCts();
   }
 
   /* ====================================================================
@@ -145,6 +175,28 @@ public abstract class AbstractConnectorInstance extends Logged
     }
 
     return true;
+  }
+
+  protected CloseableHttpClient getClient() throws SynchException {
+    if (client != null) {
+      return client;
+    }
+
+    final CloseableHttpClient cl = HttpClients.createDefault();
+
+    final HttpClientContext context = HttpClientContext.create();
+    if (info.getPrincipalHref() != null) {
+      final CredentialsProvider credsProvider = new BasicCredentialsProvider();
+      credsProvider.setCredentials(
+              new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+              new UsernamePasswordCredentials(info.getPrincipalHref(),
+                                              cnctr.getSyncher().decrypt(info.getPassword())));
+      context.setCredentialsProvider(credsProvider);
+    }
+
+    client = cl;
+
+    return cl;
   }
 
   /*

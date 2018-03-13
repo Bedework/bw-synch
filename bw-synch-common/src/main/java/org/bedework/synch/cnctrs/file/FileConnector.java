@@ -27,7 +27,6 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.SynchPropertyInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
 import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
@@ -73,12 +72,10 @@ private static PropertiesInfo fPropInfo = new PropertiesInfo();
 
   @Override
   public void start(final String connectorId,
-                    final ConnectorConfigI conf,
+                    final FileConnectorConfig conf,
                     final String callbackUri,
                     final SynchEngine syncher) {
     super.start(connectorId, conf, callbackUri, syncher);
-
-    config = (FileConnectorConfig)conf;
 
     stopped = false;
     running = true;
