@@ -15,7 +15,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.bedework:bw-util2-calendar:4.0.0-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="bw-synch-shared" />
     <orderEntry type="module" module-name="bw-util2-calendar" />
     <orderEntry type="module" module-name="bw-xml-calws-soap" />
