@@ -19,7 +19,7 @@
 package org.bedework.synch.conf;
 
 import org.bedework.synch.db.IpAddrInfo;
-import org.bedework.synch.service.SynchConnConf;
+import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.HibernateConfigBase;
 
@@ -89,9 +89,9 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
     return synchlingPoolTimeout;
   }
 
-  /** How often we retry when a target is missing
+  /**
    *
-   * @param val
+   * @param val How often we retry when a target is missing
    */
   public void setMissingTargetRetries(final int val) {
     missingTargetRetries = val;
@@ -198,9 +198,9 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
     return ipInfo;
   }
 
-  /** Map of (name, className)
+  /**
    *
-   * @param val
+   * @param val Map of (name, className)
    */
   public void setConnectorConfs(final List<SynchConnConf> val) {
     connectorConfs = val;

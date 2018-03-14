@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.file;
 
-import org.bedework.synch.service.SynchConnConf;
+import org.bedework.synch.shared.service.SynchConnConf;
 
 /**
  * @author douglm

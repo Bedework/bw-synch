@@ -18,6 +18,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="bw-synch-common" />
+    <orderEntry type="module" module-name="bw-synch-shared" />
     <orderEntry type="module" module-name="bw-synch-web" />
     <orderEntry type="module" module-name="bw-synch-war" />
     <orderEntry type="module" module-name="bw-access" />

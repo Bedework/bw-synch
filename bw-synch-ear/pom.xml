@@ -27,6 +27,18 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>bw-synch-shared</artifactId>
+      <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>bw-synch-web</artifactId>
       <version>${project.version}</version>
       <exclusions>

@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.orgSyncV2;
 
-import org.bedework.synch.service.SynchConnConfMBean;
+import org.bedework.synch.shared.service.SynchConnConfMBean;
 import org.bedework.util.jmx.MBeanInfo;
 
 /** Configure an orgsync v2 connector for the Bedework synch engine service

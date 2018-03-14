@@ -16,10 +16,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.service;
+package org.bedework.synch.shared.service;
 
 import org.bedework.synch.shared.cnctrs.Connector;
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.jmx.ConfBase;
 
