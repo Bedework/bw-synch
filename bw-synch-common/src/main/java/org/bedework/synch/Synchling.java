@@ -229,7 +229,7 @@ public class Synchling extends Logged {
     ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
                                                            SynchEndType.A);
 
-    SubscribeResponseType sr = ni.getSubResponse();
+    final SubscribeResponseType sr = ni.getSubResponse();
 
     if (!cinst.subscribe(sr)) {
       return sr.getStatus();
@@ -247,7 +247,7 @@ public class Synchling extends Logged {
 
   private StatusType addItem(final Notification note,
                              final NotificationItem ni) throws SynchException {
-    IcalendarType ical = ni.getIcal();
+    final IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
       if (debug) {
