@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.manager;
 
 import org.bedework.synch.SubscriptionConnectorInfoImpl;
 import org.bedework.synch.SubscriptionInfoImpl;
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.db.SubscriptionImpl;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Notification;

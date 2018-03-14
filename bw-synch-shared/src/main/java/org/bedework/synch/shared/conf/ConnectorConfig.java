@@ -16,9 +16,8 @@
     specific language governing permissions and limitations
     under the License.
  */
-package org.bedework.synch.conf;
+package org.bedework.synch.shared.conf;
 
-import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.ConfigBase;
 import org.bedework.util.misc.ToString;
@@ -95,7 +94,7 @@ public class ConnectorConfig extends ConfigBase<ConnectorConfig> implements
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 

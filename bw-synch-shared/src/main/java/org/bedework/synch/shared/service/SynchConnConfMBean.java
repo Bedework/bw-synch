@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.service;
+package org.bedework.synch.shared.service;
 
 import org.bedework.util.jmx.ConfBaseMBean;
 import org.bedework.util.jmx.MBeanInfo;

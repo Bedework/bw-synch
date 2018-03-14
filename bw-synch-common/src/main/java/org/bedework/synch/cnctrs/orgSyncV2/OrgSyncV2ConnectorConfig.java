@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.orgSyncV2;
 
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.misc.ToString;
 

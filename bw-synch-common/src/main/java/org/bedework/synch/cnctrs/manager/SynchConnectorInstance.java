@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
 import org.bedework.synch.shared.exception.SynchException;

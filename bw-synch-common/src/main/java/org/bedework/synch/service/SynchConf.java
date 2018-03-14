@@ -20,9 +20,10 @@ package org.bedework.synch.service;
 
 import org.bedework.synch.shared.Stat;
 import org.bedework.synch.SynchEngineImpl;
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.hibernate.HibConfig;
 import org.bedework.util.hibernate.SchemaThread;
@@ -454,8 +455,8 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     processor.interrupt();
     try {
       processor.join(20 * 1000);
-    } catch (InterruptedException ie) {
-    } catch (Throwable t) {
+    } catch (final InterruptedException ignored) {
+    } catch (final Throwable t) {
       error("Error waiting for processor termination");
       error(t);
     }
@@ -479,7 +480,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     try {
       /* Load up the config */
 
-      String res = loadOnlyConfig(SynchConfig.class);
+      final String res = loadOnlyConfig(SynchConfig.class);
 
       if (res != null) {
         return res;
@@ -487,19 +488,20 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
       /* Load up the connectors */
 
-      ConfigurationStore cs = getStore().getStore("connectors");
+      final ConfigurationStore cs = getStore().getStore("connectors");
 
       connectorNames = cs.getConfigs();
 
-      List<SynchConnConf> sccs = new ArrayList<SynchConnConf>();
+      final List<SynchConnConf> sccs = new ArrayList<>();
       cfg.setConnectorConfs(sccs);
 
-      for (String cn: connectorNames) {
-        ObjectName objectName = createObjectName("connector", cn);
+      for (final String cn: connectorNames) {
+        final ObjectName objectName = createObjectName("connector", cn);
 
         /* Read the config so we can get the mbean class name. */
 
-        ConnectorConfig connCfg = (ConnectorConfig)cs.getConfig(cn);
+        final ConnectorConfig connCfg =
+                (ConnectorConfig)cs.getConfig(cn);
 
         if (connCfg == null) {
           error("Unable to read connector configuration " + cn);
@@ -516,7 +518,15 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         }
 
         @SuppressWarnings("unchecked")
-        SynchConnConf<ConnectorConfig> scc = (SynchConnConf<ConnectorConfig>)makeObject(mbeanClassName);
+        final SynchConnConf<ConnectorConfig> scc =
+                (SynchConnConf<ConnectorConfig>)makeObject(mbeanClassName);
+
+        if (scc == null) {
+          error("Unable to create mbean class: " + mbeanClassName);
+          error("Skipping");
+          continue;
+        }
+
         scc.init(cs, objectName.toString(), connCfg);
 
         sccs.add(scc);
@@ -524,7 +534,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
       }
 
       return "OK";
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error("Failed to start management context: " + t.getLocalizedMessage());
       error(t);
       return "failed";

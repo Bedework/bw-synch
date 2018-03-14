@@ -18,10 +18,10 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.conf.ConnectorConfig;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.db.SynchDb;
-import org.bedework.synch.service.SynchConnConf;
+import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.StatLong;
