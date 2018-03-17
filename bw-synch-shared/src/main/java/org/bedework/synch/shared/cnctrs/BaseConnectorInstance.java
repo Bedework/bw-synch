@@ -22,6 +22,7 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import ietf.params.xml.ns.icalendar_2.LastModifiedPropType;
 import ietf.params.xml.ns.icalendar_2.ObjectFactory;
 import ietf.params.xml.ns.icalendar_2.ProdidPropType;
+import ietf.params.xml.ns.icalendar_2.TextPropertyType;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VersionPropType;
@@ -42,6 +43,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 /**
  * User: mike Date: 3/12/18 Time: 21:32
@@ -275,6 +277,18 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     } catch (final Throwable t) {
       throw new SynchException(t);
     }
+  }
+
+  public <T extends TextPropertyType> String getText(final Class<T> cl,
+                                                      final JAXBElement<? extends BaseComponentType> comp,
+                                                      final QName tag) {
+    final T pt = (T)XcalUtil.findProperty(comp.getValue(), tag);
+
+    if (pt == null) {
+      return null;
+    }
+
+    return pt.getText();
   }
 
   /* Fetch the iCalendar for the subscription. If it fails set the status and
