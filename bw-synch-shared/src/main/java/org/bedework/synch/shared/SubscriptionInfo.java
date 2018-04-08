@@ -45,6 +45,10 @@ public interface SubscriptionInfo<T>
    */
   String propnameXcategories = "xcategories";
 
+  /** If true suppress deletion of events missing in feed.
+   */
+  String propnameDeleteSuppressed = "delete-suppressed";
+
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
@@ -104,4 +108,18 @@ public interface SubscriptionInfo<T>
    * @throws SynchException
    */
   boolean getXlocXcategories() throws SynchException;
+
+  /** Processing of deletions - boolean
+   *
+   * @param val true to suppress deletion of missing events
+   * @throws SynchException
+   */
+  void setDeletionsSuppressed(boolean val) throws SynchException;
+
+  /** Processing of deletions - boolean
+   *
+   * @return boolean true to suppress deletion of missing events
+   * @throws SynchException
+   */
+  boolean getDeletionsSuppressed() throws SynchException;
 }

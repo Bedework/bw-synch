@@ -708,14 +708,16 @@ public class Synchling extends Logged {
 
       /* -------------------- Deletions ------------------------ */
 
-      if (((updateInfo.size() > 0) &&
-          (sub.getDirection() == SynchDirectionType.B_TO_A)) || bothWays) {
-        processDeletes(note, updateInfo, ainfo);
-      }
+      if (!sub.getInfo().getDeletionsSuppressed()) {
+        if (((updateInfo.size() > 0) &&
+                     (sub.getDirection() == SynchDirectionType.B_TO_A)) || bothWays) {
+          processDeletes(note, updateInfo, ainfo);
+        }
 
-      if (((updateInfo.size() > 0) &&
-          (sub.getDirection() == SynchDirectionType.A_TO_B)) || bothWays) {
-        processDeletes(note, updateInfo, binfo);
+        if (((updateInfo.size() > 0) &&
+                     (sub.getDirection() == SynchDirectionType.A_TO_B)) || bothWays) {
+          processDeletes(note, updateInfo, binfo);
+        }
       }
 
       sub.setErrorCt(0);

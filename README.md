@@ -1,7 +1,9 @@
-## bw-util [![Build Status](https://travis-ci.org/Bedework/bw-util.svg)](https://travis-ci.org/Bedework/bw-util)
+## bw-synch [![Build Status](https://travis-ci.org/Bedework/bw-synch.svg)](https://travis-ci.org/Bedework/bw-synch)
 
 This project provides a synch engine for external subscriptions for
 [Bedework](https://www.apereo.org/projects/bedework).
+
+It could also be used for 1 way synchronization between any source and server. 
 
 ### Requirements
 
@@ -35,3 +37,4 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 ### Release Notes
 #### 4.0.0
   * First 4.x release based on 3.11 dev 
+  * 3.12 onwards releases of bedework calendar engine now use this version.

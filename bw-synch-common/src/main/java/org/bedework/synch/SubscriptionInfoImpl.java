@@ -33,23 +33,6 @@ public class SubscriptionInfoImpl
         implements SubscriptionInfo<SubscriptionInfoImpl> {
   /* properties saved by connector instance */
 
-
-  /** Strip out alarms if true */
-  public static final String propnameAlarmProcessing = "alarm-processing";
-
-  /** Strip out scheduling properties if true */
-  public static final String propnameSchedulingProcessing = "scheduling-processing";
-
-  /** Turn locations and contacts into x-properties.
-   * The receiving end may reinstate them as real curated values
-   */
-  public static final String propnameXlocXcontacts = "xlocxcontacts";
-
-  /** Turn categories into x-properties.
-   * The receiving end may reinstate them as real curated values
-   */
-  public static final String propnameXcategories = "xcategories";
-
   /* ====================================================================
    *                   Convenience methods
    * ==================================================================== */
@@ -99,31 +82,34 @@ public class SubscriptionInfoImpl
     setProperty(propnameXlocXcontacts, String.valueOf(val));
   }
 
-  /** Processing of locations and contacts - boolean
-   *
-   * @return boolean
-   * @throws SynchException
-   */
   public boolean getXlocXcontact() throws SynchException {
     return Boolean.valueOf(getProperty(propnameXlocXcontacts));
   }
 
-  /** Processing of categories - boolean
-   *
-   * @param val true to enable processing of categories
-   * @throws SynchException
-   */
   public void setXlocXcategories(final boolean val) throws SynchException {
     setProperty(propnameXcategories, String.valueOf(val));
   }
 
-  /** Processing of categories - boolean
-   *
-   * @return boolean
-   * @throws SynchException
-   */
   public boolean getXlocXcategories() throws SynchException {
     return Boolean.valueOf(getProperty(propnameXcategories));
+  }
+
+  /** Processing of deletions - boolean
+   *
+   * @param val true to suppress deletion of missing events
+   * @throws SynchException
+   */
+  public void setDeletionsSuppressed(final boolean val) throws SynchException {
+    setProperty(propnameDeleteSuppressed, String.valueOf(val));
+  }
+
+  /** Processing of deletions - boolean
+   *
+   * @return boolean true to suppress deletion of missing events
+   * @throws SynchException
+   */
+  public boolean getDeletionsSuppressed() throws SynchException {
+    return Boolean.valueOf(getProperty(propnameDeleteSuppressed));
   }
 
   /* ====================================================================
