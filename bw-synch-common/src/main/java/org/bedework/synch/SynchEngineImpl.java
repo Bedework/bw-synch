@@ -450,17 +450,6 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
   }
 
   @Override
-  public String decrypt(final String val) throws SynchException {
-    try {
-      return getEncrypter().decrypt(val);
-    } catch (final SynchException se) {
-      throw se;
-    } catch (final Throwable t) {
-      throw new SynchException(t);
-    }
-  }
-
-  @Override
   public Connector getConnector(final String id) {
     return connectorMap.get(id);
   }
@@ -727,6 +716,25 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
   @Override
   public TimeZone getTz(final String id) throws Throwable {
     return getSyncher().getTimezones().getTimeZone(id);
+  }
+
+  /**
+   * @param val possibly null password
+   * @return decrypted string
+   * @throws SynchException on decryption failure
+   */
+  public String decrypt(final String val) throws SynchException {
+    if (val == null) {
+      return null;
+    }
+
+    try {
+      return getEncrypter().decrypt(val);
+    } catch (final SynchException se) {
+      throw se;
+    } catch (final Throwable t) {
+      throw new SynchException(t);
+    }
   }
 
   /**
