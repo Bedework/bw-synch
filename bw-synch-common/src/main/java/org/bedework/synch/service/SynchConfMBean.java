@@ -206,6 +206,14 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("Status of the database schema build.")
   public List<String> schemaStatus();
 
+  /** Reschedule the subscription now
+   *
+   * @param id
+   * @return status
+   */
+  @MBeanInfo("Reschedule the subscription now")
+  String rescheduleNow(@MBeanInfo("id") final String id);
+
   /**
    * @param value
    */

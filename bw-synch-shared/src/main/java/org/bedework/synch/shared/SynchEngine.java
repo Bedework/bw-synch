@@ -37,6 +37,12 @@ public interface SynchEngine {
    */
   void setConnectors(Subscription sub) throws SynchException;
 
+  /** Reschedule a subscription now.
+   *
+   * @param id the subscription id
+   */
+  void rescheduleNow(String id) throws SynchException;
+
   /** Reschedule a subscription for updates.
    *
    * @param sub the subscription

@@ -336,6 +336,26 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
   }
 
   @Override
+  public void rescheduleNow(final String id) throws SynchException {
+    if (debug) {
+      debug("reschedule now for subscription id " + id);
+    }
+
+    final Subscription sub = getSubscription(id);
+
+    if (sub == null) {
+      if (debug) {
+        debug("No subscription");
+        return;
+      }
+    }
+
+    setConnectors(sub);
+
+    synchTimer.schedule(sub, new Date());
+  }
+
+  @Override
   public void reschedule(final Subscription sub,
                          final boolean newSub) {
     if (debug) {

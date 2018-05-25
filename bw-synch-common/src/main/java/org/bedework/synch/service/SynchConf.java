@@ -18,11 +18,11 @@
 */
 package org.bedework.synch.service;
 
-import org.bedework.synch.shared.Stat;
 import org.bedework.synch.SynchEngineImpl;
-import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
+import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.SynchEngine;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.hibernate.HibConfig;
@@ -363,6 +363,19 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
     return buildSchema.infoLines;
   }
+
+  @Override
+  public String rescheduleNow(final String id) {
+    try {
+      syncher.rescheduleNow(id);
+
+      return "ok";
+    } catch (final Throwable t) {
+      error(t);
+      return "error";
+    }
+  }
+
 
   @Override
   public void setHibernateDialect(final String value) {
