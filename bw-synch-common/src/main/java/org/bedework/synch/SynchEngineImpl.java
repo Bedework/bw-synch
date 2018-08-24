@@ -352,6 +352,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
 
     setConnectors(sub);
 
+    sub.setErrorCt(0);
     synchTimer.schedule(sub, new Date());
   }
 
