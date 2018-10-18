@@ -23,7 +23,6 @@
     <bw-util2.version>4.0.1-SNAPSHOT</bw-util2.version>
 		<bw-access.version>4.0.2</bw-access.version>
 		<!-- Third Party Library Versions -->
-		<spring.version>3.0.5.RELEASE</spring.version>
 		<commons-codec.version>1.5</commons-codec.version>
 		<servlet-api.version>2.5</servlet-api.version>
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
@@ -187,21 +186,6 @@
 				<version>${bw-xml.version}</version>
 			</dependency>
 			<!-- Third Party Libraries -->
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-core</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-context</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-beans</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
 			<dependency>
         <groupId>${ical4j.groupId}</groupId>
         <artifactId>${ical4j.artifactId}</artifactId>
