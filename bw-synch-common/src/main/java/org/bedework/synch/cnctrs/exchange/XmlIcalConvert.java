@@ -21,7 +21,7 @@ package org.bedework.synch.cnctrs.exchange;
 import org.bedework.synch.intf.Defs;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil.TzGetter;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import com.microsoft.schemas.exchange.services._2006.types.AttendeeType;
 import com.microsoft.schemas.exchange.services._2006.types.BodyType;
@@ -77,7 +77,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 *
 * @author Mike Douglass
 */
-public class XmlIcalConvert extends Logged implements Defs {
+public class XmlIcalConvert implements Logged, Defs {
   private final ObjectFactory xcalOF = new ObjectFactory();
 
   private final TzGetter tzGetter;
@@ -119,7 +119,6 @@ public class XmlIcalConvert extends Logged implements Defs {
     String transpVal = null;
     String statusVal = null;
 
-    debug = getLogger().isDebugEnabled();
     IcalendarType ical = new IcalendarType();
     VcalendarType vcal = new VcalendarType();
 
@@ -170,7 +169,7 @@ public class XmlIcalConvert extends Logged implements Defs {
      * It is an MS id which we need to map on to an Olson style
      */
     String extzid = cal.getTimeZone();
-    if (debug) {
+    if (debug()) {
       debug("exchange tzid=" + extzid);
     }
 
@@ -219,7 +218,7 @@ public class XmlIcalConvert extends Logged implements Defs {
     pl.add(new DtStamp());
     */
     /* ======================= cal:DateTimeStamp ============================ */
-    if (debug) {
+    if (debug()) {
       debug("dtstamp=" + cal.getDateTimeStamp().toXMLFormat());
     }
 
@@ -365,7 +364,7 @@ public class XmlIcalConvert extends Logged implements Defs {
 
     /* ======================== item:MimeContent ============================ */
     /* ========================= item:ItemId ================================ */
-    if (debug) {
+    if (debug()) {
       debug("id: id=" + cal.getItemId().getId() +
             " ckey=" + cal.getItemId().getChangeKey());
     }

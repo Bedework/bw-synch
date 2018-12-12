@@ -45,21 +45,21 @@ public interface Filter {
   /** Initialise the filter.
    *
    * @param sub the subscription
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   void init(final Subscription sub) throws SynchException;
 
   /**
    * @param val the object to process
    * @return null for discarded object, otherwise possibly modified object
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   IcalendarType doFilter(final IcalendarType val) throws SynchException;
 
   /** Called to add items to the skip list for the ical differ.
    *
    * @param skipList list of items to skip - properties parameters etc
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   void addDifferSkipItems(final List<Object> skipList) throws SynchException;
 }

@@ -30,7 +30,7 @@ import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import org.w3c.dom.Document;
 
@@ -66,7 +66,7 @@ public abstract class AbstractConnector<T,
                                         TN extends Notification,
                                         Tconf extends ConnectorConfigI,
                                         InfoT extends BaseSubscriptionInfo>
-        extends Logged implements Connector<TI, TN, Tconf> {
+        implements Logged, Connector<TI, TN, Tconf> {
   protected Tconf config;
 
   protected String callbackUri;

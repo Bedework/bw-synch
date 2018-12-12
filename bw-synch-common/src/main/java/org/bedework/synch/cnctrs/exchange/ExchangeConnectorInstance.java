@@ -105,7 +105,7 @@ public class ExchangeConnectorInstance
                               subscribeResult,
                               getServerVersionInfoHolder());
 
-      if (debug) {
+      if (debug()) {
         debug(subscribeResult.toString());
       }
 
@@ -172,7 +172,7 @@ public class ExchangeConnectorInstance
 
       BaseResponseType br = new ExchangeResponse(srm);
 
-      if (debug) {
+      if (debug()) {
         debug(br.toString());
       }
 
@@ -243,7 +243,7 @@ public class ExchangeConnectorInstance
                                                      true,
                                                      cnctr.getSyncher().getTzGetter());
 
-      if (debug) {
+      if (debug()) {
         debug(resp.toString());
       }
 
@@ -422,7 +422,7 @@ public class ExchangeConnectorInstance
         }
 
         IcalendarType ical = icalConverter.toXml((CalendarItemType)item);
-        if (debug) {
+        if (debug()) {
           // serialize and print
           //debug(comp.toString());
         }

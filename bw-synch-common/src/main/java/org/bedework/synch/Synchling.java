@@ -18,9 +18,8 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
-import org.bedework.synch.shared.filters.Filter;
 import org.bedework.synch.filters.Filters;
+import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Notification.NotificationItem;
 import org.bedework.synch.shared.Subscription;
@@ -31,6 +30,7 @@ import org.bedework.synch.shared.cnctrs.ConnectorInstance;
 import org.bedework.synch.shared.cnctrs.ConnectorInstance.ItemInfo;
 import org.bedework.synch.shared.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.synch.shared.filters.Filter;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
@@ -40,7 +40,7 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.calendar.diff.XmlIcalCompare;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
@@ -72,7 +72,7 @@ import javax.xml.ws.Holder;
  *
  * @author Mike Douglass
  */
-public class Synchling extends Logged {
+public class Synchling implements Logged {
   private static final Object synchlingIdLock = new Object();
 
   private static long lastSynchlingId;
@@ -122,7 +122,7 @@ public class Synchling extends Logged {
       switch (ni.getAction()) {
       case FullSynch:
         if (syncher.subscriptionsOnly()) {
-          if (debug) {
+          if (debug()) {
             debug("Skipping: subscriptions only");
           }
           continue;
@@ -139,7 +139,7 @@ public class Synchling extends Logged {
 
       case CreatedEvent:
         if (syncher.subscriptionsOnly()) {
-          if (debug) {
+          if (debug()) {
             debug("Skipping: subscriptions only");
           }
           continue;
@@ -156,7 +156,7 @@ public class Synchling extends Logged {
 
       case ModifiedEvent:
         if (syncher.subscriptionsOnly()) {
-          if (debug) {
+          if (debug()) {
             debug("Skipping: subscriptions only");
           }
           continue;
@@ -219,7 +219,7 @@ public class Synchling extends Logged {
 
   private StatusType subscribe(final Notification note,
                          final NotificationItem ni) throws SynchException {
-    if (debug) {
+    if (debug()) {
       debug("new subscription " + note.getSub());
     }
 
@@ -250,7 +250,7 @@ public class Synchling extends Logged {
     final IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
-      if (debug) {
+      if (debug()) {
         debug("No item found");
       }
 
@@ -258,7 +258,7 @@ public class Synchling extends Logged {
     }
 
     AddItemResponseType air = getOtherCinst(note).addItem(ical);
-    if (debug) {
+    if (debug()) {
       debug("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
     }
@@ -271,7 +271,7 @@ public class Synchling extends Logged {
     IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
-      if (debug) {
+      if (debug()) {
         debug("No item found");
       }
 
@@ -281,7 +281,7 @@ public class Synchling extends Logged {
     ConnectorInstance cinst = getOtherCinst(note);
 
     FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
-    if (debug) {
+    if (debug()) {
       debug("Update: status=" + fresp.getStatus() +
             " msg=" + fresp.getMessage());
     }
@@ -315,7 +315,7 @@ public class Synchling extends Logged {
                                            toInfo).diff(ical, targetIcal);
 
     if (cst == null) {
-      if (debug) {
+      if (debug()) {
         debug("No update needed for " + ni.getUid());
       }
 
@@ -329,7 +329,7 @@ public class Synchling extends Logged {
     ui.getSelect().add(cst);
 
     UpdateItemResponseType uir = cinst.updateItem(ui);
-    if (debug) {
+    if (debug()) {
       debug("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
     }
@@ -398,13 +398,13 @@ public class Synchling extends Logged {
     sub.setOutstandingSubscription(null);
     sub.setDeleted(true);
 
-    if (debug) {
+    if (debug()) {
       debug("Attempt to delete " + sub);
     }
 
     syncher.deleteSubscription(sub);
 
-    if (debug) {
+    if (debug()) {
       debug("Deleted");
     }
 
@@ -670,7 +670,7 @@ public class Synchling extends Logged {
         checkDeletes(updateInfo, ainfo);
       }
 
-      if (debug) {
+      if (debug()) {
         debug("---------------- update set ----------------");
         for (final SynchInfo si: updateInfo) {
           debug(si.toString());
@@ -744,7 +744,7 @@ public class Synchling extends Logged {
 
       if (toIi == null) {
         /* It's not in the to list - add to list to fetch from the from end */
-        if (debug) {
+        if (debug()) {
           debug("Need to add to end " + toInfo.end + ": uid:" + fromIi.uid);
         }
 
@@ -766,10 +766,10 @@ public class Synchling extends Logged {
       }
 
       if (!update) {
-        if (debug) {
+        if (debug()) {
           debug("No need to update end " + toInfo.end + ": uid:" + fromIi.uid);
         }
-      } else if (debug) {
+      } else if (debug()) {
         debug("Need to update end " + toInfo.end + ": uid:" + fromIi.uid);
       }
 
@@ -830,7 +830,7 @@ public class Synchling extends Logged {
     }
 
     for (final ItemInfo ii: sii.items) {
-      if (debug) {
+      if (debug()) {
         debug(ii.toString());
       }
 
@@ -924,7 +924,7 @@ public class Synchling extends Logged {
         toInfo.lastCts.created++;
         toInfo.totalCts.created++;
 
-        if (debug) {
+        if (debug()) {
           debug("Add: status=" + air.getStatus() +
                 " msg=" + air.getMessage());
         }
@@ -951,7 +951,7 @@ public class Synchling extends Logged {
         }
 
         if (filtered == null) {
-          if (debug) {
+          if (debug()) {
             debug("Filter removed everything for " + si.itemInfo.uid);
           }
 
@@ -969,14 +969,14 @@ public class Synchling extends Logged {
                                        toFiltered);
 
         if (cst == null) {
-          if (debug) {
+          if (debug()) {
             debug("No update needed for " + si.itemInfo.uid);
           }
 
           continue;
         }
 
-        if (debug) {
+        if (debug()) {
           debug("Update needed for " + si.itemInfo.uid);
         }
 

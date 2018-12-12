@@ -25,7 +25,7 @@ import org.bedework.util.hibernate.HibException;
 import org.bedework.util.hibernate.HibSession;
 import org.bedework.util.hibernate.HibSessionFactory;
 import org.bedework.util.hibernate.HibSessionImpl;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public class SynchDb extends Logged implements Serializable {
+public class SynchDb implements Logged, Serializable {
   private final SynchConfig config;
 
   /** */
@@ -249,7 +249,7 @@ public class SynchDb extends Logged implements Serializable {
     }
 
     if (sess == null) {
-      if (debug) {
+      if (debug()) {
         debug("New hibernate session for " + objTimestamp);
       }
       sess = new HibSessionImpl();
@@ -266,13 +266,13 @@ public class SynchDb extends Logged implements Serializable {
 
   protected synchronized void closeSession() throws SynchException {
     if (!isOpen()) {
-      if (debug) {
+      if (debug()) {
         debug("Close for " + objTimestamp + " closed session");
       }
       return;
     }
 
-    if (debug) {
+    if (debug()) {
       debug("Close for " + objTimestamp);
     }
 
@@ -303,7 +303,7 @@ public class SynchDb extends Logged implements Serializable {
   protected void beginTransaction() throws SynchException {
     checkOpen();
 
-    if (debug) {
+    if (debug()) {
       debug("Begin transaction for " + objTimestamp);
     }
     try {
@@ -316,7 +316,7 @@ public class SynchDb extends Logged implements Serializable {
   protected void endTransaction() throws SynchException {
     checkOpen();
 
-    if (debug) {
+    if (debug()) {
       debug("End transaction for " + objTimestamp);
     }
 

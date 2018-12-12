@@ -20,7 +20,7 @@ package org.bedework.synch.web;
 
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.exception.SynchException;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import org.w3c.dom.Document;
 
@@ -37,7 +37,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /** Base class for all webdav servlet methods.
  */
-public abstract class MethodBase extends Logged {
+public abstract class MethodBase implements Logged {
   protected boolean dumpContent;
 
   protected SynchEngine syncher;

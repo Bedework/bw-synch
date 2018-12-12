@@ -25,11 +25,10 @@ import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.web.MethodBase.MethodInfo;
 import org.bedework.util.http.service.HttpOut;
 import org.bedework.util.jmx.ConfBase;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.servlet.io.CharArrayWrappedResponse;
 import org.bedework.util.xml.XmlEmit;
 import org.bedework.util.xml.tagdefs.WebdavTags;
-
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -58,12 +57,8 @@ import javax.xml.namespace.QName;
  * @version 1.0
  */
 public class SynchServlet extends HttpServlet
-        implements HttpSessionListener, ServletContextListener {
-  protected boolean debug;
-
+        implements Logged, HttpSessionListener, ServletContextListener {
   protected boolean dumpContent;
-
-  protected transient Logger log;
 
   /** Table of methods - set at init
    */
@@ -96,10 +91,8 @@ public class SynchServlet extends HttpServlet
     boolean serverError = false;
 
     try {
-      debug = getLogger().isDebugEnabled();
-
-      if (debug) {
-        debugMsg("entry: " + req.getMethod());
+      if (debug()) {
+        debug("entry: " + req.getMethod());
         dumpRequest(req);
       }
 
@@ -109,14 +102,13 @@ public class SynchServlet extends HttpServlet
 
       if (req.getCharacterEncoding() == null) {
         req.setCharacterEncoding("UTF-8");
-        if (debug) {
-          debugMsg("No charset specified in request; forced to UTF-8");
+        if (debug()) {
+          debug("No charset specified in request; forced to UTF-8");
         }
       }
 
-      if (debug && dumpContent) {
-        resp = new CharArrayWrappedResponse(resp,
-                                            getLogger());
+      if (debug() && dumpContent) {
+        resp = new CharArrayWrappedResponse(resp);
       }
 
       String methodName = req.getHeader("X-HTTP-Method-Override");
@@ -128,7 +120,7 @@ public class SynchServlet extends HttpServlet
       MethodBase method = getMethod(syncher, methodName);
 
       if (method == null) {
-        logIt("No method for '" + methodName + "'");
+        info("No method for '" + methodName + "'");
 
         // ================================================================
         //     Set the correct response
@@ -154,7 +146,7 @@ public class SynchServlet extends HttpServlet
         tryWait(req, false);
       } catch (Throwable t) {}
 
-      if (debug && dumpContent &&
+      if (debug() && dumpContent &&
           (resp instanceof CharArrayWrappedResponse)) {
         /* instanceof check because we might get a subsequent exception before
          * we wrap the response
@@ -162,17 +154,17 @@ public class SynchServlet extends HttpServlet
         CharArrayWrappedResponse wresp = (CharArrayWrappedResponse)resp;
 
         if (wresp.getUsedOutputStream()) {
-          debugMsg("------------------------ response written to output stream -------------------");
+          debug("------------------------ response written to output stream -------------------");
         } else {
           String str = wresp.toString();
 
-          debugMsg("------------------------ Dump of response -------------------");
-          debugMsg(str);
-          debugMsg("---------------------- End dump of response -----------------");
+          debug("------------------------ Dump of response -------------------");
+          debug(str);
+          debug("---------------------- End dump of response -----------------");
 
           byte[] bs = str.getBytes();
           resp = (HttpServletResponse)wresp.getResponse();
-          debugMsg("contentLength=" + bs.length);
+          debug("contentLength=" + bs.length);
           resp.setContentLength(bs.length);
           resp.getOutputStream().write(bs);
         }
@@ -202,14 +194,14 @@ public class SynchServlet extends HttpServlet
 
         int status = se.getStatusCode();
         if (status == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
-          getLogger().error(this, se);
+          error(se);
           serverError = true;
         }
         sendError(syncher, t, resp);
         return serverError;
       }
 
-      getLogger().error(this, t);
+      error(t);
       sendError(syncher, t, resp);
       return true;
     } catch (Throwable t1) {
@@ -226,8 +218,8 @@ public class SynchServlet extends HttpServlet
         QName errorTag = se.getErrorTag();
 
         if (errorTag != null) {
-          if (debug) {
-            debugMsg("setStatus(" + se.getStatusCode() + ")");
+          if (debug()) {
+            debug("setStatus(" + se.getStatusCode() + ")");
           }
           resp.setStatus(se.getStatusCode());
           resp.setContentType("text/xml; charset=UTF-8");
@@ -237,22 +229,22 @@ public class SynchServlet extends HttpServlet
             emitError(syncher, errorTag, se.getMessage(), sw);
 
             try {
-              if (debug) {
-                debugMsg("setStatus(" + se.getStatusCode() + ")");
+              if (debug()) {
+                debug("setStatus(" + se.getStatusCode() + ")");
               }
               resp.sendError(se.getStatusCode(), sw.toString());
             } catch (Throwable t1) {
             }
           }
         } else {
-          if (debug) {
-            debugMsg("setStatus(" + se.getStatusCode() + ")");
+          if (debug()) {
+            debug("setStatus(" + se.getStatusCode() + ")");
           }
           resp.sendError(se.getStatusCode(), se.getMessage());
         }
       } else {
-        if (debug) {
-          debugMsg("setStatus(" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR + ")");
+        if (debug()) {
+          debug("setStatus(" + HttpServletResponse.SC_INTERNAL_SERVER_ERROR + ")");
         }
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                        t.getMessage());
@@ -331,7 +323,7 @@ public class SynchServlet extends HttpServlet
 
       return mb;
     } catch (Throwable t) {
-      if (debug) {
+      if (debug()) {
         error(t);
       }
       throw new SynchException(t);
@@ -369,8 +361,8 @@ public class SynchServlet extends HttpServlet
 
       wtr.waiting++;
       while (wtr.active) {
-        if (debug) {
-          log.debug("in: waiters=" + wtr.waiting);
+        if (debug()) {
+          debug("in: waiters=" + wtr.waiting);
         }
 
         wtr.wait();
@@ -408,43 +400,41 @@ public class SynchServlet extends HttpServlet
    * @param req
    */
   public void dumpRequest(final HttpServletRequest req) {
-    Logger log = getLogger();
-
     try {
       Enumeration names = req.getHeaderNames();
 
       String title = "Request headers";
 
-      log.debug(title);
+      debug(title);
 
       while (names.hasMoreElements()) {
         String key = (String)names.nextElement();
         String val = req.getHeader(key);
-        log.debug("  " + key + " = \"" + val + "\"");
+        debug("  " + key + " = \"" + val + "\"");
       }
 
       names = req.getParameterNames();
 
       title = "Request parameters";
 
-      log.debug(title + " - global info and uris");
-      log.debug("getRemoteAddr = " + req.getRemoteAddr());
-      log.debug("getRequestURI = " + req.getRequestURI());
-      log.debug("getRemoteUser = " + req.getRemoteUser());
-      log.debug("getRequestedSessionId = " + req.getRequestedSessionId());
-      log.debug("HttpUtils.getRequestURL(req) = " + req.getRequestURL());
-      log.debug("contextPath=" + req.getContextPath());
-      log.debug("query=" + req.getQueryString());
-      log.debug("contentlen=" + req.getContentLength());
-      log.debug("request=" + req);
-      log.debug("parameters:");
+      debug(title + " - global info and uris");
+      debug("getRemoteAddr = " + req.getRemoteAddr());
+      debug("getRequestURI = " + req.getRequestURI());
+      debug("getRemoteUser = " + req.getRemoteUser());
+      debug("getRequestedSessionId = " + req.getRequestedSessionId());
+      debug("HttpUtils.getRequestURL(req) = " + req.getRequestURL());
+      debug("contextPath=" + req.getContextPath());
+      debug("query=" + req.getQueryString());
+      debug("contentlen=" + req.getContentLength());
+      debug("request=" + req);
+      debug("parameters:");
 
-      log.debug(title);
+      debug(title);
 
       while (names.hasMoreElements()) {
         String key = (String)names.nextElement();
         String val = req.getParameter(key);
-        log.debug("  " + key + " = \"" + val + "\"");
+        debug("  " + key + " = \"" + val + "\"");
       }
     } catch (Throwable t) {
     }
@@ -508,36 +498,5 @@ public class SynchServlet extends HttpServlet
   @Override
   public void contextDestroyed(final ServletContextEvent sce) {
     conf.stop();
-  }
-
-  /**
-   * @return LOgger
-   */
-  public Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
-    }
-
-    return log;
-  }
-
-  /** Debug
-   *
-   * @param msg
-   */
-  public void debugMsg(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  /** Info messages
-   *
-   * @param msg
-   */
-  public void logIt(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
   }
 }

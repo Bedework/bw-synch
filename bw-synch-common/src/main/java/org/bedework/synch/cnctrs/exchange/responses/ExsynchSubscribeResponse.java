@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseMessageType;
 
@@ -106,22 +107,13 @@ public class ExsynchSubscribeResponse extends ExchangeResponse {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("ExsynchSubscribeResponse{");
+    final ToString ts = new ToString(this);
 
-    super.toStringSegment(sb);
+    super.toStringSegment(ts);
 
-    if (getSubscriptionId() != null) {
-      sb.append(",\n    subscriptionId=");
-      sb.append(getSubscriptionId());
-    }
+    ts.append("subscriptionId", getSubscriptionId());
+    ts.append("watermark", getWatermark());
 
-    if (getWatermark() != null) {
-      sb.append(",\n    watermark=");
-      sb.append(getWatermark());
-    }
-
-    sb.append("}");
-
-    return sb.toString();
+    return ts.toString();
   }
 }

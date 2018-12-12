@@ -99,7 +99,7 @@ public class BedeworkConnector
     @Override
     public void run() {
       while (!conn.isStopped()) {
-        if (debug) {
+        if (debug()) {
           debug("About to call service - token = " + remoteToken);
         }
         /* First see if we need to reinitialize or ping */
@@ -124,7 +124,7 @@ public class BedeworkConnector
 
         // Wait a bit before trying again
 
-        if (debug) {
+        if (debug()) {
           debug("About to pause - token = " + remoteToken);
         }
 

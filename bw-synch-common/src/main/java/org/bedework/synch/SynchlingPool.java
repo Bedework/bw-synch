@@ -22,7 +22,7 @@ import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.exception.SynchTimeout;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @author Mike Douglass
  *
  */
-public class SynchlingPool extends Logged {
+public class SynchlingPool implements Logged {
   private SynchEngine syncher;
 
   private ArrayBlockingQueue<Synchling> pool;

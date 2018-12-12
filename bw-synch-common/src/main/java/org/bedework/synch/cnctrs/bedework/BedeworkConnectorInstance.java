@@ -364,7 +364,7 @@ public class BedeworkConnectorInstance
     /* At the moment have to fetch it just to get the href */
 
     final FetchItemResponseType fresp = fetchItem(uid);
-    if (debug) {
+    if (debug()) {
       debug("deleteItem: status=" + fresp.getStatus() +
                     " msg=" + fresp.getMessage());
     }

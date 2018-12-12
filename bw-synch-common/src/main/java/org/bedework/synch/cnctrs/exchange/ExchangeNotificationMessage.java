@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.exchange;
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
@@ -269,30 +270,14 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("Notification{");
+    final ToString ts = new ToString(this);
 
-    super.toStringSegment(sb);
+    super.toStringSegment(ts);
 
-    sb.append(",\n   subscriptionId=");
-    sb.append(getSubscriptionId());
+    ts.append("subscriptionId", getSubscriptionId());
+    ts.append("previousWatermark", getPreviousWatermark());
+    ts.append("notification items", getNotifications());
 
-    sb.append(",\n   previousWatermark=");
-    sb.append(getPreviousWatermark());
-
-    String delim = ",\n   notification items{\n      ";
-    for (NotificationItem ni: getNotifications()) {
-      sb.append(delim);
-      sb.append(ni.toString());
-
-      delim =",\n      ";
-    }
-
-    if (getNotifications().size() > 0) {
-      sb.append("}");
-    }
-
-    sb.append("}");
-
-    return sb.toString();
+    return ts.toString();
   }
 }

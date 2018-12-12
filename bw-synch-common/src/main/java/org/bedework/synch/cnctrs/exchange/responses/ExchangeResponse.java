@@ -19,11 +19,11 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType.MessageXml;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
-import org.apache.log4j.Logger;
 import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 
@@ -31,10 +31,6 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
  *
  */
 public class ExchangeResponse extends BaseResponseType {
-  private Logger logger;
-
-  protected boolean debug;
-
   private String responseCode;
 
   private Integer descriptiveLinkKey;
@@ -46,8 +42,6 @@ public class ExchangeResponse extends BaseResponseType {
    * @throws SynchException
    */
   public ExchangeResponse(final ResponseMessageType resp) throws SynchException {
-    debug = getLogger().isDebugEnabled();
-
     message = resp.getMessageText();
 
     responseCode = resp.getResponseCode();
@@ -92,35 +86,19 @@ public class ExchangeResponse extends BaseResponseType {
   }
 
   /**
-   * @param sb
+   * @param ts
    */
-  public void toStringSegment(final StringBuilder sb) {
-    sb.append("status=");
-    sb.append(getStatus());
+  public void toStringSegment(final ToString ts) {
+    ts.append("status", getStatus());
 
-    sb.append(", responseCode=");
-    sb.append(getResponseCode());
+    ts.append("responseCode", getResponseCode());
 
     if (getMessage() != null) {
-      sb.append(",\n    message=");
-      sb.append(getMessage());
+      ts.append("message", getMessage());
     }
 
     if (getDescriptiveLinkKey() != null) {
-      sb.append(", descriptiveLinkKey=");
-      sb.append(getDescriptiveLinkKey());
+      ts.append("descriptiveLinkKey", getDescriptiveLinkKey());
     }
-  }
-
-  protected Logger getLogger() {
-    if (logger == null) {
-      logger = Logger.getLogger(this.getClass());
-    }
-
-    return logger;
-  }
-
-  protected void debugMsg(final String msg) {
-    getLogger().debug(msg);
   }
 }

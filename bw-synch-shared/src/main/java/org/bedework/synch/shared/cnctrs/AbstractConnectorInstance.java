@@ -28,7 +28,7 @@ import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -47,8 +47,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector,
         InfoT extends BaseSubscriptionInfo,
         ConfigT extends ConnectorConfigI>
-        extends Logged
-        implements ConnectorInstance<InfoT> {
+        implements Logged, ConnectorInstance<InfoT> {
   protected Subscription sub;
 
   protected SynchEndType end;

@@ -21,6 +21,7 @@ package org.bedework.synch.cnctrs.exchange.responses;
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.FindItemResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.CalendarItemType;
@@ -210,12 +211,11 @@ public class FinditemsResponse extends ExchangeResponse {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("FinditemsResponse{");
+    final ToString ts = new ToString(this);
 
-    super.toStringSegment(sb);
+    super.toStringSegment(ts);
 
-    sb.append(",\n   includesLastItemInRange=");
-    sb.append(getIncludesLastItemInRange());
+    ts.append("includesLastItemInRange", getIncludesLastItemInRange());
 
 //    if (icals != null) {
 //      for (IcalendarType ical: icals) {
@@ -223,12 +223,8 @@ public class FinditemsResponse extends ExchangeResponse {
 //      }
 //    }
 
-    if (synchInfo != null) {
-      for (SynchInfo si: synchInfo) {
-        sb.append(",\n     ");
-        sb.append(si.toString());
-      }
-    }
-    return sb.toString();
+    ts.append("synchInfo", synchInfo);
+
+    return ts.toString();
   }
 }

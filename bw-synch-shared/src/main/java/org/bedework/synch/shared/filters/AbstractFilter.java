@@ -21,7 +21,7 @@ package org.bedework.synch.shared.filters;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 
 import ietf.params.xml.ns.icalendar_2.ArrayOfComponents;
@@ -43,13 +43,12 @@ import javax.xml.bind.JAXBElement;
  * @author douglm
  *
  */
-public abstract class AbstractFilter extends Logged implements Filter {
+public abstract class AbstractFilter implements Logged, Filter {
   protected Subscription sub;
 
   protected Map<String, Object> stripMap;
 
   protected AbstractFilter() {
-    debug = getLogger().isDebugEnabled();
   }
 
   protected final static ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =

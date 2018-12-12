@@ -19,6 +19,8 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.logging.Logged;
+import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SyncFolderItemsResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;
@@ -37,7 +39,8 @@ import javax.xml.bind.JAXBElement;
 /** Notification from Exchange.
  *
  */
-public class SyncFolderitemsResponse extends ExchangeResponse {
+public class SyncFolderitemsResponse extends ExchangeResponse
+        implements Logged {
   private String syncState;
   private Boolean includesLastItemInRange;
   private SyncFolderItemsChangesType changes;
@@ -59,8 +62,8 @@ public class SyncFolderitemsResponse extends ExchangeResponse {
 
       SyncFolderItemsCreateOrUpdateType s = (SyncFolderItemsCreateOrUpdateType)el1.getValue();
 
-      if (debug) {
-        debugMsg("chgType =" + chgType);
+      if (debug()) {
+        debug("chgType =" + chgType);
       }
     }
   }
@@ -292,15 +295,13 @@ public class SyncFolderitemsResponse extends ExchangeResponse {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("Notification{");
+    final ToString ts = new ToString(this);
 
-    super.toStringSegment(sb);
+    super.toStringSegment(ts);
 
-    sb.append(",\n   syncState=");
-    sb.append(getSyncState());
+    ts.append("syncState", getSyncState());
 
-    sb.append(",\n   includesLastItemInRange=");
-    sb.append(getIncludesLastItemInRange());
+    ts.append("includesLastItemInRange", getIncludesLastItemInRange());
 
     /*
     String delim = ",\n   notification items{\n      ";
@@ -318,6 +319,6 @@ public class SyncFolderitemsResponse extends ExchangeResponse {
     sb.append("}");
     */
 
-    return sb.toString();
+    return ts.toString();
   }
 }

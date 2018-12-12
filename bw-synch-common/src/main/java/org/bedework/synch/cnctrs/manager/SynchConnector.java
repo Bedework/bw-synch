@@ -275,7 +275,7 @@ public class SynchConnector
       sub.setInfo(sinfo);
     }
 
-    if (debug) {
+    if (debug()) {
       debug("Handle subscribe " +  sub);
     }
 
@@ -299,7 +299,7 @@ public class SynchConnector
 
   private Notification unsubscribe(final HttpServletResponse resp,
                            final UnsubscribeRequestType u) throws SynchException {
-    if (debug) {
+    if (debug()) {
       debug("Handle unsubscribe " +  u.getSubscriptionId());
     }
 
@@ -308,7 +308,7 @@ public class SynchConnector
     Subscription sub = checkAsr(u);
 
     if (sub == null) {
-      if (debug) {
+      if (debug()) {
         warn("No subscription found for " +  u.getSubscriptionId());
       }
       // No subscription or error - nothing to do
@@ -324,7 +324,7 @@ public class SynchConnector
 
   private Notification subStatus(final HttpServletResponse resp,
                            final SubscriptionStatusRequestType ss) throws SynchException {
-    if (debug) {
+    if (debug()) {
       debug("Handle status " +  ss.getSubscriptionId());
     }
 

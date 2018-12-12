@@ -18,10 +18,8 @@
 */
 package org.bedework.synch;
 
-import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.db.SynchDb;
-import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.StatLong;
@@ -30,12 +28,14 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.cnctrs.Connector;
 import org.bedework.synch.shared.cnctrs.Connector.NotificationBatch;
 import org.bedework.synch.shared.cnctrs.ConnectorInstance;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.XcalUtil.TzGetter;
 import org.bedework.util.http.BasicHttpClient;
 import org.bedework.util.jmx.ConfigHolder;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 import org.bedework.util.security.PwEncryptionIntf;
 import org.bedework.util.timezones.Timezones;
@@ -118,7 +118,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Mike Douglass
  */
-public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
+public class SynchEngineImpl
+        implements Logged, SynchEngine, TzGetter {
   //private static String appname = "Synch";
   static ConfigHolder<SynchConfig> cfgHolder;
 
@@ -180,7 +181,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
     @Override
     public void run() {
       while (true) {
-        if (debug) {
+        if (debug()) {
           debug("About to wait for notification");
         }
 
@@ -190,14 +191,14 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
             continue;
           }
 
-          if (debug) {
+          if (debug()) {
             debug("Received notification");
           }
 
           if ((note.getSub() != null) && note.getSub().getDeleted()) {
             // Drop it
 
-            if (debug) {
+            if (debug()) {
               debug("Dropping deleted notification");
             }
 
@@ -241,7 +242,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
           warn("Notification handler shutting down");
           break;
         } catch (Throwable t) {
-          if (debug) {
+          if (debug()) {
             error(t);
           } else {
             // Try not to flood the log with error traces
@@ -265,7 +266,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
    */
   private SynchEngineImpl() throws SynchException {
     System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
-                       String.valueOf(debug));
+                       String.valueOf(debug()));
   }
 
   /**
@@ -337,14 +338,14 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
 
   @Override
   public void rescheduleNow(final String id) throws SynchException {
-    if (debug) {
+    if (debug()) {
       debug("reschedule now for subscription id " + id);
     }
 
     final Subscription sub = getSubscription(id);
 
     if (sub == null) {
-      if (debug) {
+      if (debug()) {
         debug("No subscription");
         return;
       }
@@ -359,7 +360,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
   @Override
   public void reschedule(final Subscription sub,
                          final boolean newSub) {
-    if (debug) {
+    if (debug()) {
       debug("reschedule subscription " + sub);
     }
 
@@ -596,7 +597,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
 
         startup:
         while (starting) {
-          if (debug) {
+          if (debug()) {
             debug("startList has " + startList.size() + " subscriptions");
           }
 
@@ -670,7 +671,7 @@ public class SynchEngineImpl extends Logged implements SynchEngine, TzGetter {
       try {
         conn.stop();
       } catch (final Throwable t) {
-        if (debug) {
+        if (debug()) {
           error(t);
         } else {
           error(t.getMessage());

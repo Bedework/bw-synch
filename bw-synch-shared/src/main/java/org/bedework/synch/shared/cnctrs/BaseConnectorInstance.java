@@ -194,7 +194,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
       if (rc != HttpServletResponse.SC_OK) {
         info.setLastRefreshStatus(String.valueOf(rc));
-        if (debug) {
+        if (debug()) {
           debug("Unsuccessful response from server was " + rc);
         }
         info.setChangeToken(null);  // Force refresh next time
@@ -204,14 +204,14 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
       final String etag = HttpUtil.getFirstHeaderValue(hresp, "Etag");
       if (etag == null) {
-        if (debug) {
+        if (debug()) {
           debug("Received null etag");
         }
 
         return false;
       }
 
-      if (debug) {
+      if (debug()) {
         debug("Received etag:" + etag +
                       ", ours=" + info.getChangeToken());
       }
@@ -321,14 +321,14 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
         if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
           // Data unchanged.
-          if (debug) {
+          if (debug()) {
             debug("data unchanged");
           }
           return true;
         }
 
         if (rc != HttpServletResponse.SC_OK) {
-          if (debug) {
+          if (debug()) {
             debug("Unsuccessful response from server was " + rc);
           }
           info.setLastRefreshStatus(String.valueOf(rc));

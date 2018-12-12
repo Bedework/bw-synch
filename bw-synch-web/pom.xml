@@ -26,8 +26,14 @@
     <!-- Bedework: Util -->
     <dependency>
       <groupId>org.bedework</groupId>
+      <artifactId>bw-util-logging</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bedework</groupId>
       <artifactId>bw-util-misc</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-util-servlet</artifactId>
@@ -62,11 +68,6 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
       <scope>provided</scope>
     </dependency>
     <!-- Test Dependencies -->

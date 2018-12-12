@@ -25,7 +25,7 @@ import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.wsmessages.SynchEndType;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +41,7 @@ import java.util.TimerTask;
  *
  *   @author Mike Douglass   douglm   rpi.edu
  */
-public class SynchTimer extends Logged {
+public class SynchTimer implements Logged {
   private final SynchEngine syncher;
 
   /** This is the class that goes into a wait. The run method MUST only take  a
@@ -67,7 +67,7 @@ public class SynchTimer extends Logged {
         waiting.remove(sub.getSubscriptionId());
       }
 
-      if (debug){
+      if (debug()){
         debug("About to send resynch notification for " + sub.getSubscriptionId());
       }
 
@@ -95,8 +95,6 @@ public class SynchTimer extends Logged {
     this.syncher = syncher;
 
     timer = new Timer("SynchTimer", true);
-
-    debug = getLogger().isDebugEnabled();
   }
 
   /** Stop our timer thread.
@@ -119,7 +117,7 @@ public class SynchTimer extends Logged {
   public void schedule(final Subscription sub,
                        final Date when) {
     Date whenToResched = when;
-    if (debug){
+    if (debug()){
       debug("reschedule " + sub.getSubscriptionId() + " for " + when);
     }
 

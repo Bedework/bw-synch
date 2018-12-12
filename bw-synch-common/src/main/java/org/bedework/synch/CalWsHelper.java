@@ -18,7 +18,7 @@
 */
 package org.bedework.synch;
 
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.Logged;
 
 import org.w3c.dom.Document;
 
@@ -42,7 +42,7 @@ import javax.xml.transform.stream.StreamSource;
  *
  *   @author Mike Douglass   douglm rpi.edu
  */
-public class CalWsHelper extends Logged {
+public class CalWsHelper implements Logged {
   private MessageFactory soapMsgFactory;
 
   /** Trace a calws SOAP message
