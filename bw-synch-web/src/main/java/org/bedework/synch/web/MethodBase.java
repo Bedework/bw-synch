@@ -20,6 +20,7 @@ package org.bedework.synch.web;
 
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
 import org.w3c.dom.Document;
@@ -307,6 +308,21 @@ public abstract class MethodBase implements Logged {
     synchronized (httpDateFormatter) {
       return httpDateFormatter.format(val) + "GMT";
     }
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
 

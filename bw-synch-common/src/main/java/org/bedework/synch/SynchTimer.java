@@ -25,6 +25,7 @@ import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
 import java.util.ArrayList;
@@ -166,5 +167,20 @@ public class SynchTimer implements Logged {
     stats.add(new Stat("max waiting", getMaxWaitingCt()));
 
     return stats;
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

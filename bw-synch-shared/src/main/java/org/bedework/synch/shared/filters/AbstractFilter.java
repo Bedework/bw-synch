@@ -21,6 +21,7 @@ package org.bedework.synch.shared.filters;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 
@@ -212,5 +213,20 @@ public abstract class AbstractFilter implements Logged, Filter {
   protected void addSkip(final Map<String, Object> skipMap,
                          final Object o) {
     skipMap.put(o.getClass().getCanonicalName(), o);
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

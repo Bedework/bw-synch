@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.shared.exception.SynchException;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
 
@@ -320,5 +321,20 @@ public class SyncFolderitemsResponse extends ExchangeResponse
     */
 
     return ts.toString();
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

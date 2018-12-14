@@ -30,6 +30,7 @@ import org.bedework.synch.wsmessages.ObjectFactory;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.SynchRemoteService;
 import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
 import org.w3c.dom.Document;
@@ -343,5 +344,20 @@ public abstract class AbstractConnector<T,
     } catch(Throwable t) {
       throw new SynchException(t);
     }
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

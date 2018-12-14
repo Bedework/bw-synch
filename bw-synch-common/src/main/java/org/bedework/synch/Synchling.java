@@ -40,6 +40,7 @@ import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.calendar.diff.XmlIcalCompare;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
 
@@ -1085,5 +1086,20 @@ public class Synchling implements Logged {
     diffSubid = sub.getSubscriptionId();
     diff = new XmlIcalCompare(skipList, syncher.getTzGetter());
     return diff;
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

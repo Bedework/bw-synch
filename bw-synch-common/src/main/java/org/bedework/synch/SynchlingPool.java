@@ -22,6 +22,7 @@ import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.exception.SynchTimeout;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
 
@@ -276,5 +277,20 @@ public class SynchlingPool implements Logged {
              .append("currentMaxSize", getCurrentMaxSize())
              .append("currentAvailable", getCurrentAvailable())
              .toString();
+  }
+
+  /* ====================================================================
+   *                   Logged methods
+   * ==================================================================== */
+
+  private BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
