@@ -27,7 +27,7 @@
 
 		<!-- Third Party Library Versions -->
 		<commons-codec.version>1.5</commons-codec.version>
-		<servlet-api.version>2.5</servlet-api.version>
+		<servlet-api.version>4.0.0</servlet-api.version>
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
     <ical4j.artifactId>ical4j</ical4j.artifactId>
     <ical4j.version>2.0.6</ical4j.version>
@@ -253,7 +253,7 @@
       
 			<dependency>
 				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
+				<artifactId>javax.servlet-api</artifactId>
 				<version>${servlet-api.version}</version>
 			</dependency>
 
