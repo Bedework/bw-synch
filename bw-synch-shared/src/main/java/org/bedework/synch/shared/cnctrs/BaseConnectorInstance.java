@@ -202,21 +202,21 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
         return true;
       }
 
-      final String etag = HttpUtil.getFirstHeaderValue(hresp, "Etag");
-      if (etag == null) {
+      final String ctoken = getHttpChangeToken(hresp);
+      if (ctoken == null) {
         if (debug()) {
-          debug("Received null etag");
+          debug("Received null change token");
         }
 
         return false;
       }
 
       if (debug()) {
-        debug("Received etag:" + etag +
+        debug("Received change token:" + ctoken +
                       ", ours=" + info.getChangeToken());
       }
 
-      if (info.getChangeToken().equals(etag)) {
+      if (info.getChangeToken().equals(ctoken)) {
         return false;
       }
 
@@ -398,11 +398,11 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
         }
 
         /* Looks like we translated ok. Save any etag.
-       */
+        */
 
-        final String etag = HttpUtil.getFirstHeaderValue(hresp, "Etag");
-        if (etag != null) {
-          info.setChangeToken(etag);
+        final String ctoken = getHttpChangeToken(hresp);
+        if (ctoken != null) {
+          info.setChangeToken(ctoken);
         }
       } // try
 
@@ -412,5 +412,17 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     } catch (final Throwable t) {
       throw new SynchException(t);
     }
+  }
+
+  /* Might be an etag - might be last-modified
+
+   */
+  public final String getHttpChangeToken(final CloseableHttpResponse hresp) {
+    final String etag = HttpUtil.getFirstHeaderValue(hresp, "Etag");
+    if (etag != null) {
+      return etag;
+    }
+
+    return HttpUtil.getFirstHeaderValue(hresp, "Last-modified");
   }
 }
