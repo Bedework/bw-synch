@@ -279,7 +279,12 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.3.2</version>
     </dependency>
-	</dependencies>
+
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
+  </dependencies>
 
 	<build>
 		<finalName>bw-synch-${project.version}</finalName>

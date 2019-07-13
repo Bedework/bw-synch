@@ -43,6 +43,7 @@
     <hibernate-ehcache.version>5.2.5.Final</hibernate-ehcache.version>
 		<ehcache.version>2.10.3</ehcache.version>
 		<junit.version>4.8.2</junit.version>
+    <java.jaxb.api.version>2.3.0</java.jaxb.api.version>
 		<asm.version>3.2</asm.version>
 		<asm-attrs.version>2.2.3</asm-attrs.version>
 	</properties>
@@ -170,11 +171,13 @@
         <artifactId>bw-util-security</artifactId>
         <version>${bw-util.version}</version>
       </dependency>
+
       <dependency>
         <groupId>org.bedework</groupId>
         <artifactId>bw-util-servlet</artifactId>
         <version>${bw-util.version}</version>
       </dependency>
+
       <dependency>
         <groupId>org.bedework</groupId>
         <artifactId>bw-util-timezones</artifactId>
@@ -186,7 +189,9 @@
         <artifactId>bw-util-xml</artifactId>
         <version>${bw-util.version}</version>
       </dependency>
+
 			<!-- Bedework: Web Services -->
+
       <dependency>
         <groupId>org.bedework</groupId>
         <artifactId>bw-xml-icalendar</artifactId>
@@ -251,8 +256,14 @@
         <artifactId>classmate</artifactId>
         <version>1.3.0</version>
       </dependency>
-      
-			<dependency>
+
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${java.jaxb.api.version}</version>
+      </dependency>
+
+      <dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>${servlet-api.version}</version>
