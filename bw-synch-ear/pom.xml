@@ -289,6 +289,11 @@
       <groupId>javax.xml.soap</groupId>
       <artifactId>javax.xml.soap-api</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>javax.xml.ws</groupId>
+      <artifactId>jaxws-api</artifactId>
+    </dependency>
   </dependencies>
 
 	<build>
