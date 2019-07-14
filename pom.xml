@@ -18,13 +18,13 @@
 		<maven.source.plugin.version>2.1.2</maven.source.plugin.version>
 
 		<!-- Bedework Versions -->
-    <bw-access.version>4.0.6</bw-access.version>
-    <bw-util.version>4.0.24</bw-util.version>
+    <bw-access.version>4.0.7-SNAPSHOT</bw-access.version>
+    <bw-util.version>4.0.25-SNAPSHOT</bw-util.version>
     <bw-util-deploy.version>4.0.24</bw-util-deploy.version>
-    <bw-util-logging.version>4.0.2</bw-util-logging.version>
-    <bw-util-hibernate.version>4.0.21</bw-util-hibernate.version>
-    <bw-util2.version>4.0.4</bw-util2.version>
-    <bw-xml.version>4.0.8</bw-xml.version>
+    <bw-util-logging.version>4.0.3-SNAPSHOT</bw-util-logging.version>
+    <bw-util-hibernate.version>4.0.22-SNAPSHOT</bw-util-hibernate.version>
+    <bw-util2.version>4.0.5-SNAPSHOT</bw-util2.version>
+    <bw-xml.version>4.0.9-SNAPSHOT</bw-xml.version>
 
 		<!-- Third Party Library Versions -->
 		<commons-codec.version>1.5</commons-codec.version>
