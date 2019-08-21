@@ -28,6 +28,7 @@
 
 		<!-- Third Party Library Versions -->
 		<commons-codec.version>1.5</commons-codec.version>
+    <dom4j-version>1.6.1</dom4j-version>
 		<servlet-api.version>4.0.0</servlet-api.version>
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
     <ical4j.artifactId>ical4j</ical4j.artifactId>
@@ -308,6 +309,13 @@
 				<artifactId>cglib</artifactId>
 				<version>${cglib.version}</version>
 			</dependency>
+
+      <dependency>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>${dom4j-version}</version>
+      </dependency>
+
 			<!-- Test Dependencies -->
 
 			<dependency>
