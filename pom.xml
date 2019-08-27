@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bedework.bw-synch</groupId>
 	<artifactId>bw-synch</artifactId>
-	<version>4.0.5-SNAPSHOT</version>
+	<version>4.0.5</version>
 	<packaging>pom</packaging>
 	<name>bw-synch</name>
   <description>This project provides a synch engine for external subscriptions for
@@ -67,7 +67,7 @@
 		<connection>scm:git:git@github.com:Bedework/bw-synch.git</connection>
 		<developerConnection>scm:git:git@github.com:Bedework/bw-synch.git</developerConnection>
 		<url>https://github.com/Bedework/bw-synch</url>
-	  <tag>HEAD</tag>
+	  <tag>bw-synch-4.0.5</tag>
   </scm>
 
 	<issueManagement>
