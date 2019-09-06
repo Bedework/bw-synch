@@ -34,7 +34,7 @@
     <orderEntry type="library" name="Maven: org.bedework:bw-util-security:4.0.25" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-timezones:4.0.25" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-caching:4.0.25" level="project" />
-    <orderEntry type="module" module-name="bw-access" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-access:4.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-xml-icalendar:4.0.9" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.3" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
