@@ -33,7 +33,6 @@ import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.XcalUtil.TzGetter;
-import org.bedework.util.http.BasicHttpClient;
 import org.bedework.util.jmx.ConfigHolder;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
@@ -529,9 +528,6 @@ public class SynchEngineImpl
       timezones.init(getConfig().getTimezonesURI());
 
       tzgetter = this;
-
-      //DavClient.setDefaultMaxPerHost(20);
-      BasicHttpClient.setDefaultMaxPerRoute(20);
 
       synchlingPool = new SynchlingPool();
       synchlingPool.start(this,
