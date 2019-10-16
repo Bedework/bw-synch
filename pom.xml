@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bedework.bw-synch</groupId>
 	<artifactId>bw-synch</artifactId>
-	<version>4.0.7</version>
+	<version>4.0.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>bw-synch</name>
   <description>This project provides a synch engine for external subscriptions for
