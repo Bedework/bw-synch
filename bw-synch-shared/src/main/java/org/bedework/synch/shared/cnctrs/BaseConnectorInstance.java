@@ -313,7 +313,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
       try (CloseableHttpResponse hresp = HttpUtil.doGet(getClient(),
                                                         getUri(),
-                                                        hdrs,
+                                                        this::getHeaders,
                                                         "text/calendar")) {
         final int rc = HttpUtil.getStatus(hresp);
 
@@ -424,5 +424,26 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     }
 
     return HttpUtil.getFirstHeaderValue(hresp, "Last-modified");
+  }
+
+  private Headers getHeaders() {
+    final Headers hdrs;
+    final String changeToken;
+
+    try {
+      changeToken = info.getChangeToken();
+    } catch (final Throwable t) {
+      throw new RuntimeException(t);
+    }
+
+    if ((uidMap != null) && (changeToken != null) &&
+            (fetchedIcal != null)) {
+      hdrs = new Headers();
+      hdrs.add("If-None-Match", changeToken);
+    } else {
+      hdrs = null;
+    }
+
+    return hdrs;
   }
 }
