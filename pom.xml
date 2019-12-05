@@ -273,24 +273,6 @@
       </dependency>
 
       <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>${java.jaxb.api.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.xml.soap</groupId>
-        <artifactId>javax.xml.soap-api</artifactId>
-        <version>${javax.xml.soap-api.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.xml.ws</groupId>
-        <artifactId>jaxws-api</artifactId>
-        <version>${jaxws-api.version}</version>
-      </dependency>
-
-      <dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>${servlet-api.version}</version>
@@ -318,6 +300,26 @@
         <groupId>dom4j</groupId>
         <artifactId>dom4j</artifactId>
         <version>${dom4j-version}</version>
+      </dependency>
+
+      <!-- Web Service (SOAP) Dependencies -->
+
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${java.jaxb.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.soap</groupId>
+        <artifactId>javax.xml.soap-api</artifactId>
+        <version>${javax.xml.soap-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.ws</groupId>
+        <artifactId>jaxws-api</artifactId>
+        <version>${jaxws-api.version}</version>
       </dependency>
 
 			<!-- Test Dependencies -->
