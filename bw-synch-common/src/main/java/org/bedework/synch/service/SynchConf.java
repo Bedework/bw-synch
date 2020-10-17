@@ -102,7 +102,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
             syncher = SynchEngineImpl.getSyncher();
             syncher.start();
           }
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
           if (!showedTrace) {
             error(t);
             showedTrace = true;
@@ -162,6 +162,23 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     return schemaOutFile;
   }
 
+  @Override
+  public void setDumpThreshold(final int val) {
+    System.setProperty(
+            "com.sun.xml.ws.transport.http.HttpAdapter.dumpTreshold",
+            String.valueOf(val));
+  }
+
+  @Override
+  public int getDumpThreshold() {
+    try {
+      return Integer.parseInt(System.getProperty(
+              "com.sun.xml.ws.transport.http.HttpAdapter.dumpTreshold"));
+    } catch (final Throwable ignored) {
+      return 0;
+    }
+  }
+
   /* ========================================================================
    * Attributes
    * ======================================================================== */
@@ -171,51 +188,31 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     getConfig().setSynchlingPoolSize(val);
   }
 
-  /**
-   * @return current size of synchling pool
-   */
   @Override
   public int getSynchlingPoolSize() {
     return getConfig().getSynchlingPoolSize();
   }
 
-  /**
-   * @param val timeout in millisecs
-   */
   @Override
   public void setSynchlingPoolTimeout(final long val) {
     getConfig().setSynchlingPoolTimeout(val);
   }
 
-  /**
-   * @return timeout in millisecs
-   */
   @Override
   public long getSynchlingPoolTimeout() {
     return getConfig().getSynchlingPoolTimeout();
   }
 
-  /** How often we retry when a target is missing
-   *
-   * @param val
-   */
   @Override
   public void setMissingTargetRetries(final int val) {
     getConfig().setMissingTargetRetries(val);
   }
 
-  /**
-   * @return How often we retry when a target is missing
-   */
   @Override
   public int getMissingTargetRetries() {
     return getConfig().getMissingTargetRetries();
   }
 
-  /** web service push callback uri - null for no service
-   *
-   * @param val    String
-   */
   @Override
   public void setCallbackURI(final String val) {
     getConfig().setCallbackURI(val);
@@ -320,7 +317,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   @Override
   public List<Stat> getStats() {
     if (syncher == null) {
-      return new ArrayList<Stat>();
+      return new ArrayList<>();
     }
 
     return syncher.getStats();
@@ -389,11 +386,11 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
   @Override
   public String listHibernateProperties() {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
 
-    List<String> ps = getConfig().getHibernateProperties();
+    final List<String> ps = getConfig().getHibernateProperties();
 
-    for (String p: ps) {
+    for (final String p: ps) {
       res.append(p);
       res.append("\n");
     }
@@ -403,7 +400,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
   @Override
   public String displayHibernateProperty(final String name) {
-    String val = getConfig().getHibernateProperty(name);
+    final String val = getConfig().getHibernateProperty(name);
 
     if (val != null) {
       return val;

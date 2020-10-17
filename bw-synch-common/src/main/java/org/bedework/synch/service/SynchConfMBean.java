@@ -143,7 +143,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val true if this instance only handles subscriptions
    */
-  void setSubscriptionsOnly(final boolean val);
+  void setSubscriptionsOnly(boolean val);
 
   /**
    *
@@ -159,9 +159,9 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("Get the current stats.")
   List<Stat> getStats();
 
-  /** Export schema to database?
+  /**
    *
-   * @param val
+   * @param val Export schema to database?
    */
   void setExport(boolean val);
 
@@ -171,9 +171,9 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("Export (write) schema to database?")
   boolean getExport();
 
-  /** Output file name - full path
+  /**
    *
-   * @param val
+   * @param val Output file name - full path
    */
   void setSchemaOutFile(String val);
 
@@ -182,6 +182,18 @@ public interface SynchConfMBean extends ConfBaseMBean {
    */
   @MBeanInfo("Full path of schema output file")
   String getSchemaOutFile();
+
+  /**
+   *
+   * @param val Dump threshold
+   */
+  void setDumpThreshold(int val);
+
+  /**
+   * @return Dump threshold
+   */
+  @MBeanInfo("Dump threshold")
+  int getDumpThreshold();
 
   /* ========================================================================
    * Operations
