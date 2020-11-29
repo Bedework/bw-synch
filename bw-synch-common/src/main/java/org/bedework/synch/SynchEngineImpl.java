@@ -139,7 +139,7 @@ public class SynchEngineImpl
 
   //private Configurator config;
 
-  private static Object getSyncherLock = new Object();
+  private static final Object getSyncherLock = new Object();
 
   private static SynchEngine syncher;
 
@@ -158,13 +158,15 @@ public class SynchEngineImpl
 
   private SynchDb db;
 
-  private Map<String, Connector> connectorMap = new HashMap<>();
+  private final Map<String, Connector> connectorMap = new HashMap<>();
 
   /* Some counts */
 
-  private StatLong notificationsCt = new StatLong("notifications");
+  private final StatLong notificationsCt =
+          new StatLong("notifications");
 
-  private StatLong notificationsAddWt = new StatLong("notifications add wait");
+  private final StatLong notificationsAddWt =
+          new StatLong("notifications add wait");
 
   /** This process handles startup notifications and (un)subscriptions.
    *
@@ -186,7 +188,7 @@ public class SynchEngineImpl
         }
 
         try {
-          Notification note = notificationInQueue.take();
+          final Notification<?> note = notificationInQueue.take();
           if (note == null) {
             continue;
           }
@@ -222,7 +224,7 @@ public class SynchEngineImpl
             }
 
             /* The synchling needs to be running it's own thread. */
-            StatusType st = handleNotification(sl, note);
+            final StatusType st = handleNotification(sl, note);
 
             if (st == StatusType.WARNING) {
               /* Back on the queue - these need to be flagged so we don't get an
@@ -238,15 +240,15 @@ public class SynchEngineImpl
           /* If this is a poll kind then we should add it to a poll queue
            */
           // XXX Add it to poll queue
-        } catch (InterruptedException ie) {
+        } catch (final InterruptedException ie) {
           warn("Notification handler shutting down");
           break;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
           if (debug()) {
             error(t);
           } else {
             // Try not to flood the log with error traces
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             if ((now - lastTrace) > (30 * 1000)) {
               error(t);
               lastTrace = now;
@@ -264,16 +266,19 @@ public class SynchEngineImpl
   /** Constructor
    *
    */
-  private SynchEngineImpl() throws SynchException {
-    System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
-                       String.valueOf(debug()));
+  private SynchEngineImpl() {
+    System.setProperty(
+            "com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump",
+            String.valueOf(debug()));
+    System.setProperty(
+            "net.fortuna.ical4j.timezone.cache.impl",
+            "net.fortuna.ical4j.util.MapTimeZoneCache");
   }
 
   /**
    * @return the syncher
-   * @throws SynchException
    */
-  public static SynchEngine getSyncher() throws SynchException {
+  public static SynchEngine getSyncher() {
     if (syncher != null) {
       return syncher;
     }
@@ -298,7 +303,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void handleNotification(final Notification note) {
+  public void handleNotification(final Notification<?> note) {
     try {
       while (true) {
         if (stopping) {
@@ -309,7 +314,7 @@ public class SynchEngineImpl
           break;
         }
       }
-    } catch (InterruptedException ignored) {
+    } catch (final InterruptedException ignored) {
     }
   }
 
@@ -317,7 +322,7 @@ public class SynchEngineImpl
   public void setConnectors(final Subscription sub) throws SynchException {
     String connectorId = sub.getEndAConnectorInfo().getConnectorId();
 
-    Connector conn = getConnector(connectorId);
+    Connector<?, ?, ?> conn = getConnector(connectorId);
     if (conn == null) {
       throw new SynchException("No connector for " + sub + "(" +
                                        SynchEndType.A + ")");
@@ -347,8 +352,8 @@ public class SynchEngineImpl
     if (sub == null) {
       if (debug()) {
         debug("No subscription");
-        return;
       }
+      return;
     }
 
     setConnectors(sub);

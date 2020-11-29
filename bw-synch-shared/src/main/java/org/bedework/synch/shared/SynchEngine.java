@@ -28,7 +28,7 @@ public interface SynchEngine {
   /**
    * @param note
    */
-  void handleNotification(Notification note);
+  void handleNotification(Notification<?> note);
 
   /** When we start up a new subscription we implant a Connector in the object.
    *

@@ -222,7 +222,33 @@
         <groupId>${ical4j.groupId}</groupId>
         <artifactId>${ical4j.artifactId}</artifactId>
 				<version>${ical4j.version}</version>
-			</dependency>
+        <exclusions>
+          <exclusion>
+            <groupId>*</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!-- ical4j dependencies -->
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.8.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>4.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>javax.mail</artifactId>
+        <version>1.6.2</version>
+      </dependency>
 
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
