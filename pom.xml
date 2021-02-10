@@ -31,7 +31,7 @@
     <bw-xml.version>4.0.10</bw-xml.version>
 
 		<!-- Third Party Library Versions -->
-		<commons-codec.version>1.5</commons-codec.version>
+		<commons-codec.version>1.15</commons-codec.version>
     <dom4j-version>1.6.1</dom4j-version>
 		<servlet-api.version>4.0.0</servlet-api.version>
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>
