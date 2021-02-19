@@ -165,7 +165,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   @Override
   public void setDumpThreshold(final int val) {
     System.setProperty(
-            "com.sun.xml.ws.transport.http.HttpAdapter.dumpTreshold",
+            "com.sun.xml.ws.transport.http.HttpAdapter.dumpThreshold",
             String.valueOf(val));
   }
 
@@ -173,7 +173,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   public int getDumpThreshold() {
     try {
       return Integer.parseInt(System.getProperty(
-              "com.sun.xml.ws.transport.http.HttpAdapter.dumpTreshold"));
+              "com.sun.xml.ws.transport.http.HttpAdapter.dumpThreshold"));
     } catch (final Throwable ignored) {
       return 0;
     }
