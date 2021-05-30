@@ -781,8 +781,6 @@ public class SynchEngineImpl
                      getConfig().getPubKeys());
 
       return pwEncrypt;
-    } catch (SynchException se) {
-      throw se;
     } catch (Throwable t) {
       t.printStackTrace();
       throw new SynchException(t);
