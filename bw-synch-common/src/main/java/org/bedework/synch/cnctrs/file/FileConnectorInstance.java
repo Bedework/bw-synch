@@ -103,8 +103,6 @@ public class FileConnectorInstance
         /* Convert each entity to XML */
 
       return IcalToXcal.fromIcal(ical, null, true);
-    } catch (final SynchException se) {
-      throw se;
     } catch (final Throwable t) {
       throw new SynchException(t);
     }
