@@ -114,9 +114,8 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
         if (running) {
           // Wait a bit before restarting
           try {
-            final Object o = new Object();
-            synchronized (o) {
-              o.wait (10 * 1000);
+            synchronized (this) {
+              this.wait (10 * 1000);
             }
           } catch (final Throwable t) {
             error(t.getMessage());
@@ -502,7 +501,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
       connectorNames = cs.getConfigs();
 
-      final List<SynchConnConf> sccs = new ArrayList<>();
+      final List<SynchConnConf<?>> sccs = new ArrayList<>();
       cfg.setConnectorConfs(sccs);
 
       for (final String cn: connectorNames) {

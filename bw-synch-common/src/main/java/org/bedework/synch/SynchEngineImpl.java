@@ -464,7 +464,7 @@ public class SynchEngineImpl
 
   @Override
   public Subscription find(final Subscription sub) throws SynchException {
-    boolean opened = db.open();
+    final boolean opened = db.open();
 
     try {
       return db.find(sub);
@@ -489,7 +489,7 @@ public class SynchEngineImpl
   @Override
   public void handleNotifications(
           final NotificationBatch<Notification> notes) throws SynchException {
-    for (Notification note: notes.getNotifications()) {
+    for (final Notification note: notes.getNotifications()) {
       db.open();
       Synchling sl = null;
 
@@ -527,42 +527,50 @@ public class SynchEngineImpl
         starting = true;
       }
 
-      db = new SynchDb(getConfig());
+      final var cfg = getConfig();
+
+      db = new SynchDb(cfg);
+
+      if (cfg.getTimezonesURI() == null) {
+        throw new SynchException(
+                "Timezones URI must be set in configuration");
+      }
 
       timezones = new TimezonesImpl();
-      timezones.init(getConfig().getTimezonesURI());
+      timezones.init(cfg.getTimezonesURI());
 
       tzgetter = this;
 
       synchlingPool = new SynchlingPool();
       synchlingPool.start(this,
-                          getConfig().getSynchlingPoolSize(),
-                          getConfig().getSynchlingPoolTimeout());
+                          cfg.getSynchlingPoolSize(),
+                          cfg.getSynchlingPoolTimeout());
 
       notificationInQueue = new ArrayBlockingQueue<>(100);
 
       info("**************************************************");
       info("Starting synch");
-      info("      callback URI: " + getConfig().getCallbackURI());
+      info("      callback URI: " + cfg.getCallbackURI());
       info("**************************************************");
 
-      if (getConfig().getKeystore() != null) {
-        System.setProperty("javax.net.ssl.trustStore", getConfig().getKeystore());
+      if (cfg.getKeystore() != null) {
+        System.setProperty("javax.net.ssl.trustStore", cfg.getKeystore());
         System.setProperty("javax.net.ssl.trustStorePassword", "bedework");
       }
 
-      final List<SynchConnConf> connectorConfs = getConfig().getConnectorConfs();
+      final List<SynchConnConf<?>> connectorConfs =
+              getConfig().getConnectorConfs();
       final String callbackUriBase = getConfig().getCallbackURI();
 
       /* Register the connectors and start them */
-      for (final SynchConnConf scc: connectorConfs) {
-        final ConnectorConfig conf = (ConnectorConfig)scc.getConfig();
+      for (final SynchConnConf<?> scc: connectorConfs) {
+        final ConnectorConfig conf = scc.getConfig();
         final String cnctrId = conf.getName();
         info("Register and start connector " + cnctrId);
 
         registerConnector(cnctrId, conf);
 
-        final Connector conn = getConnector(cnctrId);
+        final var conn = getConnector(cnctrId);
         scc.setConnector(conn);
 
         conn.start(cnctrId,
@@ -633,12 +641,12 @@ public class SynchEngineImpl
       info("**************************************************");
       info("Synch started");
       info("**************************************************");
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       error(se);
       starting = false;
       running = false;
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error(t);
       starting = false;
       running = false;
@@ -715,16 +723,15 @@ public class SynchEngineImpl
    */
   public static SynchConfig getConfig() {
     if (cfgHolder == null) {
-      return null;
+      throw new RuntimeException("No configuration available");
     }
 
     return cfgHolder.getConfig();
   }
 
   /**
-   * @throws SynchException
    */
-  public void updateConfig() throws SynchException {
+  public void updateConfig() {
     if (cfgHolder != null) {
       cfgHolder.putConfig();
     }
@@ -771,7 +778,8 @@ public class SynchEngineImpl
     }
 
     try {
-      String pwEncryptClass = "org.bedework.util.security.PwEncryptionDefault";
+      final String pwEncryptClass =
+              "org.bedework.util.security.PwEncryptionDefault";
       //String pwEncryptClass = getSysparsHandler().get().getPwEncryptClass();
 
       pwEncrypt = (PwEncryptionIntf)Util.getObject(pwEncryptClass,
@@ -781,7 +789,7 @@ public class SynchEngineImpl
                      getConfig().getPubKeys());
 
       return pwEncrypt;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       t.printStackTrace();
       throw new SynchException(t);
     }
@@ -794,15 +802,15 @@ public class SynchEngineImpl
   private void registerConnector(final String id,
                                  final ConnectorConfig conf) throws SynchException {
     try {
-      Class cl = Class.forName(conf.getConnectorClassName());
+      final Class<?> cl = Class.forName(conf.getConnectorClassName());
 
       if (connectorMap.containsKey(id)) {
         throw new SynchException("Connector " + id + " already registered");
       }
 
-      Connector c = (Connector)cl.newInstance();
+      final Connector c = (Connector)cl.newInstance();
       connectorMap.put(id, c);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -829,7 +837,7 @@ public class SynchEngineImpl
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

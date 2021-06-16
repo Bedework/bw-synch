@@ -18,6 +18,7 @@
 */
 package org.bedework.synch.shared.cnctrs;
 
+import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.PropertiesInfo;
 import org.bedework.synch.shared.Subscription;
@@ -51,8 +52,8 @@ import javax.servlet.http.HttpServletResponse;
  * @param <C>
  * @param <N>
  */
-public interface Connector<C extends ConnectorInstance,
-                           N extends Notification,
+public interface Connector<C extends ConnectorInstance<? extends BaseSubscriptionInfo>,
+                           N extends Notification<? extends Notification.NotificationItem>,
                            Tconf extends ConnectorConfigI> {
   /** Start the connector. A response of null means no synch available.
    *

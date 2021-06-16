@@ -55,7 +55,7 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
   /* Path to keystores  */
   private String pubKeys;
 
-  private List<SynchConnConf> connectorConfs;
+  private List<SynchConnConf<?>> connectorConfs;
 
   private SortedSet<IpAddrInfo> ipInfo;
 
@@ -202,7 +202,7 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
    *
    * @param val Map of (name, className)
    */
-  public void setConnectorConfs(final List<SynchConnConf> val) {
+  public void setConnectorConfs(final List<SynchConnConf<?>> val) {
     connectorConfs = val;
   }
 
@@ -211,7 +211,7 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
    * @return map
    */
   @ConfInfo(dontSave = true)
-  public List<SynchConnConf> getConnectorConfs() {
+  public List<SynchConnConf<?>> getConnectorConfs() {
     return connectorConfs;
   }
 
