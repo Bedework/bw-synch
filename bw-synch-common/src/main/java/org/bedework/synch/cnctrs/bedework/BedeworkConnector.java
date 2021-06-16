@@ -46,7 +46,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 public class BedeworkConnector
       extends AbstractConnector<BedeworkConnector,
                                 BedeworkConnectorInstance,
-                                Notification,
+                                Notification<?>,
                                 BedeworkConnectorConfig,
                                 BedeworkSubscriptionInfo> {
   private static PropertiesInfo bwPropInfo = new PropertiesInfo();

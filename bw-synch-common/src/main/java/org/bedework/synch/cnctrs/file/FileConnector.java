@@ -37,7 +37,7 @@ import org.bedework.synch.wsmessages.SynchEndType;
 public class FileConnector
         extends AbstractConnector<FileConnector,
         FileConnectorInstance,
-        Notification,
+        Notification<?>,
         FileConnectorConfig,
         FileSubscriptionInfo> {
   private static final PropertiesInfo fPropInfo = new PropertiesInfo();

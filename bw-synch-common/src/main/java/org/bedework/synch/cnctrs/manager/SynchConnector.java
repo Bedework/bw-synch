@@ -72,7 +72,7 @@ import javax.xml.bind.JAXBElement;
 public class SynchConnector
       extends AbstractConnector<SynchConnector,
                                 SynchConnectorInstance,
-                                Notification,
+                                Notification<?>,
                                 ConnectorConfig,
                                  BaseSubscriptionInfo> {
   /**
@@ -154,16 +154,16 @@ public class SynchConnector
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return null;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
 
   @Override
   public void respondCallback(final HttpServletResponse resp,
-                              final NotificationBatch<Notification> notifications)
+                              final NotificationBatch<Notification<?>> notifications)
                                                     throws SynchException {
     try {
       /* We only expect single notification items in a batch */
@@ -173,8 +173,7 @@ public class SynchConnector
         return;
       }
 
-      @SuppressWarnings("unchecked")
-      Notification<NotificationItem> note = notifications.getNotifications().get(0);
+      final Notification<?> note = notifications.getNotifications().get(0);
 
       // Again one item per notification.
 
@@ -183,30 +182,30 @@ public class SynchConnector
         return;
       }
 
-      NotificationItem ni = note.getNotifications().get(0);
+      final NotificationItem ni = note.getNotifications().get(0);
 
       if (ni.getAction() == ActionType.GetInfo) {
-        GetInfoResponseType giresp = new GetInfoResponseType();
-        SynchInfoType sit = new SynchInfoType();
+        final GetInfoResponseType giresp = new GetInfoResponseType();
+        final SynchInfoType sit = new SynchInfoType();
 
         giresp.setInfo(sit);
-        ArrayOfSynchConnectorInfo asci = new ArrayOfSynchConnectorInfo();
+        final ArrayOfSynchConnectorInfo asci = new ArrayOfSynchConnectorInfo();
         sit.setConnectors(asci);
 
-        for (String id: syncher.getConnectorIds()) {
-          Connector c = syncher.getConnector(id);
+        for (final String id: syncher.getConnectorIds()) {
+          final Connector c = syncher.getConnector(id);
 
           if (c == null) {
             continue;
           }
 
-          SynchConnectorInfoType scit = new SynchConnectorInfoType();
+          final SynchConnectorInfoType scit = new SynchConnectorInfoType();
 
           scit.setName(id);
           scit.setManager(c.isManager());
           scit.setReadOnly(c.isReadOnly());
 
-          ArrayOfSynchPropertyInfo aspi = new ArrayOfSynchPropertyInfo();
+          final ArrayOfSynchPropertyInfo aspi = new ArrayOfSynchPropertyInfo();
           scit.setProperties(aspi);
 
           c.getPropertyInfo().addAllToList(aspi.getProperty());
@@ -214,7 +213,7 @@ public class SynchConnector
           asci.getConnector().add(scit);
         }
 
-        JAXBElement<GetInfoResponseType> jax = of.createGetInfoResponse(giresp);
+        final JAXBElement<GetInfoResponseType> jax = of.createGetInfoResponse(giresp);
 
         marshal(jax, resp.getOutputStream());
 
@@ -230,23 +229,23 @@ public class SynchConnector
       }
 
       if (ni.getAction() == ActionType.Unsubscribe) {
-        UnsubscribeResponseType usresp = ni.getUnsubResponse();
+        final UnsubscribeResponseType usresp = ni.getUnsubResponse();
 
-        JAXBElement<UnsubscribeResponseType> jax = of.createUnsubscribeResponse(usresp);
+        final JAXBElement<UnsubscribeResponseType> jax = of.createUnsubscribeResponse(usresp);
 
         marshal(jax, resp.getOutputStream());
       }
 
       if (ni.getAction() == ActionType.SubscriptionStatus) {
-        SubscriptionStatusResponseType ssresp = ni.getSubStatusResponse();
+        final SubscriptionStatusResponseType ssresp = ni.getSubStatusResponse();
 
-        JAXBElement<SubscriptionStatusResponseType> jax = of.createSubscriptionStatusResponse(ssresp);
+        final JAXBElement<SubscriptionStatusResponseType> jax = of.createSubscriptionStatusResponse(ssresp);
 
         marshal(jax, resp.getOutputStream());
       }
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -255,9 +254,9 @@ public class SynchConnector
    *                   Private methods
    * ==================================================================== */
 
-  private Notification subscribe(final HttpServletResponse resp,
+  private Notification<?> subscribe(final HttpServletResponse resp,
                                  final SubscribeRequestType sr) throws SynchException {
-    Subscription sub = new SubscriptionImpl(null);
+    final Subscription sub = new SubscriptionImpl(null);
 
     sub.setOwner(sr.getPrincipalHref());
     sub.setDirection(sr.getDirection());
@@ -265,11 +264,11 @@ public class SynchConnector
     sub.setEndAConnectorInfo(makeConnInfo(sr.getEndAConnector()));
     sub.setEndBConnectorInfo(makeConnInfo(sr.getEndBConnector()));
 
-    ArrayOfSynchProperties info = sr.getInfo();
+    final ArrayOfSynchProperties info = sr.getInfo();
     if (info != null) {
-      SubscriptionInfo sinfo = new SubscriptionInfoImpl();
+      final SubscriptionInfo sinfo = new SubscriptionInfoImpl();
 
-      for (SynchPropertyType sp: info.getProperty()) {
+      for (final SynchPropertyType sp: info.getProperty()) {
         sinfo.setProperty(sp.getName(), sp.getValue());
       }
       sub.setInfo(sinfo);
@@ -283,7 +282,7 @@ public class SynchConnector
 
     final Subscription s = syncher.find(sub);
 
-    SubscribeResponseType sresp = of.createSubscribeResponseType();
+    final SubscribeResponseType sresp = of.createSubscribeResponseType();
 
     if (s != null) {
       sresp.setStatus(StatusType.ERROR);
@@ -297,15 +296,16 @@ public class SynchConnector
     return new Notification(sub, sresp);
   }
 
-  private Notification unsubscribe(final HttpServletResponse resp,
-                           final UnsubscribeRequestType u) throws SynchException {
+  private Notification<?> unsubscribe(
+          final HttpServletResponse resp,
+          final UnsubscribeRequestType u) throws SynchException {
     if (debug()) {
       debug("Handle unsubscribe " +  u.getSubscriptionId());
     }
 
-    UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
+    final UnsubscribeResponseType usr = of.createUnsubscribeResponseType();
 
-    Subscription sub = checkAsr(u);
+    final Subscription sub = checkAsr(u);
 
     if (sub == null) {
       if (debug()) {
@@ -322,15 +322,15 @@ public class SynchConnector
     return new Notification(sub, u, usr);
   }
 
-  private Notification subStatus(final HttpServletResponse resp,
+  private Notification<?> subStatus(final HttpServletResponse resp,
                            final SubscriptionStatusRequestType ss) throws SynchException {
     if (debug()) {
       debug("Handle status " +  ss.getSubscriptionId());
     }
 
-    SubscriptionStatusResponseType ssr = of.createSubscriptionStatusResponseType();
+    final SubscriptionStatusResponseType ssr = of.createSubscriptionStatusResponseType();
 
-    Subscription sub = checkAsr(ss);
+    final Subscription sub = checkAsr(ss);
 
     if (sub == null) {
       // No subscription or error - nothing to do
@@ -345,7 +345,7 @@ public class SynchConnector
   }
 
   private Subscription checkAsr(final ActiveSubscriptionRequestType asr) throws SynchException {
-    Subscription sub = syncher.getSubscription(asr.getSubscriptionId());
+    final Subscription sub = syncher.getSubscription(asr.getSubscriptionId());
 
     /* Most errors we'll treat as an unknown subscription */
 
@@ -363,8 +363,8 @@ public class SynchConnector
     return sub;
   }
 
-  private SubscriptionConnectorInfo makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
-    final SubscriptionConnectorInfo subCinfo =
+  private SubscriptionConnectorInfo<?> makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
+    final SubscriptionConnectorInfo<?> subCinfo =
             new SubscriptionConnectorInfoImpl();
 
     subCinfo.setConnectorId(cinfo.getConnectorId());

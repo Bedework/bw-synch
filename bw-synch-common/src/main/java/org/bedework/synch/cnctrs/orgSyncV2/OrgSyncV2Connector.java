@@ -37,7 +37,7 @@ import org.bedework.synch.wsmessages.SynchEndType;
 public class OrgSyncV2Connector
         extends AbstractConnector<OrgSyncV2Connector,
                                   OrgSyncV2ConnectorInstance,
-                                  Notification,
+                                  Notification<?>,
                                   OrgSyncV2ConnectorConfig,
                                   OrgSyncV2SubscriptionInfo> {
   private final static PropertiesInfo propInfo = new PropertiesInfo();

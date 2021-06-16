@@ -63,8 +63,8 @@ import javax.xml.soap.SOAPMessage;
  * @param <Tconf> Configuration class
  */
 public abstract class AbstractConnector<T,
-                                        TI extends AbstractConnectorInstance,
-                                        TN extends Notification,
+                                        TI extends AbstractConnectorInstance<?, ?, ?>,
+                                        TN extends Notification<?>,
                                         Tconf extends ConnectorConfigI,
                                         InfoT extends BaseSubscriptionInfo>
         implements Logged, Connector<TI, TN, Tconf> {
