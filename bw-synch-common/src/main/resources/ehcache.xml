@@ -1,4 +1,4 @@
-<ehcache>
+<ehcache name="bwsynchChache">
 
     <!-- Sets the path to the directory where cache .data files are created.
 
@@ -69,14 +69,14 @@
          that the the underlying cache not be configured for expiry at all.
       -->
 
-    <cache name="bwsynch.org.hibernate.cache.UpdateTimestampsCache"
+    <cache name="org.hibernate.cache.spi.UpdateTimestampsCache"
            maxElementsInMemory="5000"
            eternal="true"
            overflowToDisk="true"/>
 
     <!-- Subscriptions cache
         -->
-    <cache name="bwsynch.org.bedework.synch.db.SubscriptionImpl"
+    <cache name="synchdb.org.bedework.synch.db.SubscriptionImpl"
         maxElementsInMemory="1000"
         eternal="false"
         timeToIdleSeconds="300"
