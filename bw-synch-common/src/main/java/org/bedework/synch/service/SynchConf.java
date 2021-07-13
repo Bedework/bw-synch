@@ -31,8 +31,6 @@ import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.ConfigHolder;
 import org.bedework.util.jmx.InfoLines;
 
-import org.hibernate.cfg.Configuration;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -57,8 +55,6 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   private boolean export;
 
   private String schemaOutFile;
-
-  private Configuration hibCfg;
 
   private class SchemaBuilder extends SchemaThread {
 

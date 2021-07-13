@@ -269,6 +269,7 @@
 				<version>${ehcache.version}</version>
 			</dependency>
 
+      <!--
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
@@ -286,6 +287,7 @@
         <artifactId>hibernate-commons-annotations</artifactId>
         <version>5.0.1.Final</version>
       </dependency>
+      -->
 
       <dependency>
         <groupId>com.fasterxml</groupId>
@@ -299,6 +301,7 @@
 				<version>${servlet-api.version}</version>
 			</dependency>
 
+      <!--
 			<dependency>
 				<groupId>asm</groupId>
 				<artifactId>asm</artifactId>
@@ -316,6 +319,7 @@
 				<artifactId>cglib</artifactId>
 				<version>${cglib.version}</version>
 			</dependency>
+			-->
 
       <!-- Web Service (SOAP) Dependencies -->
 
