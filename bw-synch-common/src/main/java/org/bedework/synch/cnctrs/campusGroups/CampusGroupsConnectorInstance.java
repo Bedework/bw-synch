@@ -16,18 +16,24 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.synch.cnctrs.file;
+package org.bedework.synch.cnctrs.campusGroups;
 
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.cnctrs.BaseConnectorInstance;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.util.calendar.IcalToXcal;
+import org.bedework.util.misc.Util;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.UnfoldingReader;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.util.CompatibilityHints;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -39,15 +45,15 @@ import java.net.URI;
  *
  * @author Mike Douglass
  */
-public class FileConnectorInstance
-        extends BaseConnectorInstance<FileConnector,
-                                      FileSubscriptionInfo,
-                                      FileConnectorConfig> {
-  public FileConnectorInstance(final FileConnectorConfig config,
-                               final FileConnector cnctr,
-                               final Subscription sub,
-                               final SynchEndType end,
-                               final FileSubscriptionInfo info) {
+public class CampusGroupsConnectorInstance
+        extends BaseConnectorInstance<CampusGroupsConnector,
+        CampusGroupsSubscriptionInfo,
+        CampusGroupsConnectorConfig> {
+  CampusGroupsConnectorInstance(final CampusGroupsConnectorConfig config,
+                                final CampusGroupsConnector cnctr,
+                                final Subscription sub,
+                                final SynchEndType end,
+                                final CampusGroupsSubscriptionInfo info) {
     super(sub, end, info, cnctr, config);
   }
 
@@ -83,7 +89,7 @@ public class FileConnectorInstance
       CompatibilityHints.setHintEnabled(
               CompatibilityHints.KEY_RELAXED_UNFOLDING,
               true);
-        /* Allow unrecognized properties - we'll probably ignore them */
+      /* Allow unrecognized properties - we'll probably ignore them */
       CompatibilityHints
               .setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING,
                               true);
@@ -92,7 +98,43 @@ public class FileConnectorInstance
               new UnfoldingReader(new InputStreamReader(is), true);
       final Calendar ical = builder.build(ufrdr);
 
-        /* Convert each entity to XML */
+      /* Categories come in looking like this:
+            CATEGORIES;X-CG-CATEGORY=club_acronym:AACC
+            CATEGORIES;X-CG-CATEGORY=event_type:Social
+            CATEGORIES;X-CG-CATEGORY=event_tags:Movie
+          convert them to:
+            CATEGORIES:club_acronym/AACC
+            CATEGORIES:event_type/Social
+            CATEGORIES:event_tags/Movie
+       */
+
+      for (final CalendarComponent comp: ical.getComponents()) {
+        if (!comp.getName().equals(Component.VEVENT)) {
+          continue;
+        }
+
+        /* Fix the date time values that should be UTC
+         */
+        ensureUTC(comp.getProperty(Property.CREATED));
+        ensureUTC(comp.getProperty(Property.DTSTAMP));
+        ensureUTC(comp.getProperty(Property.LAST_MODIFIED));
+
+        final PropertyList<Property> cats =
+                comp.getProperties(Property.CATEGORIES);
+        if (Util.isEmpty(cats)) {
+          continue;
+        }
+
+        for (final Property prop: cats) {
+          final Parameter par = prop.getParameter("X-CG-CATEGORY");
+          if ((par != null) && (par.getValue() != null)) {
+            prop.setValue(par.getValue() + "/" + prop.getValue());
+            prop.getParameters().remove(par);
+          }
+        }
+      }
+
+      /* Convert each entity to XML */
 
       return IcalToXcal.fromIcal(ical, null, true);
     } catch (final Throwable t) {
@@ -108,4 +150,19 @@ public class FileConnectorInstance
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
+
+  private void ensureUTC(final Property p) {
+    if (p == null) {
+      return;
+    }
+
+    final String val= p.getValue();
+    if (!val.endsWith("Z")) {
+      try {
+        p.setValue(val + "Z");
+      } catch (final Throwable t) {
+        throw new RuntimeException(t);
+      }
+    }
+  }
 }
