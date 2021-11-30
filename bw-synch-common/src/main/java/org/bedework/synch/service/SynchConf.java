@@ -33,7 +33,6 @@ import org.bedework.util.jmx.InfoLines;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.management.ObjectName;
 
@@ -59,9 +58,10 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   private class SchemaBuilder extends SchemaThread {
 
     SchemaBuilder(final String outFile,
-                  final boolean export,
-                  final Properties hibConfig) {
-      super(outFile, export, hibConfig);
+                  final boolean export) {
+      super(outFile, export, new HibConfig(getConfig(),
+                                           SynchConf.class.getClassLoader()));
+      setContextClassLoader(SynchConf.class.getClassLoader());
     }
 
     @Override
@@ -325,11 +325,9 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   @Override
   public String schema() {
     try {
-      final HibConfig hc = new HibConfig(getConfig());
-
-      buildSchema = new SchemaBuilder(getSchemaOutFile(),
-                                      getExport(),
-                                      hc.getHibConfiguration().getProperties());
+      buildSchema = new SchemaBuilder(
+              getSchemaOutFile(),
+              getExport());
 
       setStatus(statusStopped);
 
