@@ -252,6 +252,8 @@ public class SynchEngineImpl
             if ((now - lastTrace) > (30 * 1000)) {
               error(t);
               lastTrace = now;
+            } else if (t.getMessage() == null) {
+              error(t);
             } else {
               error(t.getMessage());
             }
@@ -682,6 +684,8 @@ public class SynchEngineImpl
         conn.stop();
       } catch (final Throwable t) {
         if (debug()) {
+          error(t);
+        } else if (t.getMessage() == null) {
           error(t);
         } else {
           error(t.getMessage());

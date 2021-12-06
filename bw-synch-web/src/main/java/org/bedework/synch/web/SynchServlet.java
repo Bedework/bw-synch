@@ -323,7 +323,7 @@ public class SynchServlet extends HttpServlet
       mb.init(syncher, dumpContent);
 
       return mb;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       if (debug()) {
         error(t);
       }

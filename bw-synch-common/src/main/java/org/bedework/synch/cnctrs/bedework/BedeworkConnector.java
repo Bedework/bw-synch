@@ -49,7 +49,7 @@ public class BedeworkConnector
                                 Notification<?>,
                                 BedeworkConnectorConfig,
                                 BedeworkSubscriptionInfo> {
-  private static PropertiesInfo bwPropInfo = new PropertiesInfo();
+  private static final PropertiesInfo bwPropInfo = new PropertiesInfo();
 
   static {
     bwPropInfo.requiredUri(null);
@@ -76,6 +76,9 @@ public class BedeworkConnector
     super(bwPropInfo);
   }
 
+  private final static Object threadLockObj =
+          new Object();
+
   /** This process will send keep-alive notifications to the remote system.
    * During startup the first notification is sent so this process starts with
    * a wait
@@ -88,7 +91,7 @@ public class BedeworkConnector
 
     /**
      * @param name - for the thread
-     * @param conn
+     * @param conn = the connector
      */
     public PingThread(final String name,
                       final BedeworkConnector conn) {
@@ -113,12 +116,16 @@ public class BedeworkConnector
           } else {
             ping();
           }
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
           if (!showedTrace) {
             error(t);
             showedTrace = true;
           } else {
-            error(t.getMessage());
+            if (t.getMessage() == null) {
+              error(t);
+            } else {
+              error(t.getMessage());
+            }
           }
         }
 
@@ -129,22 +136,25 @@ public class BedeworkConnector
         }
 
         try {
-          Object o = new Object();
-          long waitTime;
+          final long waitTime;
 
           if (remoteToken == null) {
-            waitTime = config.getRetryInterval() * 1000;
+            waitTime = config.getRetryInterval() * 1000L;
           } else {
-            waitTime = config.getKeepAliveInterval() * 1000;
+            waitTime = config.getKeepAliveInterval() * 1000L;
           }
 
-          synchronized (o) {
-            o.wait(waitTime);
+          synchronized (threadLockObj) {
+            threadLockObj.wait(waitTime);
           }
-        } catch (InterruptedException ie) {
+        } catch (final InterruptedException ie) {
           break;
-        } catch (Throwable t) {
-          error(t.getMessage());
+        } catch (final Throwable t) {
+          if (t.getMessage() == null) {
+            error(t);
+          } else {
+            error(t.getMessage());
+          }
         }
       }
     }
@@ -224,15 +234,15 @@ public class BedeworkConnector
    * ==================================================================== */
 
   /**
-   * @throws SynchException
+   * @throws SynchException on fatal error
    */
   public void ping() throws SynchException {
-    KeepAliveNotificationType kan = new KeepAliveNotificationType();
+    final KeepAliveNotificationType kan = new KeepAliveNotificationType();
 
     kan.setSubscribeUrl(callbackUri);
     kan.setToken(remoteToken);
 
-    KeepAliveResponseType kar = getPort().pingService(kan);
+    final KeepAliveResponseType kar = getPort().pingService(kan);
 
     if (kar.getStatus() != StatusType.OK) {
       warn("Received status " + kar.getStatus() + " for ping");
@@ -243,12 +253,13 @@ public class BedeworkConnector
   }
 
   private void initConnection() throws SynchException {
-    StartServiceNotificationType ssn = new StartServiceNotificationType();
+    final StartServiceNotificationType ssn =
+            new StartServiceNotificationType();
 
     ssn.setConnectorId(getConnectorId());
     ssn.setSubscribeUrl(callbackUri);
 
-    StartServiceResponseType ssr = getPort().startService(ssn);
+    final StartServiceResponseType ssr = getPort().startService(ssn);
 
     if (ssr == null) {
       warn("Received null response to start notification");
@@ -264,7 +275,7 @@ public class BedeworkConnector
 
     if (sysInfo == null) {
       // Try to get info
-      GetPropertiesType gp = new GetPropertiesType();
+      final GetPropertiesType gp = new GetPropertiesType();
 
       gp.setHref("/");
 

@@ -102,6 +102,8 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
           if (!showedTrace) {
             error(t);
             showedTrace = true;
+          } else if (t.getMessage() == null) {
+            error(t);
           } else {
             error(t.getMessage());
           }
@@ -114,7 +116,11 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
               this.wait (10 * 1000);
             }
           } catch (final Throwable t) {
-            error(t.getMessage());
+            if (t.getMessage() == null) {
+              error(t);
+            } else {
+              error(t.getMessage());
+            }
           }
         }
       }
@@ -329,7 +335,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
               getSchemaOutFile(),
               getExport());
 
-      setStatus(statusStopped);
+      setStatus(statusRunning);
 
       buildSchema.start();
 
