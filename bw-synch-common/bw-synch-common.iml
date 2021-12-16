@@ -33,7 +33,7 @@
     <orderEntry type="module" module-name="bw-util-xml" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-config:4.1.4" level="project" />
-    <orderEntry type="library" name="Maven: org.bedework:bw-util-logging:5.0.0" level="project" />
+    <orderEntry type="module" module-name="bw-util-logging" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.11.0" level="project" />
     <orderEntry type="module" module-name="bw-util-hibernate" />
     <orderEntry type="library" name="Maven: org.apache.derby:derbynet:10.15.2.0" level="project" />
@@ -71,7 +71,7 @@
     <orderEntry type="library" name="Maven: com.sun.mail:javax.mail:1.6.2" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.0" level="project" />
-    <orderEntry type="library" name="Maven: org.bedework:bw-access:4.0.10" level="project" />
+    <orderEntry type="module" module-name="bw-access" />
     <orderEntry type="library" name="Maven: org.bedework:bw-xml-icalendar:4.0.10" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.glassfish.jaxb:jaxb-runtime:2.3.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.2" level="project" />
