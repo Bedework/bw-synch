@@ -1,14 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.bedework.bw-synch</groupId>
 		<artifactId>bw-synch</artifactId>
-		<version>4.0.15-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<artifactId>bw-synch-ear</artifactId>
 	<packaging>ear</packaging>
-	<name>bw-synch-ear</name>
+	<name>Bedework synch: ear</name>
 
 	<dependencies>
 		<!-- Project Dependencies -->
@@ -317,22 +319,15 @@
 		<finalName>bw-synch-${project.version}</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ear-plugin</artifactId>
-				<version>2.10</version>
+
 				<configuration>
-					<!-- Exclude eclipse generated application.xml during mvn package -->
-					<earSourceExcludes>**/application.xml</earSourceExcludes>
-					<defaultLibBundleDir>lib</defaultLibBundleDir>
-					<skinnyWars>true</skinnyWars>
-					<!-- use maven generated application.xml instead -->
-					<generateApplicationXml>true</generateApplicationXml>
-					<unpackTypes>sar,rar,war</unpackTypes>
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>bw-synch-war</artifactId>
 							<contextRoot>/synch</contextRoot>
+							<bundleFileName>bw-synch-${project.version}.war</bundleFileName>
 						</webModule>
 						<!-- Wildfly modules
                     <jarModule>
@@ -347,19 +342,8 @@
 			<plugin>
 				<groupId>org.bedework</groupId>
 				<artifactId>bw-util-maven-deploy</artifactId>
-				<version>${bw-util-deploy.version}</version>
-				<executions>
-					<execution>
-						<phase>install</phase>
-						<goals>
-							<goal>bw-deploy</goal>
-						</goals>
-					</execution>
-				</executions>
+
 				<configuration>
-					<checkonly>${org.bedework.deploy.checkonly}</checkonly>
-					<noversion>true</noversion>
-					<delete>true</delete>
 					<earName>bw-synch</earName>
 					<baseDirPath>${project.basedir}/../..</baseDirPath>
 					<propsPath>${org.bedework.deployment.properties}</propsPath>

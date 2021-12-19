@@ -3,11 +3,12 @@
 	<parent>
 		<groupId>org.bedework.bw-synch</groupId>
 		<artifactId>bw-synch</artifactId>
-		<version>4.0.15-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<artifactId>bw-synch-common</artifactId>
-	<name>bw-synch-common</name>
+  <name>Bedework synch: common classes</name>
 
 	<dependencies>
     <!-- Project Dependencies -->
@@ -91,6 +92,11 @@
       <groupId>${ical4j.groupId}</groupId>
       <artifactId>${ical4j.artifactId}</artifactId>
 		</dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
 
     <!--
 		<dependency>
