@@ -19,6 +19,13 @@
     It could also be used for 1 way synchronization between any source and server.</description>
   <url>https://github.com/Bedework/bw-synch</url>
 
+  <scm>
+    <connection>scm:git:git@github.com:Bedework/bw-synch.git</connection>
+    <developerConnection>scm:git:git@github.com:Bedework/bw-synch.git</developerConnection>
+    <url>https://github.com/Bedework/bw-synch</url>
+    <tag>bw-synch-4.0.7</tag>
+  </scm>
+
 	<modules>
 		<module>bw-synch-common</module>
 		<module>bw-synch-war</module>
