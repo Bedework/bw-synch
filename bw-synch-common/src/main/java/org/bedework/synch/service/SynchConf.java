@@ -115,6 +115,9 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
             synchronized (this) {
               this.wait (10 * 1000);
             }
+          } catch (final InterruptedException ie) {
+            info("Synch service interrupted. Shutting down");
+            running = false;
           } catch (final Throwable t) {
             if (t.getMessage() == null) {
               error(t);
