@@ -321,6 +321,8 @@
 				<artifactId>maven-ear-plugin</artifactId>
 
 				<configuration>
+					<filtering>true</filtering>
+
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
@@ -335,6 +337,11 @@
                     </jarModule>
                     -->
 					</modules>
+					<archive>
+						<manifestEntries>
+							<Dependencies>org.bedework.synch.ear</Dependencies>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>
