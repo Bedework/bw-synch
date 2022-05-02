@@ -7,7 +7,7 @@
 		<version>5.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bw-synch-ear</artifactId>
+	<artifactId>bw-synch</artifactId>
 	<packaging>ear</packaging>
 	<name>Bedework synch: ear</name>
 
