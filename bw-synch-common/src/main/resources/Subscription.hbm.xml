@@ -8,16 +8,6 @@
      =================================================================== -->
 
 <hibernate-mapping>
-  <typedef class="org.bedework.util.hibernate.GenericEnumUserType"
-           name="direction">
-    <param name="enumClassname">org.bedework.synch.wsmessages.SynchDirectionType</param>
-  </typedef>
-
-  <typedef class="org.bedework.util.hibernate.GenericEnumUserType"
-           name="master">
-    <param name="enumClassname">org.bedework.synch.wsmessages.SynchMasterType</param>
-  </typedef>
-
   <class name="org.bedework.synch.db.SubscriptionImpl"
          table="bwsynch_subs" >
     <cache usage="read-write"/>
@@ -68,10 +58,10 @@
                 type="string" length="3000" />
     </component>
 
-    <property name="direction" column="bwsyn_dir" type="direction" length="25"
+    <property name="direction" column="bwsyn_dir" type="string" length="25"
               not-null="true" />
 
-    <property name="master" column="bwsyn_mstr" type="master"  length="25"
+    <property name="master" column="bwsyn_mstr" type="string"  length="25"
               not-null="true" />
   </class>
 </hibernate-mapping>

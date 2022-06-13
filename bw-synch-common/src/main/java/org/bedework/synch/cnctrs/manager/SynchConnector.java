@@ -259,8 +259,8 @@ public class SynchConnector
     final Subscription sub = new SubscriptionImpl(null);
 
     sub.setOwner(sr.getPrincipalHref());
-    sub.setDirection(sr.getDirection());
-    sub.setMaster(sr.getMaster());
+    sub.setDirectionEnum(sr.getDirection());
+    sub.setMasterEnum(sr.getMaster());
     sub.setEndAConnectorInfo(makeConnInfo(sr.getEndAConnector()));
     sub.setEndBConnectorInfo(makeConnInfo(sr.getEndBConnector()));
 

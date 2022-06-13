@@ -169,9 +169,9 @@ public class SynchDb implements Logged, Serializable {
       sess.setString("bconnprops",
                      sub.getEndBConnectorInfo().getSynchProperties());
       sess.setString("dir",
-                     sub.getDirection().name());
+                     sub.getDirection());
       sess.setString("mstr",
-                     sub.getMaster().name());
+                     sub.getMaster());
 
       return (Subscription)sess.getUnique();
     } catch (final HibException he) {

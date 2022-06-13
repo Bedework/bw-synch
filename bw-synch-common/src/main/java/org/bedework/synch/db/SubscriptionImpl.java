@@ -96,9 +96,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
 
   private SubscriptionInfo info;
 
-  private SynchDirectionType direction;
+  private String direction;
 
-  private SynchMasterType master;
+  private String master;
 
   /* Following not persisted */
 
@@ -265,7 +265,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    *
    * @param val
    */
-  public void setDirection(final SynchDirectionType val) {
+  public void setDirection(final String val) {
     direction = val;
   }
 
@@ -273,7 +273,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    *
    * @return direction
    */
-  public SynchDirectionType getDirection() {
+  public String getDirection() {
     return direction;
   }
 
@@ -281,14 +281,14 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    *
    * @param val
    */
-  public void setMaster(final SynchMasterType val) {
+  public void setMaster(final String val) {
     master = val;
   }
 
   /**
    * @return who's master
    */
-  public SynchMasterType getMaster() {
+  public String getMaster() {
     return master;
   }
 
@@ -407,11 +407,12 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return true if this has to be put on a poll queue
    */
   public boolean polling() {
-    if (getDirection() == SynchDirectionType.A_TO_B){
+    var dir = getDirectionEnum();
+    if (dir == SynchDirectionType.A_TO_B){
       return getEndAConn().getKind() == SynchKind.poll;
     }
 
-    if (getDirection() == SynchDirectionType.B_TO_A){
+    if (dir == SynchDirectionType.B_TO_A){
       return getEndBConn().getKind() == SynchKind.poll;
     }
 
@@ -426,7 +427,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
   public long refreshDelay() throws SynchException {
     String delay = "31536000000"; // About a year
 
-    if (getDirection() == SynchDirectionType.A_TO_B){
+    if (getDirectionEnum() == SynchDirectionType.A_TO_B){
       delay = new BaseSubscriptionInfo(getEndAConnectorInfo()).getRefreshDelay();
     } else {
       delay = new BaseSubscriptionInfo(getEndBConnectorInfo()).getRefreshDelay();
@@ -463,6 +464,37 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     } catch (Throwable t) {
       throw new SynchException(t);
     }
+  }
+
+  /** Which way?
+   *
+   * @param val
+   */
+  public void setDirectionEnum(final SynchDirectionType val) {
+    setDirection(val.value());
+  }
+
+  /** Which way?
+   *
+   * @return direction
+   */
+  public SynchDirectionType getDirectionEnum() {
+    return SynchDirectionType.valueOf(getDirection());
+  }
+
+  /** Which end is master?
+   *
+   * @param val
+   */
+  public void setMasterEnum(final SynchMasterType val) {
+    setMaster(val.value());
+  }
+
+  /**
+   * @return who's master
+   */
+  public SynchMasterType getMasterEnum() {
+    return SynchMasterType.valueOf(getMaster());
   }
 
   /** Add our stuff to the StringBuilder

@@ -135,57 +135,57 @@ public interface Subscription {
    *
    * @param val SubscriptionConnectorInfo
    */
-  void setEndAConnectorInfo(SubscriptionConnectorInfo val);
+  void setEndAConnectorInfo(SubscriptionConnectorInfo<?> val);
 
   /**
    * @return SubscriptionConnectorInfo
    */
-  SubscriptionConnectorInfo getEndAConnectorInfo();
+  SubscriptionConnectorInfo<?> getEndAConnectorInfo();
 
   /** Info for the endB connector.
    *
    * @param val    SubscriptionConnectorInfo
    */
-  void setEndBConnectorInfo(SubscriptionConnectorInfo val);
+  void setEndBConnectorInfo(SubscriptionConnectorInfo<?> val);
 
   /**
    * @return SubscriptionConnectorInfo
    */
-  SubscriptionConnectorInfo getEndBConnectorInfo();
+  SubscriptionConnectorInfo<?> getEndBConnectorInfo();
 
   /** Info for the subscription.
    *
    * @param val    SubscriptionInfo
    */
-  void setInfo(SubscriptionInfo val);
+  void setInfo(SubscriptionInfo<?> val);
 
   /**
    * @return SubscriptionInfo
    */
-  SubscriptionInfo getInfo();
+  SubscriptionInfo<?> getInfo();
 
   /**
    *
    * @param val Which way?
    */
-  void setDirection(SynchDirectionType val);
+  void setDirection(String val);
 
   /** Which way?
    *
    * @return direction
    */
-  SynchDirectionType getDirection();
+  String getDirection();
 
   /**
    *
    * @param val Which end is master?
    */
-  void setMaster(SynchMasterType val);
+  void setMaster(String val);
 
   /**
    * @return who's master
    */
-  SynchMasterType getMaster();
+  String getMaster();
 
   /** An outstanding request that requires an unsubscribe to complete first
    *
@@ -213,42 +213,42 @@ public interface Subscription {
   /**
    * @param val a connection
    */
-  void setEndAConn(Connector val);
+  void setEndAConn(Connector<?, ?, ?> val);
 
   /**
    * @return a connection or null
    */
-  Connector getEndAConn();
+  Connector<?, ?, ?> getEndAConn();
 
   /**
    * @param val a connection
    */
-  void setEndBConn(Connector val);
+  void setEndBConn(Connector<?, ?, ?> val);
 
   /**
    * @return a connection or null
    */
-  Connector getEndBConn();
+  Connector<?, ?, ?> getEndBConn();
 
   /**
    * @param val a connection instance
    */
-  void setEndAConnInst(ConnectorInstance val);
+  void setEndAConnInst(ConnectorInstance<?> val);
 
   /**
    * @return a connection instance or null
    */
-  ConnectorInstance getEndAConnInst();
+  ConnectorInstance<?> getEndAConnInst();
 
   /**
    * @param val a connection instance
    */
-  void setEndBConnInst(ConnectorInstance val);
+  void setEndBConnInst(ConnectorInstance<?> val);
 
   /**
    * @return a connection instance or null
    */
-  ConnectorInstance getEndBConnInst();
+  ConnectorInstance<?> getEndBConnInst();
 
   /**
    * @return true if any connector info changed
@@ -286,4 +286,27 @@ public interface Subscription {
    * @throws SynchException on properties error
    */
   Date nextRefresh() throws SynchException;
+
+  /** Which way?
+   *
+   * @param val
+   */
+  void setDirectionEnum(SynchDirectionType val);
+
+  /** Which way?
+   *
+   * @return direction
+   */
+  SynchDirectionType getDirectionEnum();
+
+  /** Which end is master?
+   *
+   * @param val
+   */
+  void setMasterEnum(SynchMasterType val);
+
+  /**
+   * @return who's master
+   */
+  SynchMasterType getMasterEnum();
 }

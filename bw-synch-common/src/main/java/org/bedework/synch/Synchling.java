@@ -441,7 +441,7 @@ public class Synchling implements Logged {
 
     ssr.setSubscriptionId(sub.getSubscriptionId());
     ssr.setPrincipalHref(sub.getOwner());
-    ssr.setDirection(sub.getDirection());
+    ssr.setDirection(sub.getDirectionEnum());
     ssr.setLastRefresh(sub.getLastRefresh());
     ssr.setErrorCt(new BigInteger(String.valueOf(sub.getErrorCt())));
 
@@ -600,8 +600,9 @@ public class Synchling implements Logged {
        * last synched.
        */
 
+      var dir = sub.getDirectionEnum();
       final boolean bothWays =
-              sub.getDirection() == SynchDirectionType.BOTH_WAYS;
+              dir == SynchDirectionType.BOTH_WAYS;
 
       final ResynchInfo ainfo = new ResynchInfo(sub,
                                                 SynchEndType.A,
@@ -613,11 +614,11 @@ public class Synchling implements Logged {
       boolean aChanged = false;
       boolean bChanged = false;
 
-      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+      if ((dir == SynchDirectionType.A_TO_B) || bothWays) {
         aChanged = ainfo.inst.changed();
       }
 
-      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+      if ((dir == SynchDirectionType.B_TO_A) || bothWays) {
         bChanged = binfo.inst.changed();
       }
 
@@ -654,20 +655,20 @@ public class Synchling implements Logged {
       List<SynchInfo> updateInfo = new ArrayList<>();
 
       /* First see what we need to transfer from A to B */
-      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+      if ((dir == SynchDirectionType.A_TO_B) || bothWays) {
         getResynchs(updateInfo, ainfo, binfo);
       }
 
       /* Now B to A */
-      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+      if ((dir == SynchDirectionType.B_TO_A) || bothWays) {
         getResynchs(updateInfo, binfo, ainfo);
       }
 
-      if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+      if ((dir == SynchDirectionType.A_TO_B) || bothWays) {
         checkDeletes(updateInfo, binfo);
       }
 
-      if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+      if ((dir == SynchDirectionType.B_TO_A) || bothWays) {
         checkDeletes(updateInfo, ainfo);
       }
 
@@ -684,7 +685,7 @@ public class Synchling implements Logged {
 
         /* Now update end A from end B.
          */
-        if ((sub.getDirection() == SynchDirectionType.B_TO_A) || bothWays) {
+        if ((dir == SynchDirectionType.B_TO_A) || bothWays) {
           while ((updateInfo.size() > 0) &&
                  processUpdates(note, updateInfo, unprocessedRes,
                                 binfo, ainfo)) {
@@ -696,7 +697,7 @@ public class Synchling implements Logged {
 
         /* Now update end B from end A.
          */
-        if ((sub.getDirection() == SynchDirectionType.A_TO_B) || bothWays) {
+        if ((dir == SynchDirectionType.A_TO_B) || bothWays) {
           while ((updateInfo.size() > 0) &&
                  processUpdates(note, updateInfo, unprocessedRes,
                                 ainfo, binfo)) {
@@ -711,12 +712,12 @@ public class Synchling implements Logged {
 
       if (!sub.getInfo().getDeletionsSuppressed()) {
         if (((updateInfo.size() > 0) &&
-                     (sub.getDirection() == SynchDirectionType.B_TO_A)) || bothWays) {
+                     (dir == SynchDirectionType.B_TO_A)) || bothWays) {
           processDeletes(note, updateInfo, ainfo);
         }
 
         if (((updateInfo.size() > 0) &&
-                     (sub.getDirection() == SynchDirectionType.A_TO_B)) || bothWays) {
+                     (dir == SynchDirectionType.A_TO_B)) || bothWays) {
           processDeletes(note, updateInfo, binfo);
         }
       }
@@ -724,9 +725,9 @@ public class Synchling implements Logged {
       sub.setErrorCt(0);
 
       return StatusType.OK;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     } finally {
       sub.updateLastRefresh();
