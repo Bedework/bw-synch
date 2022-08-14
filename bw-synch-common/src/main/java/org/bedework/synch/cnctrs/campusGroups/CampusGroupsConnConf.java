@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.campusGroups;
 
 import org.bedework.synch.cnctrs.file.FileConnConf;
+import org.bedework.util.config.ConfigurationStore;
 
 /**
  * @author douglm
@@ -27,6 +28,12 @@ import org.bedework.synch.cnctrs.file.FileConnConf;
 public class CampusGroupsConnConf
         extends FileConnConf
         implements CampusGroupsConnConfMBean {
+  public CampusGroupsConnConf(final String serviceName,
+                              final ConfigurationStore store,
+                              final String configName) {
+    super(serviceName, store, configName);
+  }
+
   /* ==============================================================
    * Conf properties
    * ============================================================== */

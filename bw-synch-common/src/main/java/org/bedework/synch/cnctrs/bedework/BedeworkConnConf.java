@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.shared.service.SynchConnConf;
+import org.bedework.util.config.ConfigurationStore;
 
 /**
  * @author douglm
@@ -26,6 +27,12 @@ import org.bedework.synch.shared.service.SynchConnConf;
  */
 public class BedeworkConnConf extends SynchConnConf<BedeworkConnectorConfig>
     implements BedeworkConnConfMBean {
+  public BedeworkConnConf(final String serviceName,
+                          final ConfigurationStore store,
+                          final String configName) {
+    super(serviceName, store, configName);
+  }
+
   /* ========================================================================
    * Conf properties
    * ======================================================================== */

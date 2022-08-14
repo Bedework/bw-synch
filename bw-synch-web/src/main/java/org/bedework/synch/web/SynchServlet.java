@@ -449,7 +449,9 @@ public class SynchServlet extends HttpServlet
     SynchConf synchConf;
 
     Configurator() {
-      super("org.bedework.synch:service=Synch");
+      super("org.bedework.synch:service=Synch",
+            (String)null,
+            null);
     }
 
     @Override
@@ -468,9 +470,8 @@ public class SynchServlet extends HttpServlet
         synchConf.start();
 
       /* ------------- Http properties -------------------- */
-        HttpOut ho = new HttpOut("org.bedework.synch.confuri",
-                                 "org.bedework.synch",
-                                 "httpConfig");
+        final HttpOut ho = new HttpOut("org.bedework.synch",
+                                       "httpConfig");
         register(new ObjectName(ho.getServiceName()), ho);
         ho.loadConfig();
       } catch (Throwable t){
@@ -489,7 +490,7 @@ public class SynchServlet extends HttpServlet
     }
   }
 
-  private Configurator conf = new Configurator();
+  private final Configurator conf = new Configurator();
 
   @Override
   public void contextInitialized(final ServletContextEvent sce) {

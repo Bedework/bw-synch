@@ -19,6 +19,7 @@
 package org.bedework.synch.cnctrs.file;
 
 import org.bedework.synch.shared.service.SynchConnConf;
+import org.bedework.util.config.ConfigurationStore;
 
 /**
  * @author douglm
@@ -26,6 +27,12 @@ import org.bedework.synch.shared.service.SynchConnConf;
  */
 public class FileConnConf extends SynchConnConf<FileConnectorConfig>
     implements FileConnConfMBean {
+  public FileConnConf(final String serviceName,
+                          final ConfigurationStore store,
+                          final String configName) {
+    super(serviceName, store, configName);
+  }
+
   /* ========================================================================
    * Conf properties
    * ======================================================================== */

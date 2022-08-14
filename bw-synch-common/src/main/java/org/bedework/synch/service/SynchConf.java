@@ -41,8 +41,8 @@ import javax.management.ObjectName;
  *
  */
 public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, ConfigHolder<SynchConfig> {
-  /* Name of the property holding the location of the config data */
-  private static final String confuriPname = "org.bedework.synch.confuri";
+  /* Name of the directory holding the config data */
+  private static final String confDirName = "synch";
 
   List<String> connectorNames;
 
@@ -135,9 +135,10 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   /**
    */
   public SynchConf() {
-    super("org.bedework.synch:service=SynchConf");
-    setConfigPname(confuriPname);
-    setPathSuffix("conf");
+    super("org.bedework.synch:service=SynchConf",
+          confDirName,
+          "conf",
+          "synch-config");
 
     SynchEngineImpl.setConfigHolder(this);
   }
@@ -492,7 +493,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     try {
       /* Load up the config */
 
-      final String res = loadOnlyConfig(SynchConfig.class);
+      final String res = loadConfig(SynchConfig.class);
 
       if (res != null) {
         return res;
@@ -531,7 +532,11 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
         @SuppressWarnings("unchecked")
         final SynchConnConf<ConnectorConfig> scc =
-                (SynchConnConf<ConnectorConfig>)makeObject(mbeanClassName);
+                (SynchConnConf<ConnectorConfig>)makeObject(
+                        mbeanClassName,
+                        objectName.toString(),
+                        cs,
+                        cn);
 
         if (scc == null) {
           error("Unable to create mbean class: " + mbeanClassName);
@@ -539,7 +544,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
           continue;
         }
 
-        scc.init(cs, objectName.toString(), connCfg);
+        scc.setConfig(connCfg);
 
         sccs.add(scc);
         register("connector", cn, scc);
