@@ -495,7 +495,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
       final String res = loadConfig(SynchConfig.class);
 
-      if (res != null) {
+      if (!"OK".equals(res)) {
         return res;
       }
 

@@ -470,11 +470,11 @@ public class SynchServlet extends HttpServlet
         synchConf.start();
 
       /* ------------- Http properties -------------------- */
-        final HttpOut ho = new HttpOut("org.bedework.synch",
+        final HttpOut ho = new HttpOut("synch",
                                        "httpConfig");
         register(new ObjectName(ho.getServiceName()), ho);
         ho.loadConfig();
-      } catch (Throwable t){
+      } catch (final Throwable t){
         t.printStackTrace();
       }
     }
