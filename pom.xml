@@ -29,7 +29,6 @@
 	<modules>
 		<module>bw-synch-common</module>
 		<module>bw-synch-war</module>
-		<module>bw-synch-ear</module>
     <module>bw-synch-web</module>
     <module>bw-synch-shared</module>
   </modules>

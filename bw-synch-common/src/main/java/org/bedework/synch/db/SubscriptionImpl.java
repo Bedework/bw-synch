@@ -479,7 +479,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return direction
    */
   public SynchDirectionType getDirectionEnum() {
-    return SynchDirectionType.valueOf(getDirection());
+    return SynchDirectionType.fromValue(getDirection());
   }
 
   /** Which end is master?

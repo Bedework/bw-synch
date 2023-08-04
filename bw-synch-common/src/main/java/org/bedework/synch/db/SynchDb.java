@@ -121,7 +121,7 @@ public class SynchDb implements Logged, Serializable {
 
   private static final String getSubQuery =
           "from " + SubscriptionImpl.class.getName() +
-                  " sub where sub.subscriptionId=:subid";
+                  " as sub where sub.subscriptionId=:subid";
 
   /** The synch engine generates a unique subscription id
    * for each subscription. This is used as a key for each subscription.
@@ -142,8 +142,8 @@ public class SynchDb implements Logged, Serializable {
   }
 
   private static final String findSubQuery =
-          "from " + SubscriptionImpl.class.getName() +
-                  " sub where sub.endAConnectorInfo.connectorId=:aconnid" +
+          "from " + SubscriptionImpl.class.getName() + " as sub" +
+                  " where sub.endAConnectorInfo.connectorId=:aconnid" +
                   " and sub.endAConnectorInfo.synchProperties=:aconnprops" +
                   " and sub.endBConnectorInfo.connectorId=:bconnid" +
                   " and sub.endBConnectorInfo.synchProperties=:bconnprops" +

@@ -3,4 +3,6 @@
 <jboss-web>
   <!-- Virtual host -->
 
+  <context-root>/synch</context-root>
+
 </jboss-web>
