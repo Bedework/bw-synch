@@ -36,34 +36,63 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 ## Release Notes
 ### 4.0.0
-  * First 4.x release based on 3.11 dev 
-  * 3.12 onwards releases of bedework calendar engine now use this version.
+* First 4.x release based on 3.11 dev 
+* 3.12 onwards releases of bedework calendar engine now use this version.
 
 ### 4.0.1
-    * Reset subscription error count on reschedule
-    * Watch for null password in decrypt
-    * Add a reschedule now feature
+* Reset subscription error count on reschedule
+* Watch for null password in decrypt
+* Add a reschedule now feature
 
 ### 4.0.2
-    * Logging changes
+* Logging changes
 
 ### 4.0.3
-    * Fix jboss-app.xml
+* Fix jboss-app.xml
 
 ### 4.0.4
-    * Use last-modified if etag not present
+* Use last-modified if etag not present
 
 ### 4.0.5
-    * Java 11: Add javax xml bind etc
-    * Fix dependencies
+* Java 11: Add javax xml bind etc
+* Fix dependencies
 
 ### 4.0.6
-    * Switch to PooledHttpClient
+* Switch to PooledHttpClient
 
 ### 4.0.7
-    * Changes for latest http support
+* Changes for latest http support
 
 ### 4.0.8
-    * bw-util refactor
-    
-    
+* bw-util refactor
+
+### 4.0.9
+* Update library versions
+
+### 4.0.10
+* Update library versions
+
+### 4.0.11
+* Update library versions
+* Remove unused fields and dependencies on hibernate.
+
+### 4.0.12
+* Update library versions
+
+### 4.0.13
+* Update library versions
+
+### 4.0.14
+* Update library versions
+* Add campusgroups support to synch engine.
+
+#### 5.0.0
+* Use bedework-parent for builds
+*  Upgrade library versions
+
+#### 5.0.1
+*  Upgrade library versions
+* Remove enum user type from db. Use string value for persistence and provide option to get enum from that.
+* Simplify the configuration utilities.
+* Deploy synch service as a war. The ear version could not access hibernate mappings.
+   
