@@ -47,7 +47,6 @@ import javax.xml.namespace.QName;
 
 /**
  * User: mike Date: 3/12/18 Time: 21:32
- *
  * Basic implementation with some commonly used methods.
  */
 public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
@@ -187,7 +186,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
       return true;
     }
 
-    try (CloseableHttpResponse hresp =
+    try (final CloseableHttpResponse hresp =
                  getChangedResponse(headSupported,
                                     contentType)) {
       final int rc = HttpUtil.getStatus(hresp);
@@ -301,20 +300,11 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
         return true;
       }
 
-      final Headers hdrs;
-
-      if ((uidMap != null) && (info.getChangeToken() != null) &&
-              (fetchedIcal != null)) {
-        hdrs = new Headers();
-        hdrs.add("If-None-Match", info.getChangeToken());
-      } else {
-        hdrs = null;
-      }
-
-      try (CloseableHttpResponse hresp = HttpUtil.doGet(getClient(),
-                                                        getUri(),
-                                                        this::getHeaders,
-                                                        "text/calendar")) {
+      try (final CloseableHttpResponse hresp =
+                   HttpUtil.doGet(getClient(),
+                                  getUri(),
+                                  this::getHeaders,
+                                  "text/calendar")) {
         final int rc = HttpUtil.getStatus(hresp);
 
         info.setLastRefreshStatus(String.valueOf(rc));
@@ -427,7 +417,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   private Headers getHeaders() {
-    final Headers hdrs;
+    final Headers hdrs = new Headers();
     final String changeToken;
 
     try {
@@ -438,11 +428,10 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
     if ((uidMap != null) && (changeToken != null) &&
             (fetchedIcal != null)) {
-      hdrs = new Headers();
       hdrs.add("If-None-Match", changeToken);
-    } else {
-      hdrs = null;
     }
+
+    hdrs.add("User-Agent", "Bedework Calendar System");
 
     return hdrs;
   }

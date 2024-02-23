@@ -182,7 +182,9 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
       return client;
     }
 
-    final CloseableHttpClient cl = HttpClients.createDefault();
+    final CloseableHttpClient cl =
+            HttpClients.custom()
+                       .setUserAgent("Bedework Calendar System").build();
 
     final HttpClientContext context = HttpClientContext.create();
     if (info.getPrincipalHref() != null) {
