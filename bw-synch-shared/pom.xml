@@ -34,7 +34,7 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-xml-icalendar</artifactId>
+      <artifactId>bw-icalendar-xml</artifactId>
     </dependency>
 
     <dependency>
