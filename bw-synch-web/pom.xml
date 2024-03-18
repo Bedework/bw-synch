@@ -25,6 +25,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>bw-synch-ws-xml</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- Bedework: Util -->
     <dependency>
       <groupId>org.bedework</groupId>
@@ -45,13 +51,7 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-xml-synchws</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bedework</groupId>
-      <artifactId>bw-xml-exchangews</artifactId>
+      <artifactId>bw-exchangews-xml</artifactId>
       <scope>provided</scope>
     </dependency>
 

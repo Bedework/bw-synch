@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE schema >
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+        xmlns:tns="http://www.bedework.org/synch/wsmessages" 
+        xmlns:xcal="urn:ietf:params:xml:ns:icalendar-2.0"
+        xmlns:xrd="http://docs.oasis-open.org/ns/xri/xrd-1.0"
+        xmlns:cws="http://docs.oasis-open.org/ws-calendar/ns/soap"
+        targetNamespace="http://www.bedework.org/synch/wsmessages" 
+        elementFormDefault="qualified">
+  <import schemaLocation="../calws-soap/xsd/wserrors.xsd"
+          namespace="http://docs.oasis-open.org/ws-calendar/ns/soap" />
+        
+  <annotation>
+    <documentation xml:lang="en">
+      This schema fragment defines the error codes and types for use by the 
+      Bedework synch service which uses an extension of the CalWS SOAP web service.
+    </documentation>
+  </annotation>
+  
+  <!-- Error codes -->
+  <complexType name="AlreadySubscribedType" >
+    <annotation>
+      <documentation xml:lang="en">
+        Already have a subscription to this calendar.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:ErrorCodeType"/>
+    </complexContent>
+  </complexType>
+  
+  <element name="alreadySubscribed" type="tns:AlreadySubscribedType"
+           substitutionGroup="cws:error" />
+
+  <complexType name="InvalidTokenType" >
+    <annotation>
+      <documentation xml:lang="en">
+        The service synch token is unknown or expired.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:ErrorCodeType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="invalidToken" type="tns:InvalidTokenType"
+           substitutionGroup="cws:error" />
+
+  <complexType name="UnknownSubscriptionType">
+    <annotation>
+      <documentation xml:lang="en">
+        Unknown subscription.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:ErrorCodeType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="unknownSubscription" type="tns:UnknownSubscriptionType"
+              substitutionGroup="cws:error" />
+
+  <complexType name="UnreachableTargetType" >
+    <annotation>
+      <documentation xml:lang="en">
+        The target of the subscription is unreachable.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:ErrorCodeType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="unreachableTarget" type="tns:UnreachableTargetType"
+              substitutionGroup="cws:error" />
+
+  <complexType name="ServiceStoppedType" >
+    <annotation>
+      <documentation xml:lang="en">
+        The synch service is not running.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:ErrorCodeType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="serviceStopped" type="tns:ServiceStoppedType"
+              substitutionGroup="cws:error" />
+</schema>

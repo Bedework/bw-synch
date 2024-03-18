@@ -31,5 +31,6 @@
 		<module>bw-synch-war</module>
     <module>bw-synch-web</module>
     <module>bw-synch-shared</module>
+    <module>bw-synch-ws-xml</module>
   </modules>
 </project>
