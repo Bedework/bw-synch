@@ -103,4 +103,7 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 #### 5.0.4
 *  Upgrade library versions
 * Moved synch xml module into synch out of bw-xml
+
+#### 5.0.5
+* Release 5.0.4 failed because of a deploy issue. Release version with new dependencies.
    

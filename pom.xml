@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.bedework</groupId>
     <artifactId>bedework-parent</artifactId>
-    <version>40</version>
+    <version>41</version>
   </parent>
 
 	<groupId>org.bedework.bw-synch</groupId>
 	<artifactId>bw-synch-engine</artifactId>
-	<version>5.0.4</version>
+	<version>5.0.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Bedework synch: engine for external subscriptions</name>
