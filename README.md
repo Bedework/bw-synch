@@ -106,4 +106,7 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.0.5
 * Release 5.0.4 failed because of a deploy issue. Release version with new dependencies.
+
+#### 5.0.6
+* Release 5.0.5 failed because of a missing name in the pom.
    

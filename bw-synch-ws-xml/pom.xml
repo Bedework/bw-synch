@@ -6,10 +6,11 @@
   <parent>
     <groupId>org.bedework.bw-synch</groupId>
     <artifactId>bw-synch-engine</artifactId>
-    <version>5.0.5</version>
+    <version>5.0.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>bw-synch-ws-xml</artifactId>
+  <name>Bedework synch: XSD and WSDLS for synch engine</name>
 
   <properties>
     <destDir>${project.build.directory}/sources</destDir>
