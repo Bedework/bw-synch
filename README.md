@@ -110,6 +110,9 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 #### 5.0.6
 * Release 5.0.5 failed because of a missing name in the pom.
 
-#### 5.0.6
+#### 5.0.7
 * Exclude calws from the generated artefact, or we get classloader errors.
+
+#### 5.0.8
+* Excluded xrd also - reinstate.
    

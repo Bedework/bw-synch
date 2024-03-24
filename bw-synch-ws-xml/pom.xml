@@ -130,7 +130,7 @@
         <configuration>
           <excludes>
             <exclude>**/icalendar_2/**</exclude>
-            <exclude>**/oasis_open/**</exclude>
+            <exclude>**/ws_calendar/**</exclude>
           </excludes>
         </configuration>
       </plugin>
