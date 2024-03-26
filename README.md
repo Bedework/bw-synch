@@ -115,4 +115,7 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.0.8
 * Excluded xrd also - reinstate.
+
+#### 5.0.8
+* calws-soap source in different artefact.
    

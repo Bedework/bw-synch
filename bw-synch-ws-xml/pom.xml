@@ -21,7 +21,7 @@
   <dependencies>
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-calws-soap-xml</artifactId>
+      <artifactId>bw-calws-soap-xml-source</artifactId>
       <type>zip</type>
     </dependency>
 
@@ -74,7 +74,7 @@
             </goals>
             <configuration>
               <includeGroupIds>org.bedework</includeGroupIds>
-              <includeArtifactIds>bw-calws-soap-xml</includeArtifactIds>
+              <includeArtifactIds>bw-calws-soap-xml-source</includeArtifactIds>
               <includeTypes>zip</includeTypes>
 
               <outputDirectory>${destDir}/calws-soap</outputDirectory>
