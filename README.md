@@ -7,7 +7,7 @@ It could also be used for 1 way synchronization between any source and server.
 
 ## Requirements
 
-1. JDK 8
+1. JDK 17
 2. Maven 3
 
 ## Building Locally
@@ -118,4 +118,11 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 #### 5.0.8
 * calws-soap source in different artefact.
+
+#### 5.0.9
+*  Upgrade library versions
+
+#### 5.0.10
+* Upgrade library versions
+* Fix needed to deal with util.hibernate bug relating to static sessionFactory variable.
    

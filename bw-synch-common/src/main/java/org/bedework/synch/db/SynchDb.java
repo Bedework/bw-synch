@@ -28,6 +28,8 @@ import org.bedework.util.hibernate.HibSessionImpl;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
+import org.hibernate.SessionFactory;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
@@ -44,6 +46,10 @@ public class SynchDb implements Logged, Serializable {
 
   /** When we were created for debugging */
   protected Timestamp objTimestamp;
+
+  /* Factory used to obtain a session
+   */
+  private static SessionFactory sessionFactory;
 
   /** Current hibernate session - exists only across one user interaction
    */
@@ -239,27 +245,32 @@ public class SynchDb implements Logged, Serializable {
       throw new SynchException("Already open");
     }
 
-    open = true;
+    try {
+      if (sessionFactory == null) {
+        sessionFactory = HibSessionFactory.
+                getSessionFactory(config.getHibernateProperties());
+      }
 
-    if (sess != null) {
-      warn("Session is not null. Will close");
-      try {
-        close();
-      } finally {
-      }
-    }
+      open = true;
 
-    if (sess == null) {
-      if (debug()) {
-        debug("New hibernate session for " + objTimestamp);
+      if (sess != null) {
+        warn("Session is not null. Will close");
+        try {
+          close();
+        } finally {
+        }
       }
-      sess = new HibSessionImpl();
-      try {
-        sess.init(HibSessionFactory.getSessionFactory(config.getHibernateProperties()));
-      } catch (HibException he) {
-        throw new SynchException(he);
+
+      if (sess == null) {
+        if (debug()) {
+          debug("New hibernate session for " + objTimestamp);
+        }
+        sess = new HibSessionImpl();
+        sess.init(sessionFactory);
+        debug("Open session for " + objTimestamp);
       }
-      debug("Open session for " + objTimestamp);
+    } catch (final HibException he) {
+      throw new SynchException(he);
     }
 
     beginTransaction();
