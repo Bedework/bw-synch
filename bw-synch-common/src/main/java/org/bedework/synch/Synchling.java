@@ -451,7 +451,6 @@ public class Synchling implements Logged {
     cinst.forceRefresh();
 
     sub.setLastRefresh(null);
-    syncher.updateSubscription(sub);
     syncher.reschedule(sub, false);
     resp.setStatus(StatusType.OK);
 
