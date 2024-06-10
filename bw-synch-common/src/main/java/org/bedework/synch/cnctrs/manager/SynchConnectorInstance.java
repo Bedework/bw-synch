@@ -89,4 +89,8 @@ public class SynchConnectorInstance
           throws SynchException {
     return null;
   }
+
+  @Override
+  public void forceRefresh() throws SynchException {
+  }
 }

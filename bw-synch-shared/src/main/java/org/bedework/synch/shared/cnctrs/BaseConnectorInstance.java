@@ -175,6 +175,12 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     return firs;
   }
 
+  @Override
+  public void forceRefresh() throws SynchException {
+    info.setChangeToken(null);  // Force refresh next time
+    fetchedIcal = null; // Force refetch
+  }
+
   protected boolean changed(final boolean headSupported,
                             final String contentType) throws SynchException {
     /* This implementation needs to at least check the change token for the

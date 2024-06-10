@@ -18,6 +18,8 @@
 */
 package org.bedework.synch.shared;
 
+import org.bedework.synch.wsmessages.RefreshRequestType;
+import org.bedework.synch.wsmessages.RefreshResponseType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
 import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
@@ -132,6 +134,20 @@ public class Notification<NI extends Notification.NotificationItem> {
     addNotificationItem((NI)new NotificationItem(request, response));
   }
 
+  /** Create a new refresh object
+   *
+   * @param sub subscription
+   * @param request refresh
+   * @param response and the response
+   */
+  @SuppressWarnings("unchecked")
+  public Notification(final Subscription sub,
+                      final RefreshRequestType request,
+                      final RefreshResponseType response) {
+    this(sub, SynchEndType.NONE);
+    addNotificationItem((NI)new NotificationItem(request, response));
+  }
+
   /** Create a new subscription status object
    *
    * @param sub subscription
@@ -222,13 +238,16 @@ public class Notification<NI extends Notification.NotificationItem> {
       Unsubscribe,
 
       /** */
+      Refresh,
+
+      /** */
       SubscriptionStatus,
 
       /** Getting system information */
       GetInfo,
     }
 
-    private ActionType action;
+    private final ActionType action;
 
     private IcalendarType ical;
 
@@ -238,6 +257,9 @@ public class Notification<NI extends Notification.NotificationItem> {
 
     private UnsubscribeRequestType unsubRequest;
     private UnsubscribeResponseType unsubResponse;
+
+    private RefreshRequestType refreshRequest;
+    private RefreshResponseType refreshResponse;
 
     private SubscriptionStatusRequestType subStatusReq;
     private SubscriptionStatusResponseType subStatusResponse;
@@ -283,6 +305,18 @@ public class Notification<NI extends Notification.NotificationItem> {
       action = ActionType.Unsubscribe;
       this.unsubRequest = unsubRequest;
       this.unsubResponse = unsubResponse;
+    }
+
+    /** Create a notification item for refresh.
+     *
+     * @param refreshRequest to refresh
+     * @param refreshResponse to the refresh
+     */
+    public NotificationItem(final RefreshRequestType refreshRequest,
+                            final RefreshResponseType refreshResponse) {
+      action = ActionType.Refresh;
+      this.refreshRequest = refreshRequest;
+      this.refreshResponse = refreshResponse;
     }
 
     /** Create a notification item for status.
@@ -337,6 +371,20 @@ public class Notification<NI extends Notification.NotificationItem> {
      */
     public UnsubscribeResponseType getUnsubResponse() {
       return unsubResponse;
+    }
+
+    /**
+     * @return request leading to a notification item
+     */
+    public RefreshRequestType getRefreshRequest() {
+      return refreshRequest;
+    }
+
+    /**
+     * @return response to a notification item
+     */
+    public RefreshResponseType getRefreshResponse() {
+      return refreshResponse;
     }
 
     /**

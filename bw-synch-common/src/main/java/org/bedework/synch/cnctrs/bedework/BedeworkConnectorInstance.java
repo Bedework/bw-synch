@@ -86,6 +86,11 @@ public class BedeworkConnectorInstance
   }
 
   @Override
+  public void forceRefresh() throws SynchException {
+    info.setChangeToken(null);  // Force refresh next time
+  }
+
+  @Override
   public SynchItemsInfo getItemsInfo() throws SynchException {
     /* Build a calendar query to fetch all the items in the referenced
      * collection

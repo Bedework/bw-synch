@@ -154,9 +154,9 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
     return info.getTotalCrudCts();
   }
 
-  /* ====================================================================
+  /* ============================================================
    *                   Protected methods
-   * ==================================================================== */
+   * ============================================================ */
 
   /** Ensure subscription info is valid
    *
@@ -217,7 +217,7 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

@@ -184,12 +184,14 @@ public class ExchangeConnectorInstance
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.bedework.synch.ConnectorInstance#changed()
-   */
   @Override
   public boolean changed() throws SynchException {
     return false;
+  }
+
+  @Override
+  public void forceRefresh() throws SynchException {
+    info.setChangeToken(null);  // Force refresh next time
   }
 
   /** This class is passed back and contains the publicly visible uid and lastmod

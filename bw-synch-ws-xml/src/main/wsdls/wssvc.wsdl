@@ -24,7 +24,7 @@
     <wsdl:part name="response" element="tns:startServiceResponse" />
   </wsdl:message>
 
-  <!-- ====================== keepAliveNotification ===================== -->  
+  <!-- ================== keepAliveNotification ================ -->
 
   <wsdl:message name="KeepAliveIn">
     <wsdl:part name="request" element="tns:keepAliveNotification" />
@@ -34,7 +34,7 @@
     <wsdl:part name="response" element="tns:keepAliveResponse" />
   </wsdl:message>
 
-  <!-- =========================== getInfo =========================== -->  
+  <!-- ======================= getInfo ====================== -->
 
   <wsdl:message name="GetInfoIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -45,7 +45,7 @@
     <wsdl:part name="response" element="tns:getInfoResponse" />
   </wsdl:message>
 
-  <!-- =========================== subscribe =========================== -->  
+  <!-- ======================= subscribe ====================== -->
 
   <wsdl:message name="SubscribeIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -56,7 +56,7 @@
     <wsdl:part name="response" element="tns:subscribeResponse" />
   </wsdl:message>
 
-  <!-- ========================== unsubscribe ========================== -->  
+  <!-- ====================== unsubscribe ===================== -->
 
   <wsdl:message name="UnsubscribeIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -67,7 +67,18 @@
     <wsdl:part name="response" element="tns:unsubscribeResponse" />
   </wsdl:message>
 
-  <!-- ====================== subscriptionStatus ========================== -->  
+  <!-- ====================== refresh ===================== -->
+
+  <wsdl:message name="RefreshIn">
+    <wsdl:part name="idToken" element="tns:synchIdToken" />
+    <wsdl:part name="request" element="tns:refresh" />
+  </wsdl:message>
+
+  <wsdl:message name="RefreshOut">
+    <wsdl:part name="response" element="tns:refreshResponse" />
+  </wsdl:message>
+
+  <!-- ================ subscriptionStatus ==================== -->
 
   <wsdl:message name="SubscriptionStatusIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -78,7 +89,7 @@
     <wsdl:part name="response" element="tns:subscriptionStatusResponse" />
   </wsdl:message>
   
-  <!-- =========================== getProperties =========================== -->  
+  <!-- ==================== getProperties ===================== -->
 
   <wsdl:message name="GetPropertiesIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -89,7 +100,7 @@
     <wsdl:part name="response" element="cws:getPropertiesResponse" />
   </wsdl:message>
 
-  <!-- =========================== calendarQuery =========================== -->
+  <!-- ===================== calendarQuery ===================== -->
 
   <wsdl:message name="CalendarQueryIn">
     <wsdl:part name="idToken" element="tns:synchIdToken" />
@@ -182,7 +193,12 @@
       <wsdl:input message="tns:UnsubscribeIn" />
       <wsdl:output message="tns:UnsubscribeOut" />
     </wsdl:operation>
-    
+
+    <wsdl:operation name="Refresh">
+      <wsdl:input message="tns:RefreshIn" />
+      <wsdl:output message="tns:RefreshOut" />
+    </wsdl:operation>
+
     <wsdl:operation name="SubscriptionStatus">
       <wsdl:input message="tns:SubscriptionStatusIn" />
       <wsdl:output message="tns:SubscriptionStatusOut" />
@@ -286,7 +302,18 @@
         <soap:body use="literal" parts="response" />
       </wsdl:output>
     </wsdl:operation>
-    
+
+    <wsdl:operation name="Refresh">
+      <soap:operation soapAction="http://www.bedework.org/synch/wsmessages/refresh" />
+      <wsdl:input>
+        <soap:header message="tns:RefreshIn" use="literal" part="idToken" />
+        <soap:body use="literal" parts="request" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" parts="response" />
+      </wsdl:output>
+    </wsdl:operation>
+
     <wsdl:operation name="SubscriptionStatus">
       <soap:operation soapAction="http://www.bedework.org/synch/wsmessages/subscriptionStatus" />
       <wsdl:input>

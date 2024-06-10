@@ -42,6 +42,8 @@ import org.bedework.synch.wsmessages.ArrayOfSynchPropertyInfo;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
 import org.bedework.synch.wsmessages.GetInfoRequestType;
 import org.bedework.synch.wsmessages.GetInfoResponseType;
+import org.bedework.synch.wsmessages.RefreshRequestType;
+import org.bedework.synch.wsmessages.RefreshResponseType;
 import org.bedework.synch.wsmessages.SubscribeRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
@@ -138,18 +140,20 @@ public class SynchConnector
             new Notification(NotificationItem.ActionType.GetInfo));
       }
 
-      if (o instanceof SubscribeRequestType) {
-        return new NotificationBatch(subscribe(resp, (SubscribeRequestType)o));
+      if (o instanceof SubscribeRequestType sr) {
+        return new NotificationBatch(subscribe(resp, sr));
       }
 
-      if (o instanceof UnsubscribeRequestType) {
-        return new NotificationBatch(unsubscribe(resp,
-                                                 (UnsubscribeRequestType)o));
+      if (o instanceof UnsubscribeRequestType ur) {
+        return new NotificationBatch(unsubscribe(resp, ur));
       }
 
-      if (o instanceof SubscriptionStatusRequestType) {
-        return new NotificationBatch(subStatus(resp,
-                                               (SubscriptionStatusRequestType)o));
+      if (o instanceof RefreshRequestType rr) {
+        return new NotificationBatch(refresh(resp, rr));
+      }
+
+      if (o instanceof SubscriptionStatusRequestType ssr) {
+        return new NotificationBatch(subStatus(resp, ssr));
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -232,6 +236,15 @@ public class SynchConnector
         final UnsubscribeResponseType usresp = ni.getUnsubResponse();
 
         final JAXBElement<UnsubscribeResponseType> jax = of.createUnsubscribeResponse(usresp);
+
+        marshal(jax, resp.getOutputStream());
+      }
+
+      if (ni.getAction() == ActionType.Refresh) {
+        final RefreshResponseType refresp = ni.getRefreshResponse();
+
+        final JAXBElement<RefreshResponseType> jax =
+                of.createRefreshResponse(refresp);
 
         marshal(jax, resp.getOutputStream());
       }
@@ -320,6 +333,32 @@ public class SynchConnector
     }
 
     return new Notification(sub, u, usr);
+  }
+
+  private Notification<?> refresh(
+          final HttpServletResponse resp,
+          final RefreshRequestType r) throws SynchException {
+    if (debug()) {
+      debug("Handle refresh " +  r.getSubscriptionId());
+    }
+
+    final RefreshResponseType rr = of.createRefreshResponseType();
+
+    final Subscription sub = checkAsr(r);
+
+    if (sub == null) {
+      if (debug()) {
+        warn("No subscription found for " +  r.getSubscriptionId());
+      }
+      // No subscription or error - nothing to do
+      rr.setStatus(StatusType.ERROR);
+      rr.setErrorResponse(new ErrorResponseType());
+      rr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
+
+      return new Notification(null, r, rr);
+    }
+
+    return new Notification(sub, r, rr);
   }
 
   private Notification<?> subStatus(final HttpServletResponse resp,

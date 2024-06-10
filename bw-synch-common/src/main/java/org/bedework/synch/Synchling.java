@@ -32,6 +32,7 @@ import org.bedework.synch.shared.cnctrs.ConnectorInstance.SynchItemsInfo;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.filters.Filter;
 import org.bedework.synch.wsmessages.ConnectorInfoType;
+import org.bedework.synch.wsmessages.RefreshResponseType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SubscriptionStatusRequestType;
 import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
@@ -78,9 +79,9 @@ public class Synchling implements Logged {
 
   private static long lastSynchlingId;
 
-  private long synchlingId;
+  private final long synchlingId;
 
-  private SynchEngine syncher;
+  private final SynchEngine syncher;
 
   private XmlIcalCompare diff;
 
@@ -113,12 +114,11 @@ public class Synchling implements Logged {
   /**
    * @param note notification
    * @return OK for all handled fine. ERROR - discard. WARN - retry.
-   * @throws SynchException
    */
-  public StatusType handleNotification(final Notification<NotificationItem> note) throws SynchException {
+  public StatusType handleNotification(final Notification<NotificationItem> note) {
     StatusType st;
 
-    for (NotificationItem ni: note.getNotifications()) {
+    for (final NotificationItem ni: note.getNotifications()) {
 
       switch (ni.getAction()) {
       case FullSynch:
@@ -198,6 +198,13 @@ public class Synchling implements Logged {
         }
         continue;
 
+      case Refresh:
+        st = refresh(note, ni);
+        if (st != StatusType.OK) {
+          return st;
+        }
+        continue;
+
       case SubscriptionStatus:
         st = subStatus(note, ni);
         if (st != StatusType.OK) {
@@ -213,13 +220,13 @@ public class Synchling implements Logged {
     return StatusType.OK;
   }
 
-  /* ====================================================================
+  /* =============================================================
    *                        Notification methods
-   * ==================================================================== */
+   * ============================================================= */
 
 
-  private StatusType subscribe(final Notification note,
-                         final NotificationItem ni) throws SynchException {
+  private StatusType subscribe(final Notification<?> note,
+                         final NotificationItem ni) {
     if (debug()) {
       debug("new subscription " + note.getSub());
     }
@@ -227,8 +234,9 @@ public class Synchling implements Logged {
     syncher.setConnectors(note.getSub());
 
     /* Try to subscribe to both ends */
-    ConnectorInstance cinst = syncher.getConnectorInstance(note.getSub(),
-                                                           SynchEndType.A);
+    ConnectorInstance<?> cinst =
+            syncher.getConnectorInstance(note.getSub(),
+                                         SynchEndType.A);
 
     final SubscribeResponseType sr = ni.getSubResponse();
 
@@ -246,8 +254,8 @@ public class Synchling implements Logged {
     return StatusType.OK;
   }
 
-  private StatusType addItem(final Notification note,
-                             final NotificationItem ni) throws SynchException {
+  private StatusType addItem(final Notification<?> note,
+                             final NotificationItem ni) {
     final IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
@@ -258,7 +266,7 @@ public class Synchling implements Logged {
       return StatusType.ERROR;
     }
 
-    AddItemResponseType air = getOtherCinst(note).addItem(ical);
+    final AddItemResponseType air = getOtherCinst(note).addItem(ical);
     if (debug()) {
       debug("Add: status=" + air.getStatus() +
             " msg=" + air.getMessage());
@@ -267,9 +275,9 @@ public class Synchling implements Logged {
     return air.getStatus();
   }
 
-  private StatusType updateItem(final Notification note,
-                                final NotificationItem ni) throws SynchException {
-    IcalendarType ical = ni.getIcal();
+  private StatusType updateItem(final Notification<?> note,
+                                final NotificationItem ni) {
+    final IcalendarType ical = ni.getIcal();
 
     if (ical == null) {
       if (debug()) {
@@ -279,9 +287,9 @@ public class Synchling implements Logged {
       return StatusType.ERROR;
     }
 
-    ConnectorInstance cinst = getOtherCinst(note);
+    final ConnectorInstance<?> cinst = getOtherCinst(note);
 
-    FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
+    final FetchItemResponseType fresp = cinst.fetchItem(ni.getUid());
     if (debug()) {
       debug("Update: status=" + fresp.getStatus() +
             " msg=" + fresp.getMessage());
@@ -291,18 +299,18 @@ public class Synchling implements Logged {
       return fresp.getStatus();
     }
 
-    IcalendarType targetIcal = fresp.getIcalendar();
+    final IcalendarType targetIcal = fresp.getIcalendar();
 
-    Subscription sub = note.getSub();
+    final Subscription sub = note.getSub();
 
-    ResynchInfo ainfo = new ResynchInfo(sub,
-                                        SynchEndType.A,
-                                        syncher);
-    ResynchInfo binfo = new ResynchInfo(sub,
-                                        SynchEndType.B,
-                                        syncher);
-    ResynchInfo toInfo;
-    ResynchInfo fromInfo;
+    final ResynchInfo ainfo = new ResynchInfo(sub,
+                                              SynchEndType.A,
+                                              syncher);
+    final ResynchInfo binfo = new ResynchInfo(sub,
+                                              SynchEndType.B,
+                                              syncher);
+    final ResynchInfo toInfo;
+    final ResynchInfo fromInfo;
     if (note.getEnd() == SynchEndType.A) {
       toInfo = binfo;
       fromInfo = ainfo;
@@ -311,9 +319,9 @@ public class Synchling implements Logged {
       fromInfo = binfo;
     }
 
-    ComponentSelectionType cst = getDiffer(note,
-                                           fromInfo,
-                                           toInfo).diff(ical, targetIcal);
+    final ComponentSelectionType cst = getDiffer(note,
+                                                 fromInfo,
+                                                 toInfo).diff(ical, targetIcal);
 
     if (cst == null) {
       if (debug()) {
@@ -323,13 +331,13 @@ public class Synchling implements Logged {
       return StatusType.OK;
     }
 
-    UpdateItemType ui = new UpdateItemType();
+    final UpdateItemType ui = new UpdateItemType();
 
     ui.setHref(fresp.getHref());
     ui.setChangeToken(fresp.getChangeToken());
     ui.getSelect().add(cst);
 
-    UpdateItemResponseType uir = cinst.updateItem(ui);
+    final UpdateItemResponseType uir = cinst.updateItem(ui);
     if (debug()) {
       debug("Update: status=" + uir.getStatus() +
             " msg=" + uir.getMessage());
@@ -337,8 +345,8 @@ public class Synchling implements Logged {
     return uir.getStatus();
   }
 
-  private ConnectorInstance getOtherCinst(final Notification note) throws SynchException {
-    SynchEndType otherEnd;
+  private ConnectorInstance<?> getOtherCinst(final Notification<?> note) {
+    final SynchEndType otherEnd;
     if (note.getEnd() == SynchEndType.A) {
       otherEnd = SynchEndType.B;
     } else {
@@ -349,18 +357,17 @@ public class Synchling implements Logged {
                                         otherEnd);
   }
 
-  /* ====================================================================
-   *                        private methods
-   * ==================================================================== */
+  /* ==========================================================
+   *                       private methods
+   * ========================================================== */
 
   /**
    * @param note the notification
    * @return status
-   * @throws SynchException
    */
-  private StatusType unsubscribe(final Notification note,
-                                 final NotificationItem ni) throws SynchException {
-    Subscription sub = note.getSub();
+  private StatusType unsubscribe(final Notification<?> note,
+                                 final NotificationItem ni) {
+    final Subscription sub = note.getSub();
     if (sub == null){
       return StatusType.ERROR;
     }
@@ -374,11 +381,11 @@ public class Synchling implements Logged {
 
     /* See if it's OK by the connector instances */
 
-    ConnectorInstance cinst = syncher.getConnectorInstance(sub,
+    ConnectorInstance<?> cinst = syncher.getConnectorInstance(sub,
                                                            SynchEndType.A);
 
-    UnsubscribeRequestType usreq = ni.getUnsubRequest();
-    UnsubscribeResponseType usr = ni.getUnsubResponse();
+    final UnsubscribeRequestType usreq = ni.getUnsubRequest();
+    final UnsubscribeResponseType usr = ni.getUnsubResponse();
 
     if (!cinst.unsubscribe(usreq, usr)) {
       warn("Unsubscribe end " + SynchEndType.A +
@@ -415,10 +422,9 @@ public class Synchling implements Logged {
   /**
    * @param note the notification
    * @return status
-   * @throws SynchException
    */
-  private StatusType subStatus(final Notification note,
-                               final NotificationItem ni) throws SynchException {
+  private StatusType refresh(final Notification<?> note,
+                             final NotificationItem ni) {
     final Subscription sub = note.getSub();
     if (sub == null){
       return StatusType.ERROR;
@@ -433,8 +439,48 @@ public class Synchling implements Logged {
 
     /* See if it's OK by the connector instances */
 
-    final ConnectorInstance cinst = syncher.getConnectorInstance(sub,
-                                                           SynchEndType.A);
+    ConnectorInstance<?> cinst =
+            syncher.getConnectorInstance(sub, SynchEndType.A);
+
+    final RefreshResponseType resp = ni.getRefreshResponse();
+
+    cinst.forceRefresh();
+
+    cinst = syncher.getConnectorInstance(note.getSub(),
+                                         SynchEndType.B);
+    cinst.forceRefresh();
+
+    sub.setLastRefresh(null);
+    syncher.updateSubscription(sub);
+    syncher.reschedule(sub, false);
+    resp.setStatus(StatusType.OK);
+
+    return StatusType.OK;
+  }
+
+  /**
+   * @param note the notification
+   * @return status
+   */
+  private StatusType subStatus(final Notification<?> note,
+                               final NotificationItem ni) {
+    final Subscription sub = note.getSub();
+    if (sub == null){
+      return StatusType.ERROR;
+    }
+
+    if (!checkAccess(sub)) {
+      info("No access for subscription " + sub);
+      return StatusType.NO_ACCESS;
+    }
+
+    syncher.setConnectors(sub);
+
+    /* See if it's OK by the connector instances */
+
+    final ConnectorInstance<?> cinst =
+            syncher.getConnectorInstance(sub,
+                                         SynchEndType.A);
 
     final SubscriptionStatusRequestType ssreq = ni.getSubStatusReq();
     final SubscriptionStatusResponseType ssr = ni.getSubStatusResponse();
@@ -457,7 +503,8 @@ public class Synchling implements Logged {
     return StatusType.OK;
   }
 
-  private ConnectorInfoType getConnectorInfo(final SubscriptionConnectorInfo sci) throws SynchException {
+  private ConnectorInfoType getConnectorInfo(
+          final SubscriptionConnectorInfo<?> sci) {
     final ConnectorInfoType ci = new ConnectorInfoType();
 
     ci.setConnectorId(sci.getConnectorId());
@@ -496,7 +543,7 @@ public class Synchling implements Logged {
 
     @Override
     public String toString() {
-      ToString ts = new ToString(this);
+      final ToString ts = new ToString(this);
 
       ts.append(itemInfo);
 
@@ -510,12 +557,12 @@ public class Synchling implements Logged {
     Subscription sub;
     SynchEndType end;
     boolean trustLastmod;
-    ConnectorInstance inst;
+    ConnectorInstance<?> inst;
     Map<String, ItemInfo> items;
     CrudCts lastCts;
     CrudCts totalCts;
 
-    final SubscriptionConnectorInfo connInfo;
+    final SubscriptionConnectorInfo<?> connInfo;
     List<Filter> inFilters;
     List<Filter> outFilters;
 
@@ -527,7 +574,7 @@ public class Synchling implements Logged {
                 final SynchEngine syncher) throws SynchException {
       this.sub = sub;
       this.end = end;
-      final Connector c;
+      final Connector<?, ?, ?> c;
       if (end == SynchEndType.A) {
         c = sub.getEndAConn();
         connInfo = sub.getEndAConnectorInfo();
@@ -566,7 +613,7 @@ public class Synchling implements Logged {
     }
   }
 
-  private StatusType reSynch(final Notification note) throws SynchException {
+  private StatusType reSynch(final Notification<?> note) {
     final Subscription sub = note.getSub();
 
     try {
@@ -600,7 +647,7 @@ public class Synchling implements Logged {
        * last synched.
        */
 
-      var dir = sub.getDirectionEnum();
+      final var dir = sub.getDirectionEnum();
       final boolean bothWays =
               dir == SynchDirectionType.BOTH_WAYS;
 
@@ -680,13 +727,13 @@ public class Synchling implements Logged {
         debug("---------------- end update set ----------------");
       }
 
-      if (updateInfo.size() > 0) {
+      if (!updateInfo.isEmpty()) {
         final Holder<List<SynchInfo>> unprocessedRes = new Holder<>();
 
         /* Now update end A from end B.
          */
         if ((dir == SynchDirectionType.B_TO_A) || bothWays) {
-          while ((updateInfo.size() > 0) &&
+          while ((!updateInfo.isEmpty()) &&
                  processUpdates(note, updateInfo, unprocessedRes,
                                 binfo, ainfo)) {
             updateInfo = unprocessedRes.value;
@@ -698,7 +745,7 @@ public class Synchling implements Logged {
         /* Now update end B from end A.
          */
         if ((dir == SynchDirectionType.A_TO_B) || bothWays) {
-          while ((updateInfo.size() > 0) &&
+          while ((!updateInfo.isEmpty()) &&
                  processUpdates(note, updateInfo, unprocessedRes,
                                 ainfo, binfo)) {
             updateInfo = unprocessedRes.value;
@@ -711,12 +758,12 @@ public class Synchling implements Logged {
       /* -------------------- Deletions ------------------------ */
 
       if (!sub.getInfo().getDeletionsSuppressed()) {
-        if (((updateInfo.size() > 0) &&
+        if (((!updateInfo.isEmpty()) &&
                      (dir == SynchDirectionType.B_TO_A)) || bothWays) {
           processDeletes(note, updateInfo, ainfo);
         }
 
-        if (((updateInfo.size() > 0) &&
+        if (((!updateInfo.isEmpty()) &&
                      (dir == SynchDirectionType.A_TO_B)) || bothWays) {
           processDeletes(note, updateInfo, binfo);
         }
@@ -810,9 +857,8 @@ public class Synchling implements Logged {
    *
    * @param rinfo resynchinfo
    * @return map or null for error
-   * @throws SynchException
    */
-  private Map<String, ItemInfo> getItemsMap(final ResynchInfo rinfo) throws SynchException {
+  private Map<String, ItemInfo> getItemsMap(final ResynchInfo rinfo) {
     /* Items is a table built from the target calendar */
     final Map<String, ItemInfo> items = new HashMap<>();
 
@@ -851,13 +897,12 @@ public class Synchling implements Logged {
    * @param fromInfo resynch info
    * @param toInfo resynch info
    * @return true if there are unprocessed entries for this end
-   * @throws SynchException
    */
-  private boolean processUpdates(final Notification note,
+  private boolean processUpdates(final Notification<?> note,
                                  final List<SynchInfo> updateInfo,
                                  final Holder<List<SynchInfo>> unprocessedRes,
                                  final ResynchInfo fromInfo,
-                                 final ResynchInfo toInfo) throws SynchException {
+                                 final ResynchInfo toInfo) {
     boolean callAgain = false;
     final List<SynchInfo> unProcessed = new ArrayList<>();
     unprocessedRes.value = unProcessed;
@@ -889,7 +934,7 @@ public class Synchling implements Logged {
       sis.add(si);
     }
 
-    if (uids.size() == 0) {
+    if (uids.isEmpty()) {
       // Nothing left to do
       return false;
     }
@@ -1011,20 +1056,24 @@ public class Synchling implements Logged {
    * @param note the notification
    * @param updateInfo list of update info
    * @param toInfo resynch info
-   * @throws SynchException
    */
   private void processDeletes(@SuppressWarnings("UnusedParameters")
-                              final Notification note,
+                              final Notification<?> note,
                               final List<SynchInfo> updateInfo,
-                              final ResynchInfo toInfo) throws SynchException {
+                              final ResynchInfo toInfo) {
     for (final SynchInfo si: updateInfo) {
       // Add to unprocessed if it's not one of ours
       if (si.deleteFrom != toInfo.end) {
-        //noinspection UnnecessaryContinue
         continue;
       }
 
-      DeleteItemResponseType dir = toInfo.inst.deleteItem(si.itemInfo.uid);
+      final DeleteItemResponseType dir =
+              toInfo.inst.deleteItem(si.itemInfo.uid);
+      final var status = dir.getStatus();
+      if (!status.equals(StatusType.OK)) {
+        error(String.format("Failed to delete %s, status was %s",
+                                    si.itemInfo.uid, status));
+      }
     }
   }
 
@@ -1064,11 +1113,10 @@ public class Synchling implements Logged {
     return true;
   }
 
-  @SuppressWarnings("unchecked")
-  private XmlIcalCompare getDiffer(final Notification note,
+  private XmlIcalCompare getDiffer(final Notification<?> note,
                                    final ResynchInfo fromInfo,
-                                   final ResynchInfo toInfo) throws SynchException {
-    Subscription sub = note.getSub();
+                                   final ResynchInfo toInfo) {
+    final Subscription sub = note.getSub();
 
     if ((diff != null) &&
         (diffSubid != null) &&
@@ -1079,7 +1127,7 @@ public class Synchling implements Logged {
     /* Make up diff list */
 
     /* First the defaults */
-    List<Object> skipList = new ArrayList<>(XmlIcalCompare.defaultSkipList);
+    final List<Object> skipList = new ArrayList<>(XmlIcalCompare.defaultSkipList);
 
     Filters.addDifferSkipItems(skipList, fromInfo.getInFilters());
     Filters.addDifferSkipItems(skipList, toInfo.getOutFilters());
@@ -1089,11 +1137,11 @@ public class Synchling implements Logged {
     return diff;
   }
 
-  /* ====================================================================
+  /* =============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================= */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

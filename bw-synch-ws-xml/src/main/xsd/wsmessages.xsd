@@ -345,7 +345,7 @@
 
   <element name="subscribeResponse" type="tns:SubscribeResponseType" />
 
-  <!-- =========================== unsubscribe =========================== -->
+  <!-- ====================== unsubscribe ======================== -->
 
   <complexType name="UnsubscribeRequestType">
     <annotation>
@@ -364,7 +364,8 @@
     </complexContent>
   </complexType>
 
-  <element name="unsubscribe" type="tns:UnsubscribeRequestType" />
+  <element name="unsubscribe"
+           type="tns:UnsubscribeRequestType" />
 
   <complexType name="UnsubscribeResponseType">
     <annotation>
@@ -378,9 +379,51 @@
     </complexContent>
   </complexType>
 
-  <element name="unsubscribeResponse" type="tns:UnsubscribeResponseType" />
+  <element name="unsubscribeResponse"
+           type="tns:UnsubscribeResponseType" />
 
-  <!-- ====================== subscriptionStatus ========================== -->
+  <!-- ====================== refresh ======================== -->
+
+  <complexType name="RefreshRequestType">
+    <annotation>
+      <documentation xml:lang="en">
+        Message to refresh a subscription. This needs to provide
+        all the information for a given end of the subscription
+        which would usually be the end that made the subscription
+        in the first place.
+
+        It's up to the connector to determine if enough information
+        has been supplied to identify the subscription. It is also up
+        to the connector to determine how the refresh should take
+        place. Usually it means discarding change tokens and/or
+        setting the next refresh to the current time.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="tns:ActiveSubscriptionRequestType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="refresh"
+           type="tns:RefreshRequestType" />
+
+  <complexType name="RefreshResponseType">
+    <annotation>
+      <documentation xml:lang="en">
+           Response to message requesting subscription refresh.
+      </documentation>
+    </annotation>
+    <complexContent mixed="false">
+      <extension base="cws:BaseResponseType">
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="refreshResponse"
+           type="tns:RefreshResponseType" />
+
+  <!-- ================ subscriptionStatus ====================== -->
 
   <complexType name="SubscriptionStatusRequestType">
     <annotation>

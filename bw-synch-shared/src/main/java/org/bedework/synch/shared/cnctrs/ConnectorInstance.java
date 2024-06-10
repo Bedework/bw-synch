@@ -69,7 +69,7 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * @param usreq
    * @param usresp
    * @return false if the unsubscribe fails - status has been set in response
-   * @throws SynchException
+   * @throws SynchException on error
    */
   boolean unsubscribe(UnsubscribeRequestType usreq,
                       UnsubscribeResponseType usresp) throws SynchException;
@@ -85,7 +85,7 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    */
   boolean validateActiveSubInfo(final ActiveSubscriptionRequestType req,
                                 final BaseResponseType resp,
-                                final Connector cnctr,
+                                final Connector<?, ?, ?> cnctr,
                                 final BaseSubscriptionInfo info) throws SynchException;
 
   /** Called when a subscription is activated on synch engine startup or after
@@ -100,7 +100,7 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * @return the connector for this instance
    * @throws SynchException
    */
-  Connector getConnector() throws SynchException;
+  Connector<?, ?, ?> getConnector() throws SynchException;
 
   /**
    * @return the info for the subscription this instance is handling.
@@ -246,4 +246,8 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * @throws SynchException
    */
   DeleteItemResponseType deleteItem(String uid) throws SynchException;
+
+  /* Reset subscription so we do a refresh of the data
+   */
+  void forceRefresh() throws SynchException;
 }
