@@ -65,6 +65,8 @@ import java.util.Map;
 
 import javax.xml.ws.Holder;
 
+import static java.lang.String.format;
+
 /** The synchling handles the processing of a single subscription when there is
  * some activity.
  *
@@ -1035,7 +1037,8 @@ public class Synchling implements Logged {
         final UpdateItemResponseType uir = toInfo.inst.updateItem(ui);
 
         if (uir.getStatus() != StatusType.OK) {
-          warn("Unable to update destination entity");
+          error(format("Unable to update destination entity. " +
+                               "Message %s", uir.getMessage()));
           continue;
         }
 
@@ -1070,8 +1073,8 @@ public class Synchling implements Logged {
               toInfo.inst.deleteItem(si.itemInfo.uid);
       final var status = dir.getStatus();
       if (!status.equals(StatusType.OK)) {
-        error(String.format("Failed to delete %s, status was %s",
-                                    si.itemInfo.uid, status));
+        error(format("Failed to delete %s, status was %s",
+                     si.itemInfo.uid, status));
       }
     }
   }
