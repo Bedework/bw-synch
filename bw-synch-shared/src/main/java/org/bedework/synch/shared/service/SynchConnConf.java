@@ -32,7 +32,7 @@ public class SynchConnConf<X extends ConnectorConfig> extends ConfBase<X>
     implements SynchConnConfMBean {
   //private String cname;
 
-  private Connector connector;
+  private Connector<?, ?, ?> connector;
 
   public SynchConnConf(final String serviceName,
                        final ConfigurationStore store,
@@ -54,16 +54,16 @@ public class SynchConnConf<X extends ConnectorConfig> extends ConfBase<X>
 
   /** Embed the connector
    *
-   * @param val
+   * @param val a connector
    */
-  public void setConnector(final Connector val) {
+  public void setConnector(final Connector<?, ?, ?> val) {
     connector = val;
   }
 
   /**
    * @return the connector
    */
-  public Connector getConnector() {
+  public Connector<?, ?, ?> getConnector() {
     return connector;
   }
 
