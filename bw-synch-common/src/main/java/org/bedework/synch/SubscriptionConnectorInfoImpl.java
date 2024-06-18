@@ -24,7 +24,6 @@ import org.bedework.synch.filters.XCategoryFilter;
 import org.bedework.synch.filters.XlocXContactFilter;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.filters.Filter;
 import org.bedework.util.misc.ToString;
 
@@ -128,6 +127,10 @@ public class SubscriptionConnectorInfoImpl
 
   @Override
   public int compareTo(final SubscriptionConnectorInfoImpl that) {
+    if (that == null) {
+      return 1;
+    }
+
     if (this == that) {
       return 0;
     }

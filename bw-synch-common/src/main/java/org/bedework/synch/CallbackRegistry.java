@@ -40,7 +40,6 @@ import java.util.Map;
  *
  * @author Mike Douglass
  */
-@SuppressWarnings("rawtypes")
 public class CallbackRegistry {
   /** An entry in the registry
    *
@@ -130,7 +129,7 @@ public class CallbackRegistry {
                                " found " + tblVal);
     }
 
-    put(connectorId, val);
+    theMap.put(connectorId, val);
   }
 
   /* ====================================================================

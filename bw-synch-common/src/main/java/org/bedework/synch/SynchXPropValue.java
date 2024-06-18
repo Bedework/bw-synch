@@ -34,33 +34,32 @@ import java.util.Properties;
 public class SynchXPropValue extends Properties {
   /**
    * @return encoded values
-   * @throws SynchException
    */
   public String encode() {
-    StringWriter sw = new StringWriter();
+    final StringWriter sw = new StringWriter();
 
     try {
       store(sw, null);
 
-      String s = sw.toString();
+      final String s = sw.toString();
 
       return Base64.encodeBase64String(s.getBytes());
-    } catch (Exception t) {
+    } catch (final Exception t) {
       throw new SynchException(t);
     }
   }
 
   /**
    * @param val encoded values
-   * @throws SynchException
    */
   public void decode(final String val) {
     try {
-      StringReader sr = new StringReader(new String(Base64.decodeBase64(val)));
+      final StringReader sr =
+              new StringReader(new String(Base64.decodeBase64(val)));
 
       clear();
       load(sr);
-    } catch (Exception t) {
+    } catch (final Exception t) {
       throw new SynchException(t);
     }
   }

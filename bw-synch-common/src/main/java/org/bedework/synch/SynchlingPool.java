@@ -43,7 +43,7 @@ public class SynchlingPool implements Logged {
 
   private ArrayBlockingQueue<Synchling> pool;
 
-  private Map<Long, Synchling> active = new HashMap<Long, Synchling>();
+  private final Map<Long, Synchling> active = new HashMap<>();
 
   private long timeout; // millisecs
 
@@ -55,8 +55,8 @@ public class SynchlingPool implements Logged {
 
   /** Create a pool with the given size
    *
-   * @param syncher
-   * @param size
+   * @param syncher the engine
+   * @param size of pool
    * @param timeout - millisecs
    */
   public void start(final SynchEngine syncher,
@@ -71,8 +71,8 @@ public class SynchlingPool implements Logged {
    */
   public void stop() {
     long maxWait = 1000 * 90; // 90 seconds - needs to be longer than longest poll interval
-    long startTime = System.currentTimeMillis();
-    long delay = 1000 * 5; // 5 sec delay
+    final long startTime = System.currentTimeMillis();
+    final long delay = 1000 * 5; // 5 sec delay
 
     while (getActiveCt() > 0) {
       if ((System.currentTimeMillis() - startTime) > maxWait) {
@@ -99,11 +99,11 @@ public class SynchlingPool implements Logged {
 
   /** Resize the pool
    *
-   * @param size
+   * @param size new pool size
    */
   public void resize(final int size) {
-    ArrayBlockingQueue<Synchling> oldPool = getPool();
-    pool = new ArrayBlockingQueue<Synchling>(size);
+    final ArrayBlockingQueue<Synchling> oldPool = getPool();
+    pool = new ArrayBlockingQueue<>(size);
     int oldSize = 0;
 
     if (oldPool != null) {
@@ -163,7 +163,7 @@ public class SynchlingPool implements Logged {
    * @return current size of pool
    */
   public int getCurrentMaxSize() {
-    ArrayBlockingQueue<Synchling> thePool = pool;
+    final ArrayBlockingQueue<Synchling> thePool = pool;
     if (thePool == null) {
       return 0;
     }
@@ -176,7 +176,7 @@ public class SynchlingPool implements Logged {
    * @return current avail
    */
   public int getCurrentAvailable() {
-    ArrayBlockingQueue<Synchling> thePool = pool;
+    final ArrayBlockingQueue<Synchling> thePool = pool;
     if (thePool == null) {
       return 0;
     }
@@ -186,8 +186,7 @@ public class SynchlingPool implements Logged {
 
   /** Put a synchling back in the pool if there's room else discard it
    *
-   * @param s
-   * @throws SynchException
+   * @param s synchling to return
    */
   public void add(final Synchling s) {
     synchronized (active) {
@@ -199,7 +198,6 @@ public class SynchlingPool implements Logged {
   /** Get a synchling from the pool if possible
    *
    * @return a sychling
-   * @throws SynchException if none available
    */
   public Synchling get() {
     return get(true);
@@ -208,20 +206,21 @@ public class SynchlingPool implements Logged {
   /** Get a synchling from the pool if possible. Return null if timed out
    *
    * @return a sychling or null
-   * @throws SynchException on error
    */
   public Synchling getNoException() {
     return get(false);
   }
 
   private Synchling get(final boolean throwOnFailure) {
-    Synchling s = null;
+    final Synchling s;
     gets++;
-    long st = System.currentTimeMillis();
+    final long st = System.currentTimeMillis();
 
     try {
       s = getPool().poll(getTimeout(), TimeUnit.MILLISECONDS);
-    } catch (Throwable t) {
+    } catch (final SynchException se) {
+      throw se;
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
 
@@ -251,7 +250,7 @@ public class SynchlingPool implements Logged {
    * @return List of Stat
    */
   public List<Stat> getStats() {
-    final List<Stat> stats = new ArrayList<Stat>();
+    final List<Stat> stats = new ArrayList<>();
 
     stats.add(new Stat("synchling get timeout", getTimeout()));
     stats.add(new Stat("synchling active", getActiveCt()));
@@ -283,7 +282,7 @@ public class SynchlingPool implements Logged {
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

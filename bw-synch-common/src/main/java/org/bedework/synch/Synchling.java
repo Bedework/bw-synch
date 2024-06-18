@@ -121,7 +121,6 @@ public class Synchling implements Logged {
     StatusType st;
 
     for (final NotificationItem ni: note.getNotifications()) {
-
       switch (ni.getAction()) {
       case FullSynch:
         if (syncher.subscriptionsOnly()) {

@@ -20,7 +20,6 @@ package org.bedework.synch;
 
 import org.bedework.synch.db.SerializablePropertiesImpl;
 import org.bedework.synch.shared.SubscriptionInfo;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
 import org.bedework.util.misc.ToString;
 
@@ -39,8 +38,7 @@ public class SubscriptionInfoImpl
 
   /** AlarmsProcessing - CalProcessingType
    *
-   * @param val
-   * @throws SynchException
+   * @param val how to handle alarms
    */
   public void setAlarmsProcessing(final CalProcessingType val) {
     setProperty(propnameAlarmProcessing, String.valueOf(val));
@@ -49,7 +47,6 @@ public class SubscriptionInfoImpl
   /** AlarmsProcessing - CalProcessingType
    *
    * @return boolean
-   * @throws SynchException
    */
   public CalProcessingType getAlarmsProcessing() {
     return CalProcessingType.fromValue(getProperty(propnameAlarmProcessing));
@@ -57,8 +54,7 @@ public class SubscriptionInfoImpl
 
   /** SchedulingProcessing - CalProcessingType
    *
-   * @param val
-   * @throws SynchException
+   * @param val how to handle scheduling properties.
    */
   public void setSchedulingProcessing(final CalProcessingType val) {
     setProperty(propnameSchedulingProcessing, String.valueOf(val));
@@ -67,7 +63,6 @@ public class SubscriptionInfoImpl
   /** SchedulingProcessing - CalProcessingType
    *
    * @return CalProcessingType
-   * @throws SynchException
    */
   public CalProcessingType getSchedulingProcessing() {
     return CalProcessingType.fromValue(getProperty(propnameSchedulingProcessing));
@@ -76,14 +71,13 @@ public class SubscriptionInfoImpl
   /** Processing of locations and contacts - boolean
    *
    * @param val true to enable processing of locations and contacts
-   * @throws SynchException
    */
   public void setXlocXcontact(final boolean val) {
     setProperty(propnameXlocXcontacts, String.valueOf(val));
   }
 
   public boolean getXlocXcontact() {
-    return Boolean.valueOf(getProperty(propnameXlocXcontacts));
+    return Boolean.parseBoolean(getProperty(propnameXlocXcontacts));
   }
 
   public void setXlocXcategories(final boolean val) {
@@ -91,13 +85,12 @@ public class SubscriptionInfoImpl
   }
 
   public boolean getXlocXcategories() {
-    return Boolean.valueOf(getProperty(propnameXcategories));
+    return Boolean.parseBoolean(getProperty(propnameXcategories));
   }
 
   /** Processing of deletions - boolean
    *
    * @param val true to suppress deletion of missing events
-   * @throws SynchException
    */
   public void setDeletionsSuppressed(final boolean val) {
     setProperty(propnameDeleteSuppressed, String.valueOf(val));
@@ -106,10 +99,9 @@ public class SubscriptionInfoImpl
   /** Processing of deletions - boolean
    *
    * @return boolean true to suppress deletion of missing events
-   * @throws SynchException
    */
   public boolean getDeletionsSuppressed() {
-    return Boolean.valueOf(getProperty(propnameDeleteSuppressed));
+    return Boolean.parseBoolean(getProperty(propnameDeleteSuppressed));
   }
 
   /* ====================================================================
