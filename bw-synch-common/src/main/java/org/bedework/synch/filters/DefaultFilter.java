@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class DefaultFilter extends AbstractFilter {
   @Override
-  public IcalendarType doFilter(final IcalendarType val) throws SynchException {
+  public IcalendarType doFilter(final IcalendarType val) {
     return stripIcal(val);
   }
 

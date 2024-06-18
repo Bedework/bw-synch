@@ -81,7 +81,7 @@ public class FileConnector
 
   @Override
   public FileConnectorInstance makeInstance(final Subscription sub,
-                                            final SynchEndType end) throws SynchException {
+                                            final SynchEndType end) {
     final FileSubscriptionInfo info;
 
     if (end == SynchEndType.A) {

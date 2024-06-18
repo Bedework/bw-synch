@@ -81,7 +81,7 @@ public class CampusGroupsConnector
   @Override
   public CampusGroupsConnectorInstance makeInstance(
           final Subscription sub,
-          final SynchEndType end) throws SynchException {
+          final SynchEndType end) {
     final CampusGroupsSubscriptionInfo info;
 
     if (end == SynchEndType.A) {

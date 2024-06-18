@@ -113,7 +113,7 @@ public class XmlIcalConvert implements Logged, Defs {
    * @return Icalendar
    * @throws SynchException
    */
-  public IcalendarType toXml(final CalendarItemType cal) throws SynchException {
+  public IcalendarType toXml(final CalendarItemType cal) {
     /* TODO
      * Transparency - derived from what?
      */
@@ -546,7 +546,7 @@ public class XmlIcalConvert implements Logged, Defs {
     return ical;
   }
 
-  private ItemType makeItemType(final String val) throws SynchException {
+  private ItemType makeItemType(final String val) {
     String uval = val.toUpperCase();
 
     if (uval.equals("IPM.NOTE")) {
@@ -599,7 +599,7 @@ public class XmlIcalConvert implements Logged, Defs {
    * @throws SynchException
    */
   public TzStuff getTz(final TimeZoneDefinitionType tzdef,
-                       final String extzid) throws SynchException {
+                       final String extzid) {
     try {
       TzStuff t = new TzStuff();
 
@@ -625,7 +625,7 @@ public class XmlIcalConvert implements Logged, Defs {
 
   private JAXBElement<? extends OrganizerPropType>
                         makeOrganizer(final SingleRecipientType org,
-                                      final boolean realOrg) throws SynchException {
+                                      final boolean realOrg) {
     OrganizerPropType prop = new OrganizerPropType();
 
     setNameAndAddress(prop, org.getMailbox());
@@ -639,7 +639,7 @@ public class XmlIcalConvert implements Logged, Defs {
 
   private JAXBElement<? extends AttendeePropType>
                         makeAttendee(final AttendeeType att,
-                                     final boolean optional) throws SynchException {
+                                     final boolean optional) {
     AttendeePropType prop = new AttendeePropType();
 
     setNameAndAddress(prop, att.getMailbox());
@@ -702,7 +702,7 @@ public class XmlIcalConvert implements Logged, Defs {
   private JAXBElement<? extends BasePropertyType> makeDateProp(final TimeZone tz,
                                       final XMLGregorianCalendar dt,
                                       final boolean allDay,
-                                      final Dtype dtype) throws SynchException {
+                                      final Dtype dtype) {
     try {
       if (dt == null) {
         return null;

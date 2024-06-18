@@ -189,7 +189,7 @@ public class SynchlingPool implements Logged {
    * @param s
    * @throws SynchException
    */
-  public void add(final Synchling s) throws SynchException {
+  public void add(final Synchling s) {
     synchronized (active) {
       active.remove(s.getSynchlingId());
     }
@@ -201,7 +201,7 @@ public class SynchlingPool implements Logged {
    * @return a sychling
    * @throws SynchException if none available
    */
-  public Synchling get() throws SynchException {
+  public Synchling get() {
     return get(true);
   }
 
@@ -210,11 +210,11 @@ public class SynchlingPool implements Logged {
    * @return a sychling or null
    * @throws SynchException on error
    */
-  public Synchling getNoException() throws SynchException {
+  public Synchling getNoException() {
     return get(false);
   }
 
-  private Synchling get(final boolean throwOnFailure) throws SynchException {
+  private Synchling get(final boolean throwOnFailure) {
     Synchling s = null;
     gets++;
     long st = System.currentTimeMillis();

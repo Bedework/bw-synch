@@ -42,7 +42,7 @@ public class ExchangeResponse extends BaseResponseType {
    * @param resp
    * @throws SynchException
    */
-  public ExchangeResponse(final ResponseMessageType resp) throws SynchException {
+  public ExchangeResponse(final ResponseMessageType resp) {
     message = resp.getMessageText();
 
     responseCode = resp.getResponseCode();

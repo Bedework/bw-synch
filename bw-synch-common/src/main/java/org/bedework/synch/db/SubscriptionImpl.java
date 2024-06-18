@@ -424,7 +424,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return the delay in millisecs.
    * @throws SynchException
    */
-  public long refreshDelay() throws SynchException {
+  public long refreshDelay() {
     String delay = "31536000000"; // About a year
 
     if (getDirectionEnum() == SynchDirectionType.A_TO_B){
@@ -448,7 +448,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return date value incremented by delay.
    * @throws SynchException
    */
-  public Date nextRefresh() throws SynchException {
+  public Date nextRefresh() {
     if (getLastRefresh() == null) {
       return new Date();
     }

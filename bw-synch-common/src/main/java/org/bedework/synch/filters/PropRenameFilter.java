@@ -75,7 +75,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
                                                      JAXBElement<? extends BasePropertyType> el);
 
   @Override
-  public IcalendarType doFilter(final IcalendarType val) throws SynchException {
+  public IcalendarType doFilter(final IcalendarType val) {
     for (final VcalendarType vcal: val.getVcalendar()) {
       doRename(vcal);
     }
@@ -83,7 +83,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
     return val;
   }
 
-  private void doRename(final BaseComponentType val) throws SynchException {
+  private void doRename(final BaseComponentType val) {
     try {
       final ArrayOfComponents comps = val.getComponents();
 
@@ -104,7 +104,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
     }
   }
 
-  private void doRenameProps(final BaseComponentType val) throws SynchException {
+  private void doRenameProps(final BaseComponentType val) {
     final ArrayOfProperties props = val.getProperties();
 
     if (props == null) {

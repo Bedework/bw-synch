@@ -321,7 +321,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void setConnectors(final Subscription sub) throws SynchException {
+  public void setConnectors(final Subscription sub) {
     String connectorId = sub.getEndAConnectorInfo().getConnectorId();
 
     Connector<?, ?, ?> conn = getConnector(connectorId);
@@ -344,7 +344,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void rescheduleNow(final String id) throws SynchException {
+  public void rescheduleNow(final String id) {
     if (debug()) {
       debug("reschedule now for subscription id " + id);
     }
@@ -389,7 +389,7 @@ public class SynchEngineImpl
 
   @Override
   public ConnectorInstance getConnectorInstance(final Subscription sub,
-                                                final SynchEndType end) throws SynchException {
+                                                final SynchEndType end) {
     ConnectorInstance cinst;
     final Connector conn;
 
@@ -425,18 +425,18 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void addSubscription(final Subscription sub) throws SynchException {
+  public void addSubscription(final Subscription sub) {
     db.add(sub);
     sub.resetChanged();
   }
 
   @Override
-  public void deleteSubscription(final Subscription sub) throws SynchException {
+  public void deleteSubscription(final Subscription sub) {
     db.delete(sub);
   }
 
   @Override
-  public void updateSubscription(final Subscription sub) throws SynchException {
+  public void updateSubscription(final Subscription sub) {
     final boolean opened = db.open();
 
     try {
@@ -451,7 +451,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public Subscription getSubscription(final String id) throws SynchException {
+  public Subscription getSubscription(final String id) {
     final boolean opened = db.open();
 
     try {
@@ -465,7 +465,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public Subscription find(final Subscription sub) throws SynchException {
+  public Subscription find(final Subscription sub) {
     final boolean opened = db.open();
 
     try {
@@ -490,7 +490,7 @@ public class SynchEngineImpl
 
   @Override
   public void handleNotifications(
-          final NotificationBatch<Notification> notes) throws SynchException {
+          final NotificationBatch<Notification> notes) {
     for (final Notification note: notes.getNotifications()) {
       db.open();
       Synchling sl = null;
@@ -516,7 +516,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void start() throws SynchException {
+  public void start() {
     try {
       if (starting || running) {
         warn("Start called when already starting or running");
@@ -758,7 +758,7 @@ public class SynchEngineImpl
    * @return decrypted string
    * @throws SynchException on decryption failure
    */
-  public String decrypt(final String val) throws SynchException {
+  public String decrypt(final String val) {
     if (val == null) {
       return null;
     }
@@ -776,7 +776,7 @@ public class SynchEngineImpl
    * @return en/decryptor
    * @throws SynchException
    */
-  public PwEncryptionIntf getEncrypter() throws SynchException {
+  public PwEncryptionIntf getEncrypter() {
     if (pwEncrypt != null) {
       return pwEncrypt;
     }
@@ -804,7 +804,7 @@ public class SynchEngineImpl
   }
 
   private void registerConnector(final String id,
-                                 final ConnectorConfig conf) throws SynchException {
+                                 final ConnectorConfig conf) {
     try {
       final Class<?> cl = Class.forName(conf.getConnectorClassName());
 
@@ -821,7 +821,7 @@ public class SynchEngineImpl
 
   @SuppressWarnings("unchecked")
   private StatusType handleNotification(final Synchling sl,
-                                        final Notification note) throws SynchException {
+                                        final Notification note) {
     final StatusType st = sl.handleNotification(note);
 
     final Subscription sub = note.getSub();

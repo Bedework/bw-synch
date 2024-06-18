@@ -95,7 +95,7 @@ public class OrgSyncV2Connector
 
   @Override
   public OrgSyncV2ConnectorInstance makeInstance(final Subscription sub,
-                                            final SynchEndType end) throws SynchException {
+                                            final SynchEndType end) {
     final OrgSyncV2SubscriptionInfo info;
 
     if (end == SynchEndType.A) {

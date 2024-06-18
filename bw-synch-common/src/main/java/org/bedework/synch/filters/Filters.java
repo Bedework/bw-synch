@@ -39,7 +39,7 @@ public class Filters {
    * @throws SynchException
    */
   public static IcalendarType doFilters(final IcalendarType val,
-                                        final List<Filter> filters) throws SynchException {
+                                        final List<Filter> filters) {
     if (filters == null) {
       return val;
     }
@@ -58,7 +58,7 @@ public class Filters {
   }
 
   public static void addDifferSkipItems(final List<Object> skipList,
-                                        final List<Filter> filters) throws SynchException {
+                                        final List<Filter> filters) {
     if (filters == null) {
       return;
     }

@@ -182,7 +182,7 @@ public class BedeworkConnector
 
   @Override
   public BedeworkConnectorInstance makeInstance(final Subscription sub,
-                                                final SynchEndType end) throws SynchException {
+                                                final SynchEndType end) {
     final BedeworkSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
@@ -196,7 +196,7 @@ public class BedeworkConnector
   }
 
   @Override
-  public void stop() throws SynchException {
+  public void stop() {
     stopped = true;
     if (pinger != null) {
       pinger.interrupt();
@@ -209,12 +209,12 @@ public class BedeworkConnector
    *                         Package methods
    * ==================================================================== */
 
-  SynchRemoteServicePortType getPort() throws SynchException {
+  SynchRemoteServicePortType getPort() {
     return getPort(config.getBwWSDLURI());
   }
 
   SynchIdTokenType getIdToken(final String principal,
-                              final String opaqueData) throws SynchException {
+                              final String opaqueData) {
     if (remoteToken == null) {
       throw new SynchException(SynchException.connectorNotStarted);
     }
@@ -236,7 +236,7 @@ public class BedeworkConnector
   /**
    * @throws SynchException on fatal error
    */
-  public void ping() throws SynchException {
+  public void ping() {
     final KeepAliveNotificationType kan = new KeepAliveNotificationType();
 
     kan.setSubscribeUrl(callbackUri);
@@ -252,7 +252,7 @@ public class BedeworkConnector
     }
   }
 
-  private void initConnection() throws SynchException {
+  private void initConnection() {
     final StartServiceNotificationType ssn =
             new StartServiceNotificationType();
 

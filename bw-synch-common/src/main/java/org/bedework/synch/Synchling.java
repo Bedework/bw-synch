@@ -572,7 +572,7 @@ public class Synchling implements Logged {
 
     ResynchInfo(final Subscription sub,
                 final SynchEndType end,
-                final SynchEngine syncher) throws SynchException {
+                final SynchEngine syncher) {
       this.sub = sub;
       this.end = end;
       final Connector<?, ?, ?> c;
@@ -592,12 +592,12 @@ public class Synchling implements Logged {
       totalCts = inst.getTotalCrudCts();
     }
 
-    void updateCts() throws SynchException {
+    void updateCts() {
       inst.setLastCrudCts(lastCts);
       inst.setTotalCrudCts(totalCts);
     }
 
-    List<Filter> getInFilters() throws SynchException {
+    List<Filter> getInFilters() {
       if (inFilters == null) {
         inFilters = connInfo.getInputFilters(sub);
       }
@@ -605,7 +605,7 @@ public class Synchling implements Logged {
       return inFilters;
     }
 
-    List<Filter> getOutFilters() throws SynchException {
+    List<Filter> getOutFilters() {
       if (outFilters == null) {
         outFilters = connInfo.getOutputFilters(sub);
       }
@@ -786,7 +786,7 @@ public class Synchling implements Logged {
 
   private void getResynchs(final List<SynchInfo> updateInfo,
                            final ResynchInfo fromInfo,
-                           final ResynchInfo toInfo) throws SynchException {
+                           final ResynchInfo toInfo) {
     final boolean useLastmods = fromInfo.trustLastmod && toInfo.trustLastmod;
 
     for (final ItemInfo fromIi: fromInfo.items.values()) {
@@ -831,7 +831,7 @@ public class Synchling implements Logged {
   }
 
   private void checkDeletes(final List<SynchInfo> updateInfo,
-                            final ResynchInfo toInfo) throws SynchException {
+                            final ResynchInfo toInfo) {
     for (final ItemInfo ii: toInfo.items.values()) {
       if (ii.seen) {
         continue;
@@ -1110,7 +1110,7 @@ public class Synchling implements Logged {
   }
 
   @SuppressWarnings("UnusedParameters")
-  private boolean checkAccess(final Subscription sub) throws SynchException {
+  private boolean checkAccess(final Subscription sub) {
     /* Does this principal have the rights to (un)subscribe? */
     return true;
   }

@@ -21,6 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.util.misc.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,16 +47,16 @@ public class CallbackRegistry {
    * @author douglm
    */
   public static class CallbackRegistryEntry {
-    private String connectorId;
+    private final String connectorId;
 
-    private Subscription sub;
+    private final Subscription sub;
 
-    private SynchEndType end;
+    private final SynchEndType end;
 
     /**
-     * @param connectorId
-     * @param sub
-     * @param end
+     * @param connectorId id of connector
+     * @param sub subscription
+     * @param end which end
      */
     public CallbackRegistryEntry(final String connectorId,
                                  final Subscription sub,
@@ -88,25 +89,16 @@ public class CallbackRegistry {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("CallbackRegistryEntry{");
-
-      sb.append("connectorId=");
-      sb.append(getConnectorId());
-
-      sb.append("sub=");
-      sb.append(getSub());
-
-      sb.append(", end=");
-      sb.append(getEnd());
-
-      sb.append("}");
-
-      return sb.toString();
+      return new ToString(this)
+              .append("connectorId", getConnectorId())
+              .append("sub", getSub())
+              .append("end", getEnd())
+              .toString();
     }
   }
 
-  private Map<String, CallbackRegistryEntry> theMap =
-      new HashMap<String, CallbackRegistryEntry>();
+  private final Map<String, CallbackRegistryEntry> theMap =
+          new HashMap<>();
 
   /** null constructor
    *
@@ -115,7 +107,7 @@ public class CallbackRegistry {
   }
 
   /**
-   * @param connectorId
+   * @param connectorId id of connector
    * @return entry or null for none.
    */
   public CallbackRegistryEntry get(final String connectorId) {
@@ -125,13 +117,12 @@ public class CallbackRegistry {
   /** Add an entry to the registry. If it's already there we throw an exception.
    * Each callback must be unique and unchanging.
    *
-   * @param connectorId
-   * @param val
-   * @throws SynchException
+   * @param connectorId id
+   * @param val entry to add
    */
   public synchronized void put(final String connectorId,
-                               final CallbackRegistryEntry val) throws SynchException {
-    CallbackRegistryEntry tblVal = get(connectorId);
+                               final CallbackRegistryEntry val) {
+    final CallbackRegistryEntry tblVal = get(connectorId);
 
     if (tblVal != null) {
       throw new SynchException("Entry already in registry." +
@@ -148,7 +139,8 @@ public class CallbackRegistry {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    final StringBuilder sb =
+            new StringBuilder(getClass().getSimpleName()).append("{");
 
     sb.append("theMap = ");
     sb.append(theMap);

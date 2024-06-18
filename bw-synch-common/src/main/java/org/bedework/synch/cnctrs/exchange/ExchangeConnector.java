@@ -115,7 +115,7 @@ public class ExchangeConnector
 
   @Override
   public ExchangeConnectorInstance makeInstance(final Subscription sub,
-                                                final SynchEndType end) throws SynchException {
+                                                final SynchEndType end) {
     final ExchangeSubscriptionInfo info;
 
     if (end == SynchEndType.A) {
@@ -134,7 +134,7 @@ public class ExchangeConnector
   @Override
   public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
-                                     final List<String> resourceUri) throws SynchException {
+                                     final List<String> resourceUri) {
     ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
 
     if (resourceUri.size() != 1) {
@@ -220,7 +220,7 @@ public class ExchangeConnector
    *                        package methods
    * ==================================================================== */
 
-  JAXBContext getEwsJAXBContext() throws SynchException {
+  JAXBContext getEwsJAXBContext() {
     try {
       if (ewsjc == null) {
         ewsjc = JAXBContext.newInstance(

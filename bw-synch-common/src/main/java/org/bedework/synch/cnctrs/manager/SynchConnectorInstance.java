@@ -50,37 +50,37 @@ public class SynchConnectorInstance
   }
 
   @Override
-  public BaseResponseType open() throws SynchException {
+  public BaseResponseType open() {
     return null;
   }
 
   @Override
-  public boolean changed() throws SynchException {
+  public boolean changed() {
     return false;
   }
 
   @Override
-  public SynchItemsInfo getItemsInfo() throws SynchException {
+  public SynchItemsInfo getItemsInfo() {
     throw new SynchException("Uncallable");
   }
 
   @Override
-  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) {
     throw new SynchException("Uncallable");
   }
 
   @Override
-  public FetchItemResponseType fetchItem(final String uid) throws SynchException {
+  public FetchItemResponseType fetchItem(final String uid) {
     throw new SynchException("Uncallable");
   }
 
   @Override
-  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) {
     return null;
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) {
     throw new SynchException("Uncallable");
   }
 
@@ -91,6 +91,6 @@ public class SynchConnectorInstance
   }
 
   @Override
-  public void forceRefresh() throws SynchException {
+  public void forceRefresh() {
   }
 }

@@ -55,7 +55,7 @@ public abstract class SerializablePropertiesImpl<T>
    * @param props
    * @throws SynchException
    */
-  public SerializablePropertiesImpl(final ArrayOfSynchProperties props) throws SynchException {
+  public SerializablePropertiesImpl(final ArrayOfSynchProperties props) {
     if (props == null) {
       return;
     }
@@ -65,7 +65,7 @@ public abstract class SerializablePropertiesImpl<T>
     }
   }
 
-  public ArrayOfSynchProperties getAllSynchProperties() throws SynchException {
+  public ArrayOfSynchProperties getAllSynchProperties() {
     loadProperties();
 
     final ArrayOfSynchProperties asp = new ArrayOfSynchProperties();
@@ -92,7 +92,7 @@ public abstract class SerializablePropertiesImpl<T>
    * @return serialized properties
    * @throws SynchException
    */
-  public String getSynchProperties() throws SynchException {
+  public String getSynchProperties() {
     if (changed) {
       try {
         final Writer wtr = new StringWriter();
@@ -141,7 +141,7 @@ public abstract class SerializablePropertiesImpl<T>
    *
    * @throws SynchException
    */
-  public synchronized void loadProperties() throws SynchException {
+  public synchronized void loadProperties() {
     try {
       if (properties == null) {
         properties = new Properties();
@@ -163,7 +163,7 @@ public abstract class SerializablePropertiesImpl<T>
    * @throws SynchException
    */
   public void setProperty(final String name,
-                          final String val) throws SynchException {
+                          final String val) {
     if (properties == null) {
       loadProperties();
     }
@@ -183,7 +183,7 @@ public abstract class SerializablePropertiesImpl<T>
    * @return val
    * @throws SynchException
    */
-  public synchronized String getProperty(final String name) throws SynchException {
+  public synchronized String getProperty(final String name) {
     if (properties == null) {
       loadProperties();
     }

@@ -144,7 +144,7 @@ public class FinditemsResponse extends ExchangeResponse {
    */
   public FinditemsResponse(final FindItemResponseMessageType firm,
                            final boolean synchInfoOnly,
-                           final XcalUtil.TzGetter tzGetter) throws SynchException {
+                           final XcalUtil.TzGetter tzGetter) {
     super(firm);
 
     FindItemParentType rf = firm.getRootFolder();

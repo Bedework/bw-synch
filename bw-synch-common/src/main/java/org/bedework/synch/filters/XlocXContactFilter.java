@@ -43,7 +43,7 @@ public class XlocXContactFilter extends PropRenameFilter {
           new ArrayList<>();
 
   @Override
-  public synchronized void init(final Subscription sub) throws SynchException {
+  public synchronized void init(final Subscription sub) {
     super.init(sub);
 
     if (!renameList.isEmpty()) {

@@ -34,7 +34,7 @@ public class ExsynchSubscribeResponse extends ExchangeResponse {
    * @param srm
    * @throws SynchException
    */
-  public ExsynchSubscribeResponse(final SubscribeResponseMessageType srm) throws SynchException {
+  public ExsynchSubscribeResponse(final SubscribeResponseMessageType srm) {
     /* Successful looks something like
      * <?xml version="1.0" encoding="utf-8"?>
      * <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">

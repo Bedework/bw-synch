@@ -86,7 +86,7 @@ public class ExchangeConnectorInstance
   }
 
   @Override
-  public BaseResponseType open() throws SynchException {
+  public BaseResponseType open() {
     try {
       /* Send a request for a new subscription to exchange */
       SubscribeRequest s = new SubscribeRequest(sub.getSubscriptionId(),
@@ -185,12 +185,12 @@ public class ExchangeConnectorInstance
   }
 
   @Override
-  public boolean changed() throws SynchException {
+  public boolean changed() {
     return false;
   }
 
   @Override
-  public void forceRefresh() throws SynchException {
+  public void forceRefresh() {
     info.setChangeToken(null);  // Force refresh next time
   }
 
@@ -217,7 +217,7 @@ public class ExchangeConnectorInstance
   }
 
   @Override
-  public SynchItemsInfo getItemsInfo() throws SynchException {
+  public SynchItemsInfo getItemsInfo() {
     DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
     fid.setId(DistinguishedFolderIdNameType.fromValue(info.getExchangeCalendar()));
     FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
@@ -262,22 +262,22 @@ public class ExchangeConnectorInstance
   }
 
   @Override
-  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) {
     return null;
   }
 
   @Override
-  public FetchItemResponseType fetchItem(final String href) throws SynchException {
+  public FetchItemResponseType fetchItem(final String href) {
     return null;
   }
 
   @Override
-  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) {
     return null;
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) {
     return null;
   }
 
@@ -295,7 +295,7 @@ public class ExchangeConnectorInstance
     return mbc;
   }
 
-  ExchangeServicePortType getPort(final ExchangeSubscriptionInfo sub) throws SynchException {
+  ExchangeServicePortType getPort(final ExchangeSubscriptionInfo sub) {
     try {
       return getExchangeServicePort(sub.getPrincipalHref(),
                                     cnctr.getSyncher().decrypt(sub.getPassword()).toCharArray()); // XXX need to en/decrypt
@@ -331,7 +331,7 @@ public class ExchangeConnectorInstance
    * ==================================================================== */
 
   private ExchangeServicePortType getExchangeServicePort(final String user,
-                                                         final char[] pw) throws SynchException {
+                                                         final char[] pw) {
     try {
       URL wsdlURL = new URL(config.getExchangeWSDLURI());
 
@@ -373,7 +373,7 @@ public class ExchangeConnectorInstance
     }
   }
 
-  IcalendarType fetchItem(final BaseItemIdType id) throws SynchException {
+  IcalendarType fetchItem(final BaseItemIdType id) {
     List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
 
     toFetch.add(id);
@@ -387,7 +387,7 @@ public class ExchangeConnectorInstance
     return items.get(0);
   }
 
-  private List<IcalendarType> fetchExItems(final List<BaseItemIdType> toFetch) throws SynchException {
+  private List<IcalendarType> fetchExItems(final List<BaseItemIdType> toFetch) {
     GetItemsRequest gir = new GetItemsRequest(toFetch);
 
     Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();

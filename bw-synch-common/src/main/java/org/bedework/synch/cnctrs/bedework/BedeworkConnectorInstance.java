@@ -78,7 +78,7 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public boolean changed() throws SynchException {
+  public boolean changed() {
     /* This implementation needs to at least check the change token for the
      * collection and match it against the stored token.
      */
@@ -86,12 +86,12 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public void forceRefresh() throws SynchException {
+  public void forceRefresh() {
     info.setChangeToken(null);  // Force refresh next time
   }
 
   @Override
-  public SynchItemsInfo getItemsInfo() throws SynchException {
+  public SynchItemsInfo getItemsInfo() {
     /* Build a calendar query to fetch all the items in the referenced
      * collection
      */
@@ -229,7 +229,7 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) {
     AddItemType ai = new AddItemType();
 
     ai.setHref(info.getUri());
@@ -239,7 +239,7 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public FetchItemResponseType fetchItem(final String uid) throws SynchException {
+  public FetchItemResponseType fetchItem(final String uid) {
     final CalendarQueryType cq = new CalendarQueryType();
 
     final ObjectFactory of = cnctr.getIcalObjectFactory();
@@ -346,7 +346,7 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) {
     // XXX this should be a search for multiple uids - need to reimplement caldav search
 
     final List<FetchItemResponseType> firs = new ArrayList<>();
@@ -359,7 +359,7 @@ public class BedeworkConnectorInstance
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) {
     return cnctr.getPort().updateItem(getIdToken(), updates);
   }
 
@@ -391,7 +391,7 @@ public class BedeworkConnectorInstance
    *                   Private methods
    * ==================================================================== */
 
-  SynchIdTokenType getIdToken() throws SynchException {
+  SynchIdTokenType getIdToken() {
     return cnctr.getIdToken(info.getPrincipalHref(),
                             info.getOpaqueData());
   }

@@ -67,7 +67,7 @@ public class SynchDb implements Logged, Serializable {
    * @return true if we had to open it. False if already open
    * @throws SynchException
    */
-  public boolean open() throws SynchException {
+  public boolean open() {
     if (isOpen()) {
       return false;
     }
@@ -87,7 +87,7 @@ public class SynchDb implements Logged, Serializable {
   /**
    * @throws SynchException
    */
-  public void close() throws SynchException {
+  public void close() {
     try {
       endTransaction();
     } catch (final SynchException wde) {
@@ -115,7 +115,7 @@ public class SynchDb implements Logged, Serializable {
    * @throws SynchException
    */
   @SuppressWarnings("unchecked")
-  public List<Subscription> getAll() throws SynchException {
+  public List<Subscription> getAll() {
     try {
       sess.createQuery(getAllQuery);
 
@@ -136,7 +136,7 @@ public class SynchDb implements Logged, Serializable {
    * @return a matching subscription or null
    * @throws SynchException
    */
-  public Subscription get(final String id) throws SynchException {
+  public Subscription get(final String id) {
     try {
       sess.createQuery(getSubQuery);
       sess.setString("subid", id);
@@ -163,7 +163,7 @@ public class SynchDb implements Logged, Serializable {
    * @return matching subscriptions
    * @throws SynchException
    */
-  public Subscription find(final Subscription sub) throws SynchException {
+  public Subscription find(final Subscription sub) {
     try {
       sess.createQuery(findSubQuery);
       sess.setString("aconnid",
@@ -190,7 +190,7 @@ public class SynchDb implements Logged, Serializable {
    * @param sub subscription
    * @throws SynchException
    */
-  public void add(final Subscription sub) throws SynchException {
+  public void add(final Subscription sub) {
     try {
       sess.save(sub);
     } catch (final HibException he) {
@@ -203,7 +203,7 @@ public class SynchDb implements Logged, Serializable {
    * @param sub subscription
    * @throws SynchException
    */
-  public void update(final Subscription sub) throws SynchException {
+  public void update(final Subscription sub) {
     try {
       sess.update(sub);
     } catch (final HibException he) {
@@ -216,7 +216,7 @@ public class SynchDb implements Logged, Serializable {
    * @param sub subscription
    * @throws SynchException
    */
-  public void delete(final Subscription sub) throws SynchException {
+  public void delete(final Subscription sub) {
     final boolean opened = open();
 
     try {
@@ -234,13 +234,13 @@ public class SynchDb implements Logged, Serializable {
    *                   Session methods
    * ==================================================================== */
 
-  protected void checkOpen() throws SynchException {
+  protected void checkOpen() {
     if (!isOpen()) {
       throw new SynchException("Session call when closed");
     }
   }
 
-  protected synchronized void openSession() throws SynchException {
+  protected synchronized void openSession() {
     if (isOpen()) {
       throw new SynchException("Already open");
     }
@@ -276,7 +276,7 @@ public class SynchDb implements Logged, Serializable {
     beginTransaction();
   }
 
-  protected synchronized void closeSession() throws SynchException {
+  protected synchronized void closeSession() {
     if (!isOpen()) {
       if (debug()) {
         debug("Close for " + objTimestamp + " closed session");
@@ -312,7 +312,7 @@ public class SynchDb implements Logged, Serializable {
     }
   }
 
-  protected void beginTransaction() throws SynchException {
+  protected void beginTransaction() {
     checkOpen();
 
     if (debug()) {
@@ -325,7 +325,7 @@ public class SynchDb implements Logged, Serializable {
     }
   }
 
-  protected void endTransaction() throws SynchException {
+  protected void endTransaction() {
     checkOpen();
 
     if (debug()) {
@@ -341,7 +341,7 @@ public class SynchDb implements Logged, Serializable {
     }
   }
 
-  protected void rollbackTransaction() throws SynchException {
+  protected void rollbackTransaction() {
     try {
       checkOpen();
       sess.rollback();

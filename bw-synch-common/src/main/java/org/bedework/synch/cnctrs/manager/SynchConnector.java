@@ -116,7 +116,7 @@ public class SynchConnector
 
   @Override
   public SynchConnectorInstance makeInstance(final Subscription sub,
-                                             final SynchEndType end) throws SynchException {
+                                             final SynchEndType end) {
     return null;
   }
 
@@ -124,7 +124,7 @@ public class SynchConnector
   @Override
   public NotificationBatch handleCallback(final HttpServletRequest req,
                                           final HttpServletResponse resp,
-                                          final List<String> resourceUri) throws SynchException {
+                                          final List<String> resourceUri) {
     try {
       // Resource uri unused for the moment - must be null or zero length (or "/")
 
@@ -268,7 +268,7 @@ public class SynchConnector
    * ==================================================================== */
 
   private Notification<?> subscribe(final HttpServletResponse resp,
-                                 final SubscribeRequestType sr) throws SynchException {
+                                 final SubscribeRequestType sr) {
     final Subscription sub = new SubscriptionImpl(null);
 
     sub.setOwner(sr.getPrincipalHref());
@@ -311,7 +311,7 @@ public class SynchConnector
 
   private Notification<?> unsubscribe(
           final HttpServletResponse resp,
-          final UnsubscribeRequestType u) throws SynchException {
+          final UnsubscribeRequestType u) {
     if (debug()) {
       debug("Handle unsubscribe " +  u.getSubscriptionId());
     }
@@ -337,7 +337,7 @@ public class SynchConnector
 
   private Notification<?> refresh(
           final HttpServletResponse resp,
-          final RefreshRequestType r) throws SynchException {
+          final RefreshRequestType r) {
     if (debug()) {
       debug("Handle refresh " +  r.getSubscriptionId());
     }
@@ -362,7 +362,7 @@ public class SynchConnector
   }
 
   private Notification<?> subStatus(final HttpServletResponse resp,
-                           final SubscriptionStatusRequestType ss) throws SynchException {
+                           final SubscriptionStatusRequestType ss) {
     if (debug()) {
       debug("Handle status " +  ss.getSubscriptionId());
     }
@@ -383,7 +383,7 @@ public class SynchConnector
     return new Notification(sub, ss, ssr);
   }
 
-  private Subscription checkAsr(final ActiveSubscriptionRequestType asr) throws SynchException {
+  private Subscription checkAsr(final ActiveSubscriptionRequestType asr) {
     final Subscription sub = syncher.getSubscription(asr.getSubscriptionId());
 
     /* Most errors we'll treat as an unknown subscription */
@@ -402,7 +402,7 @@ public class SynchConnector
     return sub;
   }
 
-  private SubscriptionConnectorInfo<?> makeConnInfo(final ConnectorInfoType cinfo) throws SynchException {
+  private SubscriptionConnectorInfo<?> makeConnInfo(final ConnectorInfoType cinfo) {
     final SubscriptionConnectorInfo<?> subCinfo =
             new SubscriptionConnectorInfoImpl();
 

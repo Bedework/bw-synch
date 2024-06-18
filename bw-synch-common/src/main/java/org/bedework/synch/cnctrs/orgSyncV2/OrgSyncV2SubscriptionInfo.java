@@ -33,7 +33,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @param info the subscription info
    * @throws SynchException on load error
    */
-  public OrgSyncV2SubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+  public OrgSyncV2SubscriptionInfo(final SubscriptionConnectorInfo info) {
     super(info);
   }
 
@@ -41,7 +41,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @param val OrgSyncPublicOnly
    * @throws SynchException on property error
    */
-  public void setOrgSyncPublicOnly(final boolean val) throws SynchException {
+  public void setOrgSyncPublicOnly(final boolean val) {
     setProperty(propnameOrgSyncPublicOnly, String.valueOf(val));
   }
 
@@ -49,7 +49,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @return boolean OrgSyncPublicOnly
    * @throws SynchException on property error
    */
-  public boolean getOrgSyncPublicOnly() throws SynchException {
+  public boolean getOrgSyncPublicOnly() {
     return Boolean.valueOf(getProperty(propnameOrgSyncPublicOnly));
   }
 
@@ -57,7 +57,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @return String location key
    * @throws SynchException on property error
    */
-  public String getLocationKey() throws SynchException {
+  public String getLocationKey() {
     return getProperty(propnameLocKey);
   }
 

@@ -49,7 +49,7 @@ public class SubscriptionConnectorInfoImpl
   }
 
   @Override
-  public List<Filter> getInputFilters(final Subscription sub) throws SynchException {
+  public List<Filter> getInputFilters(final Subscription sub) {
     // TODO - build list from properties
     final List<Filter> filters = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class SubscriptionConnectorInfoImpl
   }
 
   @Override
-  public List<Filter> getOutputFilters(final Subscription sub) throws SynchException {
+  public List<Filter> getOutputFilters(final Subscription sub) {
     // TODO - build list from properties
     final List<Filter> filters = new ArrayList<>();
 

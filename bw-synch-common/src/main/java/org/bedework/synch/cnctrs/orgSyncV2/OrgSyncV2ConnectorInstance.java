@@ -83,7 +83,7 @@ public class OrgSyncV2ConnectorInstance
   }
 
   @Override
-  public boolean changed() throws SynchException {
+  public boolean changed() {
     /*
        OrgSync doesn't support HEAD - we get a 500 error back. We'll
        just do a GET and throw the result away. We'll be back soon
@@ -97,7 +97,7 @@ public class OrgSyncV2ConnectorInstance
    * ==================================================================== */
 
   @Override
-  public URI getUri() throws SynchException {
+  public URI getUri() {
     try {
       //Get yesterdays date
       final LocalDate yesterday = LocalDate.now().minus(1, ChronoUnit.DAYS);
@@ -122,7 +122,7 @@ public class OrgSyncV2ConnectorInstance
   }
 
   @Override
-  public IcalendarType makeXcal(final InputStream is) throws SynchException {
+  public IcalendarType makeXcal(final InputStream is) {
     try {
       final List<OrgSyncV2Event> osEvents =
               om.readValue(is, new TypeReference<List<OrgSyncV2Event>>(){});
@@ -139,7 +139,7 @@ public class OrgSyncV2ConnectorInstance
   }
 
   @Override
-  public boolean getIcal() throws SynchException {
+  public boolean getIcal() {
     return getIcal("application/json");
   }
 

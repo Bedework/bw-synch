@@ -42,7 +42,7 @@ public class SubscriptionInfoImpl
    * @param val
    * @throws SynchException
    */
-  public void setAlarmsProcessing(final CalProcessingType val) throws SynchException {
+  public void setAlarmsProcessing(final CalProcessingType val) {
     setProperty(propnameAlarmProcessing, String.valueOf(val));
   }
 
@@ -51,7 +51,7 @@ public class SubscriptionInfoImpl
    * @return boolean
    * @throws SynchException
    */
-  public CalProcessingType getAlarmsProcessing() throws SynchException {
+  public CalProcessingType getAlarmsProcessing() {
     return CalProcessingType.fromValue(getProperty(propnameAlarmProcessing));
   }
 
@@ -60,7 +60,7 @@ public class SubscriptionInfoImpl
    * @param val
    * @throws SynchException
    */
-  public void setSchedulingProcessing(final CalProcessingType val) throws SynchException {
+  public void setSchedulingProcessing(final CalProcessingType val) {
     setProperty(propnameSchedulingProcessing, String.valueOf(val));
   }
 
@@ -69,7 +69,7 @@ public class SubscriptionInfoImpl
    * @return CalProcessingType
    * @throws SynchException
    */
-  public CalProcessingType getSchedulingProcessing() throws SynchException {
+  public CalProcessingType getSchedulingProcessing() {
     return CalProcessingType.fromValue(getProperty(propnameSchedulingProcessing));
   }
 
@@ -78,19 +78,19 @@ public class SubscriptionInfoImpl
    * @param val true to enable processing of locations and contacts
    * @throws SynchException
    */
-  public void setXlocXcontact(final boolean val) throws SynchException {
+  public void setXlocXcontact(final boolean val) {
     setProperty(propnameXlocXcontacts, String.valueOf(val));
   }
 
-  public boolean getXlocXcontact() throws SynchException {
+  public boolean getXlocXcontact() {
     return Boolean.valueOf(getProperty(propnameXlocXcontacts));
   }
 
-  public void setXlocXcategories(final boolean val) throws SynchException {
+  public void setXlocXcategories(final boolean val) {
     setProperty(propnameXcategories, String.valueOf(val));
   }
 
-  public boolean getXlocXcategories() throws SynchException {
+  public boolean getXlocXcategories() {
     return Boolean.valueOf(getProperty(propnameXcategories));
   }
 
@@ -99,7 +99,7 @@ public class SubscriptionInfoImpl
    * @param val true to suppress deletion of missing events
    * @throws SynchException
    */
-  public void setDeletionsSuppressed(final boolean val) throws SynchException {
+  public void setDeletionsSuppressed(final boolean val) {
     setProperty(propnameDeleteSuppressed, String.valueOf(val));
   }
 
@@ -108,7 +108,7 @@ public class SubscriptionInfoImpl
    * @return boolean true to suppress deletion of missing events
    * @throws SynchException
    */
-  public boolean getDeletionsSuppressed() throws SynchException {
+  public boolean getDeletionsSuppressed() {
     return Boolean.valueOf(getProperty(propnameDeleteSuppressed));
   }
 

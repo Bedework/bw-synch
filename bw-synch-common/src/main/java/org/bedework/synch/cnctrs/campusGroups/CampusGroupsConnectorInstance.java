@@ -58,7 +58,7 @@ public class CampusGroupsConnectorInstance
   }
 
   @Override
-  public boolean changed() throws SynchException {
+  public boolean changed() {
     return changed(true, "calendar/text");
   }
 
@@ -67,7 +67,7 @@ public class CampusGroupsConnectorInstance
    * ==================================================================== */
 
   @Override
-  public URI getUri() throws SynchException {
+  public URI getUri() {
     try {
       final URI infoUri = new URI(info.getUri());
       return new URIBuilder()
@@ -83,7 +83,7 @@ public class CampusGroupsConnectorInstance
     }
   }
 
-  public IcalendarType makeXcal(final InputStream is) throws SynchException {
+  public IcalendarType makeXcal(final InputStream is) {
     try {
       final CalendarBuilder builder = new CalendarBuilder();
       CompatibilityHints.setHintEnabled(
@@ -143,7 +143,7 @@ public class CampusGroupsConnectorInstance
   }
 
   @Override
-  public boolean getIcal() throws SynchException {
+  public boolean getIcal() {
     return getIcal("text/calendar");
   }
 

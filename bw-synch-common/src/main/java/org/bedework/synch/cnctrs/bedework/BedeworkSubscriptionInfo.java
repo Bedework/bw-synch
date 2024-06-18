@@ -32,7 +32,7 @@ public class BedeworkSubscriptionInfo extends BaseSubscriptionInfo {
    * @param info the subscription connector info
    * @throws SynchException
    */
-  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) {
     super(info);
   }
 }

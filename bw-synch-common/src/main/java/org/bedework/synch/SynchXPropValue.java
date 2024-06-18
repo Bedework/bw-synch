@@ -36,7 +36,7 @@ public class SynchXPropValue extends Properties {
    * @return encoded values
    * @throws SynchException
    */
-  public String encode() throws SynchException {
+  public String encode() {
     StringWriter sw = new StringWriter();
 
     try {
@@ -54,7 +54,7 @@ public class SynchXPropValue extends Properties {
    * @param val encoded values
    * @throws SynchException
    */
-  public void decode(final String val) throws SynchException {
+  public void decode(final String val) {
     try {
       StringReader sr = new StringReader(new String(Base64.decodeBase64(val)));
 

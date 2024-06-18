@@ -40,7 +40,7 @@ public class ExchangeNotification extends
    */
   public ExchangeNotification(final Subscription sub,
                               final SynchEndType end,
-                              final ExchangeNotificationMessage enm) throws SynchException {
+                              final ExchangeNotificationMessage enm) {
     super(sub, end);
 
     this.enm = enm;
