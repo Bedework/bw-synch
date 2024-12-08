@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.bedework;
 
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.exception.SynchException;
 
 /** Stores information about one end of a subscription for connector.
  *
@@ -31,7 +30,7 @@ public class BedeworkSubscriptionInfo extends BaseSubscriptionInfo {
   /**
    * @param info the subscription connector info
    */
-  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo info) {
+  public BedeworkSubscriptionInfo(final SubscriptionConnectorInfo<?> info) {
     super(info);
   }
 }

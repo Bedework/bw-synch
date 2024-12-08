@@ -29,10 +29,8 @@ import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import com.microsoft.schemas.exchange.services._2006.messages.ObjectFactory;
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseType;
-import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResultType;
 import com.microsoft.schemas.exchange.services._2006.types.SubscriptionStatusType;
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
@@ -42,7 +40,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 
 /** The synch processor connector for connections to Exchange.
  *
@@ -65,7 +62,7 @@ public class ExchangeConnector
   /** */
   public static final String propnameFolderId = "exchange-folder-id";
 
-  private static PropertiesInfo exPropInfo = new PropertiesInfo();
+  private static final PropertiesInfo exPropInfo = new PropertiesInfo();
 
   static {
     exPropInfo.add(propnameFolderId,
@@ -79,8 +76,8 @@ public class ExchangeConnector
     exPropInfo.requiredPassword(null);
   }
 
-  private ConnectorInstanceMap<ExchangeConnectorInstance> cinstMap =
-      new ConnectorInstanceMap<ExchangeConnectorInstance>();
+  private final ConnectorInstanceMap<ExchangeConnectorInstance> cinstMap =
+          new ConnectorInstanceMap<>();
 
   // Are these thread safe?
   private JAXBContext ewsjc;
@@ -128,14 +125,15 @@ public class ExchangeConnector
                                          this, sub, end, info);
   }
 
-  class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
+  static class ExchangeNotificationBatch extends NotificationBatch<ExchangeNotification> {
   }
 
   @Override
   public ExchangeNotificationBatch handleCallback(final HttpServletRequest req,
                                      final HttpServletResponse resp,
                                      final List<String> resourceUri) {
-    ExchangeNotificationBatch enb = new ExchangeNotificationBatch();
+    final ExchangeNotificationBatch enb =
+            new ExchangeNotificationBatch();
 
     if (resourceUri.size() != 1) {
       enb.setStatus(StatusType.ERROR);
@@ -143,10 +141,10 @@ public class ExchangeConnector
     }
 
     String id = resourceUri.get(0);
-    SynchEndType end;
+    final SynchEndType end;
 
     try {
-      String endFlag = id.substring(0, 1);
+      final String endFlag = id.substring(0, 1);
       end = SynchEndType.valueOf(endFlag);
     } catch (final Throwable t) {
       enb.setStatus(StatusType.ERROR);
@@ -156,12 +154,13 @@ public class ExchangeConnector
 
     id = id.substring(1);
 
-    Subscription sub = syncher.getSubscription(id);
+    final Subscription sub = syncher.getSubscription(id);
 
     /* WRONG - we should register our callback uri along with a connector id.
      *
      */
-    ExchangeConnectorInstance cinst = getConnectorInstance(sub, end);
+    final ExchangeConnectorInstance cinst =
+            getConnectorInstance(sub, end);
     if (cinst == null) {
       enb.setStatus(StatusType.ERROR);
       enb.setMessage("Unable to get instance for " + sub +
@@ -169,18 +168,19 @@ public class ExchangeConnector
       return enb;
     }
 
-    SendNotificationResponseType snr = (SendNotificationResponseType)unmarshalBody(req);
+    final SendNotificationResponseType snr =
+            (SendNotificationResponseType)unmarshalBody(req);
 
-    List<JAXBElement<? extends ResponseMessageType>> responseMessages =
+    final var responseMessages =
       snr.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
-    for (JAXBElement<? extends ResponseMessageType> el: responseMessages) {
-      ExchangeNotificationMessage enm = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
+    for (final var el: responseMessages) {
+      final ExchangeNotificationMessage enm = new ExchangeNotificationMessage((SendNotificationResponseMessageType)el.getValue());
 
-      ExchangeNotification en = new ExchangeNotification(sub, end, enm);
+      final ExchangeNotification en = new ExchangeNotification(sub, end, enm);
 
-      for (ExchangeNotificationMessage.NotificationItem ni: enm.getNotifications()) {
-        IcalendarType ical = cinst.fetchItem(ni.getItemId());
+      for (final var ni: enm.getNotifications()) {
+        final IcalendarType ical = cinst.fetchItem(ni.getItemId());
 
         en.addNotificationItem(new ExchangeNotification.NotificationItem(ni,
                                                                          ical));
@@ -195,11 +195,10 @@ public class ExchangeConnector
 
   @Override
   public void respondCallback(final HttpServletResponse resp,
-                              final NotificationBatch<ExchangeNotification> notifications)
-                                                    throws SynchException {
+                              final NotificationBatch<ExchangeNotification> notifications) {
     try {
-      ObjectFactory of = new ObjectFactory();
-      SendNotificationResultType snr = of.createSendNotificationResultType();
+      final ObjectFactory of = new ObjectFactory();
+      final var snr = of.createSendNotificationResultType();
 
       if (notifications.getStatus() == StatusType.OK) {
         snr.setSubscriptionStatus(SubscriptionStatusType.OK);
@@ -211,14 +210,14 @@ public class ExchangeConnector
   //                snr);
  //   } catch (final SynchException se) {
    //   throw se;
-    } catch(Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                        package methods
-   * ==================================================================== */
+   * =============================================================== */
 
   JAXBContext getEwsJAXBContext() {
     try {
@@ -229,12 +228,8 @@ public class ExchangeConnector
       }
 
       return ewsjc;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
-
-  /* ====================================================================
-   *                        private methods
-   * ==================================================================== */
 }

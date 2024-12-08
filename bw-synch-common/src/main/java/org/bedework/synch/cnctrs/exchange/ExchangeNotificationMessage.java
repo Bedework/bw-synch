@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
@@ -44,22 +43,22 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
   private final String subscriptionId;
   private final String previousWatermark;
 
-  private final List<NotificationItem> notifications = new ArrayList<NotificationItem>();
+  private final List<NotificationItem> notifications = new ArrayList<>();
 
   /**
-   * @param snrm
+   * @param snrm SendNotificationResponseMessageType
    */
   public ExchangeNotificationMessage(final SendNotificationResponseMessageType snrm) {
     super(snrm);
 
-    NotificationType nt = snrm.getNotification();
+    final NotificationType nt = snrm.getNotification();
     subscriptionId = nt.getSubscriptionId();
     previousWatermark = nt.getPreviousWatermark();
 
-    List<JAXBElement<? extends BaseNotificationEventType>> bnes =
+    final var bnes =
       nt.getCopiedEventOrCreatedEventOrDeletedEvent();
 
-    for (JAXBElement<? extends BaseNotificationEventType> el1: bnes) {
+    for (final JAXBElement<? extends BaseNotificationEventType> el1: bnes) {
       notifications.add(new NotificationItem(el1.getName().getLocalPart(),
                                              el1.getValue()));
     }
@@ -112,7 +111,7 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
       }
 
       if (bne instanceof BaseObjectChangedEventType) {
-        BaseObjectChangedEventType boce = (BaseObjectChangedEventType)bne;
+        final var boce = (BaseObjectChangedEventType)bne;
 
         setTimeStamp(boce.getTimeStamp());
         setFolderId(boce.getFolderId());
@@ -120,55 +119,53 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
         setParentFolderId(boce.getParentFolderId());
       }
 
-      if (actionStr.equals("CopiedEvent")) {
-        action = ActionType.CopiedEvent;
+      switch (actionStr) {
+        case "CopiedEvent" -> {
+          action = ActionType.CopiedEvent;
 
-        MovedCopiedEventType mce = (MovedCopiedEventType)bne;
+          final MovedCopiedEventType mce = (MovedCopiedEventType)bne;
 
-        oldFolderId = mce.getOldFolderId();
-        oldItemId = mce.getOldItemId();
-        oldParentFolderId = mce.getOldParentFolderId();
+          oldFolderId = mce.getOldFolderId();
+          oldItemId = mce.getOldItemId();
+          oldParentFolderId = mce.getOldParentFolderId();
 
-        return;
+          return;
+        }
+        case "CreatedEvent" -> {
+          action = ActionType.CreatedEvent;
+
+          return;
+        }
+        case "DeletedEvent" -> {
+          action = ActionType.DeletedEvent;
+
+          return;
+        }
+        case "ModifiedEvent" -> {
+          action = ActionType.ModifiedEvent;
+          final ModifiedEventType met = (ModifiedEventType)bne;
+
+          unreadCount = met.getUnreadCount();
+
+          return;
+        }
+        case "MovedEvent" -> {
+          action = ActionType.MovedEvent;
+          final MovedCopiedEventType mce = (MovedCopiedEventType)bne;
+
+          oldFolderId = mce.getOldFolderId();
+          oldItemId = mce.getOldItemId();
+          oldParentFolderId = mce.getOldParentFolderId();
+
+          return;
+        }
+        case "NewMailEvent" -> {
+          action = ActionType.NewMailEvent;
+
+          return;
+        }
       }
 
-      if (actionStr.equals("CreatedEvent")) {
-        action = ActionType.CreatedEvent;
-
-        return;
-      }
-
-      if (actionStr.equals("DeletedEvent")) {
-        action = ActionType.DeletedEvent;
-
-        return;
-      }
-
-      if (actionStr.equals("ModifiedEvent")) {
-        action = ActionType.ModifiedEvent;
-        ModifiedEventType met = (ModifiedEventType)bne;
-
-        unreadCount = met.getUnreadCount();
-
-        return;
-      }
-
-      if (actionStr.equals("MovedEvent")) {
-        action = ActionType.MovedEvent;
-        MovedCopiedEventType mce = (MovedCopiedEventType)bne;
-
-        oldFolderId = mce.getOldFolderId();
-        oldItemId = mce.getOldItemId();
-        oldParentFolderId = mce.getOldParentFolderId();
-
-        return;
-      }
-
-      if (actionStr.equals("NewMailEvent")) {
-        action = ActionType.NewMailEvent;
-
-        return;
-      }
     }
 
     /** Common to all
@@ -221,49 +218,17 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("NotificationItem{");
-
-      sb.append("watermark=");
-      sb.append(getWatermark());
-
-      sb.append(",\n      action=");
-      sb.append(getAction());
-
-      sb.append(", timeStamp=");
-      sb.append(getTimeStamp());
-
-      sb.append(",\n      folderId=");
-      sb.append(getFolderId());
-
-      sb.append(",\n      itemId=");
-      sb.append(getItemId());
-
-      sb.append(",\n      parentFolderId=");
-      sb.append(getParentFolderId());
-
-      if (getOldFolderId() != null) {
-        sb.append(",\n      oldFolderId=");
-        sb.append(getOldFolderId());
-      }
-
-      if (getOldItemId() != null) {
-        sb.append(",\n       oldItemId=");
-        sb.append(getOldItemId());
-      }
-
-      if (getOldParentFolderId() != null) {
-        sb.append(",\n       oldParentFolderId=");
-        sb.append(getOldParentFolderId());
-      }
-
-      if (getUnreadCount() != null) {
-        sb.append(",\n       unreadCount=");
-        sb.append(getUnreadCount());
-      }
-
-      sb.append("}");
-
-      return sb.toString();
+      return new ToString(this).append("watermark", getWatermark())
+                               .append("action", getAction())
+                               .append("timeStamp", getTimeStamp())
+                               .append("folderId", getFolderId())
+                               .append("itemId", getItemId())
+                               .append("parentFolderId", getParentFolderId())
+                               .appendNotNull("oldFolderId", getOldFolderId())
+                               .appendNotNull("oldItemId", getOldItemId())
+                               .appendNotNull("oldParentFolderId", getOldParentFolderId())
+                               .appendNotNull("unreadCount", getUnreadCount())
+                               .toString();
     }
   }
 
@@ -273,9 +238,9 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
 
     super.toStringSegment(ts);
 
-    ts.append("subscriptionId", getSubscriptionId());
-    ts.append("previousWatermark", getPreviousWatermark());
-    ts.append("notification items", getNotifications());
+    ts.append("subscriptionId", getSubscriptionId())
+      .append("previousWatermark", getPreviousWatermark())
+      .append("notification items", getNotifications());
 
     return ts.toString();
   }

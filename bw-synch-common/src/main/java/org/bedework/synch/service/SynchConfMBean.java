@@ -29,14 +29,14 @@ import java.util.List;
  * @author douglm
  */
 public interface SynchConfMBean extends ConfBaseMBean {
-  /* ========================================================================
+  /* ==============================================================
    * Config properties
-   * ======================================================================== */
+   * ============================================================== */
 
   /**
    * @param val current size of synchling pool
    */
-  void setSynchlingPoolSize(final int val);
+  void setSynchlingPoolSize(int val);
 
   /**
    * @return current size of synchling pool
@@ -47,7 +47,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
   /**
    * @param val timeout in millisecs
    */
-  void setSynchlingPoolTimeout(final long val);
+  void setSynchlingPoolTimeout(long val);
 
   /**
    * @return timeout in millisecs
@@ -55,11 +55,11 @@ public interface SynchConfMBean extends ConfBaseMBean {
   @MBeanInfo("timeout in millisecs.")
   long getSynchlingPoolTimeout();
 
-  /** How often we retry when a target is missing
+  /**
    *
-   * @param val
+   * @param val How often we retry when a target is missing
    */
-  void setMissingTargetRetries(final int val);
+  void setMissingTargetRetries(int val);
 
   /**
    * @return How often we retry when a target is missing
@@ -71,7 +71,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val    String
    */
-  void setCallbackURI(final String val);
+  void setCallbackURI(String val);
 
   /** web service push callback uri - null for no service
    *
@@ -84,7 +84,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val    String
    */
-  void setTimezonesURI(final String val);
+  void setTimezonesURI(String val);
 
   /** Timezone server location
    *
@@ -97,7 +97,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val    String
    */
-  void setKeystore(final String val);
+  void setKeystore(String val);
 
   /** Path to keystore - null for use default
    *
@@ -110,7 +110,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val    String
    */
-  void setPrivKeys(final String val);
+  void setPrivKeys(String val);
 
   /**
    *
@@ -123,7 +123,7 @@ public interface SynchConfMBean extends ConfBaseMBean {
    *
    * @param val    String
    */
-  void setPubKeys(final String val);
+  void setPubKeys(String val);
 
   /**
    *
@@ -202,35 +202,35 @@ public interface SynchConfMBean extends ConfBaseMBean {
   /** Create or dump new schema. If export and drop set will try to drop tables.
    * Export and create will create a schema in the db and export, drop, create
    * will drop tables, and try to create a new schema.
-   *
+   * <p>
    * The export and drop flags will all be reset to false after this,
    * whatever the result. This avoids accidental damage to the db.
    *
    * @return Completion message
    */
   @MBeanInfo("Start build of the database schema. Set export flag to write to db.")
-  public String schema();
+  String schema();
 
   /** Returns status of the schema build.
    *
    * @return Completion messages
    */
   @MBeanInfo("Status of the database schema build.")
-  public List<String> schemaStatus();
+  List<String> schemaStatus();
 
   /** Reschedule the subscription now
    *
-   * @param id
+   * @param id of subscription
    * @return status
    */
   @MBeanInfo("Reschedule the subscription now")
-  String rescheduleNow(@MBeanInfo("id") final String id);
+  String rescheduleNow(@MBeanInfo("id") String id);
 
   /**
-   * @param value
+   * @param value the hibernate dialect class
    */
   @MBeanInfo("Set the hibernate dialect")
-  void setHibernateDialect(@MBeanInfo("value: a valid hibernate dialect class") final String value);
+  void setHibernateDialect(@MBeanInfo("value: a valid hibernate dialect class") String value);
 
   /**
    * @return Completion messages
@@ -247,38 +247,38 @@ public interface SynchConfMBean extends ConfBaseMBean {
 
   /** Display the named property
    *
-   * @param name
+   * @param name of property
    * @return value
    */
   @MBeanInfo("Display the named hibernate property")
-  String displayHibernateProperty(@MBeanInfo("name") final String name);
+  String displayHibernateProperty(@MBeanInfo("name") String name);
 
   /** Remove the named property
    *
-   * @param name
+   * @param name of property
    */
   @MBeanInfo("Remove the named hibernate property")
-  void removeHibernateProperty(@MBeanInfo("name") final String name);
+  void removeHibernateProperty(@MBeanInfo("name") String name);
 
   /**
-   * @param name
-   * @param value
+   * @param name of property
+   * @param value of property
    */
   @MBeanInfo("Add a hibernate property")
-  void addHibernateProperty(@MBeanInfo("name") final String name,
-                              @MBeanInfo("value") final String value);
+  void addHibernateProperty(@MBeanInfo("name") String name,
+                              @MBeanInfo("value") String value);
 
   /**
-   * @param name
-   * @param value
+   * @param name of property
+   * @param value of property
    */
   @MBeanInfo("Set a hibernate property")
-  void setHibernateProperty(@MBeanInfo("name") final String name,
-                            @MBeanInfo("value") final String value);
+  void setHibernateProperty(@MBeanInfo("name") String name,
+                            @MBeanInfo("value") String value);
 
-  /* ========================================================================
+  /* ==============================================================
    * Lifecycle
-   * ======================================================================== */
+   * ============================================================== */
 
   /** Lifecycle
    *

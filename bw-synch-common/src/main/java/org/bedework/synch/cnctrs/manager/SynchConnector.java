@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.manager;
 
 import org.bedework.synch.SubscriptionConnectorInfoImpl;
 import org.bedework.synch.SubscriptionInfoImpl;
-import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.db.SubscriptionImpl;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.Notification;
@@ -28,11 +27,10 @@ import org.bedework.synch.shared.Notification.NotificationItem;
 import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.SubscriptionInfo;
 import org.bedework.synch.shared.SynchDefs.SynchKind;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
-import org.bedework.synch.shared.cnctrs.Connector;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.AlreadySubscribedType;
@@ -128,32 +126,32 @@ public class SynchConnector
     try {
       // Resource uri unused for the moment - must be null or zero length (or "/")
 
-      if (resourceUri.size() > 0) {
+      if (!resourceUri.isEmpty()) {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return null;
       }
 
-      Object o = unmarshalBody(req);
+      final Object o = unmarshalBody(req);
 
       if (o instanceof GetInfoRequestType) {
-        return new NotificationBatch(
-            new Notification(NotificationItem.ActionType.GetInfo));
+        return new NotificationBatch<>(
+                new Notification<>(NotificationItem.ActionType.GetInfo));
       }
 
-      if (o instanceof SubscribeRequestType sr) {
-        return new NotificationBatch(subscribe(resp, sr));
+      if (o instanceof final SubscribeRequestType sr) {
+        return new NotificationBatch<>(subscribe(resp, sr));
       }
 
-      if (o instanceof UnsubscribeRequestType ur) {
-        return new NotificationBatch(unsubscribe(resp, ur));
+      if (o instanceof final UnsubscribeRequestType ur) {
+        return new NotificationBatch<>(unsubscribe(resp, ur));
       }
 
-      if (o instanceof RefreshRequestType rr) {
-        return new NotificationBatch(refresh(resp, rr));
+      if (o instanceof final RefreshRequestType rr) {
+        return new NotificationBatch<>(refresh(resp, rr));
       }
 
-      if (o instanceof SubscriptionStatusRequestType ssr) {
-        return new NotificationBatch(subStatus(resp, ssr));
+      if (o instanceof final SubscriptionStatusRequestType ssr) {
+        return new NotificationBatch<>(subStatus(resp, ssr));
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -197,13 +195,13 @@ public class SynchConnector
         sit.setConnectors(asci);
 
         for (final String id: syncher.getConnectorIds()) {
-          final Connector c = syncher.getConnector(id);
+          final var c = syncher.getConnector(id);
 
           if (c == null) {
             continue;
           }
 
-          final SynchConnectorInfoType scit = new SynchConnectorInfoType();
+          final var scit = new SynchConnectorInfoType();
 
           scit.setName(id);
           scit.setManager(c.isManager());
@@ -225,9 +223,9 @@ public class SynchConnector
       }
 
       if (ni.getAction() == ActionType.NewSubscription) {
-        SubscribeResponseType sresp = ni.getSubResponse();
+        final SubscribeResponseType sresp = ni.getSubResponse();
 
-        JAXBElement<SubscribeResponseType> jax = of.createSubscribeResponse(sresp);
+        final var jax = of.createSubscribeResponse(sresp);
 
         marshal(jax, resp.getOutputStream());
       }
@@ -235,7 +233,7 @@ public class SynchConnector
       if (ni.getAction() == ActionType.Unsubscribe) {
         final UnsubscribeResponseType usresp = ni.getUnsubResponse();
 
-        final JAXBElement<UnsubscribeResponseType> jax = of.createUnsubscribeResponse(usresp);
+        final var jax = of.createUnsubscribeResponse(usresp);
 
         marshal(jax, resp.getOutputStream());
       }
@@ -243,8 +241,7 @@ public class SynchConnector
       if (ni.getAction() == ActionType.Refresh) {
         final RefreshResponseType refresp = ni.getRefreshResponse();
 
-        final JAXBElement<RefreshResponseType> jax =
-                of.createRefreshResponse(refresp);
+        final var jax = of.createRefreshResponse(refresp);
 
         marshal(jax, resp.getOutputStream());
       }
@@ -263,9 +260,9 @@ public class SynchConnector
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Private methods
-   * ==================================================================== */
+   * ============================================================== */
 
   private Notification<?> subscribe(final HttpServletResponse resp,
                                  final SubscribeRequestType sr) {
@@ -279,7 +276,7 @@ public class SynchConnector
 
     final ArrayOfSynchProperties info = sr.getInfo();
     if (info != null) {
-      final SubscriptionInfo sinfo = new SubscriptionInfoImpl();
+      final var sinfo = new SubscriptionInfoImpl();
 
       for (final SynchPropertyType sp: info.getProperty()) {
         sinfo.setProperty(sp.getName(), sp.getValue());
@@ -306,7 +303,7 @@ public class SynchConnector
       sresp.setSubscriptionId(sub.getSubscriptionId());
     }
 
-    return new Notification(sub, sresp);
+    return new Notification<>(sub, sresp);
   }
 
   private Notification<?> unsubscribe(
@@ -329,10 +326,10 @@ public class SynchConnector
       usr.setErrorResponse(new ErrorResponseType());
       usr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
 
-      return new Notification(null, u, usr);
+      return new Notification<>(null, u, usr);
     }
 
-    return new Notification(sub, u, usr);
+    return new Notification<>(sub, u, usr);
   }
 
   private Notification<?> refresh(
@@ -355,10 +352,10 @@ public class SynchConnector
       rr.setErrorResponse(new ErrorResponseType());
       rr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
 
-      return new Notification(null, r, rr);
+      return new Notification<>(null, r, rr);
     }
 
-    return new Notification(sub, r, rr);
+    return new Notification<>(sub, r, rr);
   }
 
   private Notification<?> subStatus(final HttpServletResponse resp,
@@ -377,10 +374,10 @@ public class SynchConnector
       ssr.setErrorResponse(new ErrorResponseType());
       ssr.getErrorResponse().setError(of.createUnknownSubscription(new UnknownSubscriptionType()));
 
-      return new Notification(null, ss, ssr);
+      return new Notification<>(null, ss, ssr);
     }
 
-    return new Notification(sub, ss, ssr);
+    return new Notification<>(sub, ss, ssr);
   }
 
   private Subscription checkAsr(final ActiveSubscriptionRequestType asr) {

@@ -68,7 +68,6 @@ import ietf.params.xml.ns.icalendar_2.VtodoType;
 import ietf.params.xml.ns.icalendar_2.XBedeworkExsynchLastmodPropType;
 import ietf.params.xml.ns.icalendar_2.XMicrosoftCdoBusystatusPropType;
 
-import java.util.List;
 import java.util.TimeZone;
 
 import javax.xml.bind.JAXBElement;
@@ -109,7 +108,7 @@ public class XmlIcalConvert implements Logged, Defs {
   }
 
   /**
-   * @param cal
+   * @param cal the xml calendar
    * @return Icalendar
    */
   public IcalendarType toXml(final CalendarItemType cal) {
@@ -119,15 +118,15 @@ public class XmlIcalConvert implements Logged, Defs {
     String transpVal = null;
     String statusVal = null;
 
-    IcalendarType ical = new IcalendarType();
-    VcalendarType vcal = new VcalendarType();
+    final IcalendarType ical = new IcalendarType();
+    final VcalendarType vcal = new VcalendarType();
 
     ical.getVcalendar().add(vcal);
     vcal.setComponents(new ArrayOfComponents());
 
-    JAXBElement<? extends BaseComponentType> el;
+    final JAXBElement<? extends BaseComponentType> el;
 
-    ItemType itemType = makeItemType(cal.getItemClass());
+    final ItemType itemType = makeItemType(cal.getItemClass());
 
     if (itemType == ItemType.Event) {
       el = xcalOF.createVevent(new VeventType());
@@ -139,11 +138,11 @@ public class XmlIcalConvert implements Logged, Defs {
       throw new SynchException(SynchException.unknownCalendarItemType);
     }
 
-    BaseComponentType comp = el.getValue();
+    final BaseComponentType comp = el.getValue();
 
     /* the component property list */
-    ArrayOfProperties aop = new ArrayOfProperties();
-    List<JAXBElement<? extends BasePropertyType>> pl = aop.getBasePropertyOrTzid();
+    final ArrayOfProperties aop = new ArrayOfProperties();
+    final var pl = aop.getBasePropertyOrTzid();
 
     comp.setProperties(aop);
 
@@ -154,9 +153,9 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ================= cal:ConflictingMeetingCount ======================== */
 
     /* ============================== UID =================================== */
-    UidPropType uid = new UidPropType();
+    final UidPropType uid = new UidPropType();
     uid.setText(cal.getUID());
-    JAXBElement<UidPropType> jaxbUid = xcalOF.createUid(uid);
+    final var jaxbUid = xcalOF.createUid(uid);
     pl.add(jaxbUid);
 
     /* ========================= DateTimeStamp ============================== */
@@ -168,23 +167,23 @@ public class XmlIcalConvert implements Logged, Defs {
      *   dtstart, dtend, recurrenceid.
      * It is an MS id which we need to map on to an Olson style
      */
-    String extzid = cal.getTimeZone();
+    final String extzid = cal.getTimeZone();
     if (debug()) {
       debug("exchange tzid=" + extzid);
     }
 
     /* Tz service will map the id for us */
-    TzStuff startTz = getTz(cal.getStartTimeZone(), extzid);
-    TzStuff endTz = getTz(cal.getEndTimeZone(), extzid);
+    final TzStuff startTz = getTz(cal.getStartTimeZone(), extzid);
+    final TzStuff endTz = getTz(cal.getEndTimeZone(), extzid);
 
     JAXBElement<? extends BasePropertyType> ddp = makeDateProp(startTz.tz, cal.getStart(),
-                                                Boolean.valueOf(cal.isIsAllDayEvent()),
+                                                               cal.isIsAllDayEvent(),
                                                 Dtype.start);
     if (ddp != null) {
       pl.add(ddp);
     }
 
-    Dtype dtype;
+    final Dtype dtype;
 
     if (itemType == ItemType.Task) {
       dtype = Dtype.due;
@@ -193,7 +192,7 @@ public class XmlIcalConvert implements Logged, Defs {
     }
 
     ddp = makeDateProp(endTz.tz, cal.getEnd(),
-                       Boolean.valueOf(cal.isIsAllDayEvent()),
+                       cal.isIsAllDayEvent(),
                        dtype);
 
     if (ddp != null) {
@@ -225,10 +224,10 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ==================== cal:LegacyFreeBusyStatus ======================== */
     /* Free, Tentative, Busy, OOF (OutOfOffice), NoData */
     if (cal.getLegacyFreeBusyStatus() != null) {
-      XMicrosoftCdoBusystatusPropType bsp = new XMicrosoftCdoBusystatusPropType();
+      final XMicrosoftCdoBusystatusPropType bsp = new XMicrosoftCdoBusystatusPropType();
       bsp.setText(cal.getLegacyFreeBusyStatus().value());
 
-      JAXBElement<XMicrosoftCdoBusystatusPropType> jaxb1 = xcalOF.createXMicrosoftCdoBusystatus(bsp);
+      final var jaxb1 = xcalOF.createXMicrosoftCdoBusystatus(bsp);
       pl.add(jaxb1);
       /* X-MICROSOFT-CDO-INTENDEDSTATUS Specifies the busy status that the
        * organizer intends for the attendee's copy of the meeting.
@@ -237,12 +236,12 @@ public class XmlIcalConvert implements Logged, Defs {
     }
 
     /* ========================== cal:Location  ============================= */
-    if ((cal.getLocation() != null) && (cal.getLocation().length() > 0)) {
-      LocationPropType loc = new LocationPropType();
+    if ((cal.getLocation() != null) && (!cal.getLocation().isEmpty())) {
+      final LocationPropType loc = new LocationPropType();
 
       loc.setText(cal.getLocation());
 
-      JAXBElement<LocationPropType> jaxb = xcalOF.createLocation(loc);
+      final JAXBElement<LocationPropType> jaxb = xcalOF.createLocation(loc);
       pl.add(jaxb);
     }
 
@@ -268,8 +267,8 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ==================== cal:RequiredAttendees =========================== */
     /* ==================== cal:OptionalAttendees =========================== */
 
-    NonEmptyArrayOfAttendeesType optAtts = cal.getOptionalAttendees();
-    NonEmptyArrayOfAttendeesType reqAtts = cal.getRequiredAttendees();
+    final NonEmptyArrayOfAttendeesType optAtts = cal.getOptionalAttendees();
+    final NonEmptyArrayOfAttendeesType reqAtts = cal.getRequiredAttendees();
 
     if (((optAtts != null) && !optAtts.getAttendee().isEmpty()) ||
         ((reqAtts != null) && !reqAtts.getAttendee().isEmpty())) {
@@ -277,13 +276,13 @@ public class XmlIcalConvert implements Logged, Defs {
       pl.add(makeOrganizer(cal.getOrganizer(), true));
 
       if (optAtts != null) {
-        for (AttendeeType att: optAtts.getAttendee()) {
+        for (final AttendeeType att: optAtts.getAttendee()) {
           pl.add(makeAttendee(att, true));
         }
       }
 
       if (reqAtts != null) {
-        for (AttendeeType att: optAtts.getAttendee()) {
+        for (final AttendeeType att: optAtts.getAttendee()) {
           pl.add(makeAttendee(att, false));
         }
       }
@@ -375,18 +374,18 @@ public class XmlIcalConvert implements Logged, Defs {
 
     if ((cal.getItemClass() != null) &
         !"PUBLIC".equalsIgnoreCase(cal.getItemClass())) {
-      ClassPropType cl = new ClassPropType();
+      final ClassPropType cl = new ClassPropType();
 
       cl.setText(cal.getItemClass());
 
-      JAXBElement<ClassPropType> jaxb = xcalOF.createClass(cl);
+      final JAXBElement<ClassPropType> jaxb = xcalOF.createClass(cl);
       pl.add(jaxb);
     }
 
     /* ======================= item:Culture ================================= */
     /* ======================== item:Subject ================================ */
 
-    SummaryPropType sum = new SummaryPropType();
+    final SummaryPropType sum = new SummaryPropType();
     /* XXX skip for the moment
     if (cal.getCulture() != null) {
       sum.setParameters(new ArrayOfParameters());
@@ -399,18 +398,18 @@ public class XmlIcalConvert implements Logged, Defs {
 
     sum.setText(cal.getSubject());
 
-    JAXBElement<SummaryPropType> jaxbSum = xcalOF.createSummary(sum);
+    final var jaxbSum = xcalOF.createSummary(sum);
     pl.add(jaxbSum);
 
     /* ====================== item:Sensitivity ============================== */
 
     /* ========================= item:Body ================================== */
 
-    BodyType body = cal.getBody();
+    final BodyType body = cal.getBody();
 
     if (body != null) {
       if (body.getValue() != null) {
-        DescriptionPropType desc = new DescriptionPropType();
+        final DescriptionPropType desc = new DescriptionPropType();
 
         /* XXX Skip this for the moment - we need some chnages at the far end
         if (cal.getCulture() != null) {
@@ -424,7 +423,7 @@ public class XmlIcalConvert implements Logged, Defs {
 
         desc.setText(body.getValue());
 
-        JAXBElement<DescriptionPropType> jaxbDesc = xcalOF.createDescription(desc);
+        final var jaxbDesc = xcalOF.createDescription(desc);
         pl.add(jaxbDesc);
       }
     }
@@ -436,13 +435,13 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ======================= item:Categories ============================== */
 
     if ((cal.getCategories() != null) &&
-        (cal.getCategories().getString().size() > 0)) {
-      CategoriesPropType cp = new CategoriesPropType();
-      for (String s: cal.getCategories().getString()) {
+        (!cal.getCategories().getString().isEmpty())) {
+      final CategoriesPropType cp = new CategoriesPropType();
+      for (final String s: cal.getCategories().getString()) {
         cp.getText().add(s);
       }
 
-      JAXBElement<CategoriesPropType> jaxbCat = xcalOF.createCategories(cp);
+      final var jaxbCat = xcalOF.createCategories(cp);
       pl.add(jaxbCat);
     }
 
@@ -463,28 +462,28 @@ public class XmlIcalConvert implements Logged, Defs {
                          item:ReminderMinutesBeforeStart ==================== */
 
     if (cal.isReminderIsSet()) {
-      ValarmType al = new ValarmType();
-      ArrayOfProperties alAop = new ArrayOfProperties();
-      List<JAXBElement<? extends BasePropertyType>> props = alAop.getBasePropertyOrTzid();
+      final ValarmType al = new ValarmType();
+      final ArrayOfProperties alAop = new ArrayOfProperties();
+      final var props = alAop.getBasePropertyOrTzid();
 
       al.setProperties(alAop);
 
-      ActionPropType act = new ActionPropType();
+      final ActionPropType act = new ActionPropType();
       act.setText("DISPLAY");
-      JAXBElement<ActionPropType> jaxbAction = xcalOF.createAction(act);
+      final var jaxbAction = xcalOF.createAction(act);
       props.add(jaxbAction);
 
-      DescriptionPropType d = new DescriptionPropType();
+      final DescriptionPropType d = new DescriptionPropType();
       d.setText("REMINDER");
-      JAXBElement<DescriptionPropType> jaxbDesc = xcalOF.createDescription(d);
+      final var jaxbDesc = xcalOF.createDescription(d);
       props.add(jaxbDesc);
 
-      TriggerPropType t = new TriggerPropType();
+      final TriggerPropType t = new TriggerPropType();
       t.setDuration("-PT" + cal.getReminderMinutesBeforeStart() +"M");
-      JAXBElement<TriggerPropType> jaxbTrig = xcalOF.createTrigger(t);
+      final var jaxbTrig = xcalOF.createTrigger(t);
       props.add(jaxbTrig);
 
-      ArrayOfComponents comps = new ArrayOfComponents();
+      final ArrayOfComponents comps = new ArrayOfComponents();
       comps.getBaseComponent().add(xcalOF.createValarm(al));
 
       if ((itemType == ItemType.Event) ||
@@ -502,10 +501,10 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ==================== item:LastModifiedName =========================== */
     /* ==================== item:LastModifiedTime =========================== */
 
-    XBedeworkExsynchLastmodPropType lm  = new XBedeworkExsynchLastmodPropType();
+    final var lm  = new XBedeworkExsynchLastmodPropType();
 
     lm.setText(cal.getLastModifiedTime().toXMLFormat());
-    JAXBElement<XBedeworkExsynchLastmodPropType> jaxblm = xcalOF.createXBedeworkExsynchLastmod(lm);
+    final var jaxblm = xcalOF.createXBedeworkExsynchLastmod(lm);
     pl.add(jaxblm);
 
     /* ===================== item:IsAssociated ============================== */
@@ -515,20 +514,20 @@ public class XmlIcalConvert implements Logged, Defs {
     /* ====================== item:UniqueBody =============================== */
 
     if (statusVal != null) {
-      StatusPropType st = new StatusPropType();
+      final StatusPropType st = new StatusPropType();
 
       st.setText(statusVal);
 
-      JAXBElement<StatusPropType> jaxb = xcalOF.createStatus(st);
+      final var jaxb = xcalOF.createStatus(st);
       pl.add(jaxb);
     }
 
     if (transpVal != null) {
-      TranspPropType tr = new TranspPropType();
+      final TranspPropType tr = new TranspPropType();
 
       tr.setText(transpVal);
 
-      JAXBElement<TranspPropType> jaxb = xcalOF.createTransp(tr);
+      final JAXBElement<TranspPropType> jaxb = xcalOF.createTransp(tr);
       pl.add(jaxb);
     }
 
@@ -546,41 +545,21 @@ public class XmlIcalConvert implements Logged, Defs {
   }
 
   private ItemType makeItemType(final String val) {
-    String uval = val.toUpperCase();
+    final String uval = val.toUpperCase();
 
-    if (uval.equals("IPM.NOTE")) {
-      return ItemType.Note;
-    }
+    return switch (uval) {
+      case "IPM.NOTE" -> ItemType.Note;
+      case "IPM.POST" -> ItemType.Post;
+      case "IPM.APPOINTMENT" -> ItemType.Event;
+      case "IPM.TASK" -> ItemType.Task;
+      case "IPM.CONTACT" -> ItemType.Contact;
+      case "IPM.ACTIVITY" -> ItemType.Journal;
+      case "IPM.DISTLIST" -> ItemType.DistList;
+      case "IPM.STICKYNOTE" -> ItemType.StickyNote;
+      default -> throw new SynchException(
+              SynchException.unknownCalendarItemType);
+    };
 
-    if (uval.equals("IPM.POST")) {
-      return ItemType.Post;
-    }
-
-    if (uval.equals("IPM.APPOINTMENT")) {
-      return ItemType.Event;
-    }
-
-    if (uval.equals("IPM.TASK")) {
-      return ItemType.Task;
-    }
-
-    if (uval.equals("IPM.CONTACT")) {
-      return ItemType.Contact;
-    }
-
-    if (uval.equals("IPM.ACTIVITY")) {
-      return ItemType.Journal;
-    }
-
-    if (uval.equals("IPM.DISTLIST")) {
-      return ItemType.DistList;
-    }
-
-    if (uval.equals("IPM.STICKYNOTE")) {
-      return ItemType.StickyNote;
-    }
-
-    throw new SynchException(SynchException.unknownCalendarItemType);
   }
 
   /**
@@ -592,14 +571,14 @@ public class XmlIcalConvert implements Logged, Defs {
   }
 
   /**
-   * @param tzdef
+   * @param tzdef timezone definition
    * @param extzid
    * @return tz stuff
    */
   public TzStuff getTz(final TimeZoneDefinitionType tzdef,
                        final String extzid) {
     try {
-      TzStuff t = new TzStuff();
+      final TzStuff t = new TzStuff();
 
       if (tzdef != null) {
         t.id = tzdef.getId();
@@ -624,7 +603,7 @@ public class XmlIcalConvert implements Logged, Defs {
   private JAXBElement<? extends OrganizerPropType>
                         makeOrganizer(final SingleRecipientType org,
                                       final boolean realOrg) {
-    OrganizerPropType prop = new OrganizerPropType();
+    final OrganizerPropType prop = new OrganizerPropType();
 
     setNameAndAddress(prop, org.getMailbox());
 
@@ -638,7 +617,7 @@ public class XmlIcalConvert implements Logged, Defs {
   private JAXBElement<? extends AttendeePropType>
                         makeAttendee(final AttendeeType att,
                                      final boolean optional) {
-    AttendeePropType prop = new AttendeePropType();
+    final AttendeePropType prop = new AttendeePropType();
 
     setNameAndAddress(prop, att.getMailbox());
 
@@ -652,13 +631,13 @@ public class XmlIcalConvert implements Logged, Defs {
     }
 
     if (partStat != null) {
-      PartstatParamType p = new PartstatParamType();
+      final PartstatParamType p = new PartstatParamType();
       p.setText(partStat);
       getParameters(prop).getBaseParameter().add(xcalOF.createPartstat(p));
     }
 
     if (optional) {
-      RoleParamType r = new RoleParamType();
+      final RoleParamType r = new RoleParamType();
       r.setText("OPT-PARTICIPANT");
       getParameters(prop).getBaseParameter().add(xcalOF.createRole(r));
     }
@@ -668,10 +647,10 @@ public class XmlIcalConvert implements Logged, Defs {
 
   private void setNameAndAddress(final CalAddressPropertyType prop,
                                  final EmailAddressType ea) {
-    String name = ea.getName();
+    final String name = ea.getName();
 
     if (name != null) {
-      CnParamType c = new CnParamType();
+      final CnParamType c = new CnParamType();
       c.setText(name);
       getParameters(prop).getBaseParameter().add(xcalOF.createCn(c));
     }
@@ -706,8 +685,8 @@ public class XmlIcalConvert implements Logged, Defs {
         return null;
       }
 
-      DateDatetimePropertyType prop;
-      JAXBElement<? extends BasePropertyType> jaxbProp;
+      final DateDatetimePropertyType prop;
+      final JAXBElement<? extends BasePropertyType> jaxbProp;
 
       if (dtype == Dtype.start) {
         prop = new DtstartPropType();
@@ -727,9 +706,9 @@ public class XmlIcalConvert implements Logged, Defs {
       }
 
       if (!allDay && (tz != null)) {
-        ArrayOfParameters aop = new ArrayOfParameters();
+        final ArrayOfParameters aop = new ArrayOfParameters();
 
-        TzidParamType t = new TzidParamType();
+        final TzidParamType t = new TzidParamType();
         t.setText(tz.getID());
         aop.getBaseParameter().add(xcalOF.createTzid(t));
 
@@ -742,11 +721,11 @@ public class XmlIcalConvert implements Logged, Defs {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

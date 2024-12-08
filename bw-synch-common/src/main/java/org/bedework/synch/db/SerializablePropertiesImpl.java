@@ -52,7 +52,7 @@ public abstract class SerializablePropertiesImpl<T>
   }
 
   /** Build from an array of properties
-   * @param props
+   * @param props an array of properties
    */
   public SerializablePropertiesImpl(final ArrayOfSynchProperties props) {
     if (props == null) {
@@ -106,7 +106,7 @@ public abstract class SerializablePropertiesImpl<T>
 
   /** Set the changed flag
    *
-   * @param val
+   * @param val the changed flag
    */
   public void setChanged(final boolean val) {
     changed = val;
@@ -155,8 +155,8 @@ public abstract class SerializablePropertiesImpl<T>
   /** Set a property in the internal properties - loading them from the
    * external value first if necessary.
    *
-   * @param name
-   * @param val
+   * @param name of property
+   * @param val its value
    */
   public void setProperty(final String name,
                           final String val) {
@@ -175,7 +175,7 @@ public abstract class SerializablePropertiesImpl<T>
   /** Get a property from the internal properties - loading them from the
    * external value first if necessary.
    *
-   * @param name
+   * @param name of property
    * @return val
    */
   public synchronized String getProperty(final String name) {
@@ -216,10 +216,10 @@ public abstract class SerializablePropertiesImpl<T>
   }
 
   /**
-   * @param that
+   * @param that SerializablePropertiesImpl
    * @return int
    */
-  public int doCompare(final SerializablePropertiesImpl that) {
+  public int doCompare(final SerializablePropertiesImpl<?> that) {
     if (this == that) {
       return 0;
     }
@@ -234,6 +234,9 @@ public abstract class SerializablePropertiesImpl<T>
 
   @Override
   public boolean equals(final Object o) {
+    if (!(o instanceof SerializablePropertiesImpl<?>)) {
+      return false;
+    }
     return compareTo((T)o) == 0;
   }
 

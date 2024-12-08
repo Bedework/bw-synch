@@ -213,24 +213,26 @@ public class BedeworkConnectorInstance
   }
 
   private ItemInfo getItem(final IcalendarType ical) {
-    VcalendarType vcal = ical.getVcalendar().get(0);
+    final VcalendarType vcal = ical.getVcalendar().get(0);
 
-    List<JAXBElement<? extends BaseComponentType>> comps =
+    final List<JAXBElement<? extends BaseComponentType>> comps =
         vcal.getComponents().getBaseComponent();
-    BaseComponentType comp = comps.get(0).getValue();
+    final BaseComponentType comp = comps.get(0).getValue();
 
-    UidPropType uid = (UidPropType)XcalUtil.findProperty(comp,
-                                                         XcalTags.uid);
+    final UidPropType uid =
+            (UidPropType)XcalUtil.findProperty(comp,
+                                               XcalTags.uid);
 
-    LastModifiedPropType lastmod = (LastModifiedPropType)XcalUtil.findProperty(comp,
-                                                         XcalTags.lastModified);
+    final LastModifiedPropType lastmod =
+            (LastModifiedPropType)XcalUtil.findProperty(comp,
+                                                        XcalTags.lastModified);
 
     return new ItemInfo(uid.getText(), lastmod.getUtcDateTime().toXMLFormat(), null);
   }
 
   @Override
   public AddItemResponseType addItem(final IcalendarType val) {
-    AddItemType ai = new AddItemType();
+    final AddItemType ai = new AddItemType();
 
     ai.setHref(info.getUri());
     ai.setIcalendar(val);
@@ -296,7 +298,7 @@ public class BedeworkConnectorInstance
     }
 
     final List<MultistatResponseElementType> mres = cqr.getResponse();
-    if (mres.size() == 0) {
+    if (mres.isEmpty()) {
       fir.setStatus(StatusType.NOT_FOUND);
       return fir;
     }

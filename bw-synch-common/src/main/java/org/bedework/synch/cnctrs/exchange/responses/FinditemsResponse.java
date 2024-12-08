@@ -19,7 +19,6 @@
 package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.synch.cnctrs.exchange.XmlIcalConvert;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.calendar.XcalUtil;
 import org.bedework.util.misc.ToString;
 
@@ -84,42 +83,32 @@ public class FinditemsResponse extends ExchangeResponse {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("SynchInfo{");
+      final ToString ts = new ToString(this);
 
-      folderIdToString(sb, "itemId", itemId);
-
-      sb.append(",\n      ");
-      folderIdToString(sb, "parentFolderId", parentFolderId);
-
- //     sb.append(",\n   itemClass=");
-   //   sb.append(itemClass);
-
-      sb.append(",\n      uid=");
-      sb.append(uid);
-
-      sb.append(",\n      lastMod=");
-      sb.append(lastMod);
-
-      sb.append("}");
-
-      return sb.toString();
+      folderIdToString(ts, "itemId", itemId).newLine();
+      return folderIdToString(ts, "parentFolderId", parentFolderId)
+              .newLine()
+              .indentIn()
+              .append("uid", uid)
+              .newLine()
+              .append("lastMod", lastMod)
+              .toString();
     }
 
-    private void folderIdToString(final StringBuilder sb,
-                                  final String name,
-                                  final Object id) {
-      sb.append(name);
-      sb.append("={id=");
+    private ToString folderIdToString(final ToString ts,
+                                      final String name,
+                                      final Object id) {
+      ts.delimitersOff()
+        .append(name)
+        .append("={id=");
 
-      String iid;
-      String ckey;
+      final String iid;
+      final String ckey;
 
-      if (id instanceof FolderIdType) {
-        FolderIdType fid = (FolderIdType)id;
+      if (id instanceof final FolderIdType fid) {
         iid = fid.getId();
         ckey = fid.getChangeKey();
-      } else if (id instanceof ItemIdType) {
-        ItemIdType fid = (ItemIdType)id;
+      } else if (id instanceof final ItemIdType fid) {
         iid = fid.getId();
         ckey = fid.getChangeKey();
       } else {
@@ -127,11 +116,14 @@ public class FinditemsResponse extends ExchangeResponse {
         ckey = iid;
       }
 
-      sb.append(iid);
+      ts.append(iid)
+        .append(",")
+        .newLine()
+        .append("        changeKey=")
+        .append(ckey)
+        .append("}");
 
-      sb.append(",\n        changeKey=");
-      sb.append(ckey);
-      sb.append("}");
+      return ts;
     }
   }
 
@@ -146,21 +138,19 @@ public class FinditemsResponse extends ExchangeResponse {
                            final XcalUtil.TzGetter tzGetter) {
     super(firm);
 
-    FindItemParentType rf = firm.getRootFolder();
+    final FindItemParentType rf = firm.getRootFolder();
 
     includesLastItemInRange = rf.isIncludesLastItemInRange();
 
-    XmlIcalConvert cnv = new XmlIcalConvert(tzGetter);
+    final XmlIcalConvert cnv = new XmlIcalConvert(tzGetter);
 
-    for (ItemType item: rf.getItems().getItemOrMessageOrCalendarItem()) {
-      if (!(item instanceof CalendarItemType)) {
+    for (final ItemType item: rf.getItems().getItemOrMessageOrCalendarItem()) {
+      if (!(item instanceof final CalendarItemType ci)) {
         continue;
       }
 
-      CalendarItemType ci = (CalendarItemType)item;
-
       if (!synchInfoOnly) {
-        IcalendarType ical = cnv.toXml(ci);
+        final IcalendarType ical = cnv.toXml(ci);
 
         if (icals == null) {
           icals = new ArrayList<IcalendarType>();
@@ -172,14 +162,14 @@ public class FinditemsResponse extends ExchangeResponse {
 
       // Synchinfo
 
-      SynchInfo si = new SynchInfo(ci.getItemId(),
-                                   ci.getParentFolderId(),
+      final SynchInfo si = new SynchInfo(ci.getItemId(),
+                                         ci.getParentFolderId(),
 //                                   ci.getItemClass(),
-                                   ci.getUID(),
-                                   ci.getLastModifiedTime().toXMLFormat());
+                                         ci.getUID(),
+                                         ci.getLastModifiedTime().toXMLFormat());
 
       if (synchInfo == null) {
-        synchInfo = new ArrayList<SynchInfo>();
+        synchInfo = new ArrayList<>();
       }
 
       synchInfo.add(si);

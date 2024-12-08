@@ -71,7 +71,7 @@ public abstract class PropRenameFilter extends AbstractFilter {
 
   protected abstract List<RenameElement> getRenameList();
 
-  protected abstract BasePropertyType getNewProperty(final RenameElement rl,
+  protected abstract BasePropertyType getNewProperty(RenameElement rl,
                                                      JAXBElement<? extends BasePropertyType> el);
 
   @Override
@@ -91,9 +91,8 @@ public abstract class PropRenameFilter extends AbstractFilter {
         return;
       }
 
-      for (final JAXBElement jaxbCcomp: comps.getBaseComponent()) {
-        final BaseComponentType jcomp =
-                (BaseComponentType)jaxbCcomp.getValue();
+      for (final var jaxbCcomp: comps.getBaseComponent()) {
+        final BaseComponentType jcomp = jaxbCcomp.getValue();
 
         doRenameProps(jcomp);
       }

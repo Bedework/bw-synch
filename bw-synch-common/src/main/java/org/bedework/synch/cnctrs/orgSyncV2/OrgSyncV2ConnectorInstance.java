@@ -56,7 +56,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -100,7 +99,7 @@ public class OrgSyncV2ConnectorInstance
   public URI getUri() {
     try {
       //Get yesterdays date
-      final LocalDate yesterday = LocalDate.now().minus(1, ChronoUnit.DAYS);
+      final LocalDate yesterday = LocalDate.now().minusDays(1);
       final String yesterdayStr =
               yesterday.format(DateTimeFormatter.ISO_LOCAL_DATE);
 
@@ -125,7 +124,8 @@ public class OrgSyncV2ConnectorInstance
   public IcalendarType makeXcal(final InputStream is) {
     try {
       final List<OrgSyncV2Event> osEvents =
-              om.readValue(is, new TypeReference<List<OrgSyncV2Event>>(){});
+              om.readValue(is, new TypeReference<>() {
+              });
 
         /* Convert each entity to XML */
 
@@ -143,9 +143,9 @@ public class OrgSyncV2ConnectorInstance
     return getIcal("application/json");
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Private methods
-   * ==================================================================== */
+   * ============================================================== */
 
   private IcalendarType toXcal(final List<OrgSyncV2Event> osEvents,
                                final boolean onlyPublic) {

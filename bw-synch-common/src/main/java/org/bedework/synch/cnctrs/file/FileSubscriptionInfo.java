@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.file;
 
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.exception.SynchException;
 
 /** Represents connection information for a file connector instance.
  *
@@ -29,9 +28,9 @@ import org.bedework.synch.shared.exception.SynchException;
 public class FileSubscriptionInfo extends BaseSubscriptionInfo {
 
   /**
-   * @param info
+   * @param info SubscriptionConnectorInfo
    */
-  public FileSubscriptionInfo(final SubscriptionConnectorInfo info) {
+  public FileSubscriptionInfo(final SubscriptionConnectorInfo<?> info) {
     super(info);
   }
 }

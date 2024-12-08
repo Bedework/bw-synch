@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.filters;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.filters.Filter;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;

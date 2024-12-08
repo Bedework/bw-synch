@@ -41,12 +41,12 @@ public class SyncFolderItemsRequest extends BaseRequest<SyncFolderItemsType> {
     request = super.createSyncFolderItemsType();
 
     /* Say we want all properties returned in the response */
-    ItemResponseShapeType irs = new ItemResponseShapeType();
+    final ItemResponseShapeType irs = new ItemResponseShapeType();
     irs.setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
     request.setItemShape(irs);
 
     /* Sync folder*/
-    TargetFolderIdType tfi = new TargetFolderIdType();
+    final TargetFolderIdType tfi = new TargetFolderIdType();
     if (folderId instanceof DistinguishedFolderIdType) {
       tfi.setDistinguishedFolderId((DistinguishedFolderIdType)folderId);
     } else {

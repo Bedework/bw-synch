@@ -75,7 +75,7 @@ public class OrgSyncV2ConnectorConfig extends ConnectorConfig {
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 

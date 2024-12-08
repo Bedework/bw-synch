@@ -18,14 +18,13 @@
 */
 package org.bedework.synch.cnctrs.manager;
 
-import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnectorInstance;
+import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.exception.SynchException;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
-import org.oasis_open.docs.ws_calendar.ns.soap.BaseResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.FetchItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemResponseType;
@@ -46,11 +45,6 @@ public class SynchConnectorInstance
 
   @Override
   public BaseSubscriptionInfo getSubInfo() {
-    return null;
-  }
-
-  @Override
-  public BaseResponseType open() {
     return null;
   }
 

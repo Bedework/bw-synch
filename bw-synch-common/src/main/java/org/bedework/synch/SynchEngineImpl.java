@@ -21,6 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.db.SynchDb;
 import org.bedework.synch.shared.Notification;
+import org.bedework.synch.shared.Notification.NotificationItem;
 import org.bedework.synch.shared.Stat;
 import org.bedework.synch.shared.StatLong;
 import org.bedework.synch.shared.Subscription;
@@ -39,6 +40,7 @@ import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 import org.bedework.util.security.PwEncryptionIntf;
 import org.bedework.util.timezones.Timezones;
+import org.bedework.util.timezones.TimezonesException;
 import org.bedework.util.timezones.TimezonesImpl;
 
 import net.fortuna.ical4j.model.TimeZone;
@@ -88,7 +90,7 @@ import java.util.concurrent.TimeUnit;
  * assumes the CalWs-SOAP protocol. Messages and responses are of that form
  * though the actual implementation may not use the protocol if the target does
  * not support it. For example we convert CalWs-SOAP interactions into ExchangeWS.
- *
+ * <br/>
  * --------------------- ignore below ----------------------------------------
  *
  * <p>This process manages the setting up of push-subscriptions with the exchange
@@ -151,14 +153,15 @@ public class SynchEngineImpl
 
   private SynchTimer synchTimer;
 
-  private BlockingQueue<Notification> notificationInQueue;
+  private BlockingQueue<Notification<NotificationItem>> notificationInQueue;
 
   /* Where we keep subscriptions that come in while we are starting */
   private List<Subscription> subsList;
 
   private SynchDb db;
 
-  private final Map<String, Connector> connectorMap = new HashMap<>();
+  private final Map<String, Connector<?, ?, ?>> connectorMap =
+          new HashMap<>();
 
   /* Some counts */
 
@@ -188,7 +191,7 @@ public class SynchEngineImpl
         }
 
         try {
-          final Notification<?> note = notificationInQueue.take();
+          final Notification<NotificationItem> note = notificationInQueue.take();
           if (note == null) {
             continue;
           }
@@ -305,7 +308,7 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void handleNotification(final Notification<?> note) {
+  public void handleNotification(final Notification<NotificationItem> note) {
     try {
       while (true) {
         if (stopping) {
@@ -388,10 +391,10 @@ public class SynchEngineImpl
   }
 
   @Override
-  public ConnectorInstance getConnectorInstance(final Subscription sub,
-                                                final SynchEndType end) {
-    ConnectorInstance cinst;
-    final Connector conn;
+  public ConnectorInstance<?> getConnectorInstance(final Subscription sub,
+                                                   final SynchEndType end) {
+    ConnectorInstance<?> cinst;
+    final Connector<?, ?, ?> conn;
 
     if (end == SynchEndType.A) {
       cinst = sub.getEndAConnInst();
@@ -716,7 +719,7 @@ public class SynchEngineImpl
   }
 
   /**
-   * @param val
+   * @param val the config holder
    */
   public static void setConfigHolder(final ConfigHolder<SynchConfig> val) {
     cfgHolder = val;
@@ -744,19 +747,21 @@ public class SynchEngineImpl
   /** Get a timezone object given the id. This will return transient objects
    * registered in the timezone directory
    *
-   * @param id
+   * @param id for timezone
    * @return TimeZone with id or null
-   * @throws Throwable
    */
   @Override
-  public TimeZone getTz(final String id) throws Throwable {
-    return getSyncher().getTimezones().getTimeZone(id);
+  public TimeZone getTz(final String id) {
+    try {
+      return getSyncher().getTimezones().getTimeZone(id);
+    } catch (final TimezonesException te) {
+      throw new SynchException(te);
+    }
   }
 
   /**
    * @param val possibly null password
    * @return decrypted string
-   * @throws SynchException on decryption failure
    */
   public String decrypt(final String val) {
     if (val == null) {
@@ -798,7 +803,7 @@ public class SynchEngineImpl
     }
   }
 
-  private Collection<Connector> getConnectors() {
+  private Collection<Connector<?, ?, ?>> getConnectors() {
     return connectorMap.values();
   }
 
@@ -811,16 +816,15 @@ public class SynchEngineImpl
         throw new SynchException("Connector " + id + " already registered");
       }
 
-      final Connector c = (Connector)cl.newInstance();
+      final var c = (Connector<?, ?, ?>)cl.newInstance();
       connectorMap.put(id, c);
     } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  @SuppressWarnings("unchecked")
   private StatusType handleNotification(final Synchling sl,
-                                        final Notification note) {
+                                        final Notification<NotificationItem> note) {
     final StatusType st = sl.handleNotification(note);
 
     final Subscription sub = note.getSub();

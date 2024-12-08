@@ -20,8 +20,8 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Subscription;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.util.misc.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -30,12 +30,12 @@ import ietf.params.xml.ns.icalendar_2.IcalendarType;
  */
 public class ExchangeNotification extends
         Notification<ExchangeNotification.NotificationItem> {
-  private ExchangeNotificationMessage enm;
+  private final ExchangeNotificationMessage enm;
 
   /**
-   * @param sub
-   * @param end
-   * @param enm
+   * @param sub Subscription
+   * @param end indicator
+   * @param enm ExchangeNotificationMessage
    */
   public ExchangeNotification(final Subscription sub,
                               final SynchEndType end,
@@ -56,7 +56,7 @@ public class ExchangeNotification extends
    * @author douglm
    */
   public static class NotificationItem extends Notification.NotificationItem {
-    private ExchangeNotificationMessage.NotificationItem ni;
+    private final ExchangeNotificationMessage.NotificationItem ni;
 
     NotificationItem(final ExchangeNotificationMessage.NotificationItem ni,
                      final IcalendarType ical) {
@@ -65,22 +65,19 @@ public class ExchangeNotification extends
     }
 
     @Override
-    protected void toStringSegment(final StringBuilder sb) {
-      super.toStringSegment(sb);
+    protected void toStringSegment(final ToString ts) {
+      super.toStringSegment(ts);
 
-      sb.append("\n ni=");
-      sb.append(ni);
+      ts.append("ni", ni);
     }
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+      final var ts = new ToString(this);
 
-      toStringSegment(sb);
+      toStringSegment(ts);
 
-      sb.append("}");
-
-      return sb.toString();
+      return ts.toString();
     }
   }
 }

@@ -32,22 +32,22 @@ import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType
  *   @author Mike Douglass   douglm rpi.edu
  */
 public class FindItemsRequest extends BaseRequest<FindItemType> {
-  /** Get enough information out of Exchange to allowus to figure out what we
+  /** Get enough information out of Exchange to allow us to figure out what we
    * need to fetch to (re)synch the target system with Exchange
    *
-   * @param parentId
+   * @param parentId BaseFolderIdType
    * @return FindItemsRequest object ready for call.
    */
   public static FindItemsRequest getSynchInfo(final BaseFolderIdType parentId) {
-    FindItemsRequest fir = new FindItemsRequest(parentId);
+    final FindItemsRequest fir = new FindItemsRequest(parentId);
 
     /* Specify the actual properties */
-    ItemResponseShapeType irs = new ItemResponseShapeType();
+    final ItemResponseShapeType irs = new ItemResponseShapeType();
     irs.setBaseShape(DefaultShapeNamesType.ID_ONLY);
 
     /* Say we want the UID and the lastmod. */
 
-    NonEmptyArrayOfPathsToElementType additionalProperties =
+    final NonEmptyArrayOfPathsToElementType additionalProperties =
       new NonEmptyArrayOfPathsToElementType();
 
     fir.addShapeProp(additionalProperties, UnindexedFieldURIType.CALENDAR_UID);
@@ -62,7 +62,7 @@ public class FindItemsRequest extends BaseRequest<FindItemType> {
   }
 
   /**
-   * @param parentId
+   * @param parentId BaseFolderIdType
    */
   public FindItemsRequest(final BaseFolderIdType parentId) {
     super();
@@ -89,7 +89,7 @@ public class FindItemsRequest extends BaseRequest<FindItemType> {
     // setSortOrder(NonEmptyArrayOfFieldOrdersType value)
 
     /* Parent folder ids */
-    NonEmptyArrayOfBaseFolderIdsType fids = new NonEmptyArrayOfBaseFolderIdsType();
+    final NonEmptyArrayOfBaseFolderIdsType fids = new NonEmptyArrayOfBaseFolderIdsType();
     fids.getFolderIdOrDistinguishedFolderId().add(parentId);
     request.setParentFolderIds(fids);
 

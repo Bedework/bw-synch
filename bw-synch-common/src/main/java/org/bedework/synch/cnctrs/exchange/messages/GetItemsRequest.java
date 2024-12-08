@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class GetItemsRequest extends BaseRequest<GetItemType> {
   /**
-   * @param itemIds
+   * @param itemIds list
    */
   public GetItemsRequest(final List<BaseItemIdType> itemIds) {
     super();
@@ -41,7 +41,7 @@ public class GetItemsRequest extends BaseRequest<GetItemType> {
     request = super.createGetItemType();
 
     /* Say we want all properties returned in the response */
-    ItemResponseShapeType irs = new ItemResponseShapeType();
+    final ItemResponseShapeType irs = new ItemResponseShapeType();
     irs.setBaseShape(DefaultShapeNamesType.ALL_PROPERTIES);
 
     /* Say we want plain text for the description.
@@ -50,7 +50,8 @@ public class GetItemsRequest extends BaseRequest<GetItemType> {
 
     request.setItemShape(irs);
 
-    NonEmptyArrayOfBaseItemIdsType baseItemIds = new NonEmptyArrayOfBaseItemIdsType();
+    final NonEmptyArrayOfBaseItemIdsType baseItemIds =
+            new NonEmptyArrayOfBaseItemIdsType();
     request.setItemIds(baseItemIds);
     baseItemIds.getItemIdOrOccurrenceItemIdOrRecurringMasterItemId().addAll(itemIds);
   }

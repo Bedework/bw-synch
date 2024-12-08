@@ -124,7 +124,7 @@ public class SubscriptionInfoImpl
   @Override
   public String toString() {
     try {
-      ToString ts = new ToString(this);
+      final ToString ts = new ToString(this);
 
       super.toStringSegment(ts);
 

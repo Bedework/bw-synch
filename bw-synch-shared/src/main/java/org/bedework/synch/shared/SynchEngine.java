@@ -27,7 +27,7 @@ public interface SynchEngine {
   /**
    * @param note Notification
    */
-  void handleNotification(Notification<?> note);
+  void handleNotification(Notification<Notification.NotificationItem> note);
 
   /** When we start up a new subscription we implant a Connector in the object.
    *

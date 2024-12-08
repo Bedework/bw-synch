@@ -30,7 +30,7 @@ public interface FileConnConfMBean extends SynchConnConfMBean {
    *
    * @param val    int seconds
    */
-  void setMinPoll(final int val);
+  void setMinPoll(int val);
 
   /** Min poll - seconds
    *

@@ -91,12 +91,12 @@ public class SynchDb implements Logged, Serializable {
     } catch (final SynchException wde) {
       try {
         rollbackTransaction();
-      } catch (final SynchException wde1) {}
+      } catch (final SynchException ignored) {}
       throw wde;
     } finally {
       try {
         closeSession();
-      } catch (final SynchException wde1) {}
+      } catch (final SynchException ignored) {}
       open = false;
     }
   }
@@ -247,10 +247,7 @@ public class SynchDb implements Logged, Serializable {
 
       if (sess != null) {
         warn("Session is not null. Will close");
-        try {
-          close();
-        } finally {
-        }
+        close();
       }
 
       if (sess == null) {
@@ -297,7 +294,7 @@ public class SynchDb implements Logged, Serializable {
     } catch (final Throwable t) {
       try {
         sess.close();
-      } catch (Throwable t1) {}
+      } catch (final Throwable ignored) {}
       sess = null; // Discard on error
     } finally {
       open = false;
@@ -312,7 +309,7 @@ public class SynchDb implements Logged, Serializable {
     }
     try {
       sess.beginTransaction();
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
@@ -328,7 +325,7 @@ public class SynchDb implements Logged, Serializable {
       if (!sess.rolledback()) {
         sess.commit();
       }
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
     }
   }
@@ -337,17 +334,16 @@ public class SynchDb implements Logged, Serializable {
     try {
       checkOpen();
       sess.rollback();
-    } catch (HibException he) {
+    } catch (final HibException he) {
       throw new SynchException(he);
-    } finally {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

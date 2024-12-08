@@ -149,9 +149,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return subscriptionId;
   }
 
-  /** A UTC dtstamp value
+  /**
    *
-   * @param val
+   * @param val A UTC dtstamp value
    */
   public void setLastRefresh(final String val) {
     lastRefresh = val;
@@ -164,9 +164,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return lastRefresh;
   }
 
-  /** int consecutive errors
+  /**
    *
-   * @param val
+   * @param val int consecutive errors
    */
   public void setErrorCt(final int val) {
     errorCt = val;
@@ -179,9 +179,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return errorCt;
   }
 
-  /** True if either target is missing
+  /**
    *
-   * @param val
+   * @param val True if either target is missing
    */
   public void setMissingTarget(final boolean val) {
     missingTarget = val;
@@ -261,9 +261,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return info;
   }
 
-  /** Which way?
+  /**
    *
-   * @param val
+   * @param val Which way?
    */
   public void setDirection(final String val) {
     direction = val;
@@ -277,9 +277,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return direction;
   }
 
-  /** Which end is master?
+  /**
    *
-   * @param val
+   * @param val Which end is master?
    */
   public void setMaster(final String val) {
     master = val;
@@ -308,9 +308,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return outstandingSubscription;
   }
 
-  /** True if subscription deleted
+  /**
    *
-   * @param val
+   * @param val True if subscription deleted
    */
   public void setDeleted(final boolean val) {
     deleted = val;
@@ -407,7 +407,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return true if this has to be put on a poll queue
    */
   public boolean polling() {
-    var dir = getDirectionEnum();
+    final var dir = getDirectionEnum();
     if (dir == SynchDirectionType.A_TO_B){
       return getEndAConn().getKind() == SynchKind.poll;
     }
@@ -424,7 +424,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
    * @return the delay in millisecs.
    */
   public long refreshDelay() {
-    String delay = "31536000000"; // About a year
+    final String delay;
 
     if (getDirectionEnum() == SynchDirectionType.A_TO_B){
       delay = new BaseSubscriptionInfo(getEndAConnectorInfo()).getRefreshDelay();
@@ -432,7 +432,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
       delay = new BaseSubscriptionInfo(getEndBConnectorInfo()).getRefreshDelay();
     }
 
-    return Long.valueOf(delay);
+    return Long.parseLong(delay);
   }
 
   /** Set the lastRefresh from the current time
@@ -464,9 +464,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     }
   }
 
-  /** Which way?
+  /**
    *
-   * @param val
+   * @param val Which way?
    */
   public void setDirectionEnum(final SynchDirectionType val) {
     setDirection(val.value());
@@ -480,9 +480,9 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return SynchDirectionType.fromValue(getDirection());
   }
 
-  /** Which end is master?
+  /**
    *
-   * @param val
+   * @param val Which end is master?
    */
   public void setMasterEnum(final SynchMasterType val) {
     setMaster(val.value());

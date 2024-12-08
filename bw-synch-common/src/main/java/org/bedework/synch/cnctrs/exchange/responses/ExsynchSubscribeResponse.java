@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.misc.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SubscribeResponseMessageType;
@@ -31,7 +30,7 @@ public class ExsynchSubscribeResponse extends ExchangeResponse {
   private final String watermark;
 
   /**
-   * @param srm
+   * @param srm SubscribeResponseMessageType
    */
   public ExsynchSubscribeResponse(final SubscribeResponseMessageType srm) {
     /* Successful looks something like

@@ -22,10 +22,12 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
+import org.bedework.util.xml.XmlUtil;
 
 import org.w3c.dom.Document;
 
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +36,6 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /** Base class for all webdav servlet methods.
  */
@@ -142,7 +143,7 @@ public abstract class MethodBase implements Logged {
   public List<String> getResourceUri(final HttpServletRequest req) {
     String uri = req.getServletPath();
 
-    if ((uri == null) || (uri.length() == 0)) {
+    if ((uri == null) || (uri.isEmpty())) {
       /* No path specified - set it to root. */
       uri = "/";
     }
@@ -152,7 +153,7 @@ public abstract class MethodBase implements Logged {
 
   /** Return a path, broken into its elements, after "." and ".." are removed.
    * If the parameter path attempts to go above the root we return null.
-   *
+   * <br/>
    * Other than the backslash thing why not use URI?
    *
    * @param path      String path to be fixed
@@ -165,7 +166,7 @@ public abstract class MethodBase implements Logged {
 
     String decoded;
     try {
-      decoded = URLDecoder.decode(path, "UTF8");
+      decoded = URLDecoder.decode(path, StandardCharsets.UTF_8);
     } catch (final Throwable ignored) {
       return null; // bad path
     }
@@ -208,7 +209,7 @@ public abstract class MethodBase implements Logged {
 
       if (s.equals("..")) {
         // Back up 1
-        if (al.size() == 0) {
+        if (al.isEmpty()) {
           // back too far
           return null;
         }
@@ -274,8 +275,7 @@ public abstract class MethodBase implements Logged {
     }
 
     try {
-      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
+      final var factory = XmlUtil.getSafeDocumentBuilderFactory(true);
 
       //DocumentBuilder builder = factory.newDocumentBuilder();
 /*
@@ -308,11 +308,11 @@ public abstract class MethodBase implements Logged {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

@@ -50,9 +50,10 @@ public class BaseRequest<T>
 
   protected void addShapeProp(final NonEmptyArrayOfPathsToElementType additionalProperties,
                               final UnindexedFieldURIType URI) {
-    PathToUnindexedFieldType pathToUnindexedField = new PathToUnindexedFieldType();
+    final PathToUnindexedFieldType pathToUnindexedField =
+            new PathToUnindexedFieldType();
     pathToUnindexedField.setFieldURI(URI);
-    JAXBElement<? extends BasePathToElementType> path =
+    final JAXBElement<? extends BasePathToElementType> path =
       types.createFieldURI(pathToUnindexedField);
 
     additionalProperties.getPath().add(path);

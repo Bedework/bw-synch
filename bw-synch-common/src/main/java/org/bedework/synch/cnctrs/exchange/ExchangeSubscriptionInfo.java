@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.misc.ToString;
 
 /** The deserialized information for an Exchange connection.
@@ -42,9 +41,9 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
 
   /**
    *
-   * @param info
+   * @param info SubscriptionConnectorInfo
    */
-  public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo info) {
+  public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo<?> info) {
     super(info);
   }
 

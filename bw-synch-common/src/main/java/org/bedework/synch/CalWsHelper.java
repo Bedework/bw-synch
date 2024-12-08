@@ -18,10 +18,10 @@
 */
 package org.bedework.synch;
 
+import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-
-import org.w3c.dom.Document;
+import org.bedework.util.xml.XmlUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,11 +30,9 @@ import java.io.Writer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -49,70 +47,79 @@ public class CalWsHelper implements Logged {
   /** Trace a calws SOAP message
    *
    * @param o the unmarshalled SOAP message
-   * @throws Throwable
    */
-  public void traceSoap(final Object o) throws Throwable {
-    SOAPMessage msg = marshal(o, "org.oasis_open.docs.ns.wscal.calws_soap");
+  public void traceSoap(final Object o) {
+    try {
+      final SOAPMessage msg = marshal(o,
+                                      "org.oasis_open.docs.ns.wscal.calws_soap");
 
     /* SOAP marshaller doesn't appear to form
     msg.writeTo(pstate.traceOut);
     */
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    msg.writeTo(baos);
+      final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      msg.writeTo(baos);
 
-    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+      final ByteArrayInputStream bais = new ByteArrayInputStream(
+              baos.toByteArray());
 
-    StreamSource src = new StreamSource(bais);
+      final StreamSource src = new StreamSource(bais);
 
-    Transformer serializer= SAXTransformerFactory.newInstance().newTransformer();
-    serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+      final var serializer = SAXTransformerFactory.newInstance()
+                                                  .newTransformer();
+      serializer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-    //serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-    serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-    //serializer.setOutputProperty("{http://xml.customer.org/xslt}indent-amount", "2");
+      //serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      serializer.setOutputProperty(
+              "{http://xml.apache.org/xslt}indent-amount", "2");
+      //serializer.setOutputProperty("{http://xml.customer.org/xslt}indent-amount", "2");
 
-    Writer wtr = new StringWriter();
-    StreamResult res =  new StreamResult(wtr);
-    serializer.transform(src, res);
+      final Writer wtr = new StringWriter();
+      final StreamResult res = new StreamResult(wtr);
+      serializer.transform(src, res);
 
-    debug(wtr.toString());
+      debug(wtr.toString());
+    } catch (final Exception e) {
+      throw new SynchException(e);
+    }
   }
 
   /**
    * @param o the unmarshalled SOAP message
    * @param jaxbContextPath context for the message
    * @return SOAPMessage
-   * @throws Throwable
    */
   public SOAPMessage marshal(final Object o,
-                                final String jaxbContextPath) throws Throwable {
-    if (soapMsgFactory == null) {
-      soapMsgFactory = MessageFactory.newInstance();
+                                final String jaxbContextPath) {
+    try {
+      if (soapMsgFactory == null) {
+        soapMsgFactory = MessageFactory.newInstance();
+      }
+
+      final JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
+
+      final Marshaller marshaller = jc.createMarshaller();
+
+      final var doc = XmlUtil.safeNewDocument(true);
+
+      final SOAPMessage msg = soapMsgFactory.createMessage();
+      msg.getSOAPBody().addDocument(doc);
+
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+                             Boolean.TRUE);
+      marshaller.marshal(o,
+                         msg.getSOAPBody());
+
+      return msg;
+    } catch (final Exception e) {
+      throw new SynchException(e);
     }
-
-    JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
-
-    Marshaller marshaller = jc.createMarshaller();
-
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    dbf.setNamespaceAware(true);
-    Document doc = dbf.newDocumentBuilder().newDocument();
-
-    SOAPMessage msg = soapMsgFactory.createMessage();
-    msg.getSOAPBody().addDocument(doc);
-
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-    marshaller.marshal(o,
-                       msg.getSOAPBody());
-
-    return msg;
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

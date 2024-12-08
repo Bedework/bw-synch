@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.cnctrs.exchange.responses;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.ToString;
@@ -42,12 +41,12 @@ import javax.xml.bind.JAXBElement;
  */
 public class SyncFolderitemsResponse extends ExchangeResponse
         implements Logged {
-  private String syncState;
-  private Boolean includesLastItemInRange;
+  private final String syncState;
+  private final Boolean includesLastItemInRange;
   private SyncFolderItemsChangesType changes;
 
   /**
-   * @param sfirm
+   * @param sfirm SyncFolderItemsResponseMessageType
    */
   public SyncFolderitemsResponse(final SyncFolderItemsResponseMessageType sfirm) {
     super(sfirm);
@@ -55,12 +54,12 @@ public class SyncFolderitemsResponse extends ExchangeResponse
     syncState = sfirm.getSyncState();
     includesLastItemInRange = sfirm.isIncludesLastItemInRange();
 
-    List<JAXBElement<?>> syncitems = sfirm.getChanges().getCreateOrUpdateOrDelete();
+    final List<JAXBElement<?>> syncitems = sfirm.getChanges().getCreateOrUpdateOrDelete();
 
-    for (JAXBElement<?> el1: syncitems) {
-      String chgType = el1.getName().getLocalPart();
+    for (final JAXBElement<?> el1: syncitems) {
+      final String chgType = el1.getName().getLocalPart();
 
-      SyncFolderItemsCreateOrUpdateType s = (SyncFolderItemsCreateOrUpdateType)el1.getValue();
+      final SyncFolderItemsCreateOrUpdateType s = (SyncFolderItemsCreateOrUpdateType)el1.getValue();
 
       if (debug()) {
         debug("chgType =" + chgType);
@@ -137,64 +136,60 @@ public class SyncFolderitemsResponse extends ExchangeResponse
         return;
       }
 
-      if (bne instanceof BaseObjectChangedEventType) {
-        BaseObjectChangedEventType boce = (BaseObjectChangedEventType)bne;
-
+      if (bne instanceof final BaseObjectChangedEventType boce) {
         setTimeStamp(boce.getTimeStamp());
         setFolderId(boce.getFolderId());
         setItemId(boce.getItemId());
         setParentFolderId(boce.getParentFolderId());
       }
 
-      if (actionStr.equals("CopiedEvent")) {
-        action = ActionType.CopiedEvent;
+      switch (actionStr) {
+        case "CopiedEvent" -> {
+          action = ActionType.CopiedEvent;
 
-        MovedCopiedEventType mce = (MovedCopiedEventType)bne;
+          final MovedCopiedEventType mce = (MovedCopiedEventType)bne;
 
-        oldFolderId = mce.getOldFolderId();
-        oldItemId = mce.getOldItemId();
-        oldParentFolderId = mce.getOldParentFolderId();
+          oldFolderId = mce.getOldFolderId();
+          oldItemId = mce.getOldItemId();
+          oldParentFolderId = mce.getOldParentFolderId();
 
-        return;
+          return;
+        }
+        case "CreatedEvent" -> {
+          action = ActionType.CreatedEvent;
+
+          return;
+        }
+        case "DeletedEvent" -> {
+          action = ActionType.DeletedEvent;
+
+          return;
+        }
+        case "ModifiedEvent" -> {
+          action = ActionType.ModifiedEvent;
+          final ModifiedEventType met = (ModifiedEventType)bne;
+
+          unreadCount = met.getUnreadCount();
+
+          return;
+        }
+        case "MovedEvent" -> {
+          action = ActionType.MovedEvent;
+          final MovedCopiedEventType mce = (MovedCopiedEventType)bne;
+
+          oldFolderId = mce.getOldFolderId();
+          oldItemId = mce.getOldItemId();
+          oldParentFolderId = mce.getOldParentFolderId();
+
+          return;
+        }
+        case "NewMailEvent" -> {
+          action = ActionType.NewMailEvent;
+
+          return;
+        }
       }
 
-      if (actionStr.equals("CreatedEvent")) {
-        action = ActionType.CreatedEvent;
-
-        return;
-      }
-
-      if (actionStr.equals("DeletedEvent")) {
-        action = ActionType.DeletedEvent;
-
-        return;
-      }
-
-      if (actionStr.equals("ModifiedEvent")) {
-        action = ActionType.ModifiedEvent;
-        ModifiedEventType met = (ModifiedEventType)bne;
-
-        unreadCount = met.getUnreadCount();
-
-        return;
-      }
-
-      if (actionStr.equals("MovedEvent")) {
-        action = ActionType.MovedEvent;
-        MovedCopiedEventType mce = (MovedCopiedEventType)bne;
-
-        oldFolderId = mce.getOldFolderId();
-        oldItemId = mce.getOldItemId();
-        oldParentFolderId = mce.getOldParentFolderId();
-
-        return;
-      }
-
-      if (actionStr.equals("NewMailEvent")) {
-        action = ActionType.NewMailEvent;
-
-        return;
-      }
     }
 
     /** Common to all
@@ -247,49 +242,19 @@ public class SyncFolderitemsResponse extends ExchangeResponse
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("NotificationItem{");
-
-      sb.append("watermark=");
-      sb.append(getWatermark());
-
-      sb.append(",\n      action=");
-      sb.append(getAction());
-
-      sb.append(", timeStamp=");
-      sb.append(getTimeStamp());
-
-      sb.append(",\n      folderId=");
-      sb.append(getFolderId());
-
-      sb.append(",\n      itemId=");
-      sb.append(getItemId());
-
-      sb.append(",\n      parentFolderId=");
-      sb.append(getParentFolderId());
-
-      if (getOldFolderId() != null) {
-        sb.append(",\n      oldFolderId=");
-        sb.append(getOldFolderId());
-      }
-
-      if (getOldItemId() != null) {
-        sb.append(",\n       oldItemId=");
-        sb.append(getOldItemId());
-      }
-
-      if (getOldParentFolderId() != null) {
-        sb.append(",\n       oldParentFolderId=");
-        sb.append(getOldParentFolderId());
-      }
-
-      if (getUnreadCount() != null) {
-        sb.append(",\n       unreadCount=");
-        sb.append(getUnreadCount());
-      }
-
-      sb.append("}");
-
-      return sb.toString();
+      return new ToString(this)
+              .append("watermark", getWatermark())
+              .append("action", getAction())
+              .append("timeStamp", getTimeStamp())
+              .newLine()
+              .append("folderId", getFolderId())
+              .append("itemId", getItemId())
+              .append("parentFolderId", getParentFolderId())
+              .appendNotNull("oldFolderId", getOldFolderId())
+              .appendNotNull("oldItemId", getOldItemId())
+              .appendNotNull("oldParentFolderId", getOldParentFolderId())
+              .appendNotNull("unreadCount", getUnreadCount())
+              .toString();
     }
   }
 
@@ -326,7 +291,7 @@ public class SyncFolderitemsResponse extends ExchangeResponse
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

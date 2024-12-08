@@ -37,8 +37,8 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
   private DistinguishedFolderIdType fid;
 
   /**
-   * @param subId
-   * @param end
+   * @param subId id of subscription
+   * @param end indicator
    * @param watermark
    * @param callBackUri
    */
@@ -50,7 +50,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 
     request = super.createSubscribeType();
 
-    PushSubscriptionRequestType psr = types.createPushSubscriptionRequestType();
+    final PushSubscriptionRequestType psr = types.createPushSubscriptionRequestType();
     request.setPushSubscriptionRequest(psr);
 
     /* ===== Setup BaseSubscription ====== */
@@ -60,7 +60,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 //    sub.fid = types.createFolderIdType();
     fid = types.createDistinguishedFolderIdType();
 
-    NonEmptyArrayOfNotificationEventTypesType etypes = types.createNonEmptyArrayOfNotificationEventTypesType();
+    final NonEmptyArrayOfNotificationEventTypesType etypes = types.createNonEmptyArrayOfNotificationEventTypesType();
     psr.setEventTypes(etypes);
 
     etypes.getEventType().add(NotificationEventTypeType.COPIED_EVENT);
@@ -75,7 +75,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
 
     psr.setWatermark(watermark);
 
-    StringBuilder uri = new StringBuilder(callBackUri);
+    final StringBuilder uri = new StringBuilder(callBackUri);
     if (!callBackUri.endsWith("/")) {
       uri.append("/");
     }
@@ -88,7 +88,7 @@ public class SubscribeRequest extends BaseRequest<SubscribeType> {
   }
 
   /**
-   * @param val
+   * @param val id for folder
    */
   public void setFolderId(final String val) {
     // XXX Need to allow a distinguished id or a folder id

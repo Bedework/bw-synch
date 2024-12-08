@@ -33,7 +33,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @param info the subscription info
    * @throws SynchException on load error
    */
-  public OrgSyncV2SubscriptionInfo(final SubscriptionConnectorInfo info) {
+  public OrgSyncV2SubscriptionInfo(final SubscriptionConnectorInfo<?> info) {
     super(info);
   }
 
@@ -50,7 +50,7 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
    * @throws SynchException on property error
    */
   public boolean getOrgSyncPublicOnly() {
-    return Boolean.valueOf(getProperty(propnameOrgSyncPublicOnly));
+    return Boolean.parseBoolean(getProperty(propnameOrgSyncPublicOnly));
   }
 
   /**
@@ -63,9 +63,9 @@ public class OrgSyncV2SubscriptionInfo extends BaseSubscriptionInfo {
 
   protected void toStringSegment(final ToString ts) {
     try {
-      ts.append("uri", getUri());
-      ts.newLine();
-      ts.append("orgSyncPublicOnly", getOrgSyncPublicOnly());
+      ts.append("uri", getUri())
+        .newLine()
+        .append("orgSyncPublicOnly", getOrgSyncPublicOnly());
     } catch (final Throwable t) {
       ts.append(t.getMessage());
     }

@@ -91,7 +91,7 @@ public class SynchlingPool implements Logged {
 
       try {
         wait(delay);
-      } catch (InterruptedException ie) {
+      } catch (final InterruptedException ie) {
         maxWait = 0; // Force exit
       }
     }

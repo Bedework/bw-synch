@@ -27,7 +27,6 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.SynchPropertyInfo;
 import org.bedework.synch.shared.cnctrs.AbstractConnector;
 import org.bedework.synch.shared.cnctrs.ConnectorInstanceMap;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 /** The synch processor connector for subscriptions to files.
@@ -57,7 +56,7 @@ public class FileConnector
                   false);
   }
 
-  private ConnectorInstanceMap<FileConnectorInstance> cinstMap =
+  private final ConnectorInstanceMap<FileConnectorInstance> cinstMap =
       new ConnectorInstanceMap<>();
 
   /**

@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.campusGroups;
 
 import org.bedework.synch.cnctrs.file.FileSubscriptionInfo;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
-import org.bedework.synch.shared.exception.SynchException;
 
 /** Represents connection information for a CampusGroups connector
  * instance.
@@ -31,9 +30,10 @@ public class CampusGroupsSubscriptionInfo
         extends FileSubscriptionInfo {
 
   /**
-   * @param info
+   * @param info connector info
    */
-  public CampusGroupsSubscriptionInfo(final SubscriptionConnectorInfo info) {
+  public CampusGroupsSubscriptionInfo(
+          final SubscriptionConnectorInfo<?> info) {
     super(info);
   }
 }

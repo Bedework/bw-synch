@@ -34,7 +34,6 @@ import org.bedework.util.xml.tagdefs.WebdavTags;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.management.ObjectName;
@@ -63,7 +62,7 @@ public class SynchServlet extends HttpServlet
 
   /** Table of methods - set at init
    */
-  protected HashMap<String, MethodInfo> methods = new HashMap<String, MethodInfo>();
+  protected HashMap<String, MethodInfo> methods = new HashMap<>();
 
   /* Try to serialize requests from a single session
    * This is very imperfect.
@@ -73,7 +72,7 @@ public class SynchServlet extends HttpServlet
     int waiting;
   }
 
-  private static volatile HashMap<String, Waiter> waiters = new HashMap<String, Waiter>();
+  private static final HashMap<String, Waiter> waiters = new HashMap<>();
 
   @Override
   public void init(final ServletConfig config) throws ServletException {
@@ -87,7 +86,7 @@ public class SynchServlet extends HttpServlet
   @Override
   protected void service(final HttpServletRequest req,
                          HttpServletResponse resp)
-      throws ServletException, IOException {
+      throws IOException {
 	SynchEngine syncher = null;
     boolean serverError = false;
 
@@ -118,14 +117,14 @@ public class SynchServlet extends HttpServlet
         methodName = req.getMethod();
       }
 
-      MethodBase method = getMethod(syncher, methodName);
+      final MethodBase method = getMethod(syncher, methodName);
 
       if (method == null) {
         info("No method for '" + methodName + "'");
 
-        // ================================================================
+        // ==========================================================
         //     Set the correct response
-        // ================================================================
+        // ==========================================================
       } else {
         method.init(syncher, dumpContent);
         method.doMethod(req, resp);
@@ -145,25 +144,24 @@ public class SynchServlet extends HttpServlet
 
       try {
         tryWait(req, false);
-      } catch (final Throwable t) {}
+      } catch (final Throwable ignored) {}
 
       if (debug() && dumpContent &&
-          (resp instanceof CharArrayWrappedResponse)) {
+          (resp instanceof final CharArrayWrappedResponse wresp)) {
         /* instanceof check because we might get a subsequent exception before
          * we wrap the response
          */
-        CharArrayWrappedResponse wresp = (CharArrayWrappedResponse)resp;
 
         if (wresp.getUsedOutputStream()) {
           debug("------------------------ response written to output stream -------------------");
         } else {
-          String str = wresp.toString();
+          final String str = wresp.toString();
 
           debug("------------------------ Dump of response -------------------");
           debug(str);
           debug("---------------------- End dump of response -----------------");
 
-          byte[] bs = str.getBytes();
+          final byte[] bs = str.getBytes();
           resp = (HttpServletResponse)wresp.getResponse();
           debug("contentLength=" + bs.length);
           resp.setContentLength(bs.length);
@@ -173,11 +171,11 @@ public class SynchServlet extends HttpServlet
 
       /* WebDAV is stateless - toss away the session */
       try {
-        HttpSession sess = req.getSession(false);
+        final HttpSession sess = req.getSession(false);
         if (sess != null) {
           sess.invalidate();
         }
-      } catch (final Throwable t) {}
+      } catch (final Throwable ignored) {}
     }
   }
 
@@ -190,10 +188,8 @@ public class SynchServlet extends HttpServlet
     }
 
     try {
-      if (t instanceof SynchException) {
-        SynchException se = (SynchException)t;
-
-        int status = se.getStatusCode();
+      if (t instanceof final SynchException se) {
+        final int status = se.getStatusCode();
         if (status == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
           error(se);
           serverError = true;
@@ -205,7 +201,7 @@ public class SynchServlet extends HttpServlet
       error(t);
       sendError(syncher, t, resp);
       return true;
-    } catch (Throwable t1) {
+    } catch (final Throwable t1) {
       // Pretty much screwed if we get here
       return true;
     }
@@ -214,9 +210,8 @@ public class SynchServlet extends HttpServlet
   private void sendError(final SynchEngine syncher, final Throwable t,
                          final HttpServletResponse resp) {
     try {
-      if (t instanceof SynchException) {
-        SynchException se = (SynchException)t;
-        QName errorTag = se.getErrorTag();
+      if (t instanceof final SynchException se) {
+        final QName errorTag = se.getErrorTag();
 
         if (errorTag != null) {
           if (debug()) {
@@ -226,7 +221,7 @@ public class SynchServlet extends HttpServlet
           resp.setContentType("text/xml; charset=UTF-8");
           if (!emitError(syncher, errorTag, se.getMessage(),
                          resp.getWriter())) {
-            StringWriter sw = new StringWriter();
+            final StringWriter sw = new StringWriter();
             emitError(syncher, errorTag, se.getMessage(), sw);
 
             try {
@@ -234,7 +229,7 @@ public class SynchServlet extends HttpServlet
                 debug("setStatus(" + se.getStatusCode() + ")");
               }
               resp.sendError(se.getStatusCode(), sw.toString());
-            } catch (Throwable t1) {
+            } catch (final Throwable ignored) {
             }
           }
         } else {
@@ -250,7 +245,7 @@ public class SynchServlet extends HttpServlet
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                        t.getMessage());
       }
-    } catch (Throwable t1) {
+    } catch (final Throwable ignored) {
       // Pretty much screwed if we get here
     }
   }
@@ -260,7 +255,7 @@ public class SynchServlet extends HttpServlet
                             final String extra,
                             final Writer wtr) {
     try {
-      XmlEmit xml = new XmlEmit();
+      final XmlEmit xml = new XmlEmit();
 //      syncher.addNamespace(xml);
 
       xml.startEmit(wtr);
@@ -272,7 +267,7 @@ public class SynchServlet extends HttpServlet
       xml.flush();
 
       return true;
-    } catch (Throwable t1) {
+    } catch (final Throwable t1) {
       // Pretty much screwed if we get here
       return false;
     }
@@ -304,20 +299,20 @@ public class SynchServlet extends HttpServlet
   }
 
   /**
-   * @param syncher
-   * @param name
+   * @param syncher the engine
+   * @param name of method
    * @return method
    */
   public MethodBase getMethod(final SynchEngine syncher,
                               final String name) {
-    MethodInfo mi = methods.get(name.toUpperCase());
+    final MethodInfo mi = methods.get(name.toUpperCase());
 
 //    if ((mi == null) || (getAnonymous() && mi.getRequiresAuth())) {
   //    return null;
     //}
 
     try {
-      MethodBase mb = mi.getMethodClass().newInstance();
+      final MethodBase mb = mi.getMethodClass().newInstance();
 
       mb.init(syncher, dumpContent);
 
@@ -331,10 +326,10 @@ public class SynchServlet extends HttpServlet
   }
 
   private void tryWait(final HttpServletRequest req, final boolean in) throws Throwable {
-    Waiter wtr = null;
+    Waiter wtr;
     synchronized (waiters) {
       //String key = req.getRequestedSessionId();
-      String key = req.getRemoteUser();
+      final String key = req.getRemoteUser();
       if (key == null) {
         return;
       }
@@ -384,8 +379,8 @@ public class SynchServlet extends HttpServlet
    */
   @Override
   public void sessionDestroyed(final HttpSessionEvent se) {
-    HttpSession session = se.getSession();
-    String sessid = session.getId();
+    final HttpSession session = se.getSession();
+    final String sessid = session.getId();
     if (sessid == null) {
       return;
     }
@@ -397,23 +392,23 @@ public class SynchServlet extends HttpServlet
 
   /** Debug
    *
-   * @param req
+   * @param req http request
    */
   public void dumpRequest(final HttpServletRequest req) {
     try {
-      Enumeration names = req.getHeaderNames();
+      final var names = req.getHeaderNames();
 
       String title = "Request headers";
 
       debug(title);
 
       while (names.hasMoreElements()) {
-        String key = (String)names.nextElement();
-        String val = req.getHeader(key);
+        final String key = names.nextElement();
+        final String val = req.getHeader(key);
         debug("  " + key + " = \"" + val + "\"");
       }
 
-      names = req.getParameterNames();
+      final var parnames = req.getParameterNames();
 
       title = "Request parameters";
 
@@ -431,12 +426,12 @@ public class SynchServlet extends HttpServlet
 
       debug(title);
 
-      while (names.hasMoreElements()) {
-        String key = (String)names.nextElement();
-        String val = req.getParameter(key);
+      while (parnames.hasMoreElements()) {
+        final String key = parnames.nextElement();
+        final String val = req.getParameter(key);
         debug("  " + key + " = \"" + val + "\"");
       }
-    } catch (final Throwable t) {
+    } catch (final Throwable ignored) {
     }
   }
 
@@ -483,7 +478,7 @@ public class SynchServlet extends HttpServlet
       try {
         synchConf.stop();
         getManagementContext().stop();
-      } catch (Throwable t){
+      } catch (final Throwable t){
         t.printStackTrace();
       }
     }
@@ -505,7 +500,7 @@ public class SynchServlet extends HttpServlet
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

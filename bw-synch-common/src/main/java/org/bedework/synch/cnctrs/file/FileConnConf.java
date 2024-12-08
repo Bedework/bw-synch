@@ -33,9 +33,9 @@ public class FileConnConf extends SynchConnConf<FileConnectorConfig>
     super(serviceName, store, configName);
   }
 
-  /* ========================================================================
+  /* ==============================================================
    * Conf properties
-   * ======================================================================== */
+   * ============================================================== */
 
   @Override
   public void setMinPoll(final int val) {

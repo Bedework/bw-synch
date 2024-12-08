@@ -43,7 +43,7 @@ public class DbItem<T> implements Comparable<T>, Serializable {
   }
 
   /**
-   * @param val
+   * @param val id
    */
   public void setId(final Long val) {
     id = val;
@@ -107,9 +107,6 @@ public class DbItem<T> implements Comparable<T>, Serializable {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
   @Override
   public int compareTo(final T o) {
     throw new RuntimeException("compareTo must be implemented for a db object");

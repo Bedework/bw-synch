@@ -89,14 +89,15 @@ public class ExchangeConnectorInstance
   public BaseResponseType open() {
     try {
       /* Send a request for a new subscription to exchange */
-      SubscribeRequest s = new SubscribeRequest(sub.getSubscriptionId(),
-                                                end,
-                                                info.getExchangeWatermark(),
-                                                cnctr.getCallbackUri());
+      final SubscribeRequest s =
+              new SubscribeRequest(sub.getSubscriptionId(),
+                                   end,
+                                   info.getExchangeWatermark(),
+                                   cnctr.getCallbackUri());
 
       s.setFolderId(info.getExchangeCalendar());
 
-      Holder<SubscribeResponseType> subscribeResult = new Holder<SubscribeResponseType>();
+      final Holder<SubscribeResponseType> subscribeResult = new Holder<>();
 
       getPort(info).subscribe(s.getRequest(),
                               // null, // impersonation,
@@ -109,7 +110,7 @@ public class ExchangeConnectorInstance
         debug(subscribeResult.toString());
       }
 
-      List<JAXBElement<? extends ResponseMessageType>> rms =
+      final var rms =
           subscribeResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
       if (rms.size() != 1) {
@@ -168,9 +169,11 @@ public class ExchangeConnectorInstance
        * </s:Envelope>
        */
 
-      SubscribeResponseMessageType srm = (SubscribeResponseMessageType)rms.iterator().next().getValue();
+      final var srm = (SubscribeResponseMessageType)rms.iterator()
+                                                       .next()
+                                                       .getValue();
 
-      BaseResponseType br = new ExchangeResponse(srm);
+      final BaseResponseType br = new ExchangeResponse(srm);
 
       if (debug()) {
         debug(br.toString());
@@ -218,11 +221,11 @@ public class ExchangeConnectorInstance
 
   @Override
   public SynchItemsInfo getItemsInfo() {
-    DistinguishedFolderIdType fid = new DistinguishedFolderIdType();
+    final var fid = new DistinguishedFolderIdType();
     fid.setId(DistinguishedFolderIdNameType.fromValue(info.getExchangeCalendar()));
-    FindItemsRequest fir = FindItemsRequest.getSynchInfo(fid);
+    final var fir = FindItemsRequest.getSynchInfo(fid);
 
-    Holder<FindItemResponseType> fiResult = new Holder<FindItemResponseType>();
+    final Holder<FindItemResponseType> fiResult = new Holder<>();
 
     getPort(info).findItem(fir.getRequest(),
                            // null, // impersonation,
@@ -232,27 +235,28 @@ public class ExchangeConnectorInstance
                            fiResult,
                            getServerVersionInfoHolder());
 
-    List<JAXBElement<? extends ResponseMessageType>> rms =
+    final var rms =
       fiResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
-    SynchItemsInfo sii = new SynchItemsInfo();
-    sii.items = new ArrayList<ItemInfo>();
+    final var sii = new SynchItemsInfo();
+    sii.items = new ArrayList<>();
 
-    for (JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
-      FindItemResponseMessageType firm = (FindItemResponseMessageType)jaxbrm.getValue();
+    for (final JAXBElement<? extends ResponseMessageType> jaxbrm: rms) {
+      final var firm = (FindItemResponseMessageType)jaxbrm.getValue();
 
-      FinditemsResponse resp = new FinditemsResponse(firm,
-                                                     true,
-                                                     cnctr.getSyncher().getTzGetter());
+      final var resp = new FinditemsResponse(firm,
+                                             true,
+                                             cnctr.getSyncher()
+                                                  .getTzGetter());
 
       if (debug()) {
         debug(resp.toString());
       }
 
-      for (SynchInfo si: resp.getSynchInfo()) {
-        ExchangeItemInfo eii = new ExchangeItemInfo(si.uid,
-                                                    si.lastMod,
-                                                    si.itemId);
+      for (final SynchInfo si: resp.getSynchInfo()) {
+        final var eii = new ExchangeItemInfo(si.uid,
+                                             si.lastMod,
+                                             si.itemId);
 
         sii.items.add(eii);
       }
@@ -288,7 +292,7 @@ public class ExchangeConnectorInstance
   }
 
   private MailboxCultureType getMailboxCulture() {
-    MailboxCultureType mbc = new MailboxCultureType();
+    final MailboxCultureType mbc = new MailboxCultureType();
 
     mbc.setValue("en-US"); // XXX This probably needs to come from the locale
 
@@ -317,7 +321,7 @@ public class ExchangeConnectorInstance
 
   @Override
   public boolean equals(final Object o) {
-    ExchangeConnectorInstance that = (ExchangeConnectorInstance)o;
+    final ExchangeConnectorInstance that = (ExchangeConnectorInstance)o;
 
     if (that.end != end) {
       return false;
@@ -333,7 +337,7 @@ public class ExchangeConnectorInstance
   private ExchangeServicePortType getExchangeServicePort(final String user,
                                                          final char[] pw) {
     try {
-      URL wsdlURL = new URL(config.getExchangeWSDLURI());
+      final URL wsdlURL = new URL(config.getExchangeWSDLURI());
 
       Authenticator.setDefault(new Authenticator() {
         @Override
@@ -344,11 +348,11 @@ public class ExchangeConnectorInstance
         }
     });
 
-      ExchangeWebService ews =
+      final ExchangeWebService ews =
         new ExchangeWebService(wsdlURL,
                                new QName("http://schemas.microsoft.com/exchange/services/2006/messages",
                                          "ExchangeWebService"));
-      ExchangeServicePortType port = ews.getExchangeWebPort();
+      final ExchangeServicePortType port = ews.getExchangeWebPort();
 
 //      Map<String, Object> context = ((BindingProvider)port).getRequestContext();
 
@@ -374,11 +378,11 @@ public class ExchangeConnectorInstance
   }
 
   IcalendarType fetchItem(final BaseItemIdType id) {
-    List<BaseItemIdType> toFetch = new ArrayList<BaseItemIdType>();
+    final List<BaseItemIdType> toFetch = new ArrayList<>();
 
     toFetch.add(id);
 
-    List<IcalendarType> items = fetchExItems(toFetch);
+    final List<IcalendarType> items = fetchExItems(toFetch);
 
     if (items.size() != 1) {
       return null;
@@ -388,9 +392,9 @@ public class ExchangeConnectorInstance
   }
 
   private List<IcalendarType> fetchExItems(final List<BaseItemIdType> toFetch) {
-    GetItemsRequest gir = new GetItemsRequest(toFetch);
+    final GetItemsRequest gir = new GetItemsRequest(toFetch);
 
-    Holder<GetItemResponseType> giResult = new Holder<GetItemResponseType>();
+    final Holder<GetItemResponseType> giResult = new Holder<>();
 
     getPort(info).getItem(gir.getRequest(),
                           // null, // impersonation,
@@ -400,30 +404,30 @@ public class ExchangeConnectorInstance
                           giResult,
                           getServerVersionInfoHolder());
 
-    List<JAXBElement<? extends ResponseMessageType>> girms =
-      giResult.value.getResponseMessages().getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
+    final var girms = giResult.value.getResponseMessages()
+                                    .getCreateItemResponseMessageOrDeleteItemResponseMessageOrGetItemResponseMessage();
 
-    List<IcalendarType> items = new ArrayList<IcalendarType>();
+    final List<IcalendarType> items = new ArrayList<>();
 
-    for (JAXBElement<? extends ResponseMessageType> jaxbgirm: girms) {
-      Object o = jaxbgirm.getValue();
+    for (final var jaxbgirm: girms) {
+      final Object o = jaxbgirm.getValue();
 
       if (!(o instanceof ItemInfoResponseMessageType)) {
         continue;
       }
 
-      ItemInfoResponseMessageType iirm = (ItemInfoResponseMessageType)o;
+      final var iirm = (ItemInfoResponseMessageType)o;
 
       if (iirm.getItems() == null) {
         continue;
       }
 
-      for (ItemType item: iirm.getItems().getItemOrMessageOrCalendarItem()) {
+      for (final ItemType item: iirm.getItems().getItemOrMessageOrCalendarItem()) {
         if (!(item instanceof CalendarItemType)) {
           continue;
         }
 
-        IcalendarType ical = icalConverter.toXml((CalendarItemType)item);
+        final IcalendarType ical = icalConverter.toXml((CalendarItemType)item);
         if (debug()) {
           // serialize and print
           //debug(comp.toString());
@@ -437,14 +441,13 @@ public class ExchangeConnectorInstance
   }
 
   private Holder<ServerVersionInfo> getServerVersionInfoHolder() {
-    ServerVersionInfo serverVersionInfo = new ServerVersionInfo();
-    Holder<ServerVersionInfo> serverVersion = new Holder<ServerVersionInfo>(serverVersionInfo);
+    final ServerVersionInfo serverVersionInfo = new ServerVersionInfo();
 
-    return serverVersion;
+    return new Holder<>(serverVersionInfo);
   }
 
   private RequestServerVersion getRequestServerVersion() {
-    RequestServerVersion requestVersion = new RequestServerVersion();
+    final RequestServerVersion requestVersion = new RequestServerVersion();
 
     requestVersion.setVersion(ExchangeVersionType.EXCHANGE_2010);
 

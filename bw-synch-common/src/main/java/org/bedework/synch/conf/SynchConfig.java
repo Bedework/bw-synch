@@ -185,7 +185,7 @@ public class SynchConfig extends HibernateConfigBase<SynchConfig> {
   }
 
   /**
-   * @param val
+   * @param val information about ip
    */
   public void setIpInfo(final SortedSet<IpAddrInfo> val) {
     ipInfo = val;
