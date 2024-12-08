@@ -148,7 +148,7 @@ public class ExchangeConnector
     try {
       String endFlag = id.substring(0, 1);
       end = SynchEndType.valueOf(endFlag);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       enb.setStatus(StatusType.ERROR);
       enb.setMessage("Id not starting with end flag");
       return enb;
@@ -209,7 +209,7 @@ public class ExchangeConnector
 
 //      marshalBody(resp,
   //                snr);
- //   } catch (SynchException se) {
+ //   } catch (final SynchException se) {
    //   throw se;
     } catch(Throwable t) {
       throw new SynchException(t);

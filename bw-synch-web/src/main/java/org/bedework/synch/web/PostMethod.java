@@ -32,13 +32,13 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PostMethod extends MethodBase {
   @Override
-  public void init() throws SynchException {
+  public void init() {
   }
 
   @SuppressWarnings({"unchecked"})
   @Override
   public void doMethod(final HttpServletRequest req,
-                       final HttpServletResponse resp) throws SynchException {
+                       final HttpServletResponse resp) {
     try {
       final List<String> resourceUri = getResourceUri(req);
 

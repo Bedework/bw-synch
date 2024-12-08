@@ -53,7 +53,6 @@ public abstract class SerializablePropertiesImpl<T>
 
   /** Build from an array of properties
    * @param props
-   * @throws SynchException
    */
   public SerializablePropertiesImpl(final ArrayOfSynchProperties props) {
     if (props == null) {
@@ -90,7 +89,6 @@ public abstract class SerializablePropertiesImpl<T>
 
   /**
    * @return serialized properties
-   * @throws SynchException
    */
   public String getSynchProperties() {
     if (changed) {
@@ -99,7 +97,7 @@ public abstract class SerializablePropertiesImpl<T>
 
         properties.store(wtr, null);
         synchProperties = wtr.toString();
-      } catch (Throwable t) {
+      } catch (final Throwable t) {
         throw new SynchException(t);
       }
     }
@@ -139,7 +137,6 @@ public abstract class SerializablePropertiesImpl<T>
 
   /** Load the properties from the serialized form.
    *
-   * @throws SynchException
    */
   public synchronized void loadProperties() {
     try {
@@ -160,7 +157,6 @@ public abstract class SerializablePropertiesImpl<T>
    *
    * @param name
    * @param val
-   * @throws SynchException
    */
   public void setProperty(final String name,
                           final String val) {
@@ -181,7 +177,6 @@ public abstract class SerializablePropertiesImpl<T>
    *
    * @param name
    * @return val
-   * @throws SynchException
    */
   public synchronized String getProperty(final String name) {
     if (properties == null) {
@@ -196,7 +191,7 @@ public abstract class SerializablePropertiesImpl<T>
       if (getSynchProperties() != null) {
         ts.append("synchProperties", getSynchProperties());
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -215,7 +210,7 @@ public abstract class SerializablePropertiesImpl<T>
       }
 
       return res;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -232,7 +227,7 @@ public abstract class SerializablePropertiesImpl<T>
     try {
       return Util.compareStrings(getSynchProperties(),
                                  that.getSynchProperties());
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -250,7 +245,7 @@ public abstract class SerializablePropertiesImpl<T>
       toStringSegment(ts);
 
       return ts.toString();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }

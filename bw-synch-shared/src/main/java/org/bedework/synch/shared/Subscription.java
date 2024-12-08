@@ -273,7 +273,7 @@ public interface Subscription {
    * @return the delay in millisecs.
    * @throws SynchException on properties error
    */
-  long refreshDelay() throws SynchException;
+  long refreshDelay();
 
   /** Set the lastRefresh from the current time
    *
@@ -285,11 +285,11 @@ public interface Subscription {
    * @return date value incremented by delay.
    * @throws SynchException on properties error
    */
-  Date nextRefresh() throws SynchException;
+  Date nextRefresh();
 
   /** Which way?
    *
-   * @param val
+   * @param val direction
    */
   void setDirectionEnum(SynchDirectionType val);
 
@@ -301,7 +301,7 @@ public interface Subscription {
 
   /** Which end is master?
    *
-   * @param val
+   * @param val end indicator
    */
   void setMasterEnum(SynchMasterType val);
 

@@ -34,7 +34,7 @@ public class SynchForbidden extends SynchException {
   }
 
   /** Constructor
-   * @param msg
+   * @param msg a message
    */
   public SynchForbidden(final String msg) {
     super(HttpServletResponse.SC_FORBIDDEN, msg);
@@ -42,7 +42,7 @@ public class SynchForbidden extends SynchException {
 
   /** Constructor
    *
-   * @param errorTag
+   * @param errorTag xml tag
    */
   public SynchForbidden(final QName errorTag) {
     super(HttpServletResponse.SC_FORBIDDEN, errorTag);
@@ -50,8 +50,8 @@ public class SynchForbidden extends SynchException {
 
   /** Constructor
    *
-   * @param errorTag
-   * @param msg
+   * @param errorTag xml tag
+   * @param msg a message
    */
   public SynchForbidden(final QName errorTag, final String msg) {
     super(HttpServletResponse.SC_FORBIDDEN, errorTag, msg);

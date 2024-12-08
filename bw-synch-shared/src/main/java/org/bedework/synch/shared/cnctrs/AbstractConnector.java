@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -93,11 +94,9 @@ public abstract class AbstractConnector<T,
   protected PropertiesInfo propInfo;
 
   protected AbstractConnector(final PropertiesInfo propInfo) {
-    if (propInfo == null) {
-      this.propInfo = new PropertiesInfo();
-    } else {
-      this.propInfo = propInfo;
-    }
+    this.propInfo =
+            Objects.requireNonNullElseGet(propInfo,
+                                          PropertiesInfo::new);
   }
 
   private final ConnectorInstanceMap<TI> cinstMap =
@@ -208,16 +207,16 @@ public abstract class AbstractConnector<T,
   }
 
   @Override
-  public void stop() throws SynchException {
+  public void stop() {
     running = false;
   }
 
-  public abstract TI makeInstance(final Subscription sub,
-                                  final SynchEndType end) throws SynchException;
+  public abstract TI makeInstance(Subscription sub,
+                                  SynchEndType end);
 
   @Override
   public TI getConnectorInstance(final Subscription sub,
-                                 final SynchEndType end) throws SynchException {
+                                 final SynchEndType end) {
     if (!running) {
       return null;
     }
@@ -235,13 +234,14 @@ public abstract class AbstractConnector<T,
     return inst;
   }
 
-  class BedeworkNotificationBatch extends NotificationBatch<Notification> {
+  static class BedeworkNotificationBatch
+          extends NotificationBatch<Notification<?>> {
   }
 
   @Override
   public NotificationBatch<TN> handleCallback(final HttpServletRequest req,
                                                   final HttpServletResponse resp,
-                                                  final List<String> resourceUri) throws SynchException {
+                                                  final List<String> resourceUri) {
     return null;
   }
 
@@ -255,85 +255,85 @@ public abstract class AbstractConnector<T,
    *                   Protected methods
    * ==================================================================== */
 
-  protected SynchRemoteServicePortType getPort(final String uri) throws SynchException {
+  protected SynchRemoteServicePortType getPort(final String uri) {
     try {
-      URL wsURL = new URL(uri);
+      final URL wsURL = new URL(uri);
 
-      SynchRemoteService ers =
+      final SynchRemoteService ers =
         new SynchRemoteService(wsURL,
                                new QName(SynchDefs.synchNamespace,
                                          "SynchRemoteService"));
-      SynchRemoteServicePortType port = ers.getSynchRSPort();
 
-      return port;
-    } catch (Throwable t) {
+      return ers.getSynchRSPort();
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  protected Object unmarshalBody(final HttpServletRequest req) throws SynchException {
+  protected Object unmarshalBody(final HttpServletRequest req) {
     try {
-      SOAPMessage msg = getSoapMsgFactory().createMessage(null, // headers
-                                                          req.getInputStream());
+      final SOAPMessage msg =
+              getSoapMsgFactory().createMessage(null,// headers
+                                                req.getInputStream());
 
-      SOAPBody body = msg.getSOAPBody();
+      final SOAPBody body = msg.getSOAPBody();
 
-      Unmarshaller u = getSynchJAXBContext().createUnmarshaller();
+      final Unmarshaller u = getSynchJAXBContext().createUnmarshaller();
 
       Object o = u.unmarshal(body.getFirstChild());
 
       if (o instanceof JAXBElement) {
         // Some of them get wrapped.
-        o = ((JAXBElement)o).getValue();
+        o = ((JAXBElement<?>)o).getValue();
       }
 
       return o;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
 
   protected void marshal(final Object o,
-                         final OutputStream out) throws SynchException {
+                         final OutputStream out) {
     try {
-      Marshaller marshaller = jc.createMarshaller();
+      final Marshaller marshaller = jc.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       dbf.setNamespaceAware(true);
-      Document doc = dbf.newDocumentBuilder().newDocument();
+      final Document doc = dbf.newDocumentBuilder().newDocument();
 
-      SOAPMessage msg = soapMsgFactory.createMessage();
+      final SOAPMessage msg = soapMsgFactory.createMessage();
       msg.getSOAPBody().addDocument(doc);
 
       marshaller.marshal(o,
                          msg.getSOAPBody());
 
       msg.writeTo(out);
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  protected MessageFactory getSoapMsgFactory() throws SynchException {
+  protected MessageFactory getSoapMsgFactory() {
     try {
       if (soapMsgFactory == null) {
         soapMsgFactory = MessageFactory.newInstance();
       }
 
       return soapMsgFactory;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                         Package methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  JAXBContext getSynchJAXBContext() throws SynchException {
+  JAXBContext getSynchJAXBContext() {
     try {
       if (jc == null) {
         jc = JAXBContext.newInstance("org.bedework.synch.wsmessages:" +
@@ -341,16 +341,16 @@ public abstract class AbstractConnector<T,
       }
 
       return jc;
-    } catch(Throwable t) {
+    } catch(final Throwable t) {
       throw new SynchException(t);
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

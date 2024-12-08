@@ -48,7 +48,6 @@ public class SyncFolderitemsResponse extends ExchangeResponse
 
   /**
    * @param sfirm
-   * @throws SynchException
    */
   public SyncFolderitemsResponse(final SyncFolderItemsResponseMessageType sfirm) {
     super(sfirm);

@@ -20,7 +20,6 @@ package org.bedework.synch.shared.cnctrs;
 
 import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
@@ -53,11 +52,10 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * <p>the open method handles any dynamic creation of a connection to the
    * subscribed-to service.
    *
-   * @param sr
+   * @param sr subscribe response
    * @return false if the subscription fails - status has been set in response
-   * @throws SynchException
    */
-  boolean subscribe(SubscribeResponseType sr) throws SynchException;
+  boolean subscribe(SubscribeResponseType sr);
 
   /** Check to see if an unsubscribe can go ahead. This method should ensure
    * that the important properties in the request match those set in the
@@ -66,47 +64,42 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * <p>This method should set the appropriate status and return false if an
    * error occurs.
    *
-   * @param usreq
-   * @param usresp
+   * @param usreq unsubscribe request
+   * @param usresp unsubscribe response
    * @return false if the unsubscribe fails - status has been set in response
-   * @throws SynchException on error
    */
   boolean unsubscribe(UnsubscribeRequestType usreq,
-                      UnsubscribeResponseType usresp) throws SynchException;
+                      UnsubscribeResponseType usresp);
 
   /** Ensure active subscription info matches the subscription
    *
-   * @param req
-   * @param resp
-   * @param cnctr
-   * @param info
+   * @param req http request
+   * @param resp http response
+   * @param cnctr connector
+   * @param info subscription info
    * @return true if all ok
-   * @throws SynchException
    */
-  boolean validateActiveSubInfo(final ActiveSubscriptionRequestType req,
-                                final BaseResponseType resp,
-                                final Connector<?, ?, ?> cnctr,
-                                final BaseSubscriptionInfo info) throws SynchException;
+  boolean validateActiveSubInfo(ActiveSubscriptionRequestType req,
+                                BaseResponseType resp,
+                                Connector<?, ?, ?> cnctr,
+                                BaseSubscriptionInfo info);
 
   /** Called when a subscription is activated on synch engine startup or after
    * creation of a new subscription.
    *
    * @return status + messages
-   * @throws SynchException
    */
-  BaseResponseType open() throws SynchException;
+  BaseResponseType open();
 
   /**
    * @return the connector for this instance
-   * @throws SynchException
    */
-  Connector<?, ?, ?> getConnector() throws SynchException;
+  Connector<?, ?, ?> getConnector();
 
   /**
    * @return the info for the subscription this instance is handling.
-   * @throws SynchException
    */
-  InfoT getSubInfo() throws SynchException;
+  InfoT getSubInfo();
 
   /** Called before a resynch takes place to determine if the end point has
    * changed and needs resynch. Only the source end of a subscription will be
@@ -115,39 +108,34 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * probably always return false.
    *
    * @return true if a change occurred
-   * @throws SynchException
    */
-  boolean changed() throws SynchException;
+  boolean changed();
 
   /**
-   * @param val
-   * @throws SynchException
+   * @param val counts
    */
-  public void setLastCrudCts(final CrudCts val) throws SynchException;
-
-  /**
-   * @return cts
-   * @throws SynchException
-   */
-  public CrudCts getLastCrudCts() throws SynchException;
-
-  /**
-   * @param val
-   * @throws SynchException
-   */
-  public void setTotalCrudCts(final CrudCts val) throws SynchException;
+  void setLastCrudCts(CrudCts val);
 
   /**
    * @return cts
-   * @throws SynchException
    */
-  public CrudCts getTotalCrudCts() throws SynchException;
+  CrudCts getLastCrudCts();
+
+  /**
+   * @param val counts
+   */
+  void setTotalCrudCts(CrudCts val);
+
+  /**
+   * @return cts
+   */
+  public CrudCts getTotalCrudCts();
 
 
   /** Information used to synch ends A and B
    * This information is only valid in the context of a given subscription.
    */
-  public static class ItemInfo {
+  class ItemInfo {
     /** */
     public String uid;
 
@@ -166,8 +154,8 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
      * @param lastSynch
      */
     public ItemInfo(final String uid,
-                     final String lastMod,
-                     final String lastSynch) {
+                    final String lastMod,
+                    final String lastSynch) {
       this.uid = uid;
       this.lastMod = lastMod;
       this.lastSynch = lastSynch;
@@ -175,16 +163,11 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
 
     @Override
     public String toString() {
-      final ToString ts = new ToString(this);
-
-      ts.append("uid", uid);
-
-      ts.append("lastMod", lastMod);
-
-      ts.append("lastSynch", lastSynch);
-
-
-      return ts.toString();
+      return new ToString(this)
+              .append("uid", uid)
+              .append("lastMod", lastMod)
+              .append("lastSynch", lastSynch)
+              .toString();
     }
   }
 
@@ -201,53 +184,47 @@ public interface ConnectorInstance<InfoT extends BaseSubscriptionInfo> {
    * synch.
    *
    * @return List of items - never null, maybe empty.
-   * @throws SynchException
    */
-  SynchItemsInfo getItemsInfo() throws SynchException;
+  SynchItemsInfo getItemsInfo();
 
   /** Add a calendar component
    *
-   * @param val
+   * @param val a calendar component
    * @return response
-   * @throws SynchException
    */
-  AddItemResponseType addItem(IcalendarType val) throws SynchException;
+  AddItemResponseType addItem(IcalendarType val);
 
   /** Fetch a calendar component.  The uid is required as a key as it is the
    * only value which is guaranteed to be available at both ends.
    *
    * @param uid of item
    * @return response
-   * @throws SynchException
    */
-  FetchItemResponseType fetchItem(String uid) throws SynchException;
+  FetchItemResponseType fetchItem(String uid);
 
   /** Fetch a batch of calendar components. The number and order of the result
    * set must match that of the parameter uids.
    *
    * @param uids of items
    * @return responses
-   * @throws SynchException
    */
-  List<FetchItemResponseType> fetchItems(List<String> uids) throws SynchException;
+  List<FetchItemResponseType> fetchItems(List<String> uids);
 
   /** Update a calendar component.
    *
    * @param updates has the change token, href, and the component selection fields set.
    * @return response
-   * @throws SynchException
    */
-  UpdateItemResponseType updateItem(UpdateItemType updates) throws SynchException;
+  UpdateItemResponseType updateItem(UpdateItemType updates);
 
   /** Delete a calendar component.
    *
    * @param uid - of the component to delete.
    * @return response
-   * @throws SynchException
    */
-  DeleteItemResponseType deleteItem(String uid) throws SynchException;
+  DeleteItemResponseType deleteItem(String uid);
 
   /* Reset subscription so we do a refresh of the data
    */
-  void forceRefresh() throws SynchException;
+  void forceRefresh();
 }

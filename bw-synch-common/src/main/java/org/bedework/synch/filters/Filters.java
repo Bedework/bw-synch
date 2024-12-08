@@ -36,7 +36,6 @@ public class Filters {
    * @param val object to filter
    * @param filters the list of filters to apply
    * @return null for discarded object, otherwise possibly modified object
-   * @throws SynchException
    */
   public static IcalendarType doFilters(final IcalendarType val,
                                         final List<Filter> filters) {

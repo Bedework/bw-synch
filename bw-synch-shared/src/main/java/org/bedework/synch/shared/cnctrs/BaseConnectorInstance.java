@@ -80,17 +80,17 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     super(sub, end, info, cnctr, config);
   }
 
-  public abstract URI getUri() throws SynchException;
+  public abstract URI getUri();
 
-  public abstract IcalendarType makeXcal(final InputStream is) throws SynchException;
+  public abstract IcalendarType makeXcal(InputStream is);
 
   /* Fetch the iCalendar for the subscription. If it fails set the status and
    * return false. Unchanged data will return true with no status change.
    */
-  public abstract boolean getIcal() throws SynchException;
+  public abstract boolean getIcal();
 
     @Override
-  public AddItemResponseType addItem(final IcalendarType val) throws SynchException {
+  public AddItemResponseType addItem(final IcalendarType val) {
     if (config.getReadOnly()) {
       throw new SynchException("Immutable");
     }
@@ -99,7 +99,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   @Override
-  public UpdateItemResponseType updateItem(final UpdateItemType updates) throws SynchException {
+  public UpdateItemResponseType updateItem(final UpdateItemType updates) {
     if (config.getReadOnly()) {
       throw new SynchException("Immutable");
     }
@@ -114,7 +114,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   @Override
-  public FetchItemResponseType fetchItem(final String uid) throws SynchException {
+  public FetchItemResponseType fetchItem(final String uid) {
     final FetchItemResponseType fir = new FetchItemResponseType();
 
     if (!getIcal()) {
@@ -163,7 +163,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   @Override
-  public List<FetchItemResponseType> fetchItems(final List<String> uids) throws SynchException {
+  public List<FetchItemResponseType> fetchItems(final List<String> uids) {
     // XXX this should be a search for multiple uids - need to reimplement caldav search
 
     final List<FetchItemResponseType> firs = new ArrayList<>();
@@ -176,13 +176,13 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   @Override
-  public void forceRefresh() throws SynchException {
+  public void forceRefresh() {
     info.setChangeToken(null);  // Force refresh next time
     fetchedIcal = null; // Force refetch
   }
 
   protected boolean changed(final boolean headSupported,
-                            final String contentType) throws SynchException {
+                            final String contentType) {
     /* This implementation needs to at least check the change token for the
      * collection and match it against the stored token.
      */
@@ -235,7 +235,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
   }
 
   @Override
-  public SynchItemsInfo getItemsInfo() throws SynchException {
+  public SynchItemsInfo getItemsInfo() {
     final SynchItemsInfo sii = new SynchItemsInfo();
     sii.items = new ArrayList<>();
     sii.setStatus(StatusType.OK);
@@ -264,7 +264,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
 
   private CloseableHttpResponse getChangedResponse(
           final boolean headSupported,
-          final String contentType) throws SynchException {
+          final String contentType) {
     try {
       if (headSupported) {
         return HttpUtil.doHead(getClient(),
@@ -300,7 +300,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
    * return false. Unchanged data will return true with no status change.
    *
    */
-  protected boolean getIcal(final String contentType) throws SynchException {
+  protected boolean getIcal(final String contentType) {
     try {
       if (fetchedIcal != null) {
         return true;

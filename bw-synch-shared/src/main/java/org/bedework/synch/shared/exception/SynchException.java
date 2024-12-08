@@ -47,7 +47,7 @@ import javax.xml.namespace.QName;
 public class SynchException extends RuntimeException {
   /** > 0 if set
    */
-  int statusCode = -1;
+  int statusCode;
   QName errorTag;
 
   /** */
@@ -62,29 +62,25 @@ public class SynchException extends RuntimeException {
 
   /** Constructor
    *
-   * @param s
+   * @param msg a message
    */
-  public SynchException(final String s) {
-    super(s);
-    if (statusCode < 0) {
-      statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-    }
+  public SynchException(final String msg) {
+    super(msg);
+    statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
   }
 
   /** Constructor
    *
-   * @param t
+   * @param t Throwable
    */
   public SynchException(final Throwable t) {
     super(t);
-    if (statusCode < 0) {
-      statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-    }
+    statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
   }
 
   /** Constructor
    *
-   * @param st
+   * @param st a status
    */
   public SynchException(final int st) {
     statusCode = st;
@@ -92,8 +88,8 @@ public class SynchException extends RuntimeException {
 
   /** Constructor
    *
-   * @param st
-   * @param msg
+   * @param st a status
+   * @param msg a message
    */
   public SynchException(final int st, final String msg) {
     super(msg);
@@ -102,7 +98,7 @@ public class SynchException extends RuntimeException {
 
   /** Constructor
    *
-   * @param errorTag
+   * @param errorTag xml tag
    */
   public SynchException(final QName errorTag) {
     statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -111,8 +107,8 @@ public class SynchException extends RuntimeException {
 
   /** Constructor
    *
-   * @param st
-   * @param errorTag
+   * @param st a status
+   * @param errorTag xml tag
    */
   public SynchException(final int st, final QName errorTag) {
     statusCode = st;
@@ -121,9 +117,9 @@ public class SynchException extends RuntimeException {
 
   /** Constructor
    *
-   * @param st
-   * @param errorTag
-   * @param msg
+   * @param st a status
+   * @param errorTag xml tag
+   * @param msg a message
    */
   public SynchException(final int st, final QName errorTag, final String msg) {
     super(msg);

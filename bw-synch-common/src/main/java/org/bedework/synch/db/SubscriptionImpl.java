@@ -422,7 +422,6 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
 
   /**
    * @return the delay in millisecs.
-   * @throws SynchException
    */
   public long refreshDelay() {
     String delay = "31536000000"; // About a year
@@ -446,7 +445,6 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
   /** Get a next refresh date based on the last refresh value
    *
    * @return date value incremented by delay.
-   * @throws SynchException
    */
   public Date nextRefresh() {
     if (getLastRefresh() == null) {
@@ -461,7 +459,7 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
       }
 
       return new Date(dt.getTime() + ((getErrorCt() + 1) * refreshDelay()));
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }

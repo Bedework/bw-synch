@@ -25,7 +25,7 @@ package org.bedework.synch.shared;
 public interface SynchDefs {
   /** and does it tell us when something changes or do we have to ask?
    */
-  public enum SynchKind {
+  enum SynchKind {
     /** we have to ask */
     poll,
 
@@ -35,5 +35,5 @@ public interface SynchDefs {
 
   /** Namespace of the synch SOAP service
    */
-  static final String synchNamespace = "http://www.bedework.org/synch/wsmessages";
+  String synchNamespace = "http://www.bedework.org/synch/wsmessages";
 }

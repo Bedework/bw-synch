@@ -132,20 +132,20 @@ public class SynchServlet extends HttpServlet
       }
 //    } catch (WebdavForbidden wdf) {
   //    sendError(syncher, wdf, resp);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       serverError = handleException(syncher, t, resp, serverError);
     } finally {
       if (syncher != null) {
         try {
 //          syncher.close();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
           serverError = handleException(syncher, t, resp, serverError);
         }
       }
 
       try {
         tryWait(req, false);
-      } catch (Throwable t) {}
+      } catch (final Throwable t) {}
 
       if (debug() && dumpContent &&
           (resp instanceof CharArrayWrappedResponse)) {
@@ -177,7 +177,7 @@ public class SynchServlet extends HttpServlet
         if (sess != null) {
           sess.invalidate();
         }
-      } catch (Throwable t) {}
+      } catch (final Throwable t) {}
     }
   }
 
@@ -307,10 +307,9 @@ public class SynchServlet extends HttpServlet
    * @param syncher
    * @param name
    * @return method
-   * @throws SynchException
    */
   public MethodBase getMethod(final SynchEngine syncher,
-                              final String name) throws SynchException {
+                              final String name) {
     MethodInfo mi = methods.get(name.toUpperCase());
 
 //    if ((mi == null) || (getAnonymous() && mi.getRequiresAuth())) {
@@ -437,7 +436,7 @@ public class SynchServlet extends HttpServlet
         String val = req.getParameter(key);
         debug("  " + key + " = \"" + val + "\"");
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
     }
   }
 

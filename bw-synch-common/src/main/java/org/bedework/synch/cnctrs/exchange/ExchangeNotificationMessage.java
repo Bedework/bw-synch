@@ -48,7 +48,6 @@ public class ExchangeNotificationMessage extends ExchangeResponse {
 
   /**
    * @param snrm
-   * @throws SynchException
    */
   public ExchangeNotificationMessage(final SendNotificationResponseMessageType snrm) {
     super(snrm);

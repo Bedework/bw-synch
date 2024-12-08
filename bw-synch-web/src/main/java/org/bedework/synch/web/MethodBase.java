@@ -51,9 +51,8 @@ public abstract class MethodBase implements Logged {
 
   /** Called at each request
    *
-   * @throws SynchException on fatal error
    */
-  public abstract void init() throws SynchException;
+  public abstract void init();
 
   private final SimpleDateFormat httpDateFormatter =
       new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
@@ -61,7 +60,6 @@ public abstract class MethodBase implements Logged {
   /**
    * @param req http request
    * @param resp http response
-   * @throws SynchException on fatal error
    */
   public abstract void doMethod(HttpServletRequest req,
                                 HttpServletResponse resp)
@@ -110,7 +108,7 @@ public abstract class MethodBase implements Logged {
    * @throws SynchException on init failure
    */
   public void init(final SynchEngine syncher,
-                   final boolean dumpContent) throws SynchException {
+                   final boolean dumpContent) {
     this.syncher = syncher;
     this.dumpContent = dumpContent;
 //    xml = syncher.getXmlEmit();
@@ -226,7 +224,7 @@ public abstract class MethodBase implements Logged {
 
   /*
   protected void addStatus(final int status,
-                           final String message) throws SynchException {
+                           final String message) {
     try {
       if (message == null) {
 //        message = WebdavStatusCode.getMessage(status);
@@ -235,14 +233,14 @@ public abstract class MethodBase implements Logged {
       property(WebdavTags.status, "HTTP/1.1 " + status + " " + message);
     } catch (SynchException wde) {
       throw wde;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
   */
 
   @SuppressWarnings("unused")
-  protected void addHeaders(final HttpServletResponse resp) throws SynchException {
+  protected void addHeaders(final HttpServletResponse resp) {
     // This probably needs changes
 /*
     StringBuilder methods = new StringBuilder();

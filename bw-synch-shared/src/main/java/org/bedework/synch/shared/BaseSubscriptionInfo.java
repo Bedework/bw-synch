@@ -31,7 +31,7 @@ import java.util.List;
  * @author Mike Douglass
  */
 public class BaseSubscriptionInfo {
-  private final SubscriptionConnectorInfo info;
+  private final SubscriptionConnectorInfo<?> info;
 
   /* properties saved by connector instance */
 
@@ -111,9 +111,9 @@ public class BaseSubscriptionInfo {
       }
 
       try {
-        cc.created = Long.valueOf(cts[0]);
-        cc.updated = Long.valueOf(cts[1]);
-        cc.deleted = Long.valueOf(cts[2]);
+        cc.created = Long.parseLong(cts[0]);
+        cc.updated = Long.parseLong(cts[1]);
+        cc.deleted = Long.parseLong(cts[2]);
       } catch (final Throwable ignored) {
       }
 
@@ -122,15 +122,14 @@ public class BaseSubscriptionInfo {
 
     @Override
     public String toString() {
-      return String.valueOf(created) + "," + deleted + "," + updated;
+      return created + "," + deleted + "," + updated;
     }
   }
 
   /**
    * @param info subscription connector info
-   * @throws SynchException
    */
-  public BaseSubscriptionInfo(final SubscriptionConnectorInfo info) throws SynchException {
+  public BaseSubscriptionInfo(final SubscriptionConnectorInfo<?> info) {
     this.info = info;
     info.loadProperties();
   }
@@ -138,126 +137,112 @@ public class BaseSubscriptionInfo {
   /** Path to the calendar collection.
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setUri(final String val) throws SynchException {
+  public void setUri(final String val) {
     info.setProperty(propnameUri, val);
   }
 
   /** Path to the calendar collection
    *
    * @return String
-   * @throws SynchException
    */
-  public String getUri() throws SynchException {
+  public String getUri() {
     return info.getProperty(propnameUri);
   }
 
   /** Principal requesting synch service
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setPrincipalHref(final String val) throws SynchException {
+  public void setPrincipalHref(final String val) {
     info.setProperty(propnamePrincipal, val);
   }
 
   /** Principal requesting synch service
    *
    * @return String
-   * @throws SynchException
    */
-  public String getPrincipalHref() throws SynchException {
+  public String getPrincipalHref() {
     return info.getProperty(propnamePrincipal);
   }
 
   /** Principals password
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setPassword(final String val) throws SynchException {
+  public void setPassword(final String val) {
     info.setProperty(propnamePassword, val);
   }
 
   /** Principal password
    *
    * @return String
-   * @throws SynchException
    */
-  public String getPassword() throws SynchException {
+  public String getPassword() {
     return info.getProperty(propnamePassword);
   }
 
   /** Opaque data for the connection
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setOpaqueData(final String val) throws SynchException {
+  public void setOpaqueData(final String val) {
     info.setProperty(propnameOpaqueData, val);
   }
 
   /** Opaque data for the connection
    *
    * @return String
-   * @throws SynchException
    */
-  public String getOpaqueData() throws SynchException {
+  public String getOpaqueData() {
     return info.getProperty(propnameOpaqueData);
   }
 
   /** ChangeToken
    *
    * @param val    String
-   * @throws SynchException
    */
-  public void setChangeToken(final String val) throws SynchException {
+  public void setChangeToken(final String val) {
     info.setProperty(propnameChangeToken, val);
   }
 
   /** ChangeToken
    *
    * @return String
-   * @throws SynchException
    */
-  public String getChangeToken() throws SynchException {
+  public String getChangeToken() {
     return info.getProperty(propnameChangeToken);
   }
 
   /** HTTP status or other appropriate value
    * @param val status
-   * @throws SynchException
    */
-  public void setLastRefreshStatus(final String val) throws SynchException {
+  public void setLastRefreshStatus(final String val) {
     info.setProperty(propnameLastRefreshStatus, val);
   }
 
   /**
    * @return String lastRefreshStatus
-   * @throws SynchException
    */
-  public String getLastRefreshStatus() throws SynchException {
+  public String getLastRefreshStatus() {
     return info.getProperty(propnameLastRefreshStatus);
   }
 
   /**
    * @param val crud counts
-   * @throws SynchException
    */
-  public void setLastCrudCts(final CrudCts val) throws SynchException {
+  public void setLastCrudCts(final CrudCts val) {
     info.setProperty(propnameLastCrudCts, val.toString());
   }
 
   /**
    * @return cts
-   * @throws SynchException
    */
-  public CrudCts getLastCrudCts() throws SynchException {
-    String s = info.getProperty(propnameLastCrudCts);
+  public CrudCts getLastCrudCts() {
+    final String s = info.getProperty(propnameLastCrudCts);
 
 
-    CrudCts cc = CrudCts.fromString(s);
+    final CrudCts cc = CrudCts.fromString(s);
 
     if (s == null) {
       setLastCrudCts(cc); // Ensure they get saved
@@ -268,21 +253,19 @@ public class BaseSubscriptionInfo {
 
   /**
    * @param val crud counts
-   * @throws SynchException
    */
-  public void setTotalCrudCts(final CrudCts val) throws SynchException {
+  public void setTotalCrudCts(final CrudCts val) {
     info.setProperty(propnameTotalCrudCts, val.toString());
   }
 
   /**
    * @return cts
-   * @throws SynchException
    */
-  public CrudCts getTotalCrudCts() throws SynchException {
-    String s = info.getProperty(propnameTotalCrudCts);
+  public CrudCts getTotalCrudCts() {
+    final String s = info.getProperty(propnameTotalCrudCts);
 
 
-    CrudCts cc = CrudCts.fromString(s);
+    final CrudCts cc = CrudCts.fromString(s);
 
     if (s == null) {
       setTotalCrudCts(cc); // Ensure they get saved
@@ -294,52 +277,46 @@ public class BaseSubscriptionInfo {
   /** Refresh delay - millisecs
    *
    * @param val millisecs
-   * @throws SynchException
    */
-  public void setRefreshDelay(final String val) throws SynchException {
+  public void setRefreshDelay(final String val) {
     info.setProperty(propnameRefreshDelay, val);
   }
 
   /** Refresh delay - millisecs
    *
    * @return String refreshDelay
-   * @throws SynchException
    */
-  public String getRefreshDelay() throws SynchException {
+  public String getRefreshDelay() {
     return info.getProperty(propnameRefreshDelay);
   }
 
   /** set arbitrary named property
    * @param name of property
    * @param val - String property value
-   * @throws SynchException
    */
-  public void setProperty(final String name, final String val) throws SynchException {
+  public void setProperty(final String name, final String val) {
     info.setProperty(name, val);
   }
 
   /** Get arbitrary named property
    * @param name of property
    * @return String property value
-   * @throws SynchException
    */
-  public String getProperty(final String name) throws SynchException {
+  public String getProperty(final String name) {
     return info.getProperty(name);
   }
 
   /**
    * @param classes ordered list of class names
-   * @throws SynchException
    */
-  public void setInFilterClasses(List<String> classes) throws SynchException {
+  public void setInFilterClasses(final List<String> classes) {
     info.setProperty(propnameInputFilterClasses, asString(classes));
   }
 
   /**
    * @return ordered list of class names
-   * @throws SynchException
    */
-  public List<String> getInFilterClasses() throws SynchException {
+  public List<String> getInFilterClasses() {
     try {
       return Util.getList(info.getProperty(
                                   propnameInputFilterClasses),
@@ -351,17 +328,15 @@ public class BaseSubscriptionInfo {
 
   /**
    * @param classes ordered list of class names
-   * @throws SynchException
    */
-  public void setOutFilterClasses(List<String> classes) throws SynchException {
+  public void setOutFilterClasses(final List<String> classes) {
     info.setProperty(propnameOutputFilterClasses, asString(classes));
   }
 
   /**
    * @return ordered list of class names
-   * @throws SynchException
    */
-  public List<String> getOutFilterClasses() throws SynchException {
+  public List<String> getOutFilterClasses() {
     try {
       return Util.getList(info.getProperty(
                                   propnameOutputFilterClasses),
@@ -371,11 +346,11 @@ public class BaseSubscriptionInfo {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Convenience methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private String asString(List<String> vals) {
+  private String asString(final List<String> vals) {
     final StringBuilder sb = new StringBuilder();
     String delim = "";
 
@@ -391,25 +366,25 @@ public class BaseSubscriptionInfo {
 
   protected void toStringSegment(final ToString ts) {
     try {
-      ts.append("uri", getUri());
-      ts.newLine();
-      ts.append("principalHref", getPrincipalHref());
-      ts.append("password", getPassword());
-      ts.append("etag", getChangeToken());
-      ts.newLine();
-      ts.append("lastRefreshStatus", getLastRefreshStatus());
-      ts.newLine();
-      ts.append("lastCrudCts", getLastCrudCts());
-      ts.append("totalCrudCts", getTotalCrudCts());
-      ts.append("refreshDelay", getRefreshDelay());
-    } catch (Throwable t) {
-      ts.append(t.getMessage());
+      ts.append("uri", getUri())
+        .newLine()
+        .append("principalHref", getPrincipalHref())
+        .append("password", getPassword())
+        .append("etag", getChangeToken())
+        .newLine()
+        .append("lastRefreshStatus", getLastRefreshStatus())
+        .newLine()
+        .append("lastCrudCts", getLastCrudCts())
+        .append("totalCrudCts", getTotalCrudCts())
+        .append("refreshDelay", getRefreshDelay());
+    } catch (final Throwable t) {
+      ts.append(t);
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                        Object methods
-   * ==================================================================== */
+   * ============================================================== */
 
   @Override
   public String toString() {

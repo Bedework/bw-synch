@@ -36,7 +36,6 @@ public class ExchangeNotification extends
    * @param sub
    * @param end
    * @param enm
-   * @throws SynchException
    */
   public ExchangeNotification(final Subscription sub,
                               final SynchEndType end,

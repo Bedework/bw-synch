@@ -25,12 +25,12 @@ import java.io.Serializable;
  * @author douglm
  */
 public class Stat implements Serializable {
-  private String name;
-  private String value;
+  private final String name;
+  private final String value;
 
   /**
-   * @param name
-   * @param value
+   * @param name of value
+   * @param value for stat
    */
   public Stat(final String name,
                      final String value) {
@@ -39,8 +39,8 @@ public class Stat implements Serializable {
   }
 
   /**
-   * @param name
-   * @param value
+   * @param name of value
+   * @param value for stat
    */
   public Stat(final String name,
                      final long value) {
@@ -64,13 +64,10 @@ public class Stat implements Serializable {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getName());
-    sb.append(" = ");
-    sb.append(getValue());
-    sb.append("\n");
-
-    return sb.toString();
+    return new StringBuilder().append(getName())
+                              .append(" = ")
+                              .append(getValue())
+                              .append("\n")
+                              .toString();
   }
 }

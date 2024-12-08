@@ -26,6 +26,7 @@ import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
+import org.bedework.util.misc.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 
@@ -64,7 +65,7 @@ public class Notification<NI extends Notification.NotificationItem> {
 
   private SynchEndType end;
 
-  private List<NI> notifications = new ArrayList<>();
+  private final List<NI> notifications = new ArrayList<>();
 
   /** Create a notification for a subscription
    * @param sub subscription
@@ -401,53 +402,45 @@ public class Notification<NI extends Notification.NotificationItem> {
       return subStatusResponse;
     }
 
-    protected void toStringSegment(final StringBuilder sb) {
-      sb.append("action=");
-      sb.append(getAction());
-      sb.append("uid=");
-      sb.append(getUid());
+    protected void toStringSegment(final ToString ts) {
+      ts.append("action", getAction())
+        .append("uid", getUid());
     }
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+      final var ts = new ToString(this);
 
-      toStringSegment(sb);
+      toStringSegment(ts);
 
-      sb.append("}");
-
-      return sb.toString();
+      return ts.toString();
     }
   }
 
-  protected void toStringSegment(final StringBuilder sb) {
-    sb.append("sub=");
-    sb.append(getSub());
-
-    sb.append(", end=");
-    sb.append(getEnd());
+  protected void toStringSegment(final ToString ts) {
+    ts.append("sub", getSub())
+      .append("end", getEnd())
+      .delimitersOff();
 
     String delim = ",\n   notification items{\n      ";
-    for (NI ni: getNotifications()) {
-      sb.append(delim);
-      sb.append(ni.toString());
+    for (final NI ni: getNotifications()) {
+      ts.append(delim)
+        .append(ni.toString());
 
       delim =",\n      ";
     }
 
-    if (getNotifications().size() > 0) {
-      sb.append("}");
+    if (!getNotifications().isEmpty()) {
+      ts.append("}");
     }
   }
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
+    final var ts = new ToString(this);
 
-    toStringSegment(sb);
+    toStringSegment(ts);
 
-    sb.append("}");
-
-    return sb.toString();
+    return ts.toString();
   }
 }

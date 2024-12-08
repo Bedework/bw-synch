@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.shared;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
 import org.bedework.synch.wsmessages.SynchPropertyInfoType;
 import org.bedework.synch.wsmessages.SynchPropertyType;
@@ -30,7 +29,7 @@ import java.util.Properties;
 
 /** Help handling properties. This class will hold property info for the parent
  * object. This is built by calls to add.
- *
+ * <p>
  * It will also build a new PropertiesInfo object based on a set of properties
  * and a set of current values. This can then be used to transmit the current
  * values to a remote client.
@@ -38,12 +37,12 @@ import java.util.Properties;
  * @author douglm
  */
 public class PropertiesInfo {
-  private List<SynchPropertyInfo> propInfo =
+  private final List<SynchPropertyInfo> propInfo =
       new ArrayList<>();
 
-  /* ====================================================================
+  /* ==========================================================
    *                   Some common properties
-   * ==================================================================== */
+   * ========================================================== */
 
   /** URI
    *
@@ -187,12 +186,11 @@ public class PropertiesInfo {
 
   /** Ensure info properties are valid for a new subscription
    *
-   * @param info
+   * @param info subscription info
    * @return true if all ok
-   * @throws SynchException
    */
-  public boolean validSubscribeInfoProperties(final BaseSubscriptionInfo info) throws SynchException {
-    for (SynchPropertyInfo spi: propInfo) {
+  public boolean validSubscribeInfoProperties(final BaseSubscriptionInfo info) {
+    for (final SynchPropertyInfo spi: propInfo) {
       if (spi.isRequired() &&
           (info.getProperty(spi.getName()) == null)) {
         return false;
@@ -207,10 +205,9 @@ public class PropertiesInfo {
    * @param info - current properties
    * @param propsArray - properties in a request to be validated
    * @return true if all ok
-   * @throws SynchException
    */
   public boolean validRequestProperties(final BaseSubscriptionInfo info,
-                                        final ArrayOfSynchProperties propsArray) throws SynchException {
+                                        final ArrayOfSynchProperties propsArray) {
     final Properties props = new Properties();
 
     if (propsArray != null) {
@@ -219,20 +216,20 @@ public class PropertiesInfo {
       }
     }
 
-    for (SynchPropertyInfo spi: propInfo) {
+    for (final SynchPropertyInfo spi: propInfo) {
       if (!spi.isRequired()) {
         continue;
       }
 
-      String propName = spi.getName();
-      String subVal = info.getProperty(propName);
+      final String propName = spi.getName();
+      final String subVal = info.getProperty(propName);
 
       if (subVal == null) {
         // It should never be null - but a change of requirement s may have caused this
         continue;
       }
 
-      String unsubVal = props.getProperty(propName);
+      final String unsubVal = props.getProperty(propName);
 
       if ((unsubVal == null) || !unsubVal.equals(subVal)) {
         return false;
@@ -244,7 +241,7 @@ public class PropertiesInfo {
 
   /** Add all the properties in this list to the parameter
    *
-   * @param l
+   * @param l list of properties
    */
   public void addAllToList(final List<SynchPropertyInfoType> l) {
     l.addAll(propInfo);
@@ -252,11 +249,9 @@ public class PropertiesInfo {
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
-
-    ts.append("propInfo", propInfo);
-
-    return ts.toString();
+    return new ToString(this)
+            .append("propInfo", propInfo)
+            .toString();
   }
 
   private void prop(final String name,

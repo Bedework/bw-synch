@@ -111,7 +111,6 @@ public class XmlIcalConvert implements Logged, Defs {
   /**
    * @param cal
    * @return Icalendar
-   * @throws SynchException
    */
   public IcalendarType toXml(final CalendarItemType cal) {
     /* TODO
@@ -596,7 +595,6 @@ public class XmlIcalConvert implements Logged, Defs {
    * @param tzdef
    * @param extzid
    * @return tz stuff
-   * @throws SynchException
    */
   public TzStuff getTz(final TimeZoneDefinitionType tzdef,
                        final String extzid) {
@@ -618,7 +616,7 @@ public class XmlIcalConvert implements Logged, Defs {
       }
 
       return t;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -739,7 +737,7 @@ public class XmlIcalConvert implements Logged, Defs {
       }
 
       return jaxbProp;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }

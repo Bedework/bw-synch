@@ -177,9 +177,9 @@ public class ExchangeConnectorInstance
       }
 
       return br;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -299,9 +299,9 @@ public class ExchangeConnectorInstance
     try {
       return getExchangeServicePort(sub.getPrincipalHref(),
                                     cnctr.getSyncher().decrypt(sub.getPassword()).toCharArray()); // XXX need to en/decrypt
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
@@ -368,7 +368,7 @@ public class ExchangeConnectorInstance
 
 
       return port;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }

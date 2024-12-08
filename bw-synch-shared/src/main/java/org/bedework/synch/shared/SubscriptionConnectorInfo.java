@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.shared;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.filters.Filter;
 
 import java.util.List;
@@ -33,24 +32,22 @@ public interface SubscriptionConnectorInfo<T>
   /**
    * @param val id
    */
-  public void setConnectorId(final String val);
+  void setConnectorId(String val);
 
   /**
    * @param sub the subscription
    * @return Ordered list of filters
-   * @throws SynchException
    */
-  List<Filter> getInputFilters(final Subscription sub) throws SynchException;
+  List<Filter> getInputFilters(Subscription sub);
 
   /**
    * @param sub the subscription
    * @return Ordered list of filters
-   * @throws SynchException
    */
-  public List<Filter> getOutputFilters(final Subscription sub) throws SynchException;
+  List<Filter> getOutputFilters(Subscription sub);
 
   /**
    * @return id
    */
-  public String getConnectorId();
+  String getConnectorId();
 }

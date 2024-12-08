@@ -35,7 +35,7 @@ public class SynchBadRequest extends SynchException {
 
   /** Constructor
    *
-   * @param msg
+   * @param msg a message
    */
   public SynchBadRequest(final String msg) {
     super(HttpServletResponse.SC_BAD_REQUEST, msg);
@@ -43,7 +43,7 @@ public class SynchBadRequest extends SynchException {
 
   /** Constructor
    *
-   * @param errorTag
+   * @param errorTag xml tag
    */
   public SynchBadRequest(final QName errorTag) {
     super(HttpServletResponse.SC_BAD_REQUEST, errorTag);
@@ -51,8 +51,8 @@ public class SynchBadRequest extends SynchException {
 
   /** Constructor
    *
-   * @param errorTag
-   * @param msg
+   * @param errorTag xml tag
+   * @param msg a message
    */
   public SynchBadRequest(final QName errorTag, final String msg) {
     super(HttpServletResponse.SC_BAD_REQUEST, errorTag, msg);

@@ -32,7 +32,6 @@ public class ExsynchSubscribeResponse extends ExchangeResponse {
 
   /**
    * @param srm
-   * @throws SynchException
    */
   public ExsynchSubscribeResponse(final SubscribeResponseMessageType srm) {
     /* Successful looks something like

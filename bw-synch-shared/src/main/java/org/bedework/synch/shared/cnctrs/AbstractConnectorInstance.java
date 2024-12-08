@@ -22,7 +22,6 @@ import org.bedework.synch.shared.BaseSubscriptionInfo;
 import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.conf.ConnectorConfigI;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
@@ -73,7 +72,7 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
     this.config = config;
   }
 
-  public Connector getConnector() {
+  public Connector<?, ?, ?> getConnector() {
     return cnctr;
   }
 
@@ -83,26 +82,26 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
   }
 
   @Override
-  public BaseResponseType open() throws SynchException {
+  public BaseResponseType open() {
     return null;
   }
 
   @Override
-  public boolean subscribe(final SubscribeResponseType sr) throws SynchException {
+  public boolean subscribe(final SubscribeResponseType sr) {
     return validateSubInfo(sr, getConnector(), getSubInfo());
   }
 
   @Override
   public boolean unsubscribe(final UnsubscribeRequestType usreq,
-                             final UnsubscribeResponseType usresp) throws SynchException {
+                             final UnsubscribeResponseType usresp) {
     return validateActiveSubInfo(usreq, usresp, getConnector(), getSubInfo());
   }
 
   @Override
   public boolean validateActiveSubInfo(final ActiveSubscriptionRequestType req,
                                        final BaseResponseType resp,
-                                       final Connector cnctr,
-                                       final BaseSubscriptionInfo info) throws SynchException {
+                                       final Connector<?, ?, ?> cnctr,
+                                       final BaseSubscriptionInfo info) {
     resp.setStatus(StatusType.OK);
     if (req.getEnd() != end) {
       return true;
@@ -118,39 +117,23 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
     return true;
   }
 
-  /**
-   * @param val
-   * @throws SynchException
-   */
   @Override
-  public void setLastCrudCts(final CrudCts val) throws SynchException {
+  public void setLastCrudCts(final CrudCts val) {
     info.setLastCrudCts(val);
   }
 
-  /**
-   * @return cts
-   * @throws SynchException
-   */
   @Override
-  public CrudCts getLastCrudCts() throws SynchException {
+  public CrudCts getLastCrudCts() {
     return info.getLastCrudCts();
   }
 
-  /**
-   * @param val
-   * @throws SynchException
-   */
   @Override
-  public void setTotalCrudCts(final CrudCts val) throws SynchException {
+  public void setTotalCrudCts(final CrudCts val) {
     info.setTotalCrudCts(val);
   }
 
-  /**
-   * @return cts
-   * @throws SynchException
-   */
   @Override
-  public CrudCts getTotalCrudCts() throws SynchException {
+  public CrudCts getTotalCrudCts() {
     return info.getTotalCrudCts();
   }
 
@@ -160,15 +143,14 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
 
   /** Ensure subscription info is valid
    *
-   * @param sr
-   * @param cnctr
-   * @param info
+   * @param sr subscribe response
+   * @param cnctr connector
+   * @param info subscription info
    * @return true if all ok
-   * @throws SynchException
    */
   protected boolean validateSubInfo(final SubscribeResponseType sr,
-                                    final Connector cnctr,
-                                    final BaseSubscriptionInfo info) throws SynchException {
+                                    final Connector<?, ?, ?> cnctr,
+                                    final BaseSubscriptionInfo info) {
     if (!cnctr.getPropertyInfo().validSubscribeInfoProperties(info)) {
       sr.setStatus(StatusType.ERROR);
       return false;
@@ -177,7 +159,7 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
     return true;
   }
 
-  protected CloseableHttpClient getClient() throws SynchException {
+  protected CloseableHttpClient getClient() {
     if (client != null) {
       return client;
     }
@@ -206,7 +188,7 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
   private String decryptPw(final BwCalendar val) throws CalFacadeException {
     try {
       return getSvc().getEncrypter().decrypt(val.getRemotePw());
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new CalFacadeException(t);
     }
   }

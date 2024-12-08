@@ -58,15 +58,14 @@ public abstract class AbstractFilter implements Logged, Filter {
   /** Initialise the filter.
    *
    * @param sub the subscription
-   * @throws SynchException
    */
-  public void init(final Subscription sub) throws SynchException {
+  public void init(final Subscription sub) {
     this.sub = sub;
   }
 
   @Override
-  public void addDifferSkipItems(final List<Object> skipList) throws SynchException {
-    Collection<Object> stripMapValues = getStripMap().values();
+  public void addDifferSkipItems(final List<Object> skipList) {
+    final Collection<Object> stripMapValues = getStripMap().values();
 
     if (Util.isEmpty(stripMapValues)) {
       return;
@@ -75,8 +74,7 @@ public abstract class AbstractFilter implements Logged, Filter {
     skipList.addAll(stripMapValues);
   }
 
-  protected synchronized Map<String, Object> getStripMap()
-          throws SynchException {
+  protected synchronized Map<String, Object> getStripMap() {
     if (stripMap != null) {
       return stripMap;
     }
@@ -88,7 +86,7 @@ public abstract class AbstractFilter implements Logged, Filter {
 
   /* Remove all the properties or components we are not sending to the "to" end.
    */
-  protected IcalendarType stripIcal(final IcalendarType val) throws SynchException {
+  protected IcalendarType stripIcal(final IcalendarType val) {
     try {
       final Map<String, Object> stripMap = getStripMap();
 
@@ -96,10 +94,10 @@ public abstract class AbstractFilter implements Logged, Filter {
         return val;
       }
 
-      IcalendarType res = new IcalendarType();
+      final IcalendarType res = new IcalendarType();
 
-      for (VcalendarType vcal: val.getVcalendar()) {
-        VcalendarType v = (VcalendarType)XcalUtil.cloneComponent(vcal);
+      for (final VcalendarType vcal: val.getVcalendar()) {
+        final VcalendarType v = (VcalendarType)XcalUtil.cloneComponent(vcal);
         res.getVcalendar().add(v);
 
         v.setProperties(stripProps(stripMap, vcal));
@@ -107,28 +105,28 @@ public abstract class AbstractFilter implements Logged, Filter {
       }
 
       return res;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
   @SuppressWarnings("unchecked")
   private ArrayOfComponents stripComps(final Map<String, Object> stripMap,
-                                       final BaseComponentType val) throws SynchException {
+                                       final BaseComponentType val) {
     try {
-      ArrayOfComponents comps = val.getComponents();
+      final ArrayOfComponents comps = val.getComponents();
 
       if (comps == null) {
         return null;
       }
 
-      ArrayOfComponents c = new ArrayOfComponents();
+      final ArrayOfComponents c = new ArrayOfComponents();
 
       boolean stripped = false;
 
-      for (JAXBElement jaxbCcomp: comps.getBaseComponent()) {
+      for (final JAXBElement jaxbCcomp: comps.getBaseComponent()) {
         BaseComponentType jcomp = (BaseComponentType)jaxbCcomp.getValue();
 
         /* Skip if we don't want this component */
@@ -138,7 +136,7 @@ public abstract class AbstractFilter implements Logged, Filter {
         }
 
         /* Possibly remove some properties */
-        ArrayOfProperties p = stripProps(stripMap, jcomp);
+        final ArrayOfProperties p = stripProps(stripMap, jcomp);
 
         if (jcomp.getProperties() != p) {
           // Some properties were removed
@@ -151,13 +149,14 @@ public abstract class AbstractFilter implements Logged, Filter {
         }
 
         /* Possibly remove some sub-components */
-        ArrayOfComponents strippedComps = stripComps(stripMap, jcomp);
+        final ArrayOfComponents strippedComps =
+                stripComps(stripMap, jcomp);
 
         if (jcomp.getComponents() != strippedComps) {
           // Some components were removed
           stripped = true;
 
-          BaseComponentType comp = XcalUtil.cloneComponent(jcomp);
+          final BaseComponentType comp = XcalUtil.cloneComponent(jcomp);
           comp.setProperties(jcomp.getProperties());
           comp.setComponents(strippedComps);
 
@@ -172,26 +171,26 @@ public abstract class AbstractFilter implements Logged, Filter {
       }
 
       return comps;
-    } catch (SynchException se) {
+    } catch (final SynchException se) {
       throw se;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new SynchException(t);
     }
   }
 
   private ArrayOfProperties stripProps(final Map<String, Object> stripMap,
-                                       final BaseComponentType val) throws SynchException {
-    ArrayOfProperties props = val.getProperties();
+                                       final BaseComponentType val) {
+    final ArrayOfProperties props = val.getProperties();
 
     if (props == null) {
       return null;
     }
 
-    ArrayOfProperties p = new ArrayOfProperties();
+    final ArrayOfProperties p = new ArrayOfProperties();
 
     boolean stripped = false;
 
-    for (JAXBElement<? extends BasePropertyType> jprop:
+    for (final JAXBElement<? extends BasePropertyType> jprop:
             props.getBasePropertyOrTzid()) {
       if (stripMap.get(jprop.getValue().getClass().getCanonicalName()) != null) {
         stripped = true;
@@ -215,11 +214,11 @@ public abstract class AbstractFilter implements Logged, Filter {
     skipMap.put(o.getClass().getCanonicalName(), o);
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Logged methods
-   * ==================================================================== */
+   * ============================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

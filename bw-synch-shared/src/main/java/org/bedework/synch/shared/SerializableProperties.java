@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.shared;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
 
 /** Serializable form of information for a connection to a system via a
@@ -27,7 +26,7 @@ import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
  * @param <T>
  */
 public interface SerializableProperties<T> extends Comparable<T> {
-  ArrayOfSynchProperties getAllSynchProperties() throws SynchException;
+  ArrayOfSynchProperties getAllSynchProperties();
 
   /**
    * @param val serialized properties
@@ -36,13 +35,12 @@ public interface SerializableProperties<T> extends Comparable<T> {
 
   /**
    * @return serialized properties
-   * @throws SynchException
    */
-  String getSynchProperties() throws SynchException;
+  String getSynchProperties();
 
   /** Set the changed flag
    *
-   * @param val
+   * @param val the changed flag
    */
   void setChanged(boolean val);
 
@@ -56,32 +54,29 @@ public interface SerializableProperties<T> extends Comparable<T> {
    */
   void resetChanged();
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Convenience methods
-   * ==================================================================== */
+   * ============================================================== */
 
   /** Load the properties from the serialized form.
    *
-   * @throws SynchException
    */
-  void loadProperties() throws SynchException;
+  void loadProperties();
 
   /** Set a property in the internal properties - loading them from the
    * external value first if necessary.
    *
-   * @param name
-   * @param val
-   * @throws SynchException
+   * @param name of property
+   * @param val new value
    */
   void setProperty(String name,
-                   String val) throws SynchException;
+                   String val);
 
   /** Get a property from the internal properties - loading them from the
    * external value first if necessary.
    *
-   * @param name
+   * @param name of property
    * @return val
-   * @throws SynchException
    */
-  String getProperty(String name) throws SynchException;
+  String getProperty(String name);
 }

@@ -234,7 +234,6 @@ public class BedeworkConnector
    * ==================================================================== */
 
   /**
-   * @throws SynchException on fatal error
    */
   public void ping() {
     final KeepAliveNotificationType kan = new KeepAliveNotificationType();

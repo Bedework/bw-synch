@@ -774,7 +774,6 @@ public class SynchEngineImpl
 
   /**
    * @return en/decryptor
-   * @throws SynchException
    */
   public PwEncryptionIntf getEncrypter() {
     if (pwEncrypt != null) {

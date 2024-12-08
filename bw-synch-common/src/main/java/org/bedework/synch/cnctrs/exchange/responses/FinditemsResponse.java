@@ -140,7 +140,6 @@ public class FinditemsResponse extends ExchangeResponse {
   /**
    * @param firm
    * @param synchInfoOnly
-   * @throws SynchException
    */
   public FinditemsResponse(final FindItemResponseMessageType firm,
                            final boolean synchInfoOnly,

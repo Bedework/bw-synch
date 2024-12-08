@@ -65,7 +65,6 @@ public class SynchDb implements Logged, Serializable {
 
   /**
    * @return true if we had to open it. False if already open
-   * @throws SynchException
    */
   public boolean open() {
     if (isOpen()) {
@@ -85,7 +84,6 @@ public class SynchDb implements Logged, Serializable {
   }
 
   /**
-   * @throws SynchException
    */
   public void close() {
     try {
@@ -112,7 +110,6 @@ public class SynchDb implements Logged, Serializable {
 
   /**
    * @return list of subscriptions
-   * @throws SynchException
    */
   @SuppressWarnings("unchecked")
   public List<Subscription> getAll() {
@@ -134,7 +131,6 @@ public class SynchDb implements Logged, Serializable {
    *
    * @param id - unique id
    * @return a matching subscription or null
-   * @throws SynchException
    */
   public Subscription get(final String id) {
     try {
@@ -161,7 +157,6 @@ public class SynchDb implements Logged, Serializable {
    *
    * @param sub subscription
    * @return matching subscriptions
-   * @throws SynchException
    */
   public Subscription find(final Subscription sub) {
     try {
@@ -188,7 +183,6 @@ public class SynchDb implements Logged, Serializable {
   /** Add the subscription.
    *
    * @param sub subscription
-   * @throws SynchException
    */
   public void add(final Subscription sub) {
     try {
@@ -201,7 +195,6 @@ public class SynchDb implements Logged, Serializable {
   /** Update the persisted state of the subscription.
    *
    * @param sub subscription
-   * @throws SynchException
    */
   public void update(final Subscription sub) {
     try {
@@ -214,7 +207,6 @@ public class SynchDb implements Logged, Serializable {
   /** Delete the subscription.
    *
    * @param sub subscription
-   * @throws SynchException
    */
   public void delete(final Subscription sub) {
     final boolean opened = open();
@@ -302,7 +294,7 @@ public class SynchDb implements Logged, Serializable {
         sess.close();
         sess = null;
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       try {
         sess.close();
       } catch (Throwable t1) {}

@@ -30,7 +30,7 @@ package org.bedework.synch.shared.cnctrs;
  * @author Mike Douglass
  */
 public class ConnectorCache {
-  private String name;
+  private final String name;
 
   private long lastFetch;
 

@@ -18,7 +18,6 @@
 */
 package org.bedework.synch.shared;
 
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.CalProcessingType;
 
 /** Serializable form of information about the whole subscription.
@@ -55,71 +54,61 @@ public interface SubscriptionInfo<T>
 
   /** AlarmsProcessing - CalProcessingType
    *
-   * @param val
-   * @throws SynchException
+   * @param val - CalProcessingType
    */
-  void setAlarmsProcessing(CalProcessingType val) throws SynchException;
+  void setAlarmsProcessing(CalProcessingType val);
 
   /** AlarmsProcessing - CalProcessingType
    *
    * @return boolean
-   * @throws SynchException
    */
-  CalProcessingType getAlarmsProcessing() throws SynchException;
+  CalProcessingType getAlarmsProcessing();
 
   /** SchedulingProcessing - CalProcessingType
    *
-   * @param val
-   * @throws SynchException
+   * @param val - CalProcessingType
    */
-  void setSchedulingProcessing(CalProcessingType val) throws SynchException;
+  void setSchedulingProcessing(CalProcessingType val);
 
   /** SchedulingProcessing - CalProcessingType
    *
    * @return CalProcessingType
-   * @throws SynchException
    */
-  CalProcessingType getSchedulingProcessing() throws SynchException;
+  CalProcessingType getSchedulingProcessing();
 
   /** Processing of locations and contacts - boolean
    *
    * @param val true to enable processing of locations and contacts
-   * @throws SynchException
    */
-  void setXlocXcontact(boolean val) throws SynchException;
+  void setXlocXcontact(boolean val);
 
   /** Processing of locations and contacts - boolean
    *
    * @return boolean
-   * @throws SynchException
    */
-  boolean getXlocXcontact() throws SynchException;
+  boolean getXlocXcontact();
 
   /** Processing of categories - boolean
    *
    * @param val true to enable processing of categories
-   * @throws SynchException
    */
-  void setXlocXcategories(boolean val) throws SynchException;
+  void setXlocXcategories(boolean val);
 
   /** Processing of categories - boolean
    *
    * @return boolean
-   * @throws SynchException
    */
-  boolean getXlocXcategories() throws SynchException;
+  boolean getXlocXcategories();
 
   /** Processing of deletions - boolean
    *
    * @param val true to suppress deletion of missing events
-   * @throws SynchException
    */
-  void setDeletionsSuppressed(boolean val) throws SynchException;
+  void setDeletionsSuppressed(boolean val);
 
   /** Processing of deletions - boolean
    *
    * @return boolean true to suppress deletion of missing events
-   * @throws SynchException
    */
-  boolean getDeletionsSuppressed() throws SynchException;
+  boolean getDeletionsSuppressed();
 }

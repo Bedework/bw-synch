@@ -32,7 +32,6 @@ public class CampusGroupsSubscriptionInfo
 
   /**
    * @param info
-   * @throws SynchException
    */
   public CampusGroupsSubscriptionInfo(final SubscriptionConnectorInfo info) {
     super(info);

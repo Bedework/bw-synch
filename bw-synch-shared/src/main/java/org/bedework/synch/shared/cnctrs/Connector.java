@@ -24,7 +24,6 @@ import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SynchDefs.SynchKind;
 import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.conf.ConnectorConfigI;
-import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
 
 import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
@@ -66,15 +65,14 @@ public interface Connector<C extends ConnectorInstance<?>,
    * active subscription for which the callback is intended.
    *
    * @param connectorId - registered id for the connector
-   * @param conf
-   * @param callbackUri
-   * @param syncher
-   * @throws SynchException
+   * @param conf configuration
+   * @param callbackUri see above
+   * @param syncher engine
    */
   void start(String connectorId,
              Tconf conf,
              String callbackUri,
-             SynchEngine syncher) throws SynchException;
+             SynchEngine syncher);
 
   /**
    * @return a useful status message
@@ -156,18 +154,17 @@ public interface Connector<C extends ConnectorInstance<?>,
    * @param sub - the subscription
    * @param end - which end
    * @return null for no synch else a connector instance.
-   * @throws SynchException
    */
   C getConnectorInstance(Subscription sub,
-                         SynchEndType end) throws SynchException;
+                         SynchEndType end);
 
   /** Far end may send a batch of notifications. These should not be batched
    * arbitrarily. One batch per message and response.
    *
    * @param <N>
    */
-  static class NotificationBatch<N extends Notification> {
-    private List<N> notifications = new ArrayList<>();
+  class NotificationBatch<N extends Notification> {
+    private final List<N> notifications = new ArrayList<>();
 
     private StatusType status;
     private String message;
@@ -212,27 +209,24 @@ public interface Connector<C extends ConnectorInstance<?>,
    * to determine a subscription id allowing retrieval of the subscription from
    * the synch engine.
    *
-   * @param req
-   * @param resp
+   * @param req http request
+   * @param resp http response
    * @param resourceUri - elements of the path with context and connector id removed
    * @return Notification with 1 or more Notification items or null for no action.
-   * @throws SynchException
    */
   NotificationBatch<N> handleCallback(HttpServletRequest req,
                                       HttpServletResponse resp,
-                                      List<String> resourceUri) throws SynchException;
+                                      List<String> resourceUri);
 
   /** Will respond to a notification.
    *
-   * @param resp
+   * @param resp http response
    * @param notifications from handleCallback.
-   * @throws SynchException
    */
   void respondCallback(HttpServletResponse resp,
-                       NotificationBatch<N> notifications) throws SynchException;
+                       NotificationBatch<N> notifications);
 
   /** Shut down the connector
-   * @throws SynchException
    */
-  void stop() throws SynchException;
+  void stop();
 }

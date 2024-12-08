@@ -30,7 +30,6 @@ public class FileSubscriptionInfo extends BaseSubscriptionInfo {
 
   /**
    * @param info
-   * @throws SynchException
    */
   public FileSubscriptionInfo(final SubscriptionConnectorInfo info) {
     super(info);

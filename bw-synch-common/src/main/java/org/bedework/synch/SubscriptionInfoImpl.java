@@ -116,7 +116,7 @@ public class SubscriptionInfoImpl
 
     try {
       return doCompare(that);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -129,7 +129,7 @@ public class SubscriptionInfoImpl
       super.toStringSegment(ts);
 
       return ts.toString();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }

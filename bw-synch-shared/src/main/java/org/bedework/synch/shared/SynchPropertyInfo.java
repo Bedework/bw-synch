@@ -19,6 +19,7 @@
 package org.bedework.synch.shared;
 
 import org.bedework.synch.wsmessages.SynchPropertyInfoType;
+import org.bedework.util.misc.ToString;
 
 /** Information about a single connector property. This information will be
  * published by the system allowing clients to determine what properties are
@@ -95,25 +96,13 @@ public class SynchPropertyInfo extends SynchPropertyInfoType {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append("{");
-
-    sb.append("name = ");
-    sb.append(getName());
-
-    sb.append(", secure = ");
-    sb.append(isSecure());
-
-    sb.append(",\n   type = ");
-    sb.append(getType());
-
-    sb.append(",\n   description = ");
-    sb.append(getDescription());
-
-    sb.append(",\n   required = ");
-    sb.append(isRequired());
-
-    sb.append("}");
-    return sb.toString();
+    return new ToString(this).append("name", getName())
+                             .append("secure", isSecure())
+                             .newLine()
+                             .append("type", getType()).newLine()
+                             .append("description", getDescription())
+                             .newLine()
+                             .append("required", isRequired())
+                             .toString();
   }
-
 }

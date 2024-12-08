@@ -43,7 +43,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /**
    *
    * @param info
-   * @throws SynchException
    */
   public ExchangeSubscriptionInfo(final SubscriptionConnectorInfo info) {
     super(info);
@@ -52,7 +51,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange Calendar
    *
    * @param val    String
-   * @throws SynchException
    */
   public void setExchangeCalendar(final String val) {
     setProperty(propnameExchangeCalendar, val);
@@ -61,7 +59,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange Calendar
    *
    * @return String
-   * @throws SynchException
    */
   public String getExchangeCalendar() {
     return getProperty(propnameExchangeCalendar);
@@ -70,7 +67,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange system subscriptionId.
    *
    * @param val    String
-   * @throws SynchException
    */
   public void setExchangeSubscriptionId(final String val) {
     setProperty(propnameExchangeSubscriptionId, val);
@@ -79,7 +75,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange system subscriptionId.
    *
    * @return String
-   * @throws SynchException
    */
   public String getExchangeSubscriptionId() {
     return getProperty(propnameExchangeSubscriptionId);
@@ -88,7 +83,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange watermark.
    *
    * @param val    String
-   * @throws SynchException
    */
   public void setExchangeWatermark(final String val) {
     setProperty(propnameExchangeWatermark, val);
@@ -97,7 +91,6 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
   /** Exchange watermark.
    *
    * @return String
-   * @throws SynchException
    */
   public String getExchangeWatermark() {
     return getProperty(propnameExchangeWatermark);
@@ -116,7 +109,7 @@ public class ExchangeSubscriptionInfo extends BaseSubscriptionInfo {
       ts.append("exchangeCalendar", getExchangeCalendar());
       ts.append(", exchangeSubscriptionId", getExchangeSubscriptionId());
       ts.append(", exchangeWatermark", getExchangeWatermark());
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       ts.append(t.getMessage());
     }
   }
