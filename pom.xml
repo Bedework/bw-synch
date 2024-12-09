@@ -9,7 +9,7 @@
 
 	<groupId>org.bedework.bw-synch</groupId>
 	<artifactId>bw-synch-engine</artifactId>
-	<version>5.0.12</version>
+	<version>5.0.13-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Bedework synch: engine for external subscriptions</name>
