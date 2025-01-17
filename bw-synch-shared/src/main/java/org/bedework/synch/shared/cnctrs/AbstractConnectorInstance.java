@@ -183,18 +183,6 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
     return cl;
   }
 
-  /*
-
-  private String decryptPw(final BwCalendar val) throws CalFacadeException {
-    try {
-      return getSvc().getEncrypter().decrypt(val.getRemotePw());
-    } catch (final Throwable t) {
-      throw new CalFacadeException(t);
-    }
-  }
-   *
-   */
-
   /* ====================================================================
    *                   Logged methods
    * ==================================================================== */
