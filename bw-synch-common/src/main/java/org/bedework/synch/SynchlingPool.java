@@ -24,7 +24,7 @@ import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.shared.exception.SynchTimeout;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -22,7 +22,7 @@ import org.bedework.synch.shared.SerializableProperties;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.ArrayOfSynchProperties;
 import org.bedework.synch.wsmessages.SynchPropertyType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 import org.bedework.util.misc.Util;
 
 import java.io.StringReader;

@@ -24,7 +24,7 @@ import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;

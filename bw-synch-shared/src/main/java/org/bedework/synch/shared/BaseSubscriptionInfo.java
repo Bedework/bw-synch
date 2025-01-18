@@ -19,7 +19,7 @@
 package org.bedework.synch.shared;
 
 import org.bedework.synch.shared.exception.SynchException;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 import org.bedework.util.misc.Util;
 
 import java.util.List;

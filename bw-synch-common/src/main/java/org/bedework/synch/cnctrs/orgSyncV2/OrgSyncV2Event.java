@@ -3,7 +3,7 @@
 */
 package org.bedework.synch.cnctrs.orgSyncV2;
 
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

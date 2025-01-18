@@ -21,7 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchEndType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import java.util.HashMap;
 import java.util.Map;

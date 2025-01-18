@@ -43,7 +43,7 @@ import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.calendar.diff.XmlIcalCompare;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;

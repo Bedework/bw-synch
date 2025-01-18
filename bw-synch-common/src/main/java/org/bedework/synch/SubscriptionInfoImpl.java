@@ -21,7 +21,7 @@ package org.bedework.synch;
 import org.bedework.synch.db.SerializablePropertiesImpl;
 import org.bedework.synch.shared.SubscriptionInfo;
 import org.bedework.synch.wsmessages.CalProcessingType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 /** Serializable form of information about the whole subscription.
  *

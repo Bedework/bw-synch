@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SyncFolderItemsResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;

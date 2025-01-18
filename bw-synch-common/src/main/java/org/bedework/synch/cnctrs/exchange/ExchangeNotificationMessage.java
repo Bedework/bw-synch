@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.cnctrs.exchange.responses.ExchangeResponse;
 import org.bedework.synch.shared.Notification.NotificationItem.ActionType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import com.microsoft.schemas.exchange.services._2006.messages.SendNotificationResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.types.BaseNotificationEventType;

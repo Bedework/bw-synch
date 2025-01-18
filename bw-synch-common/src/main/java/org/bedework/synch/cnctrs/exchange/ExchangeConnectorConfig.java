@@ -20,7 +20,7 @@ package org.bedework.synch.cnctrs.exchange;
 
 import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.util.config.ConfInfo;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 /** Exchange synch connector config
 *

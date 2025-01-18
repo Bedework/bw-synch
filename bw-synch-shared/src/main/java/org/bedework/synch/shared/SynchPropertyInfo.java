@@ -19,7 +19,7 @@
 package org.bedework.synch.shared;
 
 import org.bedework.synch.wsmessages.SynchPropertyInfoType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 /** Information about a single connector property. This information will be
  * published by the system allowing clients to determine what properties are

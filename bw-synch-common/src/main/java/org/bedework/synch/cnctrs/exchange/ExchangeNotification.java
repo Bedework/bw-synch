@@ -21,7 +21,7 @@ package org.bedework.synch.cnctrs.exchange;
 import org.bedework.synch.shared.Notification;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.wsmessages.SynchEndType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 

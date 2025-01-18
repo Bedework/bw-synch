@@ -26,7 +26,7 @@ import org.bedework.synch.wsmessages.SubscriptionStatusResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
 

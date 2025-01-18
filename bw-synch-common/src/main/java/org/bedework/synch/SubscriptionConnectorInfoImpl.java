@@ -25,7 +25,7 @@ import org.bedework.synch.filters.XlocXContactFilter;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.SubscriptionConnectorInfo;
 import org.bedework.synch.shared.filters.Filter;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import java.util.ArrayList;
 import java.util.List;

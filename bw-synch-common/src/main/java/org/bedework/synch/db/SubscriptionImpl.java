@@ -28,7 +28,7 @@ import org.bedework.synch.shared.cnctrs.ConnectorInstance;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.synch.wsmessages.SynchDirectionType;
 import org.bedework.synch.wsmessages.SynchMasterType;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.property.DtStamp;
