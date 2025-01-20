@@ -18,10 +18,10 @@
 */
 package org.bedework.synch.db;
 
+import org.bedework.base.exc.BedeworkException;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
-import org.bedework.util.hibernate.HibException;
 import org.bedework.util.hibernate.HibSession;
 import org.bedework.util.hibernate.HibSessionFactory;
 import org.bedework.util.hibernate.HibSessionImpl;
@@ -117,8 +117,8 @@ public class SynchDb implements Logged, Serializable {
       sess.createQuery(getAllQuery);
 
       return sess.getList();
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -138,8 +138,8 @@ public class SynchDb implements Logged, Serializable {
       sess.setString("subid", id);
 
       return (Subscription)sess.getUnique();
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -175,8 +175,8 @@ public class SynchDb implements Logged, Serializable {
                      sub.getMaster());
 
       return (Subscription)sess.getUnique();
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -187,8 +187,8 @@ public class SynchDb implements Logged, Serializable {
   public void add(final Subscription sub) {
     try {
       sess.save(sub);
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -199,8 +199,8 @@ public class SynchDb implements Logged, Serializable {
   public void update(final Subscription sub) {
     try {
       sess.update(sub);
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -213,8 +213,8 @@ public class SynchDb implements Logged, Serializable {
 
     try {
       sess.delete(sub);
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     } finally {
       if (opened) {
         close();
@@ -222,9 +222,9 @@ public class SynchDb implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Session methods
-   * ==================================================================== */
+   * ============================================================== */
 
   protected void checkOpen() {
     if (!isOpen()) {
@@ -258,8 +258,8 @@ public class SynchDb implements Logged, Serializable {
         sess.init(sessionFactory);
         debug("Open session for " + objTimestamp);
       }
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
 
     beginTransaction();
@@ -287,7 +287,7 @@ public class SynchDb implements Logged, Serializable {
         if (sess.transactionStarted()) {
           sess.rollback();
         }
-//        sess.disconnect();
+
         sess.close();
         sess = null;
       }
@@ -309,8 +309,8 @@ public class SynchDb implements Logged, Serializable {
     }
     try {
       sess.beginTransaction();
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -325,8 +325,8 @@ public class SynchDb implements Logged, Serializable {
       if (!sess.rolledback()) {
         sess.commit();
       }
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
@@ -334,8 +334,8 @@ public class SynchDb implements Logged, Serializable {
     try {
       checkOpen();
       sess.rollback();
-    } catch (final HibException he) {
-      throw new SynchException(he);
+    } catch (final BedeworkException e) {
+      throw new SynchException(e);
     }
   }
 
