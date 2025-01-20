@@ -22,9 +22,9 @@ import org.bedework.base.exc.BedeworkException;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
-import org.bedework.util.hibernate.HibSession;
-import org.bedework.util.hibernate.HibSessionFactory;
-import org.bedework.util.hibernate.HibSessionImpl;
+import org.bedework.database.hibernate.HibSession;
+import org.bedework.database.hibernate.HibSessionFactory;
+import org.bedework.database.hibernate.HibSessionImpl;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
