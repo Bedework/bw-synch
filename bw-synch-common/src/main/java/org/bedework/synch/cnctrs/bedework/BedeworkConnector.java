@@ -209,7 +209,7 @@ public class BedeworkConnector
    *                         Package methods
    * ==================================================================== */
 
-  SynchRemoteServicePortType getPort() {
+  protected SynchRemoteServicePortType getPort() {
     return getPort(config.getBwWSDLURI());
   }
 

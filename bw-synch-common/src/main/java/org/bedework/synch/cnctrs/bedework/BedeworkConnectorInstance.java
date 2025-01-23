@@ -166,7 +166,7 @@ public class BedeworkConnectorInstance
     /* Execute the query */
 
     final CalendarQueryResponseType cqr =
-            cnctr.getPort().calendarQuery(getIdToken(),
+            getPort().calendarQuery(getIdToken(),
                                           cq);
 
     final SynchItemsInfo sii = new SynchItemsInfo();
@@ -237,7 +237,7 @@ public class BedeworkConnectorInstance
     ai.setHref(info.getUri());
     ai.setIcalendar(val);
 
-    return cnctr.getPort().addItem(getIdToken(), ai);
+    return getPort().addItem(getIdToken(), ai);
   }
 
   @Override
@@ -285,7 +285,7 @@ public class BedeworkConnectorInstance
 
     cfev.getPropFilter().add(pr);
 
-    final CalendarQueryResponseType cqr = cnctr.getPort().calendarQuery(getIdToken(), cq);
+    final CalendarQueryResponseType cqr = getPort().calendarQuery(getIdToken(), cq);
 
     final FetchItemResponseType fir = new FetchItemResponseType();
 
@@ -362,7 +362,7 @@ public class BedeworkConnectorInstance
 
   @Override
   public UpdateItemResponseType updateItem(final UpdateItemType updates) {
-    return cnctr.getPort().updateItem(getIdToken(), updates);
+    return getPort().updateItem(getIdToken(), updates);
   }
 
   @Override
@@ -386,7 +386,7 @@ public class BedeworkConnectorInstance
     final DeleteItemType dit = new DeleteItemType();
     dit.setHref(fresp.getHref());
 
-    return cnctr.getPort().deleteItem(getIdToken(), dit);
+    return getPort().deleteItem(getIdToken(), dit);
   }
 
   /* ====================================================================

@@ -37,7 +37,9 @@ import org.w3c.dom.Document;
 
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,6 +76,9 @@ public abstract class AbstractConnector<T,
   protected String callbackUri;
 
   private String connectorId;
+
+  private final Map<String, SynchRemoteService> services =
+          new HashMap<>();
 
   private static final ietf.params.xml.ns.icalendar_2.ObjectFactory icalOf =
       new ietf.params.xml.ns.icalendar_2.ObjectFactory();
@@ -255,16 +260,27 @@ public abstract class AbstractConnector<T,
    *                   Protected methods
    * ==================================================================== */
 
+  protected SynchRemoteServicePortType getPort() {
+    throw new SynchException("Not implemented");
+  }
+
   protected SynchRemoteServicePortType getPort(final String uri) {
+    return getRemoteService(uri).getSynchRSPort();
+  }
+
+  private SynchRemoteService getRemoteService(final String uri) {
+    SynchRemoteService ers = services.get(uri);
+    if (ers != null) {
+      return ers;
+    }
+
     try {
-      final URL wsURL = new URL(uri);
-
-      final SynchRemoteService ers =
-        new SynchRemoteService(wsURL,
-                               new QName(SynchDefs.synchNamespace,
-                                         "SynchRemoteService"));
-
-      return ers.getSynchRSPort();
+      ers = new SynchRemoteService(
+              new URL(uri),
+              new QName(SynchDefs.synchNamespace,
+                        "SynchRemoteService"));
+      services.put(uri, ers);
+      return ers;
     } catch (final Throwable t) {
       throw new SynchException(t);
     }

@@ -25,6 +25,7 @@ import org.bedework.synch.shared.conf.ConnectorConfigI;
 import org.bedework.synch.wsmessages.ActiveSubscriptionRequestType;
 import org.bedework.synch.wsmessages.SubscribeResponseType;
 import org.bedework.synch.wsmessages.SynchEndType;
+import org.bedework.synch.wsmessages.SynchRemoteServicePortType;
 import org.bedework.synch.wsmessages.UnsubscribeRequestType;
 import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.logging.BwLogger;
@@ -55,6 +56,8 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
   protected InfoT info;
 
   protected final CnctrT cnctr;
+
+  private SynchRemoteServicePortType port;
 
   protected final ConfigT config;
 
@@ -140,6 +143,13 @@ public abstract class AbstractConnectorInstance<CnctrT extends AbstractConnector
   /* ============================================================
    *                   Protected methods
    * ============================================================ */
+
+  protected SynchRemoteServicePortType getPort() {
+    if (port == null) {
+      port = cnctr.getPort();
+    }
+    return port;
+  }
 
   /** Ensure subscription info is valid
    *
