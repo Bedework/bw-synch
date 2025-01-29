@@ -19,12 +19,12 @@
 package org.bedework.synch.db;
 
 import org.bedework.base.exc.BedeworkException;
+import org.bedework.database.db.DbSession;
+import org.bedework.database.hibernate.HibSessionFactory;
+import org.bedework.database.hibernate.HibSessionImpl;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
-import org.bedework.database.hibernate.HibSession;
-import org.bedework.database.hibernate.HibSessionFactory;
-import org.bedework.database.hibernate.HibSessionImpl;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 
@@ -51,9 +51,9 @@ public class SynchDb implements Logged, Serializable {
    */
   private static SessionFactory sessionFactory;
 
-  /** Current hibernate session - exists only across one user interaction
+  /** Current database session - exists only across one user interaction
    */
-  protected HibSession sess;
+  protected DbSession sess;
 
   /**
    * @param config the configuration
@@ -116,7 +116,7 @@ public class SynchDb implements Logged, Serializable {
     try {
       sess.createQuery(getAllQuery);
 
-      return sess.getList();
+      return (List<Subscription>)sess.getList();
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
@@ -186,7 +186,7 @@ public class SynchDb implements Logged, Serializable {
    */
   public void add(final Subscription sub) {
     try {
-      sess.save(sub);
+      sess.add(sub);
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
