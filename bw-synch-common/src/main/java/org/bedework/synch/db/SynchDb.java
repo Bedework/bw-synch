@@ -106,7 +106,7 @@ public class SynchDb implements Logged, Serializable {
    * ==================================================================== */
 
   private static final String getAllQuery =
-          "from " + SubscriptionImpl.class.getName();
+          "select sub from SubscriptionImpl sub";
 
   /**
    * @return list of subscriptions
@@ -123,8 +123,8 @@ public class SynchDb implements Logged, Serializable {
   }
 
   private static final String getSubQuery =
-          "from " + SubscriptionImpl.class.getName() +
-                  " as sub where sub.subscriptionId=:subid";
+          "select sub from SubscriptionImpl sub " +
+                  "where sub.subscriptionId=:subid";
 
   /** The synch engine generates a unique subscription id
    * for each subscription. This is used as a key for each subscription.
@@ -144,13 +144,13 @@ public class SynchDb implements Logged, Serializable {
   }
 
   private static final String findSubQuery =
-          "from " + SubscriptionImpl.class.getName() + " as sub" +
-                  " where sub.endAConnectorInfo.connectorId=:aconnid" +
-                  " and sub.endAConnectorInfo.synchProperties=:aconnprops" +
-                  " and sub.endBConnectorInfo.connectorId=:bconnid" +
-                  " and sub.endBConnectorInfo.synchProperties=:bconnprops" +
-                  " and sub.direction=:dir" +
-                  " and sub.master=:mstr";
+          "select sub from SubscriptionImpl sub " +
+                  "where sub.endAConnectorInfo.connectorId=:aconnid " +
+                  "and sub.endAConnectorInfo.synchProperties=:aconnprops " +
+                  "and sub.endBConnectorInfo.connectorId=:bconnid " +
+                  "and sub.endBConnectorInfo.synchProperties=:bconnprops " +
+                  "and sub.direction=:dir " +
+                  "and sub.master=:mstr";
 
   /** Find any subscription that matches this one. There can only be one with
    * the same endpoints
