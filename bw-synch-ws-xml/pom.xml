@@ -85,7 +85,7 @@
 
       <!-- compile xsd and wsdl -->
       <plugin>
-        <groupId>com.helger.maven</groupId>
+        <groupId>com.sun.xml.ws</groupId>
         <artifactId>jaxws-maven-plugin</artifactId>
         <executions>
           <execution>
