@@ -125,4 +125,26 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 #### 5.0.10
 * Upgrade library versions
 * Fix needed to deal with util.hibernate bug relating to static sessionFactory variable.
+
+#### 5.0.11
+* Upgrade library versions
+* Make SynchException unchecked
+* Added a refresh operation to the synch engine and added associated code to the client side.
+    * Still has an issue - the subscription info at the synch engine side appears to be out of date after update. Get OptimisticLockExeption on retry of the refresh.
+* Updating the subscription led to stale state exceptions. Just let the reschedule deal with it.
+
+#### 5.0.12
+* Upgrade library versions
+* Better error reporting
+* Remove a lot of redundant throws clauses
+
+#### 5.0.13
+* Upgrade library versions
+* Move response classes and ToString into bw-base module.
+* Add start of openjpa implementation.
+  Add new database exception and move db related exceptions into new package.
+* Create a single instance of the service object for each URI and a single port from each service. Was getting intermittent failures on calls to getPort which appear to be memory related.
+* Switch to use DbSession from bw-database.
+* Convert the hql queries into valid jpql. No hibernate specific terms were required (I think).
+* Switch to official jaxws-maven-plugin
    
