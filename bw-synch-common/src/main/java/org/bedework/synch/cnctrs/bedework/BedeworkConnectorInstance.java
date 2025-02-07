@@ -59,7 +59,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.UpdateItemType;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 
 /** Handles bedework synch interactions.
  *

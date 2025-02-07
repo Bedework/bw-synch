@@ -18,7 +18,7 @@
 */
 package org.bedework.synch.shared.exception;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 

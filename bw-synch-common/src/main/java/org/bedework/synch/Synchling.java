@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.ws.Holder;
+import jakarta.xml.ws.Holder;
 
 import static java.lang.String.format;
 

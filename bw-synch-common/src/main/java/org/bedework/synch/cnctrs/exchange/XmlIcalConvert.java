@@ -70,7 +70,7 @@ import ietf.params.xml.ns.icalendar_2.XMicrosoftCdoBusystatusPropType;
 
 import java.util.TimeZone;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /** This class manages conversions to and from Xml ICalendar to Exchange.

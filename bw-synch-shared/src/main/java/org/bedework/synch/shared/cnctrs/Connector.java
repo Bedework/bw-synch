@@ -31,8 +31,8 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /** The interface implemented by connectors. This represents the kind of object
  * used to communicate with a particular system or entity. We may implement

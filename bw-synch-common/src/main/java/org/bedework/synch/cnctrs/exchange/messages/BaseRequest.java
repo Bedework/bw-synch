@@ -23,7 +23,7 @@ import com.microsoft.schemas.exchange.services._2006.types.NonEmptyArrayOfPathsT
 import com.microsoft.schemas.exchange.services._2006.types.PathToUnindexedFieldType;
 import com.microsoft.schemas.exchange.services._2006.types.UnindexedFieldURIType;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 
 
 /** Base request class.

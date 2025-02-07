@@ -20,7 +20,7 @@ package org.bedework.synch.db;
 
 import org.bedework.base.exc.BedeworkException;
 import org.bedework.database.db.DbSession;
-import org.bedework.database.hibernate.HibSessionFactory;
+import org.bedework.database.hibernate.HibSessionFactoryProvider;
 import org.bedework.database.hibernate.HibSessionImpl;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.Subscription;
@@ -239,7 +239,7 @@ public class SynchDb implements Logged, Serializable {
 
     try {
       if (sessionFactory == null) {
-        sessionFactory = HibSessionFactory.
+        sessionFactory = HibSessionFactoryProvider.
                 getSessionFactory(config.getHibernateProperties());
       }
 

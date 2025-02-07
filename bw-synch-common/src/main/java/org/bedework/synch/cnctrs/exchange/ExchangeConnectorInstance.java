@@ -62,9 +62,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Holder;
+import jakarta.xml.ws.Holder;
 
 /** Calls from exchange synch processor to the service.
  *

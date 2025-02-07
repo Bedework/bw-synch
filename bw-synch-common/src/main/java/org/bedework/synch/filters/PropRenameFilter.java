@@ -31,7 +31,7 @@ import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 /** This filter takes a list of from, to duples. The from is a property

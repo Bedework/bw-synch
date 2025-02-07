@@ -34,7 +34,7 @@ import com.microsoft.schemas.exchange.services._2006.types.SyncFolderItemsCreate
 
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 
 /** Notification from Exchange.
  *

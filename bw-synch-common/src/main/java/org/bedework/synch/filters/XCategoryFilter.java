@@ -28,7 +28,7 @@ import ietf.params.xml.ns.icalendar_2.XBwCategoriesPropType;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 
 /** This filter strips out unwanted properties and components.
  *
