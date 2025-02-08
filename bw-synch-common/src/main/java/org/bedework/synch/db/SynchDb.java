@@ -20,6 +20,7 @@ package org.bedework.synch.db;
 
 import org.bedework.base.exc.BedeworkException;
 import org.bedework.database.db.DbSession;
+import org.bedework.database.db.DbSessionFactoryProvider;
 import org.bedework.database.hibernate.HibSessionFactoryProvider;
 import org.bedework.database.hibernate.HibSessionImpl;
 import org.bedework.synch.conf.SynchConfig;
@@ -27,8 +28,6 @@ import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-
-import org.hibernate.SessionFactory;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -49,7 +48,7 @@ public class SynchDb implements Logged, Serializable {
 
   /* Factory used to obtain a session
    */
-  private static SessionFactory sessionFactory;
+  private static DbSessionFactoryProvider factoryProvider;
 
   /** Current database session - exists only across one user interaction
    */
@@ -238,9 +237,10 @@ public class SynchDb implements Logged, Serializable {
     }
 
     try {
-      if (sessionFactory == null) {
-        sessionFactory = HibSessionFactoryProvider.
-                getSessionFactory(config.getHibernateProperties());
+      if (factoryProvider == null) {
+        factoryProvider =
+                new HibSessionFactoryProvider()
+                        .init(config.getHibernateProperties());
       }
 
       open = true;
@@ -255,7 +255,7 @@ public class SynchDb implements Logged, Serializable {
           debug("New hibernate session for " + objTimestamp);
         }
         sess = new HibSessionImpl();
-        sess.init(sessionFactory);
+        sess.init(factoryProvider);
         debug("Open session for " + objTimestamp);
       }
     } catch (final BedeworkException e) {

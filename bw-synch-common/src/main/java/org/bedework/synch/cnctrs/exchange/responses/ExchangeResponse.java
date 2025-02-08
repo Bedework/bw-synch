@@ -20,7 +20,6 @@ package org.bedework.synch.cnctrs.exchange.responses;
 
 import org.bedework.base.ToString;
 
-import com.microsoft.schemas.exchange.services._2006.messages.ResponseCodeType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType;
 import com.microsoft.schemas.exchange.services._2006.messages.ResponseMessageType.MessageXml;
 import com.microsoft.schemas.exchange.services._2006.types.ResponseClassType;
@@ -31,7 +30,7 @@ import org.oasis_open.docs.ws_calendar.ns.soap.StatusType;
  *
  */
 public class ExchangeResponse extends BaseResponseType {
-  private final ResponseCodeType responseCode;
+  private final String responseCode;
 
   private final Integer descriptiveLinkKey;
 
@@ -66,7 +65,7 @@ public class ExchangeResponse extends BaseResponseType {
   /**
    * @return - responseCode
    */
-  public ResponseCodeType getResponseCode() {
+  public String getResponseCode() {
     return responseCode;
   }
 
@@ -90,7 +89,7 @@ public class ExchangeResponse extends BaseResponseType {
   public void toStringSegment(final ToString ts) {
     ts.append("status", getStatus());
 
-    ts.append("responseCode", getResponseCode().toString());
+    ts.append("responseCode", getResponseCode());
 
     if (getMessage() != null) {
       ts.append("message", getMessage());
