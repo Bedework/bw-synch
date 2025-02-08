@@ -21,7 +21,7 @@ package org.bedework.synch.conf;
 import org.bedework.synch.db.IpAddrInfo;
 import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.util.config.ConfInfo;
-import org.bedework.util.config.HibernateConfigBase;
+import org.bedework.util.config.OrmConfigBase;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -31,7 +31,7 @@ import java.util.SortedSet;
  * @author Mike Douglass
  */
 @ConfInfo(elementName = "synch-confinfo")
-public class SynchConfig extends HibernateConfigBase<SynchConfig> {
+public class SynchConfig extends OrmConfigBase<SynchConfig> {
   /* Size of synchling pool */
   private int synchlingPoolSize;
 

@@ -21,8 +21,7 @@ package org.bedework.synch.db;
 import org.bedework.base.exc.BedeworkException;
 import org.bedework.database.db.DbSession;
 import org.bedework.database.db.DbSessionFactoryProvider;
-import org.bedework.database.hibernate.HibSessionFactoryProvider;
-import org.bedework.database.hibernate.HibSessionImpl;
+import org.bedework.database.db.DbSessionFactoryProviderImpl;
 import org.bedework.synch.conf.SynchConfig;
 import org.bedework.synch.shared.Subscription;
 import org.bedework.synch.shared.exception.SynchException;
@@ -239,8 +238,8 @@ public class SynchDb implements Logged, Serializable {
     try {
       if (factoryProvider == null) {
         factoryProvider =
-                new HibSessionFactoryProvider()
-                        .init(config.getHibernateProperties());
+                new DbSessionFactoryProviderImpl()
+                        .init(config.getOrmProperties());
       }
 
       open = true;
@@ -252,10 +251,10 @@ public class SynchDb implements Logged, Serializable {
 
       if (sess == null) {
         if (debug()) {
-          debug("New hibernate session for " + objTimestamp);
+          debug("New orm session for " + objTimestamp);
         }
-        sess = new HibSessionImpl();
-        sess.init(factoryProvider);
+        sess = factoryProvider.getNewSession();
+
         debug("Open session for " + objTimestamp);
       }
     } catch (final BedeworkException e) {
