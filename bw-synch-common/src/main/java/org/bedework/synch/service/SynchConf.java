@@ -25,11 +25,8 @@ import org.bedework.synch.shared.SynchEngine;
 import org.bedework.synch.shared.conf.ConnectorConfig;
 import org.bedework.synch.shared.service.SynchConnConf;
 import org.bedework.util.config.ConfigurationStore;
-import org.bedework.database.hibernate.HibConfig;
-import org.bedework.database.hibernate.SchemaThread;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.ConfigHolder;
-import org.bedework.util.jmx.InfoLines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +51,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   private boolean export;
 
   private String schemaOutFile;
-
+/*
   private class SchemaBuilder extends SchemaThread {
 
     SchemaBuilder(final String outFile,
@@ -77,6 +74,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
   }
 
   private SchemaBuilder buildSchema;
+ */
 
   private class ProcessorThread extends Thread {
     boolean showedTrace;
@@ -334,6 +332,8 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
   @Override
   public String schema() {
+    return "Unimplemented";
+    /*
     try {
       buildSchema = new SchemaBuilder(
               getSchemaOutFile(),
@@ -349,10 +349,13 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
 
       return "Exception: " + t.getLocalizedMessage();
     }
+     */
   }
 
   @Override
   public synchronized List<String> schemaStatus() {
+    return  null;
+    /*
     if (buildSchema == null) {
       final InfoLines infoLines = new InfoLines();
 
@@ -362,6 +365,7 @@ public class SynchConf extends ConfBase<SynchConfig> implements SynchConfMBean, 
     }
 
     return buildSchema.infoLines;
+     */
   }
 
   @Override
