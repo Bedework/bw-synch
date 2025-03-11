@@ -439,12 +439,13 @@ public class SynchEngineImpl
   }
 
   @Override
-  public void updateSubscription(final Subscription sub) {
+  public Subscription updateSubscription(final Subscription sub) {
     final boolean opened = db.open();
 
     try {
-      db.update(sub);
+      final var msub = db.update(sub);
       sub.resetChanged();
+      return msub;
     } finally {
       if (opened) {
         // It's a one-shot

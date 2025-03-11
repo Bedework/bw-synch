@@ -172,6 +172,14 @@ public class Notification<NI extends Notification.NotificationItem> {
   }
 
   /**
+   *
+   * @param sub possibly updated subscription
+   */
+  public void setSub(final Subscription sub) {
+    this.sub = sub;
+  }
+
+  /**
    * @return Subscription
    */
   public Subscription getSub() {

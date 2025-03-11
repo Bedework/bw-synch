@@ -194,9 +194,9 @@ public class SynchDb implements Logged, Serializable {
    *
    * @param sub subscription
    */
-  public void update(final Subscription sub) {
+  public Subscription update(final Subscription sub) {
     try {
-      sess.update(sub);
+      return (Subscription)sess.update(sub);
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }

@@ -68,8 +68,9 @@ public interface SynchEngine {
 
   /**
    * @param sub Subscription
+   * @return updated Subscription
    */
-  void updateSubscription(Subscription sub);
+  Subscription updateSubscription(Subscription sub);
 
   /**
    * @param id for Subscription

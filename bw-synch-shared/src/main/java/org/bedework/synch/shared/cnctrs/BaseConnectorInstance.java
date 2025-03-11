@@ -26,6 +26,8 @@ import ietf.params.xml.ns.icalendar_2.TextPropertyType;
 import ietf.params.xml.ns.icalendar_2.UidPropType;
 import ietf.params.xml.ns.icalendar_2.VcalendarType;
 import ietf.params.xml.ns.icalendar_2.VersionPropType;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.bind.JAXBElement;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
@@ -41,8 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 /**
@@ -123,7 +123,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     }
 
     if (sub.changed()) {
-      cnctr.getSyncher().updateSubscription(sub);
+      sub = cnctr.getSyncher().updateSubscription(sub);
     }
 
     final MapEntry me = uidMap.get(uid);
@@ -246,7 +246,7 @@ public abstract class BaseConnectorInstance<CnctrT extends AbstractConnector,
     }
 
     if (sub.changed()) {
-      cnctr.getSyncher().updateSubscription(sub);
+      sub = cnctr.getSyncher().updateSubscription(sub);
     }
 
     if (uidMap == null) {

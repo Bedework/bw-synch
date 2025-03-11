@@ -18,6 +18,7 @@
 */
 package org.bedework.synch;
 
+import org.bedework.base.ToString;
 import org.bedework.synch.filters.Filters;
 import org.bedework.synch.shared.BaseSubscriptionInfo.CrudCts;
 import org.bedework.synch.shared.Notification;
@@ -43,9 +44,9 @@ import org.bedework.synch.wsmessages.UnsubscribeResponseType;
 import org.bedework.util.calendar.diff.XmlIcalCompare;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.base.ToString;
 
 import ietf.params.xml.ns.icalendar_2.IcalendarType;
+import jakarta.xml.ws.Holder;
 import org.oasis_open.docs.ws_calendar.ns.soap.AddItemResponseType;
 import org.oasis_open.docs.ws_calendar.ns.soap.ComponentSelectionType;
 import org.oasis_open.docs.ws_calendar.ns.soap.DeleteItemResponseType;
@@ -62,8 +63,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.xml.ws.Holder;
 
 import static java.lang.String.format;
 
@@ -778,8 +777,8 @@ public class Synchling implements Logged {
       throw new SynchException(t);
     } finally {
       sub.updateLastRefresh();
-      syncher.updateSubscription(sub);
-      syncher.reschedule(sub, false);
+      note.setSub(syncher.updateSubscription(sub));
+      syncher.reschedule(note.getSub(), false);
     }
   }
 
