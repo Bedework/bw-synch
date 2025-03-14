@@ -495,6 +495,17 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
     return SynchMasterType.valueOf(getMaster());
   }
 
+  public Subscription copyNonDb(final Subscription val) {
+    val.setOutstandingSubscription(getOutstandingSubscription());
+    val.setDeleted(getDeleted());
+    val.setEndAConn(getEndAConn());
+    val.setEndBConn(getEndBConn());
+    val.setEndAConnInst(getEndAConnInst());
+    val.setEndBConnInst(getEndBConnInst());
+
+    return val;
+  }
+
   /** Add our stuff to the StringBuilder
    *
    * @param ts    ToString builder for result
@@ -523,10 +534,10 @@ public class SubscriptionImpl extends DbItem<SubscriptionImpl>
                 .append("master", getMaster());
   }
 
-  /* ====================================================================
+  /* ======================================================
    *                   Object methods
    * The following are required for a db object.
-   * ==================================================================== */
+   * ====================================================== */
 
   @Override
   public int hashCode() {

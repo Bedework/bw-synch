@@ -776,9 +776,17 @@ public class Synchling implements Logged {
     } catch (final Throwable t) {
       throw new SynchException(t);
     } finally {
-      sub.updateLastRefresh();
-      note.setSub(syncher.updateSubscription(sub));
-      syncher.reschedule(note.getSub(), false);
+      final var msub = syncher.getSubscription(
+              sub.getSubscriptionId());
+      if (msub == null) {
+        warn("Subscription " + sub.getSubscriptionId() +
+                     " deleted?");
+      } else {
+        sub.copyNonDb(msub);
+        msub.updateLastRefresh();
+        note.setSub(syncher.updateSubscription(msub));
+        syncher.reschedule(note.getSub(), false);
+      }
     }
   }
 

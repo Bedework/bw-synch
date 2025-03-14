@@ -260,9 +260,16 @@ public interface Subscription {
    */
   void resetChanged();
 
-  /* ====================================================================
+  /**
+   *
+   * @param val to copy to
+   * @return updated copy
+   */
+  Subscription copyNonDb(Subscription val);
+
+  /* ======================================================
    *                   Convenience methods
-   * ==================================================================== */
+   * ====================================================== */
 
   /**
    * @return true if this has to be put on a poll queue

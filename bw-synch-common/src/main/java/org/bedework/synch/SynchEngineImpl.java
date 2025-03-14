@@ -444,8 +444,8 @@ public class SynchEngineImpl
 
     try {
       final var msub = db.update(sub);
-      sub.resetChanged();
-      return msub;
+      msub.resetChanged();
+      return sub.copyNonDb(msub);
     } finally {
       if (opened) {
         // It's a one-shot
