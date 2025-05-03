@@ -112,9 +112,8 @@ public class SynchDb implements Logged, Serializable {
   @SuppressWarnings("unchecked")
   public List<Subscription> getAll() {
     try {
-      sess.createQuery(getAllQuery);
-
-      return (List<Subscription>)sess.getList();
+      return (List<Subscription>)createQuery(getAllQuery)
+              .getList();
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
@@ -132,10 +131,9 @@ public class SynchDb implements Logged, Serializable {
    */
   public Subscription get(final String id) {
     try {
-      sess.createQuery(getSubQuery);
-      sess.setString("subid", id);
-
-      return (Subscription)sess.getUnique();
+      return (Subscription)createQuery(getSubQuery)
+              .setString("subid", id)
+              .getUnique();
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
@@ -158,21 +156,23 @@ public class SynchDb implements Logged, Serializable {
    */
   public Subscription find(final Subscription sub) {
     try {
-      sess.createQuery(findSubQuery);
-      sess.setString("aconnid",
-                     sub.getEndAConnectorInfo().getConnectorId());
-      sess.setString("aconnprops",
-                     sub.getEndAConnectorInfo().getSynchProperties());
-      sess.setString("bconnid",
-                     sub.getEndBConnectorInfo().getConnectorId());
-      sess.setString("bconnprops",
-                     sub.getEndBConnectorInfo().getSynchProperties());
-      sess.setString("dir",
-                     sub.getDirection());
-      sess.setString("mstr",
-                     sub.getMaster());
+      final var eAinfo = sub.getEndAConnectorInfo();
+      final var eBinfo = sub.getEndBConnectorInfo();
 
-      return (Subscription)sess.getUnique();
+      return (Subscription)createQuery(findSubQuery)
+              .setString("aconnid",
+                         eAinfo.getConnectorId())
+              .setString("aconnprops",
+                         eAinfo.getSynchProperties())
+              .setString("bconnid",
+                         eBinfo.getConnectorId())
+              .setString("bconnprops",
+                         eBinfo.getSynchProperties())
+              .setString("dir",
+                         sub.getDirection())
+              .setString("mstr",
+                         sub.getMaster())
+              .getUnique();
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
@@ -336,6 +336,10 @@ public class SynchDb implements Logged, Serializable {
     } catch (final BedeworkException e) {
       throw new SynchException(e);
     }
+  }
+
+  protected DbSession createQuery(final String query) {
+    return sess.createQuery(query);
   }
 
   /* ==============================================================
