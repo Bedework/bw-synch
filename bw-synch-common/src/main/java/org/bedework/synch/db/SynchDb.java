@@ -99,9 +99,9 @@ public class SynchDb implements Logged, Serializable {
     }
   }
 
-  /* ====================================================================
+  /* ==============================================================
    *                   Subscription Object methods
-   * ==================================================================== */
+   * ============================================================== */
 
   private static final String getAllQuery =
           "select sub from SubscriptionImpl sub";
@@ -109,9 +109,9 @@ public class SynchDb implements Logged, Serializable {
   /**
    * @return list of subscriptions
    */
-  @SuppressWarnings("unchecked")
   public List<Subscription> getAll() {
     try {
+      //noinspection unchecked
       return (List<Subscription>)createQuery(getAllQuery)
               .getList();
     } catch (final BedeworkException e) {
@@ -140,13 +140,14 @@ public class SynchDb implements Logged, Serializable {
   }
 
   private static final String findSubQuery =
-          "select sub from SubscriptionImpl sub " +
-                  "where sub.endAConnectorInfo.connectorId=:aconnid " +
-                  "and sub.endAConnectorInfo.synchProperties=:aconnprops " +
-                  "and sub.endBConnectorInfo.connectorId=:bconnid " +
-                  "and sub.endBConnectorInfo.synchProperties=:bconnprops " +
-                  "and sub.direction=:dir " +
-                  "and sub.master=:mstr";
+          """
+           select sub from SubscriptionImpl sub \
+           where sub.endAConnectorInfo.connectorId=:aconnid \
+           and sub.endAConnectorInfo.synchProperties=:aconnprops \
+           and sub.endBConnectorInfo.connectorId=:bconnid \
+           and sub.endBConnectorInfo.synchProperties=:bconnprops \
+           and sub.direction=:dir \
+           and sub.master=:mstr""";
 
   /** Find any subscription that matches this one. There can only be one with
    * the same endpoints

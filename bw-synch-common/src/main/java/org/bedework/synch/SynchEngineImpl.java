@@ -192,10 +192,6 @@ public class SynchEngineImpl
 
         try {
           final Notification<NotificationItem> note = notificationInQueue.take();
-          if (note == null) {
-            continue;
-          }
-
           if (debug()) {
             debug("Received notification");
           }
@@ -215,18 +211,15 @@ public class SynchEngineImpl
 
           try {
             /* Get a synchling from the pool */
-            while (true) {
+            do {
               if (stopping) {
                 return;
               }
 
               sl = synchlingPool.getNoException();
-              if (sl != null) {
-                break;
-              }
-            }
+            } while (sl == null);
 
-            /* The synchling needs to be running it's own thread. */
+            /* The synchling needs to be running its own thread. */
             final StatusType st = handleNotification(sl, note);
 
             if (st == StatusType.WARNING) {
@@ -237,7 +230,9 @@ public class SynchEngineImpl
               notificationInQueue.put(note);
             }
           } finally {
-            synchlingPool.add(sl);
+            if (sl != null) {
+              synchlingPool.add(sl);
+            }
           }
 
           /* If this is a poll kind then we should add it to a poll queue
