@@ -37,54 +37,35 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
 
-        <configuration>
-          <moduleName>org.bedework.logs</moduleName>
-
-          <noArtifact>true</noArtifact>
-          <mainClass>org.bedework.bwlogs.BwLogs</mainClass>
-
-          <jarResources>
-            <jarResource>
-              <groupId>org.bedework</groupId>
-              <artifactId>bw-logs</artifactId>
-              <version>${bw-logs.version}</version>
-            </jarResource>
-          </jarResources>
-
-          <moduleDependencies>
-            <moduleDependency>
-              <name>org.bedework.base</name>
-            </moduleDependency>
-
-            <moduleDependency>
-              <name>org.bedework.logging</name>
-            </moduleDependency>
-
-            <moduleDependency>
-              <name>org.bedework.util.args</name>
-            </moduleDependency>
-
-            <moduleDependency>
-              <name>org.bedework.util.misc</name>
-            </moduleDependency>
-
-            <moduleDependency>
-              <name>org.bedework.org.apache.httpcomponents.httpclient</name>
-            </moduleDependency>
-
-            <moduleDependency>
-              <name>org.bedework.org.apache.httpcomponents.httpcore</name>
-            </moduleDependency>
-          </moduleDependencies>
-        </configuration>
+        <executions>
+          <execution>
+            <id>copy-generated-asciidoc</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/docs/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}/generated-docs</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>index.html</include>
+                    <include>asciidoctor.css</include>
+                    <include>tocbot*/*</include>
+                    <include>docinfo/*</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 </project>
