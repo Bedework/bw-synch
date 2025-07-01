@@ -1,0 +1,16 @@
+[[introduction]]
+== Introduction
+The synch engine consists of the major components:
+
+* Synch engine itself - coordinates the synch process
+* SynchService - a jboss service used to control the synch  engine.
+* Synchlings - activated to handle a single phase of the synch process.
+* Callback service - an http endpoint for service callbacks
+
+The synch service handles subscriptions which define two endpoints which are to be kept in synch. The endpoints are designated endA and endB as the synchronization is symmetrical.
+
+Synchronization is carried out through connectors which use end-point information to establish a connector instance which provides a connection to a service. These connectors and instances implement interfaces which use classes from CalWs-SOAP augmented by some special classes to handle the data and messages.
+
+Internally, only XML calendar items are handled. It is up to the connector and instances to convert to and from the native formats.
+
+Endpoints can use callback notifications to signal that changes have taken place in the data or can be polled regularly for changes. Bedework and Exchange can work in the notification mode, an external file must be polled.

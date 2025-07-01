@@ -89,7 +89,7 @@ import java.util.concurrent.TimeUnit;
  * <p>Interactions with the calendars is carried out through an interface which
  * assumes the CalWs-SOAP protocol. Messages and responses are of that form
  * though the actual implementation may not use the protocol if the target does
- * not support it. For example we convert CalWs-SOAP interactions into ExchangeWS.
+ * not support it.
  * <br/>
  * --------------------- ignore below ----------------------------------------
  *

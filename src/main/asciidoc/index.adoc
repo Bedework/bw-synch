@@ -1,0 +1,27 @@
+= Bedework Synch-engine modules.
+:title: The Bedework Synch Engine modules.
+:safe-mode-unsafe:
+:docinfo: shared
+:docinfodir: ./docinfo
+:docinfo2:
+:scriptsdir: ./tocbot-3.0.2
+:imagesdir: ./resources/
+:toc: left
+:toclevels: 4
+:sectnumlevels: 4
+//
+:reports-dir: reports/
+//
+:sectnums!:
+
+include::introduction.adoc[]
+
+:sectnums:
+
+include::synch-process.adoc[]
+include::connectors.adoc[]
+include::using.adoc[]
+
+[[reports]]
+== Reports
+link:reports/dependency-check-report.html[Dependency check]

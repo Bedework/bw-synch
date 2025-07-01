@@ -1,0 +1,2 @@
+=== Using this project
+This project is deployed as a war when requested in the galleon install process.

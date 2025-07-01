@@ -47,13 +47,6 @@
       <artifactId>bw-util-servlet</artifactId>
     </dependency>
 
-    <!-- Bedework: Web Services -->
-
-    <dependency>
-      <groupId>org.bedework</groupId>
-      <artifactId>bw-exchangews-xml</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
     <!-- Third Party Libraries -->
 

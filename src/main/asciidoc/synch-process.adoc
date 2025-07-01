@@ -1,0 +1,15 @@
+[[synch-process]]
+== The Synchronization process.
+===Matching entities
+When a calendar entity is changed in one collection the system needs to locate the corresponding entity in the other system. Calendar systems use differing approaches to identifying resources, for example, DAV based systems use the href. The only common identifier is the UID, so subscriptions may need to maintain a mapping of UID to the native identifiers. It may be possible instead to search the system for the UID within the collection.
+
+=== Subscriptions.
+A subscription defines two endpoints, the direction of the synchronization and, if needed, which end is considered the master. Direction can be A to B, B to A or both ways.
+
+=== Startup.
+When the service starts, there are a number of subscriptions stored in a database which are currently inactive and must be brought to the active state. To do so, requires a resynch which involves scanning both ends and resolving the differences. The connector information might contain enough to determine if the far end has changed since the last resynch — particularly important for a file.
+
+=== Steady State
+Once started, subscriptions are kept up to date in two ways:
+* notifications of changes trigger updates
+* periodic resynchronizations for example, of files. These are very cheap if no change takes place, less so when the file is changed.

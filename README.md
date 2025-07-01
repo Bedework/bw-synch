@@ -7,7 +7,7 @@ It could also be used for 1 way synchronization between any source and server.
 
 ## Requirements
 
-1. JDK 17
+1. JDK 21
 2. Maven 3
 
 ## Building Locally
