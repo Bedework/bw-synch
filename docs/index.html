@@ -5,141 +5,135 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>Bedework network modules.</title>
+<title>The Bedework Synch Engine modules.</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Bedework Network Modules.</h1>
+<h1>Bedework Synch-engine modules.</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_introduction">Introduction</a></li>
-<li><a href="#dav">1. Util-dav</a>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#synch-process">1. The Synchronization process.</a>
 <ul class="sectlevel2">
-<li><a href="#_using_this_project">1.1. Using this project</a></li>
+<li><a href="#_subscriptions">1.1. Subscriptions.</a></li>
+<li><a href="#_startup">1.2. Startup.</a></li>
+<li><a href="#_steady_state">1.3. Steady State</a></li>
 </ul>
 </li>
-<li><a href="#http">2. Util-http</a>
-<ul class="sectlevel2">
-<li><a href="#_using_this_project_2">2.1. Using this project</a></li>
-</ul>
-</li>
-<li><a href="#servlet">3. Util-servlet</a>
-<ul class="sectlevel2">
-<li><a href="#_using_this_project_3">3.1. Using this project</a></li>
-</ul>
-</li>
-<li><a href="#servlet-filters">4. Util-servlet-filters</a>
-<ul class="sectlevel2">
-<li><a href="#_using_this_project_4">4.1. Using this project</a></li>
-</ul>
-</li>
-<li><a href="#reports">5. Reports</a></li>
+<li><a href="#connectors">2. The Connectors.</a></li>
+<li><a href="#reports">3. Reports</a></li>
 </ul>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_introduction">Introduction</h2>
+<h2 id="introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This project provides a number of network (http, DAV,servlet etc) related classes and methods for
-<a href="https://www.apereo.org/projects/bedework">Bedework</a>.</p>
+<p>The synch engine consists of the major components:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Synch engine itself - coordinates the synch process</p>
+</li>
+<li>
+<p>SynchService - a jboss service used to control the synch  engine.</p>
+</li>
+<li>
+<p>Synchlings - activated to handle a single phase of the synch process.</p>
+</li>
+<li>
+<p>Callback service - an http endpoint for service callbacks</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The synch service handles subscriptions which define two endpoints which are to be kept in synch. The endpoints are designated endA and endB as the synchronization is symmetrical.</p>
+</div>
+<div class="paragraph">
+<p>Synchronization is carried out through connectors which use end-point information to establish a connector instance which provides a connection to a service. These connectors and instances implement interfaces which use classes from CalWs-SOAP augmented by some special classes to handle the data and messages.</p>
+</div>
+<div class="paragraph">
+<p>Internally, only XML calendar items are handled. It is up to the connector and instances to convert to and from the native formats.</p>
+</div>
+<div class="paragraph">
+<p>Endpoints can use callback notifications to signal that changes have taken place in the data or can be polled regularly for changes. Bedework and Exchange can work in the notification mode, an external file must be polled.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="dav">1. Util-dav</h2>
+<h2 id="synch-process">1. The Synchronization process.</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Provides a utility class to interact with DAV servers.</p>
+<p>===Matching entities
+When a calendar entity is changed in one collection the system needs to locate the corresponding entity in the other system. Calendar systems use differing approaches to identifying resources, for example, DAV based systems use the href. The only common identifier is the UID, so subscriptions may need to maintain a mapping of UID to the native identifiers. It may be possible instead to search the system for the UID within the collection.</p>
 </div>
 <div class="sect2">
-<h3 id="_using_this_project">1.1. Using this project</h3>
+<h3 id="_subscriptions">1.1. Subscriptions.</h3>
 <div class="paragraph">
-<p>Add the artifact(s) as a dependency to your project:</p>
+<p>A subscription defines two endpoints, the direction of the synchronization and, if needed, which end is considered the master. Direction can be A to B, B to A or both ways.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>      &lt;dependency&gt;
-        &lt;groupId&gt;org.bedework&lt;/groupId&gt;
-        &lt;artifactId&gt;bw-util-dav&lt;/artifactId&gt;
-      &lt;/dependency&gt;</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="http">2. Util-http</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Provides utility classes to handle http interactions.</p>
 </div>
 <div class="sect2">
-<h3 id="_using_this_project_2">2.1. Using this project</h3>
+<h3 id="_startup">1.2. Startup.</h3>
 <div class="paragraph">
-<p>Add the artifact(s) as a dependency to your project:</p>
+<p>When the service starts, there are a number of subscriptions stored in a database which are currently inactive and must be brought to the active state. To do so, requires a resynch which involves scanning both ends and resolving the differences. The connector information might contain enough to determine if the far end has changed since the last resynch — particularly important for a file.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>      &lt;dependency&gt;
-        &lt;groupId&gt;org.bedework&lt;/groupId&gt;
-        &lt;artifactId&gt;bw-util-http&lt;/artifactId&gt;
-      &lt;/dependency&gt;</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="servlet">3. Util-servlet</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Provides classes and interfaces to help build servlets.</p>
 </div>
 <div class="sect2">
-<h3 id="_using_this_project_3">3.1. Using this project</h3>
+<h3 id="_steady_state">1.3. Steady State</h3>
 <div class="paragraph">
-<p>Add the artifact(s) as a dependency to your project:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>      &lt;dependency&gt;
-        &lt;groupId&gt;org.bedework&lt;/groupId&gt;
-        &lt;artifactId&gt;bw-util-servlet&lt;/artifactId&gt;
-      &lt;/dependency&gt;</code></pre>
-</div>
+<p>Once started, subscriptions are kept up to date in two ways:
+* notifications of changes trigger updates
+* periodic resynchronizations for example, of files. These are very cheap if no change takes place, less so when the file is changed.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="servlet-filters">4. Util-servlet-filters</h2>
+<h2 id="connectors">2. The Connectors.</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Provides base classes and abstract implementations for servlet filters.</p>
+<p>These are the modules that interact with the endpoints. They come in the following flavors:</p>
 </div>
-<div class="sect2">
-<h3 id="_using_this_project_4">4.1. Using this project</h3>
-<div class="paragraph">
-<p>Add the artifact(s) as a dependency to your project:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>      &lt;dependency&gt;
-        &lt;groupId&gt;org.bedework&lt;/groupId&gt;
-        &lt;artifactId&gt;bw-util-servlet-filters&lt;/artifactId&gt;
-      &lt;/dependency&gt;</code></pre>
-</div>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Bedework</dt>
+<dd>
+<p>interacts with the bedework system using CalWS-Soap.</p>
+</dd>
+<dt class="hdlist1">Campus Groups</dt>
+<dd>
+<p>Accepts data generated by Campus Groups. This is read-only.</p>
+</dd>
+<dt class="hdlist1">File</dt>
+<dd>
+<p>Reads a remote file. Currently only ics is supported. Uses etags to try to avoid reads when possible.</p>
+</dd>
+<dt class="hdlist1">OrgSync</dt>
+<dd>
+<p>Was used for OrgSync</p>
+</dd>
+<dt class="hdlist1">Exchange</dt>
+<dd>
+<p>No longer supported and removed. The code was removed June 30th, 2025. If there were sufficient interest, it could possibly be reinstated.</p>
+</dd>
+<dt class="hdlist1">Manager</dt>
+<dd>
+<p>A special connector for management operations.
+=== Using this project
+This project is deployed as a war when requested in the galleon install process.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="reports">5. Reports</h2>
+<h2 id="reports">3. Reports</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><a href="reports/dependency-check-report.html">Dependency check</a></p>
@@ -149,7 +143,7 @@
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-06-30 03:15:48 UTC
+Last updated 2025-06-30 23:00:55 -0400
 </div>
 </div>
 </body>
